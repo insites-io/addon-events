@@ -1,4 +1,8 @@
 name: notify_out_of_stock
+metadata:
+  label: "Ecommerce - Notify out of stock"
+  groups: []
+  is_enabled: true
 properties:
 - name: email
   type: string

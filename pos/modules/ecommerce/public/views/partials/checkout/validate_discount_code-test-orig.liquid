@@ -38,11 +38,12 @@ payload: {
     {%- if payload.check_duplicates -%}
         {% graphql current_codes = "modules/ecommerce/discount_code/get_cart_discount_codes", 
             user_id: payload.user_id,
-            discount_code: payload.discount_code,
-            discount_code_id: discount.id,
+            discount_code: discount.id,
             discount_debited: false
             | dig: 'items' %}
     {%- endif -%}
+
+{% log current_codes, type: "Test duplicate:" %}
 
     {%- if current_codes.results.size > 0 -%}
         {%- assign message = "Discount code has already been applied." -%}

@@ -233,15 +233,15 @@ Step: Call the search GraphQL with the parameters
             }
             {%- endparse_json -%}
             
-            {%- graphql product_variants = 'modules/ecommerce/shop/get_product_variants_is_exist', args: params -%}
-                {%- if product_variants.items.total_entries > 0 -%}
+            {%- graphql product_variants = 'modules/ecommerce/shop/get_product_variants_is_exist', args: params -%}            
+            {%- if product_variants.items.total_entries > 0 -%}
                 {%- for prod_var in product_variants.items.results -%}
                     {%- if prod_var.properties.on_sale -%}
                     {%- assign sale_flag = true -%}
                     {%- break -%}    
                     {%- endif -%}
                 {%- endfor -%}
-                {%- endif -%}
+            {%- endif -%}
             {%- else -%}
                 {%- if product.on_sale -%}
                 {%- assign sale_flag = true -%}

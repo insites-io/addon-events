@@ -25,7 +25,7 @@ query get_category_meta (
       
       meta_title: property(name: "meta_title")
       meta_description: property(name: "meta_description")
-      search_engine_visibility: property(name: "search_engine_visibility")
+      search_engine_visibility: property_boolean(name: "search_engine_visibility")
       canonical_url: property(name: "canonical_url")
       og_title: property(name: "og_title")
       og_description: property(name: "og_description")

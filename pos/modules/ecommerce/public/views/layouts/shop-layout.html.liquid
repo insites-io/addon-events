@@ -64,18 +64,17 @@ It IS NOT accessable in {{content_for_layout}} which includes the specific page
         {%- assign slug_type = 'error' -%}
         {%- comment -%}Check if has slug2{%- endcomment -%}
         {%- if context.params.slug2 -%}
+
             {%- comment -%}Check via graphql if there is a category with slug2{%- endcomment -%}
-            {%- graphql slug2_cat = 'modules/ecommerce/shop/get_category', slug: context.params.slug2 -%}
-            {%- if slug2_cat.items and slug2_cat.items.total_entries > 0 -%}
-            {%- assign category_slug2 = slug2_cat.items.results[0] -%}
-            {%- assign slug_type = 'category' -%}
+            {%- graphql slug2_cat = 'modules/ecommerce/shop/get_category_menu', slug: context.params.slug2 | dig: 'items' | dig: 'results' | first -%}
+            {%- if slug2_cat -%}
+                {%- assign slug_type = 'category' -%}
             {%- endif -%}
-        
+                
             {%- comment -%}Check via graphql if there is a product with slug2{%- endcomment -%}
-            {%- graphql slug2_prod = 'modules/ecommerce/shop/get_product_detail', slug: context.params.slug2 -%}
-            {%- if slug2_prod.items and slug2_prod.items.total_entries > 0 -%}
-            {%- assign product_slug2 = slug2_prod.items.results[0] -%}
-            {%- assign slug_type = 'product' -%}
+            {%- graphql slug2_prod = 'modules/ecommerce/shop/get_product_detail_menu', slug: context.params.slug2 | dig: 'items' | dig: 'results' | first -%}            
+            {%- if  slug2_prod -%}
+                {%- assign slug_type = 'product' -%}
             {%- endif -%}
             
         {%- endif -%}
@@ -92,9 +91,9 @@ It IS NOT accessable in {{content_for_layout}} which includes the specific page
                         <i class="icon-chevron-right"></i>
                         <!-- <span>&gt;</span> -->
                         {%- if slug_type == 'product' -%}
-                            <span class="active">{{ product_slug2.properties.name }}</span>
+                            <span class="active">{{ slug2_prod.name }}</span>
                         {%- else -%}
-                            <span class="active">{{ category_slug2.properties.name }}</span>
+                            <span class="active">{{ slug2_cat.name }}</span>
                         {%- endif -%}
                     </div>
                 </div>

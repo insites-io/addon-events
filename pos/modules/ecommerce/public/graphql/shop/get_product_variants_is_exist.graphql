@@ -27,7 +27,7 @@ query get_product_variants_is_exist (
     total_pages
     current_page
     results {
-      on_sale: property(name: "on_sale")      
+      on_sale: property_boolean(name: "on_sale")      
     }
   }
 }

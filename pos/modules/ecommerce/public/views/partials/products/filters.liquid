@@ -13,7 +13,6 @@
     }
     {%- endparse_json -%}
     {%- graphql sub_category_data = 'modules/ecommerce/shop/get_category_ids', args: params -%}
-    {% comment %} {% log sub_category_data, type: "Test sub_category_data: "%} {% endcomment %}
 
     <div class="grid-x">
         <div class="small-12 cell">
@@ -26,8 +25,6 @@
                     }
                     {%- endparse_json -%}
                     {%- graphql lvl_two_cat_data = 'modules/ecommerce/shop/get_category_ids', args: sub_params -%}
-
-                    {% comment %} {% log lvl_two_cat_data, type: "Test lvl_two_cat_data: "%}  {% endcomment %}
 
                     {%- if lvl_two_cat_data.items and lvl_two_cat_data.items.total_entries > 0 -%}
                     <ins-accordion menu>
@@ -62,8 +59,6 @@
 
     {%- comment -%} Sub-Step: Get all the list of the parent category  {%- endcomment -%}
     {%- graphql parent_category = 'modules/ecommerce/shop/get_category_parent', page: 1, size: 100 -%}
-    {% comment %} {% log parent_category, type: "Test parent_category: "%}  {% endcomment %}
-
     {%- if parent_category.items and parent_category.items.total_entries > 0 -%}
 
     <div class="grid-x">

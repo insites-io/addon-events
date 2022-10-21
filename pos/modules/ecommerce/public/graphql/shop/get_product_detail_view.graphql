@@ -46,6 +46,7 @@ query get_product_detail_view (
       stock: property_int(name: "stock")  
       sale_price: property_int(name: "sale_price")  
       regular_price: property_int(name: "regular_price")  
+      on_sale: property_boolean(name: "on_sale")
       name: property(name: "name")  
       sku: property(name: "sku")  
       short_description: property(name: "short_description")  

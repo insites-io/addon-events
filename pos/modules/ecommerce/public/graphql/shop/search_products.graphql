@@ -37,18 +37,18 @@ query search_products(
       id 
       created_at
       updated_at
-      # properties
+      properties
       name: property(name: "name")
       slug: property(name: "slug")
       sku: property(name: "sku")
-      stock: property(name: "stock")
-      is_enabled: property(name: "is_enabled")
-      is_featured: property(name: "is_featured")
-      variant_enabled: property(name: "variant_enabled")
+      stock: property_int(name: "stock")
+      is_enabled: property_boolean(name: "is_enabled")
+      is_featured: property_boolean(name: "is_featured")
+      variant_enabled: property_boolean(name: "variant_enabled")
       variant_schema: property(name: "variant_schema")
-      on_sale: property(name: "on_sale")
-      regular_price: property(name: "regular_price")
-      sale_price: property(name: "sale_price")
+      on_sale: property_boolean(name: "on_sale")
+      regular_price: property_float(name: "regular_price")
+      sale_price: property_float(name: "sale_price")
       short_description: property(name: "short_description")
       main_image:related_records(
         table: "modules/insites_ecommerce/insites_product_uploads"

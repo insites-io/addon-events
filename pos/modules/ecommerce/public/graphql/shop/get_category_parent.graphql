@@ -7,6 +7,7 @@ query get_category_parent (
   $sort_by: [RecordsSortInput!] = {
       properties: [
           { name: "sort_order", order: ASC }
+          { name: "name", order: ASC }
       ]
   }
 ) {
@@ -21,6 +22,7 @@ query get_category_parent (
         { name: "parent_ids", value_in: $parent_ids }
         { name: "is_enabled", value_boolean: $is_enabled }
         { name: "is_archived", value_boolean: false }
+        { name: "slug", not_value_in: "null" }
       ] 
     }
     sort: $sort_by

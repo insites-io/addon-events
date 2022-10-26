@@ -11,6 +11,8 @@ query get_category_meta (
       table: { value: "modules/insites_ecommerce/insites_category" }
       properties: [
         { name: "slug", value: $slug }
+        { name: "is_enabled", value_boolean: true }
+        { name: "is_archived", value_boolean: false }
       ] 
     }
     

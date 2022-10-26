@@ -8,8 +8,7 @@
     {%- comment -%} Sub-Step: Create a filter to get the subcategory of the parent category {%- endcomment -%}
     {%- parse_json params -%}
     {
-        "parent_ids": ["{{ parent_id }}"],
-        "is_show_more": true
+        "parent_ids": ["{{ parent_id }}"]
     }
     {%- endparse_json -%}
     {%- graphql sub_category_data = 'modules/ecommerce/shop/get_category_ids', args: params -%}
@@ -20,8 +19,7 @@
                 {%- for subcat in sub_category_data.items.results -%}
                     {%- parse_json sub_params -%}
                     { 
-                        "parent_ids": ["{{ subcat.id }}"], 
-                        "is_show_more": true                 
+                        "parent_ids": ["{{ subcat.id }}"]
                     }
                     {%- endparse_json -%}
                     {%- graphql lvl_two_cat_data = 'modules/ecommerce/shop/get_category_ids', args: sub_params -%}

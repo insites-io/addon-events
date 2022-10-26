@@ -4,14 +4,14 @@
         class="active"
     {% endif %}>
     <ul class="text-left">
-        {%- graphql parent_category = 'modules/ecommerce/shop/get_parent_category', page: 1, size: 100 -%}
-        {%- if parent_category.items and parent_category.items.total_entries > 0 -%}
-        {%- for catMenu in parent_category.items.results -%}
+        {%- graphql parent_category = 'modules/ecommerce/shop/get_category_parent', page: 1, size: 100 | dig: 'items' -%}
+        {%- if parent_category.total_entries > 0 -%}
+        {%- for catMenu in parent_category.results -%}
         <li
-            {% if context.params.slug2 == catMenu.properties.slug %}
+            {% if context.params.slug2 == catMenu.slug %}
             class="li-active"
             {%- endif -%}>
-            <a href="/products/{{catMenu.properties.slug}}">{{ catMenu.properties.name }}</a>
+            <a href="/products/{{catMenu.slug}}">{{ catMenu.name }}</a>
         </li>
         {%- endfor -%}
         {%- endif -%}

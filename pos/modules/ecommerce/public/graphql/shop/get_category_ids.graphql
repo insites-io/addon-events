@@ -3,7 +3,6 @@ query get_category_ids (
   $size: Int = 50,
   $slug: String = "",
   $is_enabled: Boolean = true,
-  $is_show_more: Boolean = false,
   $parent_ids: [String!],
   $sort_by: [RecordsSortInput!] = {
       properties: [
@@ -31,8 +30,8 @@ query get_category_ids (
     current_page
     results {
       id 
-      name:property(name: "name") @include(if: $is_show_more)
-      slug:property(name: "slug") @include(if: $is_show_more)      
+      name:property(name: "name")
+      slug:property(name: "slug")
     }
   }
 }

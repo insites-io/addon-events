@@ -6,7 +6,7 @@
 
 {%- graphql cartList = 'modules/ecommerce/cart/get_cart',
     user_id: user_id, status: "Cart" -%}
-
+{%- log cartList, type: 'Test cartList:' -%}
 {%- if cartList.items.total_entries > 0 -%}
     <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
         {%- for cart_item in cartList.items.results -%}

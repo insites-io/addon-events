@@ -1,15 +1,15 @@
 let productInfo = {
-    "user_id" : "",
-    "quantity" : "",
-    "order_id" : "",
-    "status" : "",
-    "product_id" : "",
-    "product_name" : "",
-    "product_sku" : "",
-    "product_variant" : "",
-    "product_price" : "",
-    "tax_amount" : "",
-    "shipping_amount" : ""
+    "user_id": "",
+    "quantity": "",
+    "order_id": "",
+    "status": "",
+    "product_id": "",
+    "product_name": "",
+    "product_sku": "",
+    "product_variant": "",
+    "product_price": "",
+    "tax_amount": "",
+    "shipping_amount": ""
 }
 let variantList = [];
 
@@ -17,62 +17,66 @@ let productDetail = (function () {
     return {
         methods: {
             async validateForm(event) {
-                event ? event.preventDefault(): '';
+                event ? event.preventDefault() : '';
                 //Get id and element to identify the kind of form submitted
                 let formId = event.target.id;
                 let formElem = document.getElementById(formId);
                 // Check what form is being validated...
-                if(formId == 'add-to-cart-form'){
+                if (formId == 'add-to-cart-form') {
                     //Validation for Adding to cart
-                    if(await App.validation.validateForm(formElem)){
-                       formElem.submit();
+                    if (await App.validation.validateForm(formElem)) {
+                        formElem.submit();
                     }
-                    else{
+                    else {
                         let varSelect = document.getElementById('variant-list');
-                        if(varSelect){
+                        if (varSelect) {
                             varSelect.setAttribute("has-error", "true");
                         }
                     }
-
                 } else {
+                    //Check if reCaptcha element exist then do reCaptcha validation
+                    let captcha = formElem.querySelectorAll("#recaptcha-v2-wrapper").length == 1
+                        ? App.validation.checkRecaptcha()
+                        : true;
+
                     //Validation for other (account type) forms
-                    if(await App.validation.validateForm(formElem)){
+                    if (await App.validation.validateForm(formElem) && captcha) {
                         formElem.submit();
                     }
                 }
             },
-            async productVariantSelected(event){
+            async productVariantSelected(event) {
                 //Only used when there is variant
                 let eventElement = document.getElementById('variant-list');
-                if(eventElement){
+                if (eventElement) {
                     eventElement.removeAttribute("has-error");
                 }
 
                 let varProdIdInput = document.getElementById('prod-det-variant-id');
-                if(varProdIdInput){
+                if (varProdIdInput) {
                     varProdIdInput.value = event.detail.value;
                 }
 
                 let varProdListInput = document.getElementById('prod-det-variant');
-                if(varProdListInput){
+                if (varProdListInput) {
                     varProdListInput.value = event.detail.label;
                 }
 
-                if(prodVarList){
+                if (prodVarList) {
                     let ind;
-                    for(let a = 0; a < prodVarList.length; a++ ){
-                        if(prodVarList[a].id == event.detail.value){
+                    for (let a = 0; a < prodVarList.length; a++) {
+                        if (prodVarList[a].id == event.detail.value) {
                             ind = a;
                             break;
                         }
                     }
-                    
-                    if(ind != null){
+
+                    if (ind != null) {
                         productDetail.methods.setProductDetailsDisplay(prodVarList[ind]);
                         let hasStockPanel = document.getElementById('has-stock-cont');
                         let noStockPanel = document.getElementById('no-stock-cont');
 
-                        if(prodVarList[ind].properties.stock > 0){
+                        if (prodVarList[ind].properties.stock > 0) {
                             hasStockPanel.classList.remove('hide');
                             noStockPanel.classList.add('hide');
                         } else {
@@ -85,28 +89,28 @@ let productDetail = (function () {
 
                 }
             },
-            setProductDetailsDisplay(prodDetail){
+            setProductDetailsDisplay(prodDetail) {
                 let skuDisplay = document.getElementById('product-sku');
-                if(skuDisplay){
+                if (skuDisplay) {
                     skuDisplay.innerText = "SKU:" + prodDetail.properties.sku;
                 }
                 let quantitySteper = document.getElementById('product-quantity');
-                if(quantitySteper){
+                if (quantitySteper) {
                     quantitySteper.value = 1;
                     quantitySteper.max = prodDetail.properties.stock;
                 }
                 let varProdQtyInput = document.getElementById('prod-det-quantity');
-                if(varProdQtyInput){
+                if (varProdQtyInput) {
                     varProdQtyInput.value = 1;
                 }
                 let varProdSkuInput = document.getElementById('prod-det-variant-sku');
-                if(varProdSkuInput){
+                if (varProdSkuInput) {
                     varProdSkuInput.value = prodDetail.properties.sku;
                 }
                 let priceDisplay = document.getElementById('product-price');
                 let notPriceDisplay = document.getElementById('not-product-price');
-                if(priceDisplay && notPriceDisplay){
-                    if(prodDetail.properties.on_sale){
+                if (priceDisplay && notPriceDisplay) {
+                    if (prodDetail.properties.on_sale) {
                         priceDisplay.innerText = "$" + prodDetail.properties.sale_price;
                         notPriceDisplay.innerText = "$" + prodDetail.properties.regular_price;
                     } else {
@@ -132,21 +136,21 @@ let productDetail = (function () {
                 //     mainGallery.classList.remove('hidden-gallery');
                 // }
             },
-            setProductDetailOutOfStock(prodDetail, value){
+            setProductDetailOutOfStock(prodDetail, value) {
                 let prodVarNotify = document.getElementById('prod-variant');
-                if(prodVarNotify){
+                if (prodVarNotify) {
                     prodVarNotify.value = value;
                 }
             },
-            productQuantitySelected(event){
+            productQuantitySelected(event) {
                 let varProdQtyInput = document.getElementById('prod-det-quantity');
-                if(varProdQtyInput){
+                if (varProdQtyInput) {
                     varProdQtyInput.value = event.detail;
                 }
             },
-            buyNowButtonClicked(event){
+            buyNowButtonClicked(event) {
                 let redirectInput = document.getElementById('redirect-input');
-                if(redirectInput){
+                if (redirectInput) {
                     redirectInput.value = "/shopping-cart";
                 }
 
@@ -154,23 +158,23 @@ let productDetail = (function () {
 
         },
         init: {
-            initProductDetailInterface(){
+            initProductDetailInterface() {
                 let variantSelect = document.getElementById('variant-list');
-                if(variantSelect){
+                if (variantSelect) {
                     variantSelect.addEventListener('insSelectOptionClicked', productDetail.methods.productVariantSelected);
                 }
 
                 let quantitySteper = document.getElementById('product-quantity');
-                if(quantitySteper){
+                if (quantitySteper) {
                     quantitySteper.addEventListener('insValueChange', productDetail.methods.productQuantitySelected);
                 }
 
                 let buyNowBtn = document.getElementById('buy-now-btn');
-                if(buyNowBtn){
+                if (buyNowBtn) {
                     buyNowBtn.addEventListener('insClick', productDetail.methods.buyNowButtonClicked);
                 }
             }
-            
+
         }
     }
 })();

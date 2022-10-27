@@ -16,6 +16,8 @@ fields:
     product_name:
     product_sku:
     product_variant:
+spam_protection:
+    recaptcha_v2:     
 email_notifications:
     - modules/ecommerce/out_of_stock_inquire_email
     - modules/ecommerce/out_of_stock_workflow
@@ -38,17 +40,23 @@ email_notifications:
                 label="Email Address"
                 field="email"
                 name="{{ form.fields.properties.email.name }}" 
-                value="{{ form.fields.properties.email.value }}" 
+                value="{{ form.fields.properties.email.value }}"
                 {% if form.errors['email'] %} has-error {% endif %}
                 error-message="{{ form.fields.properties.email.validation.rules.presence.message }}"
                 placeholder="Email Address">
             </ins-input>
             
+            {%- comment -%} IF your form / instance have recaptcha enabled, uncommment this code {%- endcomment -%} 
+            <div class="spacer small"></div>
+            <div id="recaptcha-v2-wrapper" class="large-6 medium-6 small-12 cell form-field-wrapper" data-test="notify-out-of-stock-recaptcha-container">
+                {% spam_protection "recaptcha_v2" %}
+                <div class="ins-form-error"></div>
+            </div>
+
             <input type="hidden" id="prod-id" name="{{ form.fields.properties.product_id.name }}" value="{{ product_info.id }}">
             <input type="hidden" id="prod-name" name="{{ form.fields.properties.product_name.name }}" value="{{ product_info.properties.name }}">
             <input type="hidden" id="prod-sku" name="{{ form.fields.properties.product_sku.name }}" value="{{ product_info.properties.sku }}">
             <input type="hidden" id="prod-variant" name="{{ form.fields.properties.product_variant.name }}" value="">
-
             <input type="hidden" id="redirect-inp" name="redirect_to" value="/thank-you">
 
         </div>
@@ -57,6 +65,5 @@ email_notifications:
             <ins-button id="notify-me-btn" class="full" label="NOTIFY ME" solid color="blue" type="submit" size="large"></ins-button>
         </div>
     </div>
-
 
 {%- endform -%}

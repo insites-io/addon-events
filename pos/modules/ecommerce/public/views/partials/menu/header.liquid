@@ -1,13 +1,11 @@
-
 {%- if context.current_user.id -%}
     {%- assign user_id = context.current_user.id -%}
 {%- else -%}
     {%- assign user_id = context.session.session_id -%}
 {%- endif -%}
 
-{%- graphql cartList = 'modules/ecommerce/cart/get_cart',
+{%- graphql cartList = 'modules/ecommerce/cart/get_cart_total',
     user_id: user_id, status: "Cart" -%}
-
 
 {%- graphql user_data = 'modules/ecommerce/account/get_current_user' -%}
 {%- assign user = user_data.current_user -%}

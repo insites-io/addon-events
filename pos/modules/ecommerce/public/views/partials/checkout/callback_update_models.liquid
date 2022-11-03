@@ -100,21 +100,21 @@
         {% log context.exports.order.cart_ids, type: "Update card ids" %}
         {%- for cart_id in context.exports.order.cart_ids -%}
             {%- comment -%}2.3.1 Check if cart item was variant or main product{%- endcomment -%}
-            {%- graphql cart = 'modules/ecommerce/cart/get_cart', 
+            {%- graphql cart = 'modules/ecommerce/cart/get_cart_variant', 
                 id: cart_id
                 | dig: 'items' | dig: 'results' | first -%}
             {% log cart, type: "==== Cart ==== " %}
 
-            {%- assign qty_purchased = cart.properties.quantity | times: 1.0 -%}
+            {%- assign qty_purchased = cart.quantity | times: 1.0 -%}
             {%- comment -%}Check if cart item was variant or main product{%- endcomment -%}
-            {%- if cart.properties.product_variant_id and cart.product.variant_schema -%}
+            {%- if cart.product_variant_id and cart.product.variant_schema -%}
                 {%- comment -%}IF variant id and variant schema, deduct purchase from variant inventory{%- endcomment -%}
                 {%- assign model_name = cart.product.variant_schema -%}
-                {%- assign cart_item_id = cart.properties.product_variant_id -%}
+                {%- assign cart_item_id = cart.product_variant_id -%}
 
             {%- else -%}
                 {%- comment -%}ELSE inventory will be deducted on product model{%- endcomment -%}
-                {%- assign cart_item_id = cart.properties.product_id -%}
+                {%- assign cart_item_id = cart.product_id -%}
             {%- endif -%}
             
             {%- comment -%}2.3.2 Deduct purchase from model variant / product{%- endcomment -%}

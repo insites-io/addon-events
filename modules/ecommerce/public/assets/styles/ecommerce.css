@@ -6,12 +6,16 @@
     line-height: 32px; /* 133.333% */
 }
 
-.body-small-bold {
-    font-family: var(--family-font-02, "Work Sans");
+.body-small {
+    font-family: var(--family-font-02);
     font-size: 14px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 20px; /* 142.857% */
+}
+
+.bold {
+    font-weight: 700;
 }
 
 .body-x-small {
@@ -47,6 +51,10 @@
     font-style: normal;
     font-weight: 400;
     line-height: 24px; /* 150% */
+}
+
+.strikethrough {
+    text-decoration: line-through;
 }
 
 /* Mega Menu */
@@ -325,12 +333,13 @@ ins-drawer#mobile-filter-drawer .ins-drawer-wrap.opened .ins-content.left {
 ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     padding: 24px 16px;
 }
+.cart-drawer .ins-form-field-wrap {
+    margin-bottom: 0px;
+}
 
 .cart-price {
     color: var(--font-color-head);
     text-align: right;
-
-    /* Ecommerce/cart-price */
     font-family: var(--family-font-01, Roboto);
     font-size: 16px;
     font-style: normal;
@@ -338,7 +347,8 @@ ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     line-height: 16px; /* 100% */
 }
 
-.cart-drawer ins-button .ins-button div .btn__label {
+.cart-drawer .cart-remove-btn .btn__label,
+.cart-drawer .cart-remove-btn button.blue {    
     color: var(--font-color-body);
     font-family: var(--family-font-01);
     font-size: 10px !important;
@@ -346,6 +356,7 @@ ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     font-weight: 700;
     line-height: 16px; /* 160% */
 }
+
 
 /* Client Portal */
 

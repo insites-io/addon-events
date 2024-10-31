@@ -37,10 +37,6 @@ var apiServices = (function () {
     }
 
     return {
-        updateCartItem: async (payload) => {
-            let url = `/update-cart-api.json`;
-            return await processRequest('post', url, payload);
-        },
         validateDiscountCode: async (payload) => {
             let url = `/validate-discount-code.json`;
             return await processRequest('post', url, payload);

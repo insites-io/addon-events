@@ -78,51 +78,20 @@ let shoppingCart = (function () {
                 if(confirm) {
                     formElem.submit(); 
                 }
-            },
-            async quantityChanged(event){
-                //Function attached to when the quantity stepper changed value
-                let itemId = event.target.id.replace("qty-cart-","");
-                let itemQty = event.detail;
-
-                let payload  ={
-                    "id": itemId,
-                    "quantity": itemQty
-                }
-
-                let response = await apiServices.updateCartItem({ 'payload': payload });
-                if(response.state && response.data.items) {
-                    //Updating cart success
-                    location.reload();
-                } else {
-                    //Updating cart failed
-                    // API error: failed to submit form
-                    //this.errorHandler();
-                }
-
-            }
+            }            
         },
         init: {
-            initShoppingCartInterface() {
-                let cartContainer = document.getElementById('shopping-cart-list');
-                let subElem = cartContainer.getElementsByClassName("quantity-cart");
-                for (var i = 0; i < subElem.length; i++) {
-                    subElem[i].addEventListener('insValueChange', shoppingCart.methods.quantityChanged, false);
-                }
-                
-            },
             initDiscountCodeEvents() {
                 let codesList = document.querySelectorAll('.list-discount-codes--item [class^="icon-"]')
                 for (var i = 0; i < codesList.length; i++) {
                     codesList[i].addEventListener('click', shoppingCart.methods.removeDiscountCode);
                 }
-            }
-            
+            }                        
         }
     }
 })();
 
 
 setTimeout(() => {
-    shoppingCart.init.initShoppingCartInterface();
     shoppingCart.init.initDiscountCodeEvents();
 }, 200);

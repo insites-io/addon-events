@@ -10,6 +10,9 @@ metadata: {
     "page_title": "Products",
     "meta_title": "Products"       
 }
+
+---
+{% comment %} 
 dynamic_cache:
   layout: false
   key: |-
@@ -34,9 +37,6 @@ dynamic_cache:
  
     {%- include "modules/website/generate_cache_key", models: models -%}
     {{ context.current_user.id }} 
----
-{% comment %} 
-
 {% endcomment %}
 
 
@@ -124,16 +124,6 @@ URL Structures:
 {%- endif -%}
 
 
-
-{%- if context.flash and context.flash.notice == "Success-AddCart" -%}
-<script>
-setTimeout(() => {
-    App.events.notyf('success', "Product has been added to cart!");
-}, 200);
-</script>
-{% endif -%}
-
-
 {%- if context.flash and context.flash.notice == "Success-OutStockNotify" -%}
 <script>
 setTimeout(() => {
@@ -141,3 +131,6 @@ setTimeout(() => {
 }, 200);
 </script>
 {% endif -%}
+
+
+{% include 'modules/ecommerce/carts/cart_drawer' %} 

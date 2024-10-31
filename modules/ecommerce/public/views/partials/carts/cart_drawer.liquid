@@ -1,71 +1,336 @@
-<ins-button 
-  label="Open Inner" 
-  solid color="blue" 
-  id="openDrawerEl">
-</ins-button>
+{% comment %} Get the user uuid {% endcomment %}
+{%  liquid
+    if context.session.user_uuid and context.session.user_uuid != ''
+        assign user_uuid = context.session.user_uuid
+    else
+        graphql user = 'modules/client/account/get_current_user'
+        session user_uuid = user.current_user.external_id
+        assign user_uuid = user.current_user.external_id
+    endif
+%}
+
+{% comment %} Get the user's cart(s) {% endcomment %}
+{% graphql user_cart = 'modules/ecommerce/carts/get_user_cart', 
+    contact_uuid: user_uuid | dig: 'items','results' | first %}
 
 
-<!-- Drawer inside iframe -->
+{% if user_cart.items.size > 0 %}
+
+    {% comment %} Get the product info {% endcomment %}
+    {%  liquid
+
+        ## Convert an array of strings into an array of objects
+        assign item_obj = '' | split: ',' 
+        for item in user_cart.items
+            assign item_json = item | parse_json
+            assign item_obj = item_obj | array_add: item_json
+        endfor
+
+        assign product_uuids = item_obj | array_map: 'product_uuid' | array_flatten
+        graphql products = 'modules/ecommerce/products/get_cart_products', uuid: product_uuids, size: user_cart.items.size | dig: 'items','results'
+    %}
+
+{% endif %}
+
 
 <ins-drawer 
-  label="Cart (4)" 
+  label="Cart ({{ user_cart.items.size }})" 
   custom-width="390px" 
   position="right" 
-  id="drawerEl"
+  id="cartDrawer"
   class="cart-drawer">
 
-    {% for i in (1..4) %}
-    <div class="grid-x" >
-        <div class="cell grid-y large-7">
-            <h6>UrbanLounge Sectional</h6>
-            <p class="body-x-small">SKU 9SIAJB7APH0171</p>
-            <div class="spacer x-small"></div>
-            <p>
-                <span class="body-x-small-bold">Colour:</span>
-                <span class="body-x-small">Yellow</span>
-            </p>
-            <p>
-                <span class="body-x-small-bold">Price:</span>
-                <span class="body-x-small">$130.00</span>
-            </p>
+    <div id="cart-items-wrap">
+
+    {% if user_cart.items.size > 0 %}
+
+    
+        {% assign subtotal = 0 %}
+
+        {% for item in item_obj %}
+
+        {% liquid 
+            assign product = products | array_detect: uuid: item.product_uuid
+            assign product_name = product.product_name
+            assign sku = product.product_sku
+            assign price_strikethrough = ''
+            if product.product_variant
+                assign variant = product.product_variant
+                assign sku = variant.product_sku
+                if variant.is_on_sale == true 
+                    assign price = variant.sale_price
+                    assign price_strikethrough = variant.regular_price
+                else 
+                    assign price = variant.regular_price
+                endif
+            elsif product.is_on_sale == true 
+                assign price = product.sale_price
+                assign price_strikethrough = product.regular_price
+            else
+                assign price = product.regular_price
+            endif
+
+            assign item_total = price | times: item.quantity
+            assign subtotal = subtotal | plus: item_total
+        %}
+
+        <div id="cart-item-{{product.id}}" class="cart-item-wrap">
+            <div class="grid-x" >
+                <div class="cell grid-y large-7 medium-7 small-7">
+                    <h6>{{ product_name }}</h6>
+                    <p class="body-x-small">SKU {{ sku }}</p>
+                    <div class="spacer x-small"></div>
+                    {% if product.product_variant.product_options %}
+                    {%  liquid 
+                        ## Convert an array of strings into an array of objects
+                        assign product_options = '' | split: ',' 
+                        for product_option in product.product_variant.product_options
+                            assign product_option_json = product_option | parse_json
+                            assign product_options = product_options | array_add: product_option_json
+                        endfor
+                    %}
+                    {% for product_option in product_options%}
+                    <p>
+                        <span class="body-x-small-bold">{{ product_option.product_option_label }}:</span>
+                        <span class="body-x-small">{{ product_option.product_option_value }}</span>
+                    </p>
+                    {% endfor %}
+                    {% endif %}
+                    <p>
+                        <span class="body-x-small-bold">Price:</span>
+                        <span class="body-x-small item-price">{{ price | pricify }}</span>
+                        {% if product.is_on_sale == true or variant.is_on_sale == true %}
+                        <span class="body-x-small strikethrough">{{ price_strikethrough | pricify }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="cell grid-y large-5 medium-5 small-5 text-right">
+                    <p class="cart-price compute-price">{{ item_total | pricify }}</p>
+                    <div class="spacer x-small"></div>
+                    <ins-input-stepper
+                        class="cart-stepper" 
+                        data-product_uuid="{{ item.product_uuid }}"
+                        data-product_sku="{{ sku }}"
+                        value="{{ item.quantity }}" 
+                        step="1" min="1" 
+                        max="{{ max_qty }}" 
+                        small>
+                    </ins-input-stepper>
+                </div>        
+            </div>
+            <div class="text-right" >
+                {% parse_json remove_item %}
+                {
+                    "product_uuid": "{{ product.uuid }}",
+                    "product_sku": "{{ sku }}"
+                }
+                {% endparse_json %}
+                <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{{ remove_item }}' ></ins-button>
+            </div>    
+            <div class="spacer x-large"></div>
         </div>
-        <div class="cell grid-y large-5 text-right">
-            <p class="cart-price">$130.00</p>
-            <div class="spacer x-small"></div>
-            <ins-input-stepper
-                id="qty-cart-{{ cart_item.id }}" 
-                class="quantity-cart" 
-                value="{{ cart_item.properties.quantity }}" 
-                step="1" min="1" 
-                max="{{ max_qty }}" 
-                small>
-            </ins-input-stepper>
-        </div>        
+        {% endfor %}    
+
+    {% endif %}
+
     </div>
-    <div class="text-right" >
-        <ins-button label="Remove" icon="icon-trash-2" size="small" ></ins-button>
+
+    <div id="empty-cart-wrap" class="hide">
+        <h3 class="text-center">Your cart is empty!</h3>
+        <div class="spacer x-small"></div>
+        <p class="text-center">Don't miss out on the best deals!</p>
     </div>
-    <div class="spacer x-large"></div>
-    {% endfor %}
 
-    <div class="spacer"></div>
-    <div class="grid-x align-justify" >
-        <p class="heading-3-small font-color-head">Sub Total</p>
-        <p class="heading-3-small font-color-head">$3,142.55</p>
-    </div>
-    <div class="spacer"></div>
-    <ins-button label="Go to Cart" icon="icon-shopping-cart" solid></ins-button>
-    <div class="spacer x-small"></div>
-    <ins-button label="Continue Shopping" icon="icon-arrow-back" size="small" ></ins-button>
-
-
-
+    <div id="bottom-wrap">
+        <div class="spacer"></div>
+        <div class="grid-x align-justify" >
+            <p class="heading-3-small font-color-head">Sub Total</p>
+            <p id="cart-subtotal" class="heading-3-small font-color-head">{{ subtotal | pricify }}</p>
+        </div>
+        <div class="spacer"></div>
+        <ins-button label="Go to Cart" icon="icon-shopping-cart" solid class="full"></ins-button>
+        <div class="spacer x-small"></div>
+        <ins-button label="Continue Shopping" icon="icon-arrow-back" id="continue-shopping-btn" class="full"></ins-button>
+        <div class="spacer"></div>
+        <p class="body-small text-center">Shipping calculated at checkout</p>
+    </div>    
 
 </ins-drawer>
 
+
+
+
 <script>
-  // this button opens the <ins-drawer> inside of the iframe
-  document.getElementById('openDrawerEl').addEventListener('insClick', function() {
-    document.getElementById('drawerEl').setDrawerState(true);
-  });
+    let user_uuid = "{{ user_uuid }}";
+    let cartDrawer = document.getElementById('cartDrawer');
+    let drawerBody = document.querySelector(".ins-drawer-body");
+    let cartItemsWrap = document.getElementById('cart-items-wrap');
+    let emptyCartWrap = document.getElementById('empty-cart-wrap');
+    let bottomWrap = document.getElementById('bottom-wrap');
+    let cartSubtotal = document.getElementById('cart-subtotal');    
+
+
+    /* Add to Cart */
+    let addToCartBtn = document.querySelectorAll(".add-to-cart-btn");
+    addToCartBtn.forEach(btn => {
+        btn.addEventListener('insClick', event => {  
+            cartDrawer.setDrawerState(true);  
+
+            let data = JSON.parse(event.detail.data);      
+                data.quantity = "1";          
+            let cartItem = document.getElementById(`cart-item-${data.id}`);
+
+            if(cartItem == null){
+
+                if(addToCart(data)){        
+
+                    if (!emptyCartWrap.classList.contains('hide')) {
+                        emptyCartWrap.classList.add('hide');
+                        bottomWrap.classList.remove('hide');
+                    }          
+                
+                    let cartItemHtml = ` <div id="cart-item-${data.id}" class="cart-item-wrap">
+                            <div class="grid-x" >
+                                <div class="cell grid-y large-7 medium-7 small-7">
+                                    <h6>${ data.product_name }</h6>
+                                    <p class="body-x-small">SKU ${ data.product_sku }</p>
+                                    <div class="spacer x-small"></div>
+                                    <p>
+                                        <span class="body-x-small-bold">Price:</span>
+                                        <span class="body-x-small item-price">$${ data.price }</span>
+                                    </p>
+                                </div>
+                                <div class="cell grid-y large-5 medium-5 small-5 text-right">
+                                    <p class="cart-price compute-price">$${ data.price }</p>
+                                    <div class="spacer x-small"></div>
+                                    <ins-input-stepper
+                                        class="cart-stepper" 
+                                        data-product_uuid="${ data.product_uuid }"
+                                        data-product_sku="${ data.product_sku }"
+                                        value="1" 
+                                        step="1" min="1" 
+                                        small>
+                                    </ins-input-stepper>
+                                </div>        
+                            </div>
+                            <div class="text-right" >
+                                <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"product_uuid":"${data.product_uuid}","product_sku":"${data.product_sku}"}' ></ins-button>
+                            </div>    
+                            <div class="spacer x-large"></div>
+                        </div>`;                                                            
+
+                    cartItemsWrap.insertAdjacentHTML('afterbegin', cartItemHtml);
+
+                    let newItem = document.getElementById(`cart-item-${data.id}`);
+                    if (newItem) {                   
+                        let cartStepper = document.querySelector(`#cart-item-${data.id} .cart-stepper`);                        
+                        cartStepperEventListener(cartStepper);
+
+                        let removeCartBtn = document.querySelector(`#cart-item-${data.id} .cart-remove-btn`);
+                        removeCartEventListener(removeCartBtn);
+                    } 
+
+                    computeSubTotal();
+
+                }
+            }
+        });
+    });
+
+    
+    /* Increment - Decrement Cart */
+    let cartStepper = document.querySelectorAll(".cart-stepper");
+    cartStepper.forEach(step => {
+        cartStepperEventListener(step);
+    }); 
+    
+    function cartStepperEventListener(step){
+        step.addEventListener('insValueChange', event => {   
+            let itemWrap = event.target.closest(".cart-item-wrap");            
+            let stepperData = event.target.closest("ins-input-stepper").dataset;
+            let data = {
+                "product_uuid": stepperData.product_uuid,
+                "product_sku": stepperData.product_sku,
+                "quantity": event.detail
+            };            
+            computeItemTotal(itemWrap, event.detail);
+            if(addToCart(data, 'stepper')){                
+                computeSubTotal();
+            }       
+        });
+    }    
+
+    /* Remove from Cart */
+    let removeCartBtn = document.querySelectorAll(".cart-remove-btn");
+    removeCartBtn.forEach(btn => {
+        removeCartEventListener(btn);
+    });
+
+    function removeCartEventListener(btn){
+        btn.addEventListener('insClick', event => {
+            if(removeToCart(JSON.parse(event.detail.data))){
+                let cartItem = btn.closest('.cart-item-wrap');
+                if (cartItem) {
+                    cartItem.remove();
+                    computeSubTotal();
+                }
+            }
+        });
+    }
+    
+
+    
+    async function addToCart(data, type){                      
+        data["contact_uuid"] = user_uuid;
+        data["type"] = type;
+        let response = await apiServices.processRequest("post", "/add-to-cart.json", data);
+        console.log('response', response);        
+        if(response.state && response.data.items) {
+            return true;          
+        } 
+    }         
+
+    async function removeToCart(data){               
+        data["contact_uuid"] = user_uuid;
+        data["type"] = "remove";
+        let response = await apiServices.processRequest("post", "/remove-to-cart.json", data);
+        console.log('remove response', response);        
+        if(response.state && response.data.items) {
+            return true;           
+        } 
+    }   
+
+
+    function computeItemTotal(itemWrap, qty){      
+        let itemPrice = itemWrap.querySelector(".item-price");
+        let computePrice = itemWrap.querySelector(".compute-price");
+        let price = parseFloat(itemPrice.textContent.replace('$', '')) * qty;
+        computePrice.textContent = `$${price}`;
+    }
+
+
+    function computeSubTotal(){    
+        let subTotal = 0;
+        let prices = document.querySelectorAll(".compute-price");
+
+        prices.forEach(price => {
+            subTotal += parseFloat(price.textContent.replace('$', ''));
+        });
+
+        cartSubtotal.textContent = `$${subTotal}`;
+        cartDrawer.label = `Cart (${prices.length})`;
+
+        if(prices.length == 0){
+            bottomWrap.classList.add('hide');
+            emptyCartWrap.classList.remove('hide');            
+        }
+    }  
+
+      
+
+    /* Close the cart drawer */
+    let contShoppingBtn = document.getElementById("continue-shopping-btn");
+    contShoppingBtn.addEventListener('insClick', event => {                 
+        cartDrawer.setDrawerState(false); 
+    });
 </script>

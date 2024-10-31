@@ -42,29 +42,22 @@ query search_products_with_related_record(
     total_pages
     current_page
     results {
-      id 
-      #properties
+      id
+      uuid: property(name: "uuid")      
       product_name: property(name: "product_name")
       slug: property(name: "slug")
       sku: property(name: "sku")
       stock_level: property_int(name: "stock_level")
+      is_variant_enabled: property_boolean(name: "is_variant_enabled")
       is_featured: property_boolean(name: "is_featured")
       is_on_sale: property_boolean(name: "is_on_sale")
       regular_price: property_float(name: "regular_price")
       sale_price: property_float(name: "sale_price")
-      short_description: property(name: "short_description")
       category_uuids: property_array(name: "category_uuids")
       product_image: property_upload(name: "product_image") {
         url
       }
-      # custom_field: related_record(
-      #   table: "modules/ins_ecommerce/product_custom_field",
-      #   join_on_property: "uuid",
-      #   foreign_property: "product_uuid"
-      # ){
-      #   id
-      #   brand: property(name: "brand")
-      # }      
+      #properties   
     }
   }
 }

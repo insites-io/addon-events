@@ -1,3 +1,21 @@
+{%  liquid
+    assign sku = product.product_sku
+    if product.product_variant
+        assign variant = product.product_variant
+        assign sku = variant.product_sku
+        if variant.is_on_sale == true 
+            assign price = variant.sale_price
+            assign price_strikethrough = variant.regular_price
+        else 
+            assign price = variant.regular_price
+        endif
+    elsif product.is_on_sale == true 
+        assign price = product.sale_price
+        assign price_strikethrough = product.regular_price
+    else
+        assign price = product.regular_price
+    endif
+%}    
     <div class="cell">
         <div class="wrap">
             {% if product.product_image.url %}
@@ -13,7 +31,11 @@
                     {% assign category = all_categories | array_detect: uuid: product.category_uuids[0] %}
                     <p>{{ category.category_name | default: 'Category' }}</p>
                     <div class="spacer"></div>
-                    <p class="product-current-price">${{ product.regular_price | default: '0.00' }}</p>
+                    <p class="product-current-price">{{ price | pricify }}
+                        {% if product.is_on_sale == true or variant.is_on_sale == true %}
+                        <span class="body-x-small strikethrough">{{ price_strikethrough | pricify }}</span>
+                        {% endif %}
+                    </p>
                     <div class="spacer"></div>
                     {% if purchase_date  %}
                     <div class="spacer"></div>
@@ -22,7 +44,16 @@
                     {% endif %}
                 </div>
                 <div class="buttons">
-                    <ins-button class="full" label="Add to Cart" solid color="blue" icon="icon-shopping-cart"></ins-button>
+                    {% parse_json data %}
+                    {
+                        "id": "{{ product.id }}",
+                        "product_uuid": "{{ product.uuid }}",
+                        "product_sku": "{{ sku }}",
+                        "product_name": "{{ product.product_name }}",
+                        "price": "{{ price | default: 0 }}"
+                    }
+                    {% endparse_json %}
+                    <ins-button class="full add-to-cart-btn" label="Add to Cart" data='{{ data }}' solid color="blue" icon="icon-shopping-cart"></ins-button>
                     <div class="spacer x-small"></div>
                     <a href="/products/{{ product.slug }}">
                         <ins-button class="full" label="View Details" outlined icon="icon-eye"></ins-button>

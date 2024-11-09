@@ -23,21 +23,40 @@ metadata: {
 }
 ---
 
-{%- assign global = context.exports.global -%}
+{% comment %} Get the user uuid {% endcomment %}
+{%  liquid
+    if context.session.user_uuid and context.session.user_uuid != ''
+        assign user_uuid = context.session.user_uuid
+    else
+        graphql user = 'modules/client/account/get_current_user'
+        session user_uuid = user.current_user.external_id
+        assign user_uuid = user.current_user.external_id
+    endif
+%}
 
 
-{%- if context.current_user.id -%}
-    {%- assign user_id = context.current_user.id -%}
-{%- else -%}
-    {%- assign user_id = context.session.session_id -%}
-{%- endif -%}
+{% graphql user_cart = 'modules/ecommerce/carts/get_user_cart', 
+        contact_uuid: user_uuid | dig: 'items','results' | first %}
 
-{%- graphql cartList = 'modules/ecommerce/cart/get_cart_total',
-    user_id: user_id,
-    status: "Cart" -%}
 
-{%- content_for 'title' -%}Review your cart{%- endcontent_for -%}
-{%- content_for 'canonical_url' -%}/shopping-cart{%- endcontent_for -%}
+{% if user_cart.items.size > 0 %}
+
+    {% comment %} Get the product info {% endcomment %}
+    {%  liquid
+
+        ## Convert an array of strings into an array of objects
+        assign cartList = '' | split: ',' 
+        for item in user_cart.items
+            assign item_json = item | parse_json
+            assign cartList = cartList | array_add: item_json
+        endfor
+
+        assign product_uuids = cartList | array_map: 'product_uuid' | array_flatten
+        graphql products = 'modules/ecommerce/products/get_cart_products', uuid: product_uuids, size: user_cart.items.size | dig: 'items','results'
+    %}
+
+{% endif %}
+
 
 <div class="ecommerce-wrapper grid-container">
     <div class="grid-x grid-padding-x">
@@ -48,7 +67,7 @@ metadata: {
         <div class="small-12 cell spacer x-large"></div>
         
         <div class="large-7 small-12 cell">
-            {% include 'modules/ecommerce/shop/shopping_cart' %}
+            {% include 'modules/ecommerce/shop/shopping_cart', cartList, products %}
             <div class="spacer x-large hide-for-large-only"></div>
         </div>
         <div class="large-4 large-offset-1 small-12 cell">
@@ -57,9 +76,10 @@ metadata: {
                 show_discount_list: true,
                 status: "Cart",
                 form_update: true,
-                form_delete: true %}
+                form_delete: true,
+                cartList, products %}
             <div class="spacer x-large"></div>
-            {%- if cartList.items.total_entries > 0 -%}
+            {%- if cartList.size > 0 -%}
                 <div class="text-right">
                     <a href="/checkout">
                         <ins-button label="PROCEED TO CHECKOUT" solid color="blue" class="checkoutBtn"></ins-button>

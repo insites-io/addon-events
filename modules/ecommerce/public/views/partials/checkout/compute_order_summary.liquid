@@ -1,23 +1,19 @@
-{%- if user_id -%}
-    {%- comment -%}Optional parameter to get specific user's cart{%- endcomment -%}
-    {%- assign user_id = user_id -%}
-{%- else -%}
-    {%- unless order_id -%}
-        {%- comment -%}Automatically get & set user_id parameter {%- endcomment -%}
-        {%- if context.current_user.id -%}
-            {%- assign user_id = context.current_user.id -%}
-        {%- else -%}
-            {%- assign user_id = context.session.session_id -%}
-        {%- endif -%}
-    {%- endunless -%}
-{%- endif -%}
+{% comment %} 
+    Parameter required from parent 
+    -- cartList
+    -- products
+{% endcomment %}
 
 
-{%- if order_id -%}
-    {%- assign discount_debited = true -%}
-{%- else -%}
-    {%- assign discount_debited = false -%}
-{%- endif -%}
+{% comment %} discount_debited {% endcomment %}
+{%  liquid 
+    if order_id
+        assign discount_debited = true
+    else
+        assign discount_debited = false
+    endif
+%}
+
 
 {% comment %} STEP 1: Get discount object, and create array for discounts info {% endcomment %}
 {% graphql cart_discount_codes = 'modules/ecommerce/discount_code/get_cart_discount_codes', 
@@ -56,23 +52,9 @@
 {%- endunless -%} 
 
 {% comment %} cart_discount_codes_list {{ cart_discount_codes_list }} <br><br> {% endcomment %}
-{% graphql cart = 'modules/ecommerce/cart/get_cart', 
-    id: cart_id,
-    ids: cart_ids,
-    user_id: user_id, 
-    order_id: order_id,
-    status: status
-    | dig: 'items' | dig: 'results' %}
+{% assign cart = cartList %}
 
-{%- parse_json test_cart -%}
-{
-    "id": "{{cart_id}}",
-    "ids": "{{cart_ids}}",
-    "user_id": "{{user_id}}", 
-    "order_id": "{{order_id}}",
-    "status": "{{status}}"
-}
-{%- endparse_json -%} 
+
 
 {%- assign cart_ids = "" | split: ',' %}
 {%- assign cart_discount_code_ids = "" | split: ',' %}

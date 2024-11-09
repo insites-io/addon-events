@@ -2,7 +2,11 @@
 {%- comment -%}
     Checkout landing page: User not yet logged in
 {%- endcomment -%}
-{%- assign company_name = context.exports.global.company_name | strip | default: "us" -%}
+
+{%- include "modules/insites_cms/globals" -%}
+{%- assign global = context.exports.global -%}
+
+{%- assign company_name = global.company_name | strip | default: "us" -%}
 
 <div class="grid-x grid-padding-x">
     <div class="large-offset-1 medium-offset-0 small-offset-0
@@ -22,15 +26,16 @@
 
     <div class="large-4 medium-5 small-12 cell end btn-container">
         {%- comment -%}Redirect to checkout {%- endcomment -%}
-        <h2 class="heading-1">New Customer</h2>
+        <h2 class="heading-1">Guest Checkout</h2>
         <div class="spacer x-small"></div>
-        <p>If this is your first time purchasing from {{ company_name }}, press continue to start your order.</p>
+        <p>No account creation or password is required.</p>
         <div class="spacer x-large"></div>
 
         <a href="?guest=true">
             <ins-button outlined 
                 type="button" 
-                label="Continue as new customer">
+                label="Checkout as Guest"
+                icon-right="icon-arrow-forward">
             </ins-button>
         </a>
         

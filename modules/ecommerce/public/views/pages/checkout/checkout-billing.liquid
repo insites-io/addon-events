@@ -1,0 +1,62 @@
+---
+slug: checkout/billing
+layout: modules/ecommerce/checkout
+# enable_profiler: true
+searchable: "true"
+max_deep_level: 3
+metadata: {
+    "status": "published",
+    "page_type": "content", 
+    "page_name": "Checkout - Billing Detail",
+    "og:url": "{{ context.exports.global.company_url | strip }}",
+    "og:type": "",
+    "og:image": "",
+    "og:title": "Checkout - Billing Detail",
+    "og:description": "Checkout - Billing Detail",
+    "og:site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Checkout - Billing Detail",
+    "page_title": "Checkout - Billing Detail | {{ context.exports.global.company_name | strip }}",
+    "description": "Checkout - Billing Detail",
+    "canonical_url": "",
+    "search_engine_visibility": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_changefreq": "never"
+}
+authorization_policies:
+  - modules/ecommerce/customer_logged_in
+---
+
+{%- graphql data = 'modules/ecommerce/account/get_current_user' -%}
+
+{% include 'modules/ecommerce/checkout/checkout_redirect_step' %}
+
+<div class="grid-x grid-padding-x">
+    <div class="large-offset-2 medium-offset-1 small-offset-0 large-8 medium-10 small-12 cell">
+        {% include 'modules/ecommerce/layout/checkout_steps', 
+            clickable: true %}
+    </div>
+</div>
+
+<div class="spacer xxxx-large"></div>
+
+<div class="grid-x grid-padding-x">
+    <div class="large-7 medium-12 small-12 cell">
+        {%- if context.session.billing_address_id == blank or context.session.shipping_address_id == context.session.billing_address_id  -%}
+        {%- include_form 'modules/ecommerce/checkout_billing_address', id: context.session.shipping_address_id, data -%}
+        {%- else -%}
+        {%- include_form 'modules/ecommerce/checkout_billing_address', id: context.session.billing_address_id, data -%}
+        {%- endif -%}
+        
+    </div>
+    <div class="large-4 large-offset-1 medium-12 small-12 cell">
+        <div class="hide-for-large spacer xxx-large"></div>
+        {%- include 'modules/ecommerce/layout/order_summary', 
+            show_product: true,
+            status: "Cart",
+            check
+            form_update: true,
+            form_delete: true -%}
+    </div>
+</div>

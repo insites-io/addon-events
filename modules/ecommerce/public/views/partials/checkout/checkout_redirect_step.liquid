@@ -1,0 +1,17 @@
+{%- assign latest_step = context.session.latest_step | default: 1 -%}
+{%- assign checkout_links = "checkout,checkout/shipping,checkout/billing,checkout/payment,confirmation" | split: ',' -%}
+{%- assign current_slug = context.page.slug -%}
+{%- assign latest_index = latest_step | minus: 1 -%}
+{%- liquid
+    if checkout_links[0] == current_slug and latest_step < 1
+        redirect_to checkout_links[latest_index]
+    elsif checkout_links[1] == current_slug and latest_step < 2
+        redirect_to checkout_links[latest_index]
+    elsif checkout_links[2] == current_slug and latest_step < 3
+        redirect_to checkout_links[latest_index]
+    elsif checkout_links[3] == current_slug and latest_step < 4
+        redirect_to checkout_links[latest_index]
+    elsif checkout_links[4] == current_slug and latest_step < 5
+        redirect_to checkout_links[latest_index]
+    endif
+-%}

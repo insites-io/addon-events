@@ -1,30 +1,15 @@
 ---
 slug: checkout/shipping
 layout: modules/ecommerce/checkout-layout
-# enable_profiler: true
-searchable: "true"
-max_deep_level: 3
+searchable: "false"
+max_deep_level: 2
 metadata: {
     "status": "published",
-    "page_type": "content",
-    "og:url": "{{ context.exports.global.company_url | strip }}",
-    "og:type": "",
-    "og:image": "",
-    "og:title": "Checkout - Shipping Detail",
-    "og:description": "Checkout - Shipping Detail",
-    "og:site_name": "{{ context.exports.global.company_name | strip }}",
-    "meta_title": "Checkout - Shipping Detail",
-    "page_title": "Checkout - Shipping Detail | Insites",
-    "meta_description": "Checkout - Shipping Detail",
-    "canonical_url": "",
-    "search_engine_visibility": false,
-    "sitemap_enabled": false,
-    "sitemap_priority": "1.0",## primary order (DESC)
-    "sitemap_order": "0", ## secondary order (ASC)
-    "sitemap_changefreq": "never"
-} 
-authorization_policies:
-  - modules/ecommerce/customer_logged_in
+    "page_type": "content", 
+    "page_name": "Checkout - Shipping Detail",
+    "page_title": "Checkout - Shipping Detail",
+    "meta_title": "Checkout - Shipping Detail"       
+}
 ---
 
 {%- graphql data = 'modules/ecommerce/account/get_current_user' -%}
@@ -33,8 +18,7 @@ authorization_policies:
 
 <div class="grid-x grid-padding-x">
     <div class="large-offset-2 medium-offset-1 small-offset-0 large-8 medium-10 small-12 cell">
-        {% include 'modules/ecommerce/layout/checkout_steps', 
-            clickable: true %}
+        {% include 'modules/ecommerce/layout/checkout_steps', clickable: true, data %}
     </div>
 </div>
 
@@ -43,9 +27,9 @@ authorization_policies:
 <div class="grid-x grid-padding-x">
     <div class="large-7 medium-12 small-12 cell">
         {%- if context.session.shipping_address_id and context.session.shipping_address_id != blank -%}
-            {%- include_form 'modules/ecommerce/checkout_shipping_address', id: context.session.shipping_address_id -%}
+            {%- include_form 'modules/ecommerce/checkout_shipping_address', id: context.session.shipping_address_id, data -%}
         {%- else -%}
-            {%- include_form 'modules/ecommerce/checkout_shipping_address' -%}
+            {%- include_form 'modules/ecommerce/checkout_shipping_address', data -%}
         {%- endif -%}
     </div>
     <div class="large-4 large-offset-1 medium-12 small-12 cell">

@@ -8,38 +8,41 @@ flash_notice: "Success-UserAddressShipping"
 fields:
   properties:
     uuid:
-      validation: 
-        presence: true
+      #validation: 
+      #  presence: true
     related_uuid:
-      validation: 
-        presence: true
+      #validation: 
+      #  presence: true
     related_type: 
       property_options:
         default: "contact"
     address_1:
-      validation: 
-        presence: 
-          message: Address is required
+      #validation: 
+      #  presence: 
+      #    message: Address is required
     address_2:
     city:
-      validation: 
-        presence: 
-          message: City is required
+      #validation: 
+      #  presence: 
+      #    message: City is required
     state:
-      validation: 
-        presence: 
-          message: State is required
+      #validation: 
+      #  presence: 
+      #    message: State is required
     postcode:
-      validation: 
-        presence: 
-          message: Postal code is required
+      #validation: 
+      #  presence: 
+      #    message: Postal code is required
     country:
-      validation: 
-        presence: 
-          message: Country is required      
+      #validation: 
+      #  presence: 
+      #    message: Country is required     
+    same_shipping:
+      property_options:
+        virtual: true 
     shipping_instructions:
       property_options:
-        virtual: true
+        virtual: true    
     shipping_company_name:
       property_options:
         virtual: true
@@ -61,37 +64,27 @@ fields:
     shipping_address_id:
       property_options:
         virtual: true        
-    freight_method:
-      property_options:
-        virtual: true  
-    preferred_pick_up_date:
-      property_options:
-        virtual: true
-    preferred_delivery_date:
-      property_options:
-        virtual: true
-
+    
 callback_actions: |-    
-  
-  {%- session freight_method = form.properties.freight_method -%}
-  {%- session preferred_pick_up_date = form.properties.preferred_pick_up_date -%}
-  {%- session preferred_delivery_date = form.properties.preferred_delivery_date -%}
 
-  {%- session shipping_address_1 = form.properties.address_1 -%}
-  {%- session shipping_address_2 = form.properties.address_2 -%}
-  {%- session shipping_city = form.properties.city -%}
-  {%- session shipping_state = form.properties.state -%}
-  {%- session shipping_postcode = form.properties.postcode -%}
-  {%- session shipping_country = form.properties.country -%}
-  {%- session shipping_is_enabled = form.properties.is_enabled -%}
-  {%- session shipping_instructions = form.properties.shipping_instructions -%}
+  {% assign prop = form.properties %}
 
-  {%- session shipping_company_name = form.properties.shipping_company_name -%}
-  {%- session shipping_contact_first_name = form.properties.shipping_contact_first_name -%}
-  {%- session shipping_contact_last_name = form.properties.shipping_contact_last_name -%}
-  {%- session shipping_contact_email = form.properties.shipping_contact_email -%}
-  {%- session shipping_contact_phone_number = form.properties.shipping_contact_phone_number -%}
-  {%- session shipping_contact_phone_country_code = form.properties.shipping_contact_phone_country_code -%}
+  {%- session same_shipping = prop.same_shipping -%}
+  {%- session shipping_address_1 = prop.address_1 -%}
+  {%- session shipping_address_2 = prop.address_2 -%}
+  {%- session shipping_city = prop.city -%}
+  {%- session shipping_state = prop.state -%}
+  {%- session shipping_postcode = prop.postcode -%}
+  {%- session shipping_country = prop.country -%}
+  {%- session shipping_is_enabled = prop.is_enabled -%}
+  {%- session shipping_instructions = prop.shipping_instructions -%}
+
+  {%- session shipping_company_name = prop.shipping_company_name -%}
+  {%- session shipping_contact_first_name = prop.shipping_contact_first_name -%}
+  {%- session shipping_contact_last_name = prop.shipping_contact_last_name -%}
+  {%- session shipping_contact_email = prop.shipping_contact_email -%}
+  {%- session shipping_contact_phone_number = prop.shipping_contact_phone_number -%}
+  {%- session shipping_contact_phone_country_code = prop.shipping_contact_phone_country_code -%}
 
   {%- session shipping_address_id = form.id -%}
   {%- session latest_step = 3 -%}
@@ -111,123 +104,57 @@ callback_actions: |-
   <input type="hidden" 
     id="hidden-shipping-phone" 
     name="{{ form.fields.properties.shipping_contact_phone_number.name }}"
-    value="{{ form.fields.properties.shipping_contact_phone_number.value }}" /> 
+    value="{{ form.fields.properties.shipping_contact_phone_number.value }}" > 
   <input type="hidden" 
     id="hidden-shipping-phone-country-code"
     name="{{ form.fields.properties.shipping_contact_phone_country_code.name }}"
-    value="{{ form.fields.properties.shipping_contact_phone_country_code.value }}" />
+    value="{{ form.fields.properties.shipping_contact_phone_country_code.value }}" >
 
   
   <input 
     type="hidden" 
     id="hidden-company-name"
-    value="{{ context.session.account_company_name }}" />
+    value="{{ context.session.account_company_name }}" >
   <input 
     type="hidden" 
     id="hidden-first-name"
-    value="{{ context.current_user.first_name }}" />
+    value="{{ context.current_user.first_name }}" >
   <input 
     type="hidden" 
     id="hidden-last-name"
-    value="{{ context.current_user.last_name }}" />
+    value="{{ context.current_user.last_name }}" >
   <input 
     type="hidden" 
     id="hidden-email"
-    value="{{ context.current_user.email }}" />
+    value="{{ context.current_user.email }}" >
   <input 
     type="hidden" 
     id="hidden-country-code"
-    value="{{ context.session.account_mobile_country_code }}" />
+    value="{{ context.session.account_mobile_country_code }}" >
   <input 
     type="hidden" 
     id="hidden-mobile-number"
-    value="{{ context.session.account_mobile_number }}" />
+    value="{{ context.session.account_mobile_number }}" >
 
     
   <div id="shipping-details" class="insites-form">
-    <h2 class="heading-1">Shipping</h2>
-    <div class="spacer xxx-large"></div>
-
-    <!-- Field: Do you want to receive quotes from freight providers to deliver your order?* -->
-    <div class="column-1">
-      <div class="list-field-wrap" 
-        validate
-        data-type="string"
-        data-ui="radio" 
-        data-name="{{ form.fields.properties.freight_method.name }}"
-        {%- if form.errors['properties.radio_sample'] != nil -%} has-error="true" {%- endif -%}>
-            <label class="list-field_label">Do you want to receive quotes from freight providers to deliver your order?*</label>
-        <div class="list-radio-options">
-          <ins-radio
-            label="Yes, please allow freight providers to quote for shipping" value="Delivery"
-            name="{{ form.fields.properties.freight_method.name }}"
-            {% if context.session.freight_method == "Delivery" %}checked{% endif %}>
-          </ins-radio>
-          <ins-radio
-            label="No, I will organise the pick up and delivery" value="Pick-up"
-            name="{{ form.fields.properties.freight_method.name }}"
-            {% if context.session.freight_method == "Pick-up" %}checked{% endif %}>
-          </ins-radio>
-        </div>
-        <p class="list-field_error">{{ form.errors['properties.radio_sample'] | default: 'Required' }}</p>
-      </div>
-    </div>
-
-    <div class="spacer"></div>
-
-    {% comment %} <!-- Field: Preferred pickup date* -->
-    <div class="column-1">
-      <ins-date-time
-        validate
-        mode="datepicker" 
-        data-type="date"
-        data-ui="date"
-        icon="icon-calendar"
-        format="DD/MM/YYYY"
-        label="Preferred pickup date*"
-        name="{{ form.fields.properties.preferred_pick_up_date.name }}"
-        value="{{ context.session.preferred_pick_up_date }}"
-        error-message="{{ form.errors['properties.preferred_pick_up_date'] | default: 'Required' }}"
-        {%- include 'modules/insites_forms/form_code/placeholder', form: form, name: 'preferred_pick_up_date' -%}
-        {%- include 'modules/insites_forms/form_code/validation/required', form: form, name: 'preferred_pick_up_date' -%}
-        {%- if form.errors['properties.preferred_pick_up_date'] != nil -%} has-error {%- endif -%}>
-      </ins-date-time>
-    </div>  
-
-    <div class="spacer large"></div> {% endcomment %}
-
-    <!-- Field: Preferred delivery date* -->
-    <div class="column-1">
-      <ins-date-time
-        validate
-        mode="datepicker" 
-        data-type="date"
-        data-ui="date"
-        icon="icon-calendar"
-        format="DD/MM/YYYY"
-        label="Preferred delivery date*"
-        name="{{ form.fields.properties.preferred_delivery_date.name }}"
-        value="{{ context.session.preferred_delivery_date }}"
-        error-message="{{ form.errors['properties.preferred_delivery_date'] | default: 'Required' }}"
-        {%- include 'modules/insites_forms/form_code/placeholder', form: form, name: 'preferred_delivery_date' -%}
-        {%- include 'modules/insites_forms/form_code/validation/required', form: form, name: 'preferred_delivery_date' -%}
-        {%- if form.errors['properties.preferred_delivery_date'] != nil -%} has-error {%- endif -%}>
-      </ins-date-time>
-    </div>  
-
-    <div class="spacer large"></div>
-
 
     <h2 class="heading-2">Shipping Contact</h2>
     <div class="spacer x-large"></div>
 
+    {% if context.current_user %}
     <ins-checkbox class="inline" 
+      {% if context.session.same_shipping == 'true' %} checked {% endif %}
+      name="{{ form.fields.properties.same_shipping.name }}"
+      value=true
       id="same-shipping" 
-      label="My shipping details are the same as my account details">
+      label="My shipping details are the same as my account details.">
     </ins-checkbox>
+    <div class="spacer"></div>
+    {% endif %}
 
     {% comment %} Contact Person Fields {% endcomment %}
-    <div class="grid-x grid-padding-x shipping-contact-person">
+    <div class="grid-x grid-padding-x shipping-contact-person {% if context.session.same_shipping == 'true' %} hide {% endif %}">
       <div class="large-12 medium-12 small-12 cell">
         <ins-input shipping-details-field 
           class="label-input" 
@@ -263,8 +190,8 @@ callback_actions: |-
       </div>
       <div class="large-6 medium-6 small-12 cell">
         <ins-input required validate shipping-details-field
-          label="Email*" 
-          placeholder="Email" 
+          label="Email Address**" 
+          placeholder="Email Address*" 
           field="email"
           name="{{ form.fields.properties.shipping_contact_email.name }}" 
           id="shipping-email" 
@@ -279,56 +206,62 @@ callback_actions: |-
         <ins-input-tel shipping-details-field
           class="label-input" 
           id="shipping-phone" 
-          label="Mobile Phone"
+          label="Phone Number"
           country-code="{{ context.session.shipping_contact_phone_country_code}}"
           phonenum-value="{{ context.session.shipping_contact_phone_number}}"
-          phonenum-placeholder="Mobile Phone" no-areacode>
+          phonenum-placeholder="Phone Number" no-areacode>
         </ins-input-tel>
       </div>
     </div>
 
-    <div class="spacer xxx-large"></div>
-    <div class="validate-address">
-      <div class="grid-x grid-padding-x">
-        <div class="large-6 medium-6 small-12 cell">
-          <h2 class="heading-2">Shipping Address</h2>
-        </div>
-        <div class="large-6 medium-6 small-12 cell text-right">
-          &nbsp;
-        </div>
-      </div>
+    <div class="spacer"></div>
+    <div class="spacer x-small"></div>
 
-      <div class="spacer x-large"></div>
+    <div class="validate-address">
+      <h2 class="heading-2">Shipping Address</h2>
+
+      <div class="spacer"></div>
+      <div class="spacer xx-small"></div>
 
       <p class="error-message hide">Shipping address is required.</p>
       
-      {%- graphql addresses = "modules/ecommerce/user/get_user_address_list", 
-        user_uuid: data.current_user.uuid 
-        | dig: "items" | dig: "results" -%}
+      {% if data.current_user.uuid.size > 1 %}      
 
-      {%- comment -%}Address cards{%- endcomment -%}
-      {%- include 'modules/ecommerce/layout/address_cards', 
-        addresses: addresses,
-        selected_card: context.session.shipping_address_id | default: "",
-        type: 'shipping' -%}
+        {%- graphql addresses = 'modules/ecommerce/address/get_address', 
+          user_uuid: data.current_user.uuid | dig: 'items','results' -%}
+            
+        {%- comment -%}Address cards{%- endcomment -%}
+        {%- include 'modules/ecommerce/layout/address_cards', 
+          addresses: addresses,
+          selected_card: context.session.shipping_address_id | default: "",
+          type: 'shipping' -%}
 
-      {% comment %} Shipping Address Fields {% endcomment %}
-      <div class="text-right"
-        id="address-toggle">
-        <div class="spacer small"></div>
-        <ins-button 
-          type="button" 
-          class="add-address-btn {% if addresses.size <= 0 %}hide{% endif %}"
-          name="shipping-address-fields" 
-          id="open-address" 
-          icon="icon-add" 
-          label="New Address" 
-          color="blue" 
-          size="small">
-        </ins-button>
-      </div>
+              
+        <div class="spacer x-small"></div>
+        <div class="spacer xx-small"></div>        
 
-      <div class="spacer x-small"></div>      
+        {% comment %} Shipping Address Fields {% endcomment %}
+        <div class="text-right"
+          id="address-toggle">
+          <ins-button 
+            type="button" 
+            class="add-address-btn"
+            name="shipping-address-fields" 
+            id="open-address" 
+            icon="icon-add" 
+            label="New Address" 
+            color="blue" 
+            size="small">
+          </ins-button>
+        </div>  
+        <div class="spacer"></div>
+
+      {% else %}
+
+        <div class="spacer x-small"></div>
+        <div class="spacer xx-small"></div>
+
+      {% endif %}
 
       <div id="shipping-address-fields" 
         class="address-fields {% if addresses.size > 0 %}hide{% endif %} " >
@@ -340,7 +273,7 @@ callback_actions: |-
             </ins-input>
             <input type="hidden" id="shipping_address_id"
               value="{{ context.session.shipping_address_id | default: '' }}"
-              name="{{ form.fields.properties.shipping_address_id.name }}" />
+              name="{{ form.fields.properties.shipping_address_id.name }}" >
           </div>
           <div class="large-6 medium-6 small-12 cell">
             <ins-input  required validate 
@@ -427,13 +360,19 @@ callback_actions: |-
     </div>            
 
     {%- assign submitLabel = 'Proceed to Billing' -%}
-    {% if addresses.size <= 0 %}
+    {% if addresses.size <= 0 or data.current_user.uuid == blank %}
       {%- assign submitLabel = 'Save and Proceed' -%}
     {% endif %}
 
-    <div class="grid-x grid-padding-x">
-      <div class="large-12 medium-12 small-12 cell text-right">
-        <div class="spacer small"></div>
+    <div class="spacer x-small"></div>
+    <div class="spacer x-small"></div>
+    <div class="grid-x grid-padding-x">    
+      <div class="large-6 medium-6 small-12 cell">
+        <a href="/checkout">
+          <ins-button solid type="button" label="Back" outlined></ins-button>
+        </a>
+      </div>
+      <div class="large-6 medium-6 small-12 cell text-right">        
         <ins-button solid 
           id="shipping-submit-button" 
           type="submit" 

@@ -1,0 +1,34 @@
+query get_address(
+  $user_uuid: String!,
+  $related_type: String,
+  $page: Int = 1,
+  $size: Int = 50
+){
+  items: records(
+    page: $page
+    per_page: $size
+    filter:{
+      table: { value: "modules/insites_core/crm_address" } 
+      deleted_at: { exists: false }
+      properties:[
+        { name:"related_uuid", value: $user_uuid }
+        { name:"related_type", value: $related_type }
+      ]
+    }
+  ){
+    total_entries
+    total_pages
+    results{
+      id
+      #properties
+      uuid: property(name: "uuid")
+      address_1: property(name: "address_1")
+      address_2: property(name: "address_2") 
+      address_3: property(name: "address_3") 
+      city: property(name: "city") 
+      state: property(name: "state") 
+      postcode: property(name: "postcode") 
+      country: property(name: "country")      
+    }
+  }
+}

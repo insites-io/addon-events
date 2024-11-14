@@ -2,19 +2,18 @@
     Checkout page + form
 {%- endcomment -%}
 
-{% include 'modules/ecommerce/checkout/checkout_redirect_step' %}
+{%- graphql data = 'modules/ecommerce/account/get_current_user' | dig: 'current_user' -%}
+{% assign company_uuid = data.crm_contact[0].company_uuid %}
+
+{% include 'modules/ecommerce/checkout/checkout_redirect_step', data %}
 
 <div class="grid-x grid-padding-x">
     <div class="large-offset-2 medium-offset-1 small-offset-0 large-8 medium-10 small-12 cell">
-        {% include 'modules/ecommerce/layout/checkout_steps', 
-            clickable: true %}
+        {% include 'modules/ecommerce/layout/checkout_steps', clickable: true, data %}
     </div>
 </div>
 
 <div class="spacer xxxx-large"></div>
-
-{%- graphql data = 'modules/ecommerce/account/get_current_user' | dig: 'current_user' -%}
-{% assign company_uuid = data.crm_contact[0].company_uuid %}
 
 
 {%- assign company_name = "" -%}
@@ -23,7 +22,6 @@
         uuid: company_uuid | dig: 'items','results' | first -%}
     {%- assign company_name = company.company_name -%}
 {%- endif -%}
-
 
 
 <div class="grid-x grid-padding-x">

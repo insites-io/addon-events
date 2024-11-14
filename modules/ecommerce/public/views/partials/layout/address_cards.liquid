@@ -1,47 +1,47 @@
-
 {%- if addresses.size > 0 -%}
     <div class="grid-x grid-padding-x grid-padding-y address-options" data-equalizer>
     {%- for data in addresses -%}
         {%- assign full_address = "" -%}
-        {%- if data.properties.address_1 and data.properties.address_1 != '' -%}
-            {%- assign full_address = full_address | append: data.properties.address_1 | strip | append : ", " -%}
+        {%- if data.address_1 and data.address_1 != '' -%}
+            {%- assign full_address = full_address | append: data.address_1 | strip | append : ", " -%}
         {%- endif -%}
-        {%- if data.properties.address_2 and data.properties.address_2 != '' -%}
-            {%- assign full_address = full_address | append: data.properties.address_2 | strip | append : ", " -%}
+        {%- if data.address_2 and data.address_2 != '' -%}
+            {%- assign full_address = full_address | append: data.address_2 | strip | append : ", " -%}
         {%- endif -%}
-        {%- if data.properties.address_3 and data.properties.address_3 != '' -%}
-            {%- assign full_address = full_address | append: data.properties.address_3 | strip | append : ", " -%}
+        {%- if data.address_3 and data.address_3 != '' -%}
+            {%- assign full_address = full_address | append: data.address_3 | strip | append : ", " -%}
         {%- endif -%}
-        {%- if data.properties.city and data.properties.city != '' -%}
-            {%- assign full_address = full_address | append: data.properties.city | strip -%}
+        {%- if data.city and data.city != '' -%}
+            {%- assign full_address = full_address | append: data.city | strip -%}
         {%- endif -%}
-        {%- comment -%}
-        {%- if data.properties.state and data.properties.state != '' -%}
-            {%- assign full_address = full_address | append: data.properties.state | strip | append : " " -%}
-        {%- endif -%}
-        {%- if data.properties.postcode and data.properties.postcode != '' -%}
-            {%- assign full_address = full_address | append: data.properties.postcode | strip | append : ", " -%}
-        {%- endif -%}
-        {%- if data.properties.country and data.properties.country != '' -%}
-            {%- assign full_address = full_address | append: data.properties.country | strip | append : " " -%}
-        {%- endif -%}
-        {%- endcomment -%}
         <div class="large-6 medium-6 small-12 cell">
+        
+            {% comment %} Convert into integer for comparison with selected_card {% endcomment %}
+            {% assign data_id = data.id | plus: 0 %} 
+
             <ins-checkbox-card data-equalizer-watch
-                name="{{ type }}-address-cards"
+                name="{{ type }}-address-cards"    
+
+                {% if addresses.size == 1 %}
+                    selected
+                {% elsif data_id == selected_card %}
+                    selected
+                {% endif %}
+
                 selected-color="blue"
                 value="{{ data.id }}"
                 data-address="{{ full_address }}"
-                data-address_1="{{ data.properties.address_1 }}"
-                data-address_2="{{ data.properties.address_2 }}"
-                data-city="{{ data.properties.city }}"
-                data-state="{{ data.properties.state }}"
-                data-postcode="{{ data.properties.postcode }}"
-                data-country="{{ data.properties.country }}">
+                data-address_1="{{ data.address_1 }}"
+                data-address_2="{{ data.address_2 }}"
+                data-city="{{ data.city }}"
+                data-state="{{ data.state }}"
+                data-postcode="{{ data.postcode }}"
+                data-country="{{ data.country }}">
                 <div>
-                    <p><strong>{{ full_address }}</strong></p>
-                    <p>{{ data.properties.state | strip }}, {{ data.properties.postcode | strip }}</p>
-                    <p>{{ data.properties.country | strip }}</p>
+                    <p class="form-label">{{ full_address }}</p>
+                    <div class="spacer small"></div>
+                    <p>{{ data.state | strip }} <br>{{ data.postcode | strip }}</p>
+                    <p>{{ data.country | strip }}</p>
                 </div>
             </ins-checkbox-card>
         </div>

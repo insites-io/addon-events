@@ -1,6 +1,6 @@
 ---
 slug: checkout/billing
-layout: modules/ecommerce/checkout
+layout: modules/ecommerce/checkout-layout
 # enable_profiler: true
 searchable: "true"
 max_deep_level: 3
@@ -24,8 +24,6 @@ metadata: {
     "sitemap_order": "0", ## secondary order (ASC)
     "sitemap_changefreq": "never"
 }
-authorization_policies:
-  - modules/ecommerce/customer_logged_in
 ---
 
 {%- graphql data = 'modules/ecommerce/account/get_current_user' -%}

@@ -1,21 +1,66 @@
+{%- assign latestStep = context.session.latest_step | default: 1 -%}
+{%- assign currentStep = 1 -%}
+
+{% case context.page.slug %}
+{% when 'checkout' %}
+{%- assign currentStep = 1 -%}
+{% when 'checkout/shipping' %}
+{%- assign currentStep = 2 -%}
+{% when 'checkout/billing' %}
+{%- assign currentStep = 3 -%}
+{% when 'checkout/payment' %}
+{%- assign currentStep = 4 -%}
+{% when 'confirmation' %}
+{%- assign currentStep = 5 -%}
+{% else %}
+
+{% endcase %}
 
 <ins-steps
     {% if clickable %} clickable  with-validation {% endif %}
     {% if context.location.pathname == '/confirmation' %} complete {% endif %}
     id="checkout-nav">
 
-    {% unless context.params.guest %}
-    <ins-step data-step="1" content="account-details" description="Account Details" active>
+    {% if data.current_user.uuid %}
+    <ins-step data-step="1" 
+        {% if currentStep == 1 %}active{% endif %}
+        {% if latestStep < 1 %}disabled {% endif %}
+        {% if latestStep > 1 and currentStep != 1 %}complete{% endif %}
+        content="account-details" 
+        link="/checkout" 
+        description="Account Details" 
+        class="checkout-step">
     </ins-step>
-    {% endunless %}
+    {% endif %}
 
-    <ins-step data-step="2" content="shipping-details" description="Shipping">
+    <ins-step data-step="2" 
+        {% if currentStep == 2 %}active{% endif %}
+        {% if latestStep < 2 %}disabled {% endif %}
+        {% if latestStep > 2 and currentStep != 2 %}complete{% endif %}
+        content="shipping-details" 
+        link="/checkout/shipping" 
+        description="Shipping" 
+        class="checkout-step">
     </ins-step>
 
-    <ins-step data-step="3" content="billing-details" description="Billing">
+    <ins-step data-step="3" 
+        {% if currentStep == 3 %}active{% endif %}
+        {% if latestStep < 3 %}disabled {% endif %}
+        {% if latestStep > 3 and currentStep != 3 %}complete{% endif %}
+        content="billing-details" 
+        link="/checkout/billing" 
+        description="Billing" 
+        class="checkout-step">
     </ins-step>
 
-    <ins-step data-step="4" content="payment-details" description="Payment">
-    </ins-step>    
+    <ins-step data-step="4" 
+        {% if currentStep == 4 %}active{% endif %}
+        {% if latestStep < 4 %}disabled {% endif %}
+        {% if latestStep > 4 and currentStep != 4 %}complete{% endif %}
+        content="payment-details" 
+        link="/checkout/payment" 
+        description="Payment" 
+        class="checkout-step">
+    </ins-step>
 
 </ins-steps>

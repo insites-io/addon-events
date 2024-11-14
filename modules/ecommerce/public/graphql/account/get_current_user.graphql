@@ -1,6 +1,7 @@
 query get_current_user {
   current_user {
     id
+    uuid: external_id
     first_name
     last_name
     name

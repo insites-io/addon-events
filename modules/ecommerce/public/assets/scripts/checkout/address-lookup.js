@@ -6,12 +6,16 @@ var AddressLookup = (function () {
 
     return {
         methods: {
-            fillAddress(field, type) {
+            fillAddress(field, type) {            
                 let address = field.getPlace();
+                let geometry = {
+                    "latitude": address.geometry.location.lat(),
+                    "longitude": address.geometry.location.lng()
+                };            
                     AddressLookup.methods.resetAddress(type);
                     AddressLookup.methods.unselectAddressCards(type);
-                if (address && address.address_components) {
-                    AddressLookup.methods.mapGoogleAddress(address.address_components, type);
+                if (address && address.address_components) {                    
+                    AddressLookup.methods.mapGoogleAddress(address.address_components, type, geometry);
                     addressValueChanged = true;
                 }
             },
@@ -29,29 +33,56 @@ var AddressLookup = (function () {
                         el.selected = false;
                     });
             },
-            mapGoogleAddress(address, name) {
+            mapGoogleAddress(address, name, geometry) {
+                //clear values
+                if(document.getElementById(`${name}_address_1`))
+                    document.getElementById(`${name}_address_1`).value = "";
+                if(document.getElementById(`${name}_address_2`))
+                    document.getElementById(`${name}_address_2`).value = "";
+                if(document.getElementById(`${name}_city`))
+                    document.getElementById(`${name}_city`).value = "";
+                if(document.getElementById(`${name}_suburb`))
+                    document.getElementById(`${name}_suburb`).value = "";
+                if(document.getElementById(`${name}_state`))
+                    document.getElementById(`${name}_state`).value = "";
+                if(document.getElementById(`${name}_postcode`))
+                    document.getElementById(`${name}_postcode`).value = "";
+                if(document.getElementById(`${name}_country`))
+                    document.getElementById(`${name}_country`).value = "";
+
+                if(document.getElementById(`${name}_longitude`))
+                    document.getElementById(`${name}_longitude`).value = geometry.longitude;
+                if(document.getElementById(`${name}_latitude`))
+                    document.getElementById(`${name}_latitude`).value = geometry.latitude;
+
+
                 address.forEach(item => {
                     let addressType = item.types[0];
                     // Update fields as needed on project.
                     switch (addressType) {
                         case "street_number":
-                            document.getElementById(`${name}_address_1`).value = item['short_name'] + " ";
+                            if(document.getElementById(`${name}_address_1`))
+                                document.getElementById(`${name}_address_1`).value = item['short_name'] + " ";
                             break;
 
                         case "premise":
-                            document.getElementById(`${name}_address_1`).value = item['long_name'] + " ";
+                            if(document.getElementById(`${name}_address_1`))
+                                document.getElementById(`${name}_address_1`).value = item['long_name'] + " ";
                             break;
 
                         case "route":
-                            document.getElementById(`${name}_address_1`).value += item['long_name'] + " ";
+                            if(document.getElementById(`${name}_address_1`))
+                                document.getElementById(`${name}_address_1`).value += item['long_name'] + " ";
                             break;
 
                         case "neighborhood":
-                            document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
+                            if(document.getElementById(`${name}_address_2`))
+                                document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
                             break;
 
                         case "sublocality_level_1":
-                            document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
+                            if(document.getElementById(`${name}_address_2`))
+                                document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
                             break;
 
                         case "locality":
@@ -59,37 +90,52 @@ var AddressLookup = (function () {
                                 address.length < 9 &&
                                 address[6].long_name !== "Canada") {
 
-                                document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
+                                if(document.getElementById(`${name}_address_2`))
+                                    document.getElementById(`${name}_address_2`).value += item['long_name'] + " ";
 
-                            } else document.getElementById(`${name}_city`).value = item['long_name'] + " ";
+                            } else {
+                                if(document.getElementById(`${name}_city`))
+                                    document.getElementById(`${name}_city`).value = item['long_name'] + " ";
+                            }
                             break;
 
                         case "postal_town":
-                            document.getElementById(`${name}_city`).value += item['long_name'];
+                            if(document.getElementById(`${name}_suburb`))
+                                document.getElementById(`${name}_suburb`).value += item['long_name'];
                             break;
 
                         case "administrative_area_level_2":
-                            if (address.length <= 7) {
-                                // document.getElementById(`${name}_suburb`).value = item['long_name'] + " ";
-                                document.getElementById(`${name}_state`).value = item['long_name'] + " ";
-                            } else document.getElementById(`${name}_state`).value = item['long_name'] + " ";
+                            if (address.length <= 7){
+                                if(document.getElementById(`${name}_suburb`))
+                                    document.getElementById(`${name}_suburb`).value =  item['long_name'] + " ";
+                              } else {
+                                if(document.getElementById(`${name}_state`))
+                                    document.getElementById(`${name}_state`).value =  item['long_name'] + " ";
+                              }
                             break;
 
                         case "administrative_area_level_1":
-                            if (address.length < 8)
-                                document.getElementById(`${name}_state`).value += item['short_name'];
-                            else
-                                document.getElementById(`${name}_city`).value += item['short_name'];
+                            if (address.length < 8){
+                                if(document.getElementById(`${name}_state`))
+                                    document.getElementById(`${name}_state`).value = item['short_name'];                                    
+                            }else{
+                                if(document.getElementById(`${name}_suburb`))
+                                    document.getElementById(`${name}_suburb`).value += item['short_name'];
+                            }                                
                             break;
 
                         case "country":
-                            document.getElementById(`${name}_country`).value = item['long_name'];
-                            // document.getElementById(`${name}_country_code`).value = item['short_name'];
+                            if(document.getElementById(`${name}_country`)){                                                                    
+                                document.getElementById(`${name}_country`).setValue(item['long_name']);                                
+                            }
+                            if(document.getElementById(`${name}_country_code`))
+                                document.getElementById(`${name}_country_code`).setValue(item['short_name']); 
                             break;
 
                         case "postal_code":
                         case "postal_code_prefix":
-                            document.getElementById(`${name}_postcode`).value = item['short_name'];
+                            if(document.getElementById(`${name}_postcode`))
+                                document.getElementById(`${name}_postcode`).value = item['short_name'];
                             break;
                     }
                 });
@@ -111,12 +157,15 @@ var AddressLookup = (function () {
                     if (lookupField && google !== undefined) {
                         // Initialize google autocomplete on field
                         let searchAddressField = new google.maps.places.Autocomplete(lookupField);
+
                         // Set initial restrict to the listed countries
-                        searchAddressField.setComponentRestrictions({ country: ["au"] });
+                        //searchAddressField.setComponentRestrictions({ country: ["au"] });
+
                         // Fill address event
                         searchAddressField.addListener('place_changed', (event) => {
                             AddressLookup.methods.fillAddress(searchAddressField, name);
                         });
+                        
                         clearInterval(setStateInterval);
                     }
                 }, 300);

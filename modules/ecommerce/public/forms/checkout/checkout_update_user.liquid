@@ -65,12 +65,12 @@ callback_actions: |-
 
     <div class="grid-x grid-padding-x account-details">
 
-      <input type="hidden2" 
+      <input type="hidden" 
         id="hidden-account-phone"
         name="{{ profiles_prop.mobile_phone_number.name }}"
         value="{{ profiles_prop.mobile_phone_number.value }}" >
 
-      <input type="hidden2" 
+      <input type="hidden" 
         id="hidden-account-phone-country-code"
         name="{{ profiles_prop.mobile_phone_country_code.name }}"
         value="{{ profiles_prop.mobile_phone_country_code.value }}" >
@@ -141,7 +141,7 @@ callback_actions: |-
    <div class="spacer small"></div>
     <div class="grid-x grid-padding-x">
       <div class="large-6 medium-6 small-12 cell">
-          <a href="javascript:window.history.back();">
+          <a href="/shopping-cart">
               <ins-button solid type="button" label="Cancel" outlined></ins-button>
           </a>
       </div>

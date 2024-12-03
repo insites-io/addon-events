@@ -1,36 +1,78 @@
+{% comment %} 
+    Some pages may pass these parameters: 
+        - user_uuid
+        - user_cart
+        - carts
+        - products
+
+    If these parameters were not passed, get their values here
+{% endcomment %}
+
+
+{% comment %} Get the user uuid {% endcomment %}
+{%  liquid
+    if context.session.user_uuid and context.session.user_uuid != ''
+        assign user_uuid = context.session.user_uuid
+    else
+        graphql user = 'modules/client/account/get_current_user'
+        session user_uuid = user.current_user.external_id
+        assign user_uuid = user.current_user.external_id
+    endif
+%}
+
+{% comment %} Get user_cart {% endcomment %}
+{%- if user_uuid -%}
+    {%- if user_cart == '' or user_cart == blank -%}
+        {% graphql user_cart = 'modules/ecommerce/carts/get_user_cart', 
+            contact_uuid: user_uuid, show_discount_details: true | dig: 'items','results' | first %}
+    {%- endif -%}
+{%- else -%}
+    {% comment %} get cart in local storage {% endcomment %}
+{%- endif -%}
+
+{% comment %} Get the product info {% endcomment %}
+{%- if carts == '' or carts == blank -%}
+    {%  liquid
+        ## Convert an array of strings into an array of objects
+        assign carts = '' | split: ',' 
+        for item in user_cart.items
+            assign item_json = item | parse_json
+            assign carts = carts | array_add: item_json
+        endfor
+
+        assign product_uuids = carts | array_map: 'product_uuid' | array_flatten
+        graphql products = 'modules/ecommerce/products/get_cart_products', uuid: product_uuids, size: user_cart.items.size | dig: 'items','results'
+    %}
+{%- endif -%}
+
 <div class="order-summary-wrapper">
     <h2 class="color-font-sub heading-2">
         {%- if context.location.pathname == '/confirmation' -%}
-        Payment {% else %} Order {% endif %} Summary test
+        Payment {% else %} Order {% endif %} Summary
     </h2>
     <div class="spacer x-large"></div>
     
     <div class="order-summary">    
         {%- if show_product -%}
-            {%- for item in cartList -%}
-                {%- assign item_amount = item.product_price | times: item.quantity -%}
+            {%- for item in carts -%}
+
+                {% include 'modules/ecommerce/carts/cart_details', products, item, user_uuid %}
+                {% assign cart = context.exports.cart %}    
             
                 <div class="grid-x grid-padding-x body-large">
                     <div class="product-name large-6 medium-8 small-6 cell">
-                        <div>{{ item.product_name }}</div>
-                        <div>
-                            <span class="attributes">{{ item.product_variant }}</span>
-                        </div>
+                        <p class="font-color-sub">{{ cart.product_name }}</p>
                     </div>
-                    <div class="text-right large-3 medium-4 small-6 cell">
-                        {%- assign label = "pc" -%}
-                        {%- if item.quantity > 1 -%}
-                            {%- assign label = "pcs" -%}
-                        {%- endif -%}
-                        {{ item.quantity }} {{ item.product.unit_label | default: label }}
+                    <div class="text-right large-3 medium-4 small-6 cell">                        
+                        <p>{{ item.quantity }}x</p>
                     </div>
                     <div class="text-right large-3 medium-12 small-12 cell">
-                        {%- assign item_amount = item_amount | divided_by: 100.0 | advanced_format: '%.2f' | default: "0.00" -%}
+                        {%- assign item_amount = cart.price | advanced_format: '%.2f' | default: "0.00" -%}
                         {%- assign item_amount = item_amount | pricify -%}
                         {%- unless item_amount contains '.' -%}
                             {%- assign item_amount = item_amount | append: '.00' -%}
                         {%- endunless -%}
-                        {{ item_amount }}
+                        <p class="font-color-sub">{{ item_amount }}</p>
                     </div>
                 </div>
                 {%- unless forloop.last -%}
@@ -41,7 +83,7 @@
         {%- endif -%}
     </div>
 
-    {%- if show_product and cart.size > 0 -%}
+    {%- if show_product and carts.size > 0 -%}
     <div class="spacer"></div>
     <hr>
     <div class="spacer"></div>
@@ -49,80 +91,69 @@
     
     {% comment %}--- GET ORDER COMPUTATION SUMMARY ---{% endcomment %}
     {%- include 'modules/ecommerce/checkout/compute_order_summary' 
-        order_id: order_id,
-        cartList, products -%}
+        order_id,
+        user_uuid, user_cart, carts, products -%}
 
-    <div class="order-subtotal">
-        <div class="grid-x grid-padding-x body-large">
-            <div class="large-6 medium-6 small-6 cell">
-                Subtotal
-            </div>
-            <div class="large-6 medium-6 small-6 cell text-right">
-                {%- assign sub_total = context.exports.order.sub_total | divided_by: 100 | advanced_format: '%.2f' | default: "0.00" -%}
-                {%- assign sub_total = sub_total | pricify -%}
-                {%- unless sub_total contains '.' -%}
-                    {%- assign sub_total = sub_total | append: '.00' -%}
-                {%- endunless -%}
-                {{ sub_total }}
-            </div>
+    {% assign computed = context.exports.computed %}
+
+   {% comment %} Subtotal {% endcomment %}
+    <div class="grid-x grid-padding-x">
+        <div class="large-6 medium-6 small-6 cell">
+            <p class="font-color-sub">Subtotal</p>
         </div>
-        <div class="spacer x-small"></div>
-        <div class="grid-x grid-padding-x">
-            <div class="large-6 medium-6 small-6 cell">
-                Delivery & Handling
-            </div>
-            <div class="large-6 medium-6 small-6 cell text-right">
-                {%- assign shipping_cost = context.exports.order.shipping_amount | divided_by: 100 | advanced_format: '%.2f' | default: "0.00" -%}
-                {%- assign shipping_cost = shipping_cost | pricify -%}
-                {%- unless shipping_cost contains '.' -%}
-                    {%- assign shipping_cost = shipping_cost | append: '.00' -%}
-                {%- endunless -%}
-                {{ shipping_cost }}
-            </div>
+        <div class="large-6 medium-6 small-6 cell text-right">
+            {%- assign sub_total = computed.sub_total_amount | advanced_format: '%.2f' | default: "0.00" -%}
+            {%- assign sub_total = sub_total | pricify -%}
+            {%- unless sub_total contains '.' -%}
+                {%- assign sub_total = sub_total | append: '.00' -%}
+            {%- endunless -%}
+            <p>{{ sub_total }}</p>
         </div>
-        
     </div>
+    <div class="spacer x-small"></div>
 
-    <div class="spacer medium"></div>
-    <hr>
-    <div class="spacer medium"></div>
-
-    {% comment %} Discount Codes {% endcomment %}
-    {%- if order_id -%}
-        {%- assign discount_debited = true -%}
-    {%- else -%}
-        {%- assign discount_debited = false -%}
-    {%- endif -%}
+    {% comment %} Delivery & Handling {% endcomment %}
+    <div class="grid-x grid-padding-x">
+        <div class="large-6 medium-6 small-6 cell">
+            <p class="font-color-sub">Delivery & Handling</p>
+        </div>
+        <div class="large-6 medium-6 small-6 cell text-right">
+            {%- assign shipping_cost = computed.shipping_amount | advanced_format: '%.2f' | default: "0.00" -%}
+            {%- assign shipping_cost = shipping_cost | pricify -%}
+            {%- unless shipping_cost contains '.' -%}
+                {%- assign shipping_cost = shipping_cost | append: '.00' -%}
+            {%- endunless -%}
+            <p>{{ shipping_cost }}</p>
+        </div>
+    </div>                
     
-    {% graphql discount_codes = "modules/ecommerce/discount_code/get_cart_discount_codes_order_summary" 
-        user_id: user_id,
-        order_id: order_id,
-        discount_debited: discount_debited,
-        | dig: 'items' | dig: 'results' %}
-
-    {% if discount_codes.size > 0 %}
+    
+    {% comment %} Discounts {% endcomment %}
+    {% if user_cart.discounts.size > 0 %}
+        <div class="spacer x-small"></div>
         <div class="list-discount-codes">
             <div class="grid-x">
                 <div class="small-6 medium-6 large-8 cell">
-                    <p class="body-large color-font-head"><b>Discounts</b></p>
+                    <p class="font-color-sub">Discounts</p>
                 </div>
                 <div class="small-6 medium-6 large-4 cell text-right">
-                    {%- if context.exports.order.total_discount_amount > 0 -%}
-                        {%- assign total_discount_amount = context.exports.order.total_discount_amount | divided_by: 100 | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- if computed.total_discount_amount > 0 -%}
+                        {%- assign total_discount_amount = computed.total_discount_amount | advanced_format: '%.2f' | default: "0.00" -%}
                         {%- assign total_discount_amount = total_discount_amount | pricify -%}
                         {%- unless total_discount_amount contains '.' -%}
                             {%- assign total_discount_amount = total_discount_amount | append: '.00' -%}
                         {%- endunless -%}
-                        <p class="body-large color-font-head"><b>{{ total_discount_amount | prepend: '- '}}</b></p>
+                        <p>{{ total_discount_amount | prepend: '- '}}</p>
                     {%- endif -%}
                 </div>
             </div>
-            <div class="spacer medium"></div>
-            {%- for item in discount_codes -%}
+            <div class="spacer x-small"></div>
+
+            {%- for item in user_cart.discounts -%}
                 {%- if order_id -%}
                     {%- assign code = item -%}
                 {%- else -%}
-                    {%- assign code = item.discount_codes -%}
+                    {%- assign code = item -%}
                 {%- endif -%}
                 
                 {%- assign type = code.discount_type | downcase -%}
@@ -136,9 +167,8 @@
                         "check_duplicates": false,
                         "form_delete": {{ form_delete | default: false }},
                         "form_update": {{ form_update | default: false }},
-                        "form_id": "{{ item.id }}",
-                        "user_id": "{{ user_id }}",
-                        "discount_code": "{{ code.discount_code }}"
+                        "contact_uuid": "{{ user_uuid }}",
+                        "discount_code": "{{ item.discount_code }}"
                     }
                     {% endparse_json %}
                     
@@ -169,17 +199,15 @@
                             endif
                         -%}
                     {%- endunless -%}
-                    {%- if code.apply_to_total == true -%}
-                        {%- assign value = value | append: " Total" -%}
-                    {%- endif -%}
+                    
 
-                    <div class="list-discount-codes--item" data-id="{{ item.id }}">
-                        <div class="code-details">
-                            <p class="font-head color-font-head">{{ code.discount_name }}</p>
-                            <p class="body-small">{{ code.discount_code }} - {{ value }}</p>
+                    <div class="list-discount-codes--item" data-id="{{ item.id }}" data-uuid="{{ item.uuid }}">
+                        <div class="body-small">
+                            <p class="font-head bold">{{ code.discount_name }}</p>
+                            <p>{{ code.discount_code }} - {{ value }}</p>
                             {%- if code.minimum_cart_value > 0 -%}
                             <div class="spacer xx-small"></div>
-                            <p class="body-small">Minimum ${{ code.minimum_cart_value | advanced_format: "%.2f" }} Purchase</p>
+                            <p>Minimum ${{ code.minimum_cart_value | advanced_format: "%.2f" }} Purchase</p>
                             {%- endif -%}
                         </div>
                         {%- if show_discount_list -%}
@@ -190,42 +218,58 @@
                 {%- endif -%}
             {%- endfor -%}
         </div>
-        <div class="spacer medium"></div>                
+        <div class="spacer x-small"></div>                
     {%- endif -%}
-
     {% comment %} END Discount Codes {% endcomment %}
 
-    
-    <div class="grid-x grid-padding-x tax">
+
+    {% comment %} Processing Fee {% endcomment %}
+    <div class="grid-x grid-padding-x">
         <div class="large-6 medium-6 small-6 cell">
-            Tax
+            <p class="font-color-sub">Processing Fee (1.7%)</p>
         </div>
         <div class="large-6 medium-6 small-6 cell text-right">
-            {%- assign tax_amount = context.exports.order.tax_amount | divided_by: 100 | advanced_format: '%.2f' | default: "0.00" -%}
+            {%- assign processing_fee = computed.processing_fee | advanced_format: '%.2f' | default: "0.00" -%}
+            {%- assign processing_fee = processing_fee | pricify -%}
+            {%- unless processing_fee contains '.' -%}
+                {%- assign processing_fee = processing_fee | append: '.00' -%}
+            {%- endunless -%}
+            <p>{{ processing_fee }}</p>
+        </div>
+    </div>
+    <div class="spacer x-small"></div> 
+
+
+    {% comment %} Tax {% endcomment %}
+    <div class="grid-x grid-padding-x">
+        <div class="large-6 medium-6 small-6 cell">
+            <p class="font-color-sub">Tax</p>
+        </div>
+        <div class="large-6 medium-6 small-6 cell text-right">
+            {%- assign tax_amount = computed.tax_amount | advanced_format: '%.2f' | default: "0.00" -%}
             {%- assign tax_amount = tax_amount | pricify -%}
             {%- unless tax_amount contains '.' -%}
                 {%- assign tax_amount = tax_amount | append: '.00' -%}
             {%- endunless -%}
-            {{ tax_amount }}
+            <p>{{ tax_amount }}</p>
         </div>
     </div>
     <div class="spacer medium"></div>    
     <hr>
     <div class="spacer medium"></div>
 
-    <div class="grid-x grid-padding-x">
+
+    <div class="grid-x grid-padding-x font-color-head">
         <div class="large-6 medium-6 small-6 cell">
-            <h3 class="order-total">Total</h3>
+            <p class="order-total">Total</p>
         </div>
         <div class="large-6 medium-6 small-6 cell text-right">
-            <span class="order-total">
-            {%- assign total_amount = context.exports.order.total_amount | divided_by: 100 | advanced_format: '%.2f' | default: "0.00" -%}
+            {%- assign total_amount = computed.total_amount | advanced_format: '%.2f' | default: "0.00" -%}
             {%- assign total_amount = total_amount | pricify -%}
             {%- unless total_amount contains '.' -%}
                 {%- assign total_amount = total_amount | append: '.00' -%}
-            {%- endunless -%}
-            {{ total_amount }}
-            </span>
+            {%- endunless -%}            
+            <p class="order-total">{{ total_amount }}</p>
         </div>
     </div>
 </div>

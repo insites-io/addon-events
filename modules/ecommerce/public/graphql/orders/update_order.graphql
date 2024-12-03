@@ -34,10 +34,6 @@ mutation update_order (
     $billing_country_code: String
     $billing_postcode: String
 
-    $gateway_id: String
-    $gateway_customer_id: String
-    $user_id: String
-
     $order_number: String
     $order_status: String
     $order_payment_status: String
@@ -55,7 +51,6 @@ mutation update_order (
     $tax_amount: Float
     $shipping_amount: Float
     $total_amount: Float
-    $amount_due: Float
 ) {
     items: record_update(
         id: $id
@@ -96,10 +91,6 @@ mutation update_order (
                 { name: "billing_country_code", value: $billing_country_code }
                 { name: "billing_postcode", value: $billing_postcode }
 
-                { name: "gateway_id", value: $gateway_id }
-                { name: "gateway_customer_id", value: $gateway_customer_id }
-                { name: "user_id", value: $user_id }
-
                 { name: "order_number", value: $order_number }
                 { name: "order_status", value: $order_status }
                 { name: "order_payment_status", value: $order_payment_status }
@@ -117,7 +108,6 @@ mutation update_order (
                 { name: "tax_amount", value_float: $tax_amount }
                 { name: "shipping_amount", value_float: $shipping_amount }
                 { name: "total_amount", value_float: $total_amount }
-                { name: "amount_due", value_float: $amount_due }
             ]
         }
     ) {

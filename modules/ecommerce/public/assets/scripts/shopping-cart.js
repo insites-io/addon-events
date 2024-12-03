@@ -19,10 +19,10 @@ let shoppingCart = (function () {
         methods: {
             async removeDiscountCode(ev) {
                 let discountEl = ev.target.parentElement;
-                let id = discountEl.getAttribute('data-id');
-                if(id && !isDeleting) {
+                let uuid = discountEl.getAttribute('data-uuid');
+                if(uuid && !isDeleting) {
                     isDeleting = true;
-                    let response = await apiServices.removeDiscountCode({ id });
+                    let response = await apiServices.removeDiscountCode({ uuid });
                     if(response.state) {
                         discountEl.remove();
                         App.events.notyf("success", "Discount code has been removed from your cart.");
@@ -42,7 +42,7 @@ let shoppingCart = (function () {
                 if(formEl && this.validateDiscountForm(formEl)) {
                     formEl.querySelector('#apply-discount-btn').loading = true;
                     let payload = {
-                        user_id: formEl.querySelector('#user-id-input').value,
+                        contact_uuid: formEl.querySelector('#user-uuid-input').value,
                         discount_code: formEl.querySelector('#discount-code-input').value,
                         check_duplicates: true
                     }

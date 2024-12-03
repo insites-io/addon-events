@@ -1,0 +1,18 @@
+mutation update_cart_discount (
+  $id: ID!,
+  $discount_code_uuids: [String!],
+) {
+  items: record_update(
+    id: $id,
+    record: {
+      table: "modules/insites_ecommerce/cart",
+    	properties: [
+        { name: "discount_code_uuids", value_array: $discount_code_uuids }        
+      ]
+    }
+  ) {
+    id    
+    updated_at
+    properties
+  }
+} 

@@ -26,26 +26,11 @@ fields:
         virtual: true
 callback_actions: >
   {%- comment -%}GET Cart data{%- endcomment -%}
-  {% log context.session.session_id, type: "==== Sign-in callback: Session ID ====" %}
-  {% include 'modules/ecommerce/checkout/compute_order_summary',
-     user_id: context.session.session_id %}
-  
-  {% log form.id, type: "==== Sign-in callback: User ID ====" %}
-  {% log context.exports.order.cart_ids, type: "==== Sign-in callback: Cart IDs ====" %}
-
-  {%- comment -%}Update cart user_id{%- endcomment -%}
-  {%- assign user_id = form.id | downcase -%}
-  {% graphql cart = "modules/ecommerce/cart/update_status_cart_ids", 
-      ids: context.exports.order.cart_ids,
-      user_id: user_id %}
-  {% log cart, type: "==== Sign-in callback: Cart Updated ====" %}
+  {% comment %} ==TEST car update cart {% endcomment %}
 
 
   {%- comment -%}Update cart discount code user_id{%- endcomment -%}
-  {% graphql cart_discount_codes = "modules/ecommerce/discount_code/callback_update_cart_discount_codes",
-    ids: context.exports.order.cart_discount_code_ids,
-    user_id: user_id %}
-  {% log cart_discount_codes, type: "==== Sign-in callback: Cart Discount Codes Updated ====" %}
+  {% comment %} ==TEST cart_discount_codes {% endcomment %}
 ---
 
 {%- form 

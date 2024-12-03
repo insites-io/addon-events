@@ -162,7 +162,7 @@
             <p id="cart-subtotal" class="heading-3-small font-color-head">{{ subtotal | pricify }}</p>
         </div>
         <div class="spacer"></div>
-        <ins-button label="Go to Cart" icon="icon-shopping-cart" solid class="full"></ins-button>
+        <a href="/shopping-cart"><ins-button label="Go to Cart" icon="icon-shopping-cart" solid class="full"></ins-button></a>
         <div class="spacer x-small"></div>
         <ins-button label="Continue Shopping" icon="icon-arrow-back" id="continue-shopping-btn" class="full"></ins-button>
         <div class="spacer"></div>
@@ -175,6 +175,7 @@
 
 
 <script>
+    let page = "{{ context.params.slug }}";
     let user_uuid = "{{ user_uuid }}";
     let cartDrawer = document.getElementById('cartDrawer');
     let cartItemsWrap = document.getElementById('cart-items-wrap');
@@ -306,9 +307,9 @@
     async function removeToCart(data){                                      
         if(user_uuid != ""){
             data["contact_uuid"] = user_uuid;
-            let response = await apiServices.processRequest("post", "/remove-to-cart.json", data);
-            console.log('remove response', response);        
+            let response = await apiServices.processRequest("post", "/remove-to-cart.json", data);             
             if(response.state && response.data.items) {
+                if(page == 'shopping-cart') location.reload();
                 return true;          
             }
         } else {

@@ -111,6 +111,9 @@ It IS NOT accessable in {{content_for_layout}} which includes the specific page
         </div>
         <div class="spacer xxxx-large"></div>
     </div>
+
+    {% include 'modules/ecommerce/carts/cart_drawer' %}
+    
     {%- capture foot_key -%} {{ context.exports.layout_cache_key.cache_key | append: "-footer_section"}} {%- endcapture -%}
     {%- cache foot_key -%}
     {% include 'modules/website/layout/footer' %}

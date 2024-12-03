@@ -41,9 +41,9 @@ var apiServices = (function () {
             let url = `/validate-discount-code.json`;
             return await processRequest('post', url, payload);
         },
-        removeDiscountCode: async (id) => {
+        removeDiscountCode: async (uuid) => {
             let url = `/remove-discount-code.json`;
-            return await processRequest('post', url, id);
+            return await processRequest('post', url, uuid);
         },
         processRequest: processRequest
     }

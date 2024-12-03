@@ -1,68 +1,38 @@
-{%- if cartList.size > 0 -%}
+{%- if carts.size > 0 -%}
     <h2>Cart Items</h2>
     <div class="spacer x-large"></div>
     <div id="shopping-cart-list" class="shopping-cart grid-y">
-        {%- for item in cartList -%}          
 
-            {% liquid 
-                assign product = products | array_detect: uuid: item.product_uuid
-                assign product_name = product.product_name
+        {%- for item in carts -%}          
 
-                ## to fix issues in comparing '' versus null
-                if product.product_sku == null 
-                    assign product = product | add_hash_key: 'product_sku', ''
-                endif
-                
-                ## Check if the item is a product or a variant of the product
-                if item.product_sku == product.product_sku
-                    ## item is NOT a variant
-                    assign selected_prop = product
-                else 
-                    ## item is a variant                
-                    for variant in product.variants
-                        if item.product_sku == variant.product_sku
-                            assign selected_prop = variant
-                        endif
-                    endfor
-                endif             
-
-                if selected_prop.is_on_sale == true 
-                    assign price = selected_prop.sale_price
-                    assign price_strikethrough = selected_prop.regular_price
-                else 
-                    assign price = selected_prop.regular_price
-                    assign price_strikethrough = ''
-                endif          
-
-                assign product_id = selected_prop.id
-                assign item_total = price | times: item.quantity
-                assign subtotal = subtotal | plus: item_total
-            %}                                          
-
-            <div id="cart-item-{{product_id}}" class="cart-item-wrap cell">
+            {% include 'modules/ecommerce/carts/cart_details', products, item, user_uuid %}
+            {% assign cart = context.exports.cart %}
+            
+                                                
+            <div id="cart-item-{{cart.selected_prop.id}}" class="cart-item-wrap cell">
                 {% if forloop.first == false %}
                     <hr>
                     <div class="spacer x-large"></div>
                 {% endif %}
                 <div class="grid-x" >
                     <div class="img-wrap" style="width:88px;">
-                        {% if selected_prop.product_image.url %}
-                            <img  src="{{ selected_prop.product_image.url }}" alt="{{ product.product_name }}" >
+                        {% if cart.selected_prop.product_image.url %}
+                            <img  src="{{ cart.selected_prop.product_image.url }}" alt="{{ cart.product_name }}" >
                         {% else %}
                             {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                         {% endif %}
                     </div>
                     <div class="flex-grow-1">
                         <h6>
-                            {{ product_name }} 
-                            {% if selected_prop.stock_level < 1 %}
+                            {{ cart.product_name }} 
+                            {% if cart.selected_prop.stock_level < 1 %}
                             <ins-tag label="Pre-Order" class='preorder-tag body-x-small' ></ins-tag>
                             {% endif %}
                         </h6> 
                         <p class="body-small">SKU: {{ item.product_sku }}</p>
                         <div class="spacer small"></div>
                         {% comment %} Get variant info {% endcomment %}
-                        {% if item.product_sku != product.product_sku %}
+                        {% if cart.is_variant == true %}
                             {%  liquid 
                                 ## Convert an array of strings into an array of objects
                                 assign options = '' | split: ',' 
@@ -80,14 +50,14 @@
                         {% endif %}
                         <p>
                             <span class="body-x-small-bold">Price:</span>
-                            <span class="body-x-small item-price">{{ price | pricify }}</span>
-                            {% if selected_prop.is_on_sale == true %}
-                            <span class="body-x-small strikethrough">{{ price_strikethrough | pricify }}</span>
+                            <span class="body-x-small item-price">{{ cart.price | pricify }}</span>
+                            {% if cart.selected_prop.is_on_sale == true %}
+                            <span class="body-x-small strikethrough">{{ cart.price_strikethrough | pricify }}</span>
                             {% endif %}
                         </p>
                     </div>
                     <div class="btn-wrap grid-y">
-                        <p class="cart-price compute-price">{{ item_total | pricify }}</p>
+                        <p class="cart-price compute-price">{{ cart.item_total_price | pricify }}</p>
                         <div class="spacer small"></div>
                         <ins-input-stepper
                             class="cart-stepper" 
@@ -95,7 +65,7 @@
                             data-product_sku="{{ item.product_sku }}"
                             value="{{ item.quantity }}" 
                             step="1" min="1" 
-                            max="{{ selected_prop.stock_level  }}" 
+                            max="{{ cart.selected_prop.stock_level  }}" 
                             small>
                         </ins-input-stepper>
                         <div class="spacer small"></div>

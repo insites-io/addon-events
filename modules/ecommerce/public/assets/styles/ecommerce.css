@@ -1,3 +1,11 @@
+:root {
+    --font-head: #2B2B2B;
+}
+
+.font-head {
+    color: var(--font-head);
+}
+
 .heading-3-small {
     font-family: var(--font-family-01);
     font-size: 24px;
@@ -13,12 +21,21 @@ h6, .heading-6 {
     line-height: 120%; /* 19.2px */
 }
 
-.body-small {
+.body-small,
+.body-small p {
     font-family: var(--font-family-02);
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 142.857% */
+}
+
+.body-medium {
+    font-family: var(--font-family-02);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
 }
 
 .bold {
@@ -459,6 +476,72 @@ ins-tag.preorder-tag span.ins-tag {
     margin-left: 4px;
 }
 
+/* Discount Code */
+.discount-code-form .ins-accordion-item,
+.discount-code-form .ins-accordion-item_header>.inner-head,
+.discount-code-form .ins-accordion-item.open>.ins-accordion-item_header>.inner-head {
+    background: var(--color-ui-03);
+    color: var(--font-color-head);
+}
+.discount-code-form .ins-accordion-item_header>.inner-head {
+    border: none;
+    padding: 16px;    
+    font-family: var(--font-family-02);
+}
+.discount-code-form .ins-form-field-wrap {
+    margin-bottom: 0px;
+}
+.discount-code-form .ins-accordion-item.open>.ins-accordion-item_header>.inner-head {
+    padding-bottom: 8px;
+}
+.discount-code-form .ins-accordion-item_content .inner-content {
+    padding: 16px;
+}
+.discount-code-form .grid-x.gap {
+    gap: 8px;
+}
+
+.list-discount-codes--item+.list-discount-codes--item {
+    margin-top: 8px;
+}
+.list-discount-codes--item {
+    border: 1px solid var(--color-ui-03);
+    background-color: var(--color-ui-02);
+    padding: 8px 16px;
+    position: relative;
+    padding-right: 32px;
+}
+.list-discount-codes--item .font-head {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.list-discount-codes--item [class^="icon-"] {
+    position: absolute;
+    cursor: pointer;
+    font-size: 9px;
+    right: 20px;
+    top: calc(50% - 4.5px);
+}
+.list-discount-codes--item [class^="icon-"]:hover {
+    color: var(--font-color-head);
+}
+
+/* Order Summary */
+.order-summary {
+    max-height: 184px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 15px;
+    width: calc(100% + 15px);    
+}
+.order-total {
+    font-family: var(--font-family-01);
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
 
 /* Client Portal */
 
@@ -523,4 +606,7 @@ ins-card.overview .wrap{
 /* Insites Components */
 .ins-checkbox-card-wrap {
     padding: 24px;
+}
+.ins-accordion-item_header {
+    padding-top: 0px;
 }

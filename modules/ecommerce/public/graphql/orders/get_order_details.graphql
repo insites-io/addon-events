@@ -1,6 +1,7 @@
 query get_order_details (
   $id: ID
-  $user_id: String
+  $uuid: String
+  $is_more: Boolean=false
   ){
   items: records(
     per_page: 1
@@ -9,45 +10,77 @@ query get_order_details (
       deleted_at:{ exists:false }
       table: { value: "modules/insites_ecommerce/order" }
       properties:[
-        { name: "user_id", value: $user_id }
+        { name: "uuid", value: $uuid }
       ]
     }
   ){
     results {
+			
       id
-      created_at
-      properties
-      ## only works for 'last payment' / 'latest payment' 
+      uuid: property(name: "uuid")
+      user_id
+      order_reference: property(name: "order_reference")
+      
+      billing_company_name: property(name: "billing_company_name")
+      billing_contact_first_name: property(name: "billing_contact_first_name") 
+      billing_contact_last_name: property(name: "billing_contact_last_name") 
+      billing_contact_email: property(name: "billing_contact_email") 
+      billing_contact_phone_country_code: property(name: "billing_contact_phone_country_code") 
+      billing_contact_phone_number: property(name: "billing_contact_phone_number") 
+      billing_address_1: property(name: "billing_address_1") 
+      billing_address_2: property(name: "billing_address_2") 
+      billing_address_3: property(name: "billing_address_3") 
+      billing_city: property(name: "billing_city") 
+      billing_state: property(name: "billing_state") 
+      billing_postcode: property(name: "billing_postcode") 
+      billing_country: property(name: "billing_country")   
+      
+      total_tax_amount: property_float(name: "total_tax_amount")   
+      total_amount: property_float(name: "total_amount")  
+                       
       payment: related_record(
-        table: "modules/insites_ecommerce/insites_payment"
-        join_on_property: "id"
-        foreign_property: "order_id"
+        table: "modules/insites_ecommerce/payment"
+        join_on_property: "uuid"
+        foreign_property: "order_uuid"
         sort: { updated_at: { order: DESC }}
       ) {
         card_brand: property(name: "card_brand")
-        card_last4: property(name: "card_last4")
-        card_exp_month: property(name: "card_exp_month")
-        card_exp_year: property(name: "card_exp_year")
+        card_last_four_digits: property(name: "card_last_four_digits")
+        card_expiry_month: property(name: "card_expiry_month")
+        card_expiry_year: property(name: "card_expiry_year")        
       }
-      related_user {
-        id
-        name
-        email
-      }
+     
+    },
+    results @include(if: $is_more){
+      
+      shipping_company_name: property(name: "shipping_company_name")
+      shipping_contact_first_name: property(name: "shipping_contact_first_name") 
+      shipping_contact_last_name: property(name: "shipping_contact_last_name") 
+      shipping_contact_email: property(name: "shipping_contact_email") 
+      shipping_contact_phone_country_code: property(name: "shipping_contact_phone_country_code") 
+      shipping_contact_phone_number: property(name: "shipping_contact_phone_number") 
+      shipping_address_1: property(name: "shipping_address_1") 
+      shipping_address_2: property(name: "shipping_address_2") 
+      shipping_address_3: property(name: "shipping_address_3") 
+      shipping_city: property(name: "shipping_city") 
+      shipping_state: property(name: "shipping_state") 
+      shipping_postcode: property(name: "shipping_postcode") 
+      shipping_country: property(name: "shipping_country")   
+      shipping_instructions: property(name: "shipping_instructions")
+      
+      order_status: property(name: "order_status")    
+      order_shipping_status: property(name: "order_shipping_status")         
+      
       cart: related_records(
         table: "modules/insites_ecommerce/cart"
-        foreign_property:"order_id", 
-        join_on_property: "id") {
-          properties
-        
-          product: related_record(
-            table: "modules/insites_ecommerce/product"
-            foreign_property:"id", 
-            join_on_property: "product_id") {
-
-            unit_label: property(name: "unit_label")
-          }
+        foreign_property: "order_uuid", 
+        join_on_property: "uuid") {
+          product_name: property(name: "product_name")  
+          product_weight: property(name: "product_weight")
+          quantity: property_int(name: "quantity") 
+          product_price: property_float(name: "product_price")                
       }
+
     }
   }
 }

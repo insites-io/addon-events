@@ -1,33 +1,36 @@
-{% log "Checkout Form Data " %}
-{%- 
-    liquid
+{% assign prop = form.properties %}
 
+{%- liquid
     assign stripe_customer_id = blank
-    assign customer_email = form.properties.billing_contact_email | strip
-    assign customer_name = form.properties.billing_contact_first_name | append: ' ' | append: form.properties.billing_contact_last_name
-    assign user_id = user_id | default: blank
-    assign company_name = company_name | default: blank
+    assign customer_name = prop.billing_contact_first_name | append: ' ' | append: prop.billing_contact_last_name
     assign charge_to_this_card = false
-
-    ## STEP 1: Stripe Customer ##
-    graphql stripe_customer = 'modules/client/customers/get_user_stripe_id', email: customer_email | dig: 'items','results' | first
-
-    if stripe_customer.id 
-        assign stripe_customer_id = stripe_customer.profiles[0].stripe_id
-        assign user_id = stripe_customer.id
-        assign user_uuid = stripe_customer.external_id
-        assign company_uuid = stripe_customer.profiles[0].company_uuid
-        assign charge_to_this_card = form.properties.stripe_credit_card
-    endif  
 -%}
+
+{% if context.current_user %}
+    {%  liquid
+        assign customer_email = context.current_user.email
+        graphql stripe_customer = 'modules/client/customers/get_user_stripe_id', email: customer_email | dig: 'items','results' | first
+
+        if stripe_customer.id 
+            assign stripe_customer_id = stripe_customer.profiles[0].stripe_id
+            assign user_uuid = stripe_customer.external_id
+            assign charge_to_this_card = prop.stripe_credit_card
+        endif 
+    %}
+{% else %}
+    {%  liquid
+        assign customer_email = context.session.billing_contact_email
+        assign stripe_customer_id = context.session.stripe_customer_id
+    %}                    
+{% endif %}
 
 
 {%- comment -%} STEP 2: Stripe Charge / Payment  {%- endcomment -%}
-{% parse_json "create_charge" %}
+{% parse_json create_charge %}
 {
     "idempotency_key": "{{ '' | uuid }}",
-    "currency": "AUD",
-    "amount": "{{ form.properties.total_amount | advanced_format: '%.0f' }}",
+    "currency": "{{ currency }}",
+    "amount": "{{ prop.total_amount | advanced_format: '%.0f' }}",
     "customer": "{{ stripe_customer_id }}",
     {%- if charge_to_this_card -%}
         "source": "{{ charge_to_this_card }}",
@@ -36,12 +39,14 @@
     "metadata": {
         "Insites Order ID": "{{ form.id }}",
         "Insites Customer UUID": "{{ user_uuid }}",
-        "Insites Company UUID": "{{ company_uuid }}",
-        "Insites Company Name": "{{ company_name }}",
-        "Insites Order": "https://{{ context.location.host }}/admin/insites#/ecommerce/edit-order/{{ form.id }}"
+        "Insites Company Name": "{{ prop.billing_company_name }}",
+        "Insites Order": "https://{{ context.location.host }}/admin/insites#/ecommerce/orders/{{ prop.uuid }}"
     },
-    "statement_descriptor": "{{ form.properties.statement_descriptor }}"
-
+    "billing_details": {
+        "name": "{{ customer_name }}",
+        "email": "{{ customer_email }}"
+    },
+    "statement_descriptor": "{{ prop.statement_descriptor }}"
 }
 {% endparse_json %}
 
@@ -50,15 +55,13 @@
 
 {% log "=== START PROCESS: STRIPE PAYMENT ==="%}
 
-
 {% graphql stripe_create_charge = 'modules/ecommerce/system/trigger_api_call', 
     name: "modules/ecommerce/create_charge",
     data: create_charge 
     | dig: "items" | dig: "response" %}
     
-{%- assign stripe_create_charge = stripe_create_charge.body | parse_json -%}
-{%- assign payment_response = stripe_create_charge -%}
-
-{% export payment_response %}
+{%- assign payment_response = stripe_create_charge.body | parse_json -%}
 
 {% log "=== END PROCESS: STRIPE PAYMENT ===" %}
+
+{% export payment_response %}

@@ -34,6 +34,8 @@ metadata: {
 ##     {%- include "modules/website/dynamic_cache_key", models: models -%}
 ---
 
+{% include 'modules/ecommerce/checkout/clear_session' %}
+
 <div class="thank-you grid-container">
     <div class="grid-x text-center">
         <div class="large-offset-4 large-4 medium-offset-3 medium-6 small-12 cell">

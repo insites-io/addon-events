@@ -5,7 +5,7 @@ resource_owner: anyone
 redirect_to: > 
     {% log form.properties.uuid, type: "==== Redirect To: confirmation?order_uuid= " %}
     {%- if context.exports.payment_response.status == "succeeded" or context.exports.payment_response.status == "active" -%}
-    confirmation?order_uuid={{ form.properties.uuid }}
+    confirmation?id={{ form.properties.uuid }}
     {%- else -%}
         {%- if context.exports.payment_response.error.code == "card_declined" -%}
         checkout/payment?status=payment-error&type={{ context.exports.payment_response.error.decline_code | default: "" }}
@@ -123,6 +123,7 @@ fields:
         order_contact_uuid:
             validation:
                 presence: true
+        order_contact_email:
         order_contact_first_name:
         order_contact_last_name:                
         order_status: ## String = "Paid" ??
@@ -135,6 +136,9 @@ fields:
         total_tax_amount: ## Float!
         total_shipping_amount: ## Float!
         total_amount: ## Float!
+        total_amount_paid:
+        discount_code_uuids:
+        total_discount_amount:
         uuid:
             validation:
                 presence:  
@@ -148,7 +152,7 @@ default_payload: >
     
     {%- comment -%} Compute order values {%- endcomment -%}
     {% include 'modules/ecommerce/checkout/compute_order_summary' %}
-
+    {% assign computed = context.exports.computed %}
     {
         "properties_attributes": {
             "shipping_company_name": "{{context.session.shipping_company_name | default: ''}}",
@@ -190,10 +194,12 @@ default_payload: >
             "date_time": "", 
             "notes": "", 
             "currency": "{{ settings.currency | default: 'AUD' }}", 
-            "subtotal_amount": "{{ 100 }}",
-            "total_tax_amount": "{{ 0 }}",
-            "total_shipping_amount": "{{ context.exports.order.total_shipping_amount | plus: form.properties.additional_shipping_cost }}",
-            "total_amount": "{{ 100 }}",
+            "subtotal_amount": "{{ computed.sub_total_amount }}",
+            "total_tax_amount": "{{ computed.tax_amount }}",
+            "total_shipping_amount": "{{ computed.shipping_amount  }}",
+            "total_discount_amount": "{{ computed.total_discount_amount }}",
+            "total_amount_paid": "{{ computed.total_amount }}",
+            "total_amount": "{{ computed.total_amount }}",
             "uuid": "{{ '' | uuid }}"                       
         }
     }
@@ -204,7 +210,7 @@ callback_actions: >
      
     START: Checkout callback process
         - API call to Stripe (Payment)
-        - Create / Update models
+        - Create / Update records
         - Trigger Email & API callback via GraphQL    
     {%- endcomment -%}
     
@@ -252,7 +258,7 @@ callback_actions: >
             <div class="large-6 medium-6 small-12 cell text-right">
                 {% if context.current_user %}
                 <div class="spacer x-small"></div>
-                <ins-button type="button" id="add-card-btn" size="small" icon="icon-plus" label="Add Card">
+                <ins-button type="button" id="add-card-btn" size="small" icon="icon-plus" label="Add Card test">
                 </ins-button>
                 {% endif %}
             </div>
@@ -356,6 +362,5 @@ callback_actions: >
 </script>
 {%- include 'modules/ecommerce/forms/stripe_element',
     cc_field_id: "checkout-credit-card",
-    email: context.session.billing_contact_email, 
     public_key: stripe_settings.pk_key -%}
 <!-- END Stripe Element -->

@@ -1,50 +1,35 @@
 ---
 slug: confirmation
 layout: modules/ecommerce/checkout-layout
-# enable_profiler: true
-searchable: "true"
-max_deep_level: 3
+searchable: false
+max_deep_level: 2
 metadata: {
     "status": "published",
-    "page_type": "content", ## content, system or endpoint
+    "page_type": "content", 
     "page_name": "Checkout - Order Successful",
-    "og:url": "{{ context.exports.global.company_url | strip }}",
-    "og:type": "",
-    "og:image": "",
-    "og:title": "Checkout - Order Successful",
-    "og:description": "Checkout - Order Successful",
-    "og:site_name": "{{ context.exports.global.company_name | strip }}",
-    "meta_title": "Checkout - Order Successful",
-    "page_title": "Checkout - Order Successful | {{ context.exports.global.company_name | strip }}",
-    "description": "Checkout - Order Successful",
-    "canonical_url": "",
-    "search_engine_visibility": false,
-    "sitemap_enabled": false,
-    "sitemap_priority": "1.0",## primary order (DESC)
-    "sitemap_order": "0", ## secondary order (ASC)
-    "sitemap_changefreq": "never"
+    "page_title": "Checkout - Order Successful",
+    "meta_title": "Checkout - Order Successful"       
 }
 authorization_policies:
-    - modules/ecommerce/order_created_date_valid 
+#    - modules/ecommerce/order_created_date_valid 
 #    - modules/ecommerce/customer_logged_in  ## commented out to allow 'guest customer' to view order confirmation
 ---
 
-{% graphql order = "modules/ecommerce/orders/get_order_details", uuid: context.params.order_uuid, is_more: true | dig: 'items' | dig: 'results' | first %}
+{% assign order_uuid = context.params.id %}
+{% if order_uuid != blank %}
+    {% graphql order = "modules/ecommerce/orders/get_order_details", 
+        uuid: order_uuid, is_more: true | dig: 'items' | dig: 'results' | first %}
+{% endif %}
 
-{%- if context.current_user.id == order.user_id -%}
 
-    <div class="grid-x grid-padding-x">
-        <div class="large-offset-2 medium-offset-1 small-offset-0 large-8 medium-10 small-12 cell">
-            {% include 'modules/ecommerce/layout/checkout_steps' %}
-        </div>
-    </div>
+{% comment %} context.current_user.id == order.user_id {% endcomment %}
+{%- if true -%}
 
-    <div class="spacer xxx-large"></div>
     <div class="grid-x grid-padding-x">
         <div class="large-12 medium-12 small-12 cell text-center">
             <h1 class="heading-1">We've received your order</h1>
             <div class="spacer small"></div> 
-            <p>Your order has been received with order number <strong>{{ order.id }}-{{ order.order_reference }}</strong></p>
+            <p class="body-large">Your order has been received with order number <strong>{{ order.id }}-{{ order.order_reference }}</strong></p>
         </div>
     </div>
     <div class="spacer xxxx-large"></div>
@@ -54,10 +39,11 @@ authorization_policies:
             <h2 class="heading-2">Order Details</h2>
             <div class="spacer xx-large"></div>
 
-            {%- comment -%} Contact & Payment Details {%- endcomment -%}
             <div class="grid-x grid-padding-x">
-                <div class="large-5 medium-5 small-12 cell">
-                    <h3 class="heading-3">Order Contact</h3>
+
+                {% comment %} Account Details {% endcomment %}
+                <div class="large-5 medium-12 small-12 cell">
+                    <h3 class="heading-3">Account Details</h3>
                     <div class="spacer small"></div>
                     {%- if order.billing_company_name -%}
                     <p class="font-cabin">{{ order.billing_company_name }}</p>
@@ -68,23 +54,8 @@ authorization_policies:
                     <div class="spacer xx-large"></div>
                 </div>
 
-                {%- if context.current_user.id -%}
-                <div class="large-5 large-offset-1 medium-5 medium-offset-1 small-12 cell">
-                    <h3 class="heading-3">Payment Details</h3>
-                    <div class="spacer small"></div>
-                    <p class="font-cabin">{{ order.payment.card_brand | upcase }} **** **** **** {{ order.payment.card_last_four_digits }}</p>
-                    {%- assign month = order.payment.card_expiry_month -%}
-                    {%- if order.payment.card_expiry_month.size < 2 -%}
-                        {%- assign month = "0" | append: order.payment.card_expiry_month -%}
-                    {%- endif -%}
-                    <p class="font-cabin">{{ month }} / {{ order.payment.card_expiry_year }}</p>
-                    <div class="spacer xx-large"></div>
-
-                </div>
-                {%- endif -%}
-
-                {%- comment -%} Addresses Details {%- endcomment -%}
-                <div class="large-5 medium-5 {% unless context.current_user.id %} large-offset-1 medium-offset-1 {% endunless %} small-12 cell">
+                {% comment %} Shipping Details {% endcomment %}                
+                <div class="large-5 large-offset-1 medium-12 small-12 cell">
                     <h3 class="heading-3">Shipping Details</h3>
                     <div class="spacer small"></div>
                         {%- assign shipping_address = "" -%}
@@ -118,8 +89,10 @@ authorization_policies:
                     <p class="font-cabin">{{ shipping_address }}</p>
                     <div class="spacer xx-large"></div>
                 </div>
-                <div class="large-5 medium-5 {% if context.current_user.id %} large-offset-1 medium-offset-1 {% endif %} small-12 cell">
-                    <h3 class="heading-3">Billing Address</h3>
+
+                {% comment %} Billing Details {% endcomment %}
+                <div class="large-5 medium-12 small-12 cell">
+                    <h3 class="heading-3">Billing Details</h3>
                     <div class="spacer small"></div>
                     {%- assign billing_address = "" -%}
                         {%- if order.billing_address_1 and order.billing_address_1 != '' -%}
@@ -144,7 +117,24 @@ authorization_policies:
                             {%- assign billing_address = billing_address | append: order.billing_country | append : " " -%}
                         {%- endif -%}
                     <p class="font-cabin">{{ billing_address }}</p>
+                    <div class="spacer xx-large"></div>
                 </div>
+
+                {% comment %} Payment Details {% endcomment %}
+                {%- if context.current_user.id -%}
+                <div class="large-5 large-offset-1 medium-12 small-12 cell">
+                    <h3 class="heading-3">Payment Details</h3>
+                    <div class="spacer small"></div>
+                    <p class="font-cabin">{{ order.payment.card_brand | upcase }} **** **** **** {{ order.payment.card_last_four_digits }}</p>
+                    {%- assign month = order.payment.card_expiry_month -%}
+                    {%- if order.payment.card_expiry_month.size < 2 -%}
+                        {%- assign month = "0" | append: order.payment.card_expiry_month -%}
+                    {%- endif -%}
+                    <p class="font-cabin">{{ month }} / {{ order.payment.card_expiry_year }}</p>
+                    <div class="spacer xx-large"></div>
+                </div>
+                {%- endif -%}                                
+
             </div>
         </div>
         <div class="large-4 large-offset-1 medium-6 small-12 cell">        

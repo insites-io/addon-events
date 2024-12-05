@@ -119,8 +119,8 @@ authorization_policies:
           </div>
         </div>
 
-        {%- include 'modules/ecommerce/forms/stripe_element',
-          email_field_id: "email" -%}
+        {% comment %} {%- include 'modules/ecommerce/forms/stripe_element',
+          email_field_id: "email" -%} {% endcomment %}
 
         {%- else -%}
         <div class="grid-x grid-padding-x">

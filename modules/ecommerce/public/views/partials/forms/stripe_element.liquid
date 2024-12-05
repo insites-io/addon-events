@@ -43,6 +43,15 @@
     </form>
 </ins-modal>
 
+{% comment %} Get email {% endcomment %}
+{%  liquid
+    if context.current_user
+        assign email = context.current_user.email
+    else
+        assign email = context.session.billing_contact_email
+    endif
+%}
+
 <script>
     let payByCardField = document.getElementById('{{ cc_field_id }}');
     let email = "{{ email }}";

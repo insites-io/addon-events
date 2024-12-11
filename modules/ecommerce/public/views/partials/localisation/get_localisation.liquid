@@ -1,0 +1,12 @@
+{% comment %} Get localisation [date_format, time_format] {% endcomment %}
+{%  liquid
+    if context.session.localisation_date_format and context.session.localisation_date_format != ''
+        assign localisation_date_format = context.session.localisation_date_format
+    else
+        graphql localisation = 'modules/ecommerce/localisation/get_localisation' | dig: 'items','results' | first
+        assign localisation_date_format = localisation.date_format | default: 'DD/MM/YYYY'
+        session localisation_date_format = localisation_date_format        
+    endif
+
+    return localisation_date_format
+%}

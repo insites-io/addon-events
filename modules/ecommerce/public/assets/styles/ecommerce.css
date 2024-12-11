@@ -563,6 +563,11 @@ ins-card.overview .wrap{
     
 }
 
+/* Order History */
+#order-table .pagination-wrap {
+    padding: 16px;
+}
+
 /* pagination styles */
 .pageinations ins-select {
     display: inline-block;
@@ -589,6 +594,41 @@ ins-card.overview .wrap{
     border-bottom: solid 1px var(--color-ui-04);
     border-color: var(--color-ui-04);
 }
+
+
+/* Tags */
+.tagged span {
+    font-family: var(--font-family-02);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; 
+    padding: 4px 8px;
+    border-radius: 2px;
+}
+.tagged.Processing span {
+    color: var(--color-main);
+    background: var(--color-main-hover-light);
+}
+.tagged.Open span {
+    color: var(--warning);
+    background: var(--warning-hover-light);
+}
+.tagged.Cancelled span, 
+.tagged.Refunded span,
+.tagged.Packed span,
+.tagged.In.Transit span,
+.tagged.Picked.Up span {
+    color: var(--font-color-head);
+    background: var(--color-ui-03);
+}
+.tagged.Complete span,
+.tagged.Completed span,
+.tagged.Delivered span {
+    color: var(--success);
+    background: var(--success-hover-light);
+}
+
 
 /* Other */
 .vertical-divider {

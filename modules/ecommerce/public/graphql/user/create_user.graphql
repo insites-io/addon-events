@@ -26,8 +26,17 @@ mutation user_create(
             ]
         	}
         },
+        # {
+        #   name: "modules/ecommerce/customer", 
+        # 	values: {
+        #     properties: [
+        #       {name: "is_enabled", value_boolean: true},
+        #       {name: "is_activated", value_boolean: false}
+        #     ]
+        # 	}
+        # },
         {
-          name: "modules/ecommerce/customer", 
+          name: "modules/client/client", 
         	values: {
             properties: [
               {name: "is_enabled", value_boolean: true},

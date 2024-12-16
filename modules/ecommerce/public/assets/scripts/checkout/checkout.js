@@ -509,7 +509,7 @@ let Checkout = (function () {
                 let isValid = await App.validation.validateForm(form);
 
                 // Check if there's a selected card and set isValid to false if not
-                if (!selectedCardId && !newAddressFlag) {
+                if (!selectedCardId && !newAddressFlag && !billingSamewithShippingFlag) {
                     isValid = false;
                 }
 
@@ -520,7 +520,7 @@ let Checkout = (function () {
                         Checkout.events.saveSessionApi();
                     }
                 } else {
-                    if (!selectedCardId && !newAddressFlag) {
+                    if (!selectedCardId && !newAddressFlag && !billingSamewithShippingFlag) {
                         this.setAddressCardError();
                     }
                     App.events.notyf("error", "Please check missing fields");

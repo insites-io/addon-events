@@ -22,7 +22,6 @@ metadata: {
     "sitemap_changefreq": "never"
 }
 ---
-
 {% if context.current_user %}
 
     {% comment %} Get the user uuid {% endcomment %}
@@ -88,14 +87,24 @@ metadata: {
             <div class="spacer x-large"></div>
 
             <div id="proceed-to-checkout" class="text-right {% if carts == blank %}hide{% endif %}">
-                <a href="/checkout">
-                    <ins-button label="PROCEED TO CHECKOUT" solid color="blue" class="checkoutBtn"></ins-button>
-                </a>
+                <ins-button id="proceed-to-checkout-btn" label="PROCEED TO CHECKOUT" solid color="blue" class="checkoutBtn" onclick="document.location.href = '/checkout';"></ins-button>
             </div>
 
             <div class="spacer x-large"></div>
 
-            {% include_form 'modules/ecommerce/apply_discount_code' %}
+            {% liquid
+                ## Check if has cart
+                if user_cart.id
+                    assign cart_id = user_cart.id   
+                endif
+
+                ## Include discount code form based on cart availability
+                if cart_id 
+                    include_form 'modules/ecommerce/apply_discount_code', id: cart_id 
+                else 
+                    include_form 'modules/ecommerce/apply_discount_code'
+                endif
+            %}
         </div>
     </div>
 </div>

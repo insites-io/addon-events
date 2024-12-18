@@ -10,25 +10,24 @@ const accountPhone = {
 const accountSubmitBtn = document.getElementById('account-submit');
 
 // Shipping Address Elements------------------------------------------
-const shippingPhone = {
-    inputTelAccount: document.getElementById('shipping-phone'),
-    shippingMobilePhone: document.getElementById('hidden-shipping-phone'),
-    shippingMobileCountryCode: document.getElementById('hidden-shipping-phone-country-code')
-}
-let sameShippingDetailsBtn = document.getElementById('same-shipping');
-let shippingSubmitBtn = document.getElementById("shipping-submit-button");
+// const shippingPhone = {
+//     inputTelAccount: document.getElementById('shipping-phone'),
+//     shippingMobilePhone: document.getElementById('hidden-shipping-phone'),
+//     shippingMobileCountryCode: document.getElementById('hidden-shipping-phone-country-code')
+// }
+// let shippingSubmitBtn = document.getElementById("shipping-submit-button");
 
 // Billing Address Elements------------------------------------------
-const billingPhone = {
-    inputTelAccount: document.getElementById('billing-phone'),
-    billingPhoneNumber: document.getElementById('hidden-billing_contact_phone_number'),
-    billingCountryCode: document.getElementById('hidden-billing_contact_phone_country_code')
-}
-let sameAddressBtn = document.getElementById('same-billing');
-let billingSubmitBtn = document.getElementById("billing-submit-button");
-let billingSameWithShipping = document.getElementById("billing-same-with-shipping"); 
-let billingContactFields = document.getElementById("billing-contact-fields");
-let billingAddressFields = document.getElementById("billing-address-fields");
+// const billingPhone = {
+//     inputTelAccount: document.getElementById('billing-phone'),
+//     billingPhoneNumber: document.getElementById('hidden-billing_contact_phone_number'),
+//     billingCountryCode: document.getElementById('hidden-billing_contact_phone_country_code')
+// }
+// let sameAddressBtn = document.getElementById('same-billing');
+// let billingSubmitBtn = document.getElementById("billing-submit-button");
+// let billingSameWithShipping = document.getElementById("billing-same-with-shipping"); 
+// let billingContactFields = document.getElementById("billing-contact-fields");
+// let billingAddressFields = document.getElementById("billing-address-fields");
 
 // Payment Information Elements------------------------------------------
 let addCardBtn = document.getElementById('add-card-btn');
@@ -36,58 +35,118 @@ let cardModal = document.getElementById('stripe-modal');
 let checkoutSubmitBtn = document.getElementById('checkout-submit-btn');
 
 let addAddressBtn = Array.from(document.getElementsByClassName('add-address-btn'));
+let newAddressFlag = false;
+let selectedCardId = null;
+let shippingSamewithAccountFlag = false;
+let billingSamewithShippingFlag = false;
+
+const inputIds = [
+    "shipping_address_1",
+    "shipping_address_2",
+    "shipping_state",
+    "shipping_postcode",
+    "shipping_country",
+    "billing_address_1",
+    "billing_address_2",
+    "billing_state",
+    "billing_postcode",
+    "billing_country"
+];
+
+// BILLING ELEMENTS ------------------------------------------
+
+// Get references to relevant elements
+const billingSameWithShippingEl = document.getElementById('billing-same-with-shipping');
+const billingFirstNameEl = document.getElementById('billing_contact_first_name');
+const billingLastNameEl = document.getElementById('billing_contact_last_name');
+const billingEmailEl = document.getElementById('billing_contact_email');
+const billingCompanyNameEl = document.getElementById('billing_company_name');
+const billingSubmitBtn = document.getElementById("billing-submit-button");
+const billingContactFields = document.getElementById("billing-contact-fields");
+const billingAddressFields = document.getElementById("billing-address-fields");
+
+
+// Billing hidden details
+const hiddenBillingShippingFirstNameEl = document.getElementById('hidden-shipping-first-name');
+const hiddenBillingShippingLastNameEl = document.getElementById('hidden-shipping-last-name');
+const hiddenBillingShippingEmailEl = document.getElementById('hidden-shipping-email');
+const hiddenBillingShippingCompanyNameEl = document.getElementById('hidden-shipping-company-name');
+const hiddenBillingFirstNameEl = document.getElementById('hidden-billing_contact_first_name');
+const hiddenBillingLastNameEl = document.getElementById('hidden-billing_contact_last_name');
+const hiddenBillingEmailEl = document.getElementById('hidden-billing_contact_email');
+const hiddenBillingCompanyNameEl = document.getElementById('hidden-billing_company_name');
+const hiddenSelectedShippingAddressId = document.getElementById('hidden-selected-shipping') ;
+
+// Billing Phone details
+const billingPhone = {
+    inputTelAccount: document.getElementById('billing-phone'),
+    billingMobileCountryCode: document.getElementById('hidden-billing_contact_phone_country_code'),
+    billingMobilePhone: document.getElementById('hidden-billing_contact_phone_number'),
+    shippingMobilePhone: document.getElementById('hidden-shipping-mobile-number'),
+    shippingMobileCountryCode: document.getElementById('hidden-shipping-country-code'),
+};  
+
+
+// SHIPPING ELEMENTS ------------------------------------------
+
+// Get references to relevant elements
+const shippingSameWithAccountEl = document.getElementById('same-shipping');
+const shippingFirstNameEl = document.getElementById('shipping-first-name');
+const shippingLastNameEl = document.getElementById('shipping-last-name');
+const shippingEmailEl = document.getElementById('shipping-email');
+const shippingCompanyNameEl = document.getElementById('shipping-company-name');
+const shippingSubmitBtn = document.getElementById("shipping-submit-button");
+
+// Account and shipping hidden details
+const hiddenAccountFirstNameEl = document.getElementById('hidden-account-first-name');
+const hiddenAccountLastNameEl = document.getElementById('hidden-account-last-name');
+const hiddenAccountEmailEl = document.getElementById('hidden-account-email');
+const hiddenAccountCompanyNameEl = document.getElementById('hidden-company-name');
+const hiddenShippingFirstNameEl = document.getElementById('hidden-first-name');
+const hiddenShippingLastNameEl = document.getElementById('hidden-last-name');
+const hiddenShippingEmailEl = document.getElementById('hidden-email');
+const hiddenShippingCompanyNameEl = document.getElementById('hidden-shipping-company-name');
+
+// Shipping Phone details
+const shippingPhone = {
+    inputTelAccount: document.getElementById('shipping-phone'),
+    accountMobilePhone: document.getElementById('hidden-mobile-number'),
+    accountMobileCountryCode: document.getElementById('hidden-country-code'),
+    shippingMobilePhone: document.getElementById('hidden-shipping-mobile-number'),
+    shippingMobileCountryCode: document.getElementById('hidden-shipping-country-code')
+};
 
 let Checkout = (function () {
     return {
         methods: {
-            // Update Shipping Detail 
-            updateShippingDetails(checkState) {
-                let accountDetails = document.querySelectorAll('[shipping-details-field]');
-                accountDetails.forEach((field) => {
-                    let idValue = field.getAttribute('id');
-                    if(idValue) {
-                        if(checkState){
-                            if(idValue == "shipping-phone"){
-                                let countryCode = document.getElementById('hidden-shipping-phone-country-code');
-                                let phoneNumber = document.getElementById('hidden-shipping-phone');
-                                if(phoneNumber && countryCode){
-                                    document.getElementById(idValue).setAttribute('phonenum-value', phoneNumber.value);
-                                    document.getElementById(idValue).setCountryCode(countryCode.value);
-                                }
-                            } else {
-                                let hiddenFieldId = idValue.replace(/shipping-/g, "hidden-");
-                                let hiddenField = document.getElementById(hiddenFieldId);
-                                if(hiddenField){
-                                    document.getElementById(idValue).value = hiddenField.value;
-                                }
-                            }
-                            document.getElementById(idValue).setAttribute('has-error',false);
-                            document.getElementById(idValue).setAttribute('readonly',true);
-                        } else {
-                            document.getElementById(idValue).removeAttribute('readonly');
-                        }
-                    }
-                });
-            },
-            async updateBillingContact(isSameWithShipping){
-                if(isSameWithShipping){
-                    document.getElementById("hidden-billing_company_name").value = shipping_company_name;
-                    document.getElementById("hidden-billing_contact_first_name").value = shipping_contact_first_name;
-                    document.getElementById("hidden-billing_contact_last_name").value = shipping_contact_last_name;
-                    document.getElementById("hidden-billing_contact_email").value = shipping_contact_email;
-                    document.getElementById("hidden-billing_contact_phone_number").value = shipping_contact_phone_number;
-                    document.getElementById("hidden-billing_contact_phone_country_code").value = shipping_contact_phone_country_code;
-                } else {
-                    document.getElementById("hidden-billing_company_name").value = document.getElementById("billing_company_name").value;
-                    document.getElementById("hidden-billing_contact_first_name").value = document.getElementById("billing_contact_first_name").value;
-                    document.getElementById("hidden-billing_contact_last_name").value = document.getElementById("billing_contact_last_name").value;
-                    document.getElementById("hidden-billing_contact_email").value = document.getElementById("billing_contact_email").value;
+            // Function to update phone details
+            updatePhone(sameAddress = false, page = '') {
+                const setPhoneDetails = (telPhone, countryCodeValue, phoneValueValue) => {
+                    telPhone.setCountryCode(countryCodeValue);
+                    telPhone.setAttribute('phonenum-value', phoneValueValue);
+                };
 
-                    let phone = await billingPhone.inputTelAccount.getValues();
-                    if(phone){
-                        billingPhone.billingPhoneNumber.value = phone.phone_number;
-                        billingPhone.billingCountryCode.value = phone.country_code;
-                    }                    
+                let countryCode = '';
+                let phoneValue = '';
+
+                const getPhoneDetails = (pageType) => {
+                    if (pageType === 'billing') {
+                        // Use billing phone details
+                        countryCode = billingPhone[`${sameAddress ? 'shipping' : 'billing'}MobileCountryCode`].value;
+                        phoneValue = billingPhone[`${sameAddress ? 'shipping' : 'billing'}MobilePhone`].value || '';
+                        countryCode = countryCode ? `+${countryCode}` : '+61'; 
+                    } else if (pageType === 'shipping') {
+                        // Use shipping phone details
+                        countryCode = shippingPhone[`${sameAddress ? 'account' : 'shipping'}MobileCountryCode`].value;
+                        phoneValue = shippingPhone[`${sameAddress ? 'account' : 'shipping'}MobilePhone`].value || '';
+                        countryCode = countryCode ? `+${countryCode}` : '+61'; 
+                    }
+                };
+
+                if (page === 'billing' || page === 'shipping') {
+                    getPhoneDetails(page);
+                    const telPhone = (page === 'billing') ? billingPhone.inputTelAccount : shippingPhone.inputTelAccount;
+                    setPhoneDetails(telPhone, `+${countryCode}`, phoneValue);
                 }
             },
             async checkSignUpUserEmail(field){ 
@@ -113,6 +172,43 @@ let Checkout = (function () {
                     emailElem.hasError = false;
                     emailIsClean = true;
                 }
+            },
+            checkSelectedCard(){
+                const cards = document.querySelectorAll('ins-checkbox-card');
+        
+                cards.forEach(card => {
+                    const isSelected = card.hasAttribute('selected');
+
+                    // If a selected card is found, stop further processing
+                    if (isSelected) {
+                        selectedCardId = card.value;
+                        console.info('selectedCardId', selectedCardId)
+                        Checkout.methods.removeAddressRequiredAttribute();
+                        return; 
+                    }
+                });
+            },
+            removeAddressRequiredAttribute() {
+                console.info('removeAddressRequiredAttribute function triggered. Removing required and validate attributes.');
+                // Remove the 'required' and 'validate' attributes
+                inputIds.forEach(id => {
+                    const inputElement = document.getElementById(id);
+                    if (inputElement) {
+                        inputElement.removeAttribute('required');
+                        inputElement.removeAttribute('validate');
+                    }
+                });
+            },
+            addAddressRequiredAttribute( ){
+                console.info('addAddressRequiredAttribute function triggered. Add required and validate attributes.');
+                // Add the 'required' and 'validate' attributes
+                inputIds.forEach(id => {
+                    const inputElement = document.getElementById(id);
+                    if (inputElement) {
+                        inputElement.setAttribute('required', '');
+                        inputElement.setAttribute('validate', '');
+                    }
+                });
             }
         },
         validation: {
@@ -136,31 +232,7 @@ let Checkout = (function () {
                             ? element.classList.add('is-invalid')
                             : element.classList.remove('is-invalid')
                     });
-            },
-            validateAddress(currentStep) {
-                let container = currentStep.querySelectorAll('.validate-address');
-                if(container) {
-                    container.forEach(block => {
-                        let addressValid = block.querySelectorAll(".address-fields[required] .is-invalid");
-                        if (addressValid.length > 0) {
-                            block.querySelector('.error-message').classList.remove('hide');
-                            Checkout.validation.addressCardsHasError(block, true);
-                        } else {
-                            block.querySelector('.error-message').classList.add('hide');
-                            Checkout.validation.addressCardsHasError(block, false);
-                        }
-                    });
-                }
-            },
-            addressCardsHasError(step, error) {
-                step.querySelectorAll('.address-options ins-checkbox-card')
-                    .forEach(element => {
-                        error 
-                            ? element.classList.add('is-invalid')
-                            : element.classList.remove('is-invalid')
-                    });
             }
-
         },
         events: {
             // Account Information submission
@@ -186,22 +258,92 @@ let Checkout = (function () {
             async shippingSubmit(event){
                 event.preventDefault();
                 shippingSubmitBtn.loading = true;
-                let form = event.srcElement;
-                let phone = await shippingPhone.inputTelAccount.getValues();
-                if(phone){
-                    shippingPhone.shippingMobilePhone.value = phone.phone_number;
-                    shippingPhone.shippingMobileCountryCode.value = phone.country_code;
-                }
-                let isValid = await App.validation.validateForm(form);
 
+                let form = event.srcElement;
+                let isValid = await App.validation.validateForm(form);
+                
+                // Check if there's a selected card and set isValid to false if not
+                if (!selectedCardId && !newAddressFlag) {
+                    isValid = false;
+                }
+  
                 if(isValid) {
-                    form.submit();
+                    if (newAddressFlag) {
+                        form.submit();
+                    } else {
+                        Checkout.events.saveSessionApi(true);
+                    }
                 } else {
-                    this.setAddressCardError();
+                    if (!selectedCardId && !newAddressFlag) {
+                        this.setAddressCardError();
+                    }
                     App.events.notyf("error", "Please check missing fields");
                     shippingSubmitBtn.loading = false;
+
+                    // Remove 'is-invalid' class from all elements
+                    // This is necessary because when the form is submitted with invalid fields, 
+                    // some elements may incorrectly retain the 'is-invalid' class 
+                    // even after the issue is corrected.
+                    this.removeInvalidClassFromForm();
                 }
                 return false;
+            },
+            async saveSessionApi(shipping = false) {
+                let phoneNumber = null;
+                let phoneCountryCode = null;
+            
+                // Determine if we are saving shipping or billing information
+                let phone;
+                if (shipping) {
+                    phone = await shippingPhone.inputTelAccount.getValues();
+                } else {
+                    phone = await billingPhone.inputTelAccount.getValues();
+                }
+            
+                // Extract phone details if available
+                if (phone) {
+                    phoneNumber = phone.phone_number;
+                    phoneCountryCode = phone.country_code;
+                }
+            
+                // Prepare payload based on whether it's shipping or billing
+                let payload = {};
+                if (shipping) {
+                    payload = {
+                        same_shipping: `${shippingSamewithAccountFlag}`,
+                        address_id: selectedCardId,
+                        shipping_instructions: document.getElementById('shipping_instructions').value,
+                        shipping_company_name: shippingCompanyNameEl.value,
+                        shipping_contact_first_name: shippingFirstNameEl.value,
+                        shipping_contact_last_name: shippingLastNameEl.value,
+                        shipping_contact_email: shippingEmailEl.value,
+                        shipping_contact_phone_number: phoneNumber,
+                        shipping_contact_phone_country_code: phoneCountryCode,
+                        latest_step: 3
+                    };
+                } else {
+                    payload = {
+                        billing_same_with_shipping: `${billingSamewithShippingFlag}`,
+                        address_id: selectedCardId,
+                        billing_company_name: billingCompanyNameEl.value,
+                        billing_contact_first_name: billingFirstNameEl.value,
+                        billing_contact_last_name: billingLastNameEl.value,
+                        billing_contact_email: billingEmailEl.value,
+                        billing_contact_phone_number: phoneNumber,
+                        billing_contact_phone_country_code: phoneCountryCode,
+                        latest_step: 4
+                    };
+                }
+            
+                // Send request to save session data
+                const url = '/save-checkout-session.json';
+                const response = await apiServices.processRequest('post', url, payload);
+            
+                // Handle successful response
+                if (response.state && response.data) {
+                    window.location.href = shipping ? "/checkout/billing" : "/checkout/payment";
+                    newAddressFlag = false;
+                }
             },
             selectAddressCard(addressCard) {
                 let name = addressCard.getAttribute('name');
@@ -209,10 +351,10 @@ let Checkout = (function () {
 
                 //Toggle 'My billing address is the same as my shipping address'
                 if(value == shipping_address_id) {
-                    if(billingSameWithShipping) billingSameWithShipping.setAttribute('checked', true);
+                    if(billingSameWithShippingEl) billingSameWithShippingEl.setAttribute('checked', true);
                     console.log('setAttribute true');
                 } else {
-                    if(billingSameWithShipping) billingSameWithShipping.setAttribute('checked', false);
+                    if(billingSameWithShippingEl) billingSameWithShippingEl.setAttribute('checked', false);
                 }
 
                 // Remove State of address field cards
@@ -224,6 +366,8 @@ let Checkout = (function () {
                 // set selected state
                 addressCard.setAttribute('selected', true);
                 addressCard.selected = true;
+                selectedCardId = addressCard.value;
+                console.info('selected card', selectedCardId);
                 //Show the add new address button
                 document.getElementsByClassName('add-address-btn')[0]?.classList.remove('hide');
                 //Modify fields and form
@@ -283,6 +427,7 @@ let Checkout = (function () {
                 containerEl.classList.add("hide");
             },
             addNewAddress(button){
+                Checkout.methods.addAddressRequiredAttribute();
                 //Use the initial generated uuid
                 document.getElementById('address-uuid').value = document.getElementById('temp-address-uuid').value;
 
@@ -308,6 +453,7 @@ let Checkout = (function () {
                     address.setAttribute('selected', false);
                     address.selected = false;
                 });
+                selectedCardId = null;
             },
             clearAddressField(btnAddress){
                 let name = btnAddress.getAttribute('name');
@@ -352,32 +498,53 @@ let Checkout = (function () {
                 containerEl.classList.remove("hide");
             },
             setAddressCardError(){
-                let addressCards = Array.from(document.querySelectorAll('ins-checkbox-card'));
+                // let addressCards = Array.from(document.querySelectorAll('ins-checkbox-card'));
+                let addressCards = Array.from(document.querySelectorAll('.ins-checkbox-card-wrap'));
+
                 addressCards.forEach(address => {
-                    address.classList.add('is-invalid');
+                    address.style.borderColor = '';
+                    address.style.borderColor = 'red';
                 });
+            },
+            // Function to remove 'is-invalid' class from all form elements
+            removeInvalidClassFromForm() {
+                const invalidElements = document.querySelectorAll('.is-invalid');
+                invalidElements.forEach((element) => {
+                    element.classList.remove('is-invalid');
+                });
+                console.info('Removed "is-invalid" class from all elements.');
             },
             async billingSubmit(event){
                 event.preventDefault();
                 billingSubmitBtn.loading = true;
 
-                Checkout.methods.updateBillingContact(false);
-                
-                let phone = await billingPhone.inputTelAccount.getValues();
-                if(phone){
-                    billingPhone.billingPhoneNumber.value = phone.phone_number;
-                    billingPhone.billingCountryCode.value = phone.country_code;
-                } 
+                let form = event.srcElement; 
 
-                let form = event.srcElement;                
                 let isValid = await App.validation.validateForm(form);
+      
+                // Check if there's a selected card and set isValid to false if not
+                if (!selectedCardId && !newAddressFlag && !billingSamewithShippingFlag) {
+                    isValid = false;
+                }
 
-                if(isValid) {
-                    form.submit();
+                if (isValid) {
+                    if (newAddressFlag) {
+                        form.submit();
+                    } else {
+                        Checkout.events.saveSessionApi();
+                    }
                 } else {
-                    this.setAddressCardError();
+                    if (!selectedCardId && !newAddressFlag && !billingSamewithShippingFlag) {
+                        this.setAddressCardError();
+                    }
                     App.events.notyf("error", "Please check missing fields");
                     billingSubmitBtn.loading = false;
+
+                    // Remove 'is-invalid' class from all elements
+                    // This is necessary because when the form is submitted with invalid fields, 
+                    // some elements may incorrectly retain the 'is-invalid' class 
+                    // even after the issue is corrected.
+                    this.removeInvalidClassFromForm();
                 }
                 return false;
             },
@@ -402,7 +569,6 @@ let Checkout = (function () {
                 let isValid = await App.validation.validateForm(form);
                 
                 Checkout.validation.validateCreditCard(form);
-
                 if(isValid) {
                     form.submit();
                 } else {
@@ -428,35 +594,60 @@ let Checkout = (function () {
             },
             initShippingDetailsListener() {
                 let shipCont = document.getElementsByClassName("shipping-contact-person");
-                if (sameShippingDetailsBtn) {
-                    sameShippingDetailsBtn.addEventListener('insCheck', (event) => {
+                if (shippingSameWithAccountEl) {
+                    shippingSameWithAccountEl.addEventListener('insCheck', (event) => {
                         let isChecked = event.detail.checked;
-                        Checkout.methods.updateShippingDetails(isChecked);
+                        shippingSamewithAccountFlag = isChecked;
+        
                         if (isChecked){
                             for (var i = 0; i < shipCont.length; i++) { shipCont[i].classList.add('hide'); }
-                        }else{
+
+                            shippingFirstNameEl.value = hiddenAccountFirstNameEl.value;
+                            shippingLastNameEl.value = hiddenAccountLastNameEl.value;
+                            shippingEmailEl.value = hiddenAccountEmailEl.value;
+                            shippingCompanyNameEl.value = hiddenAccountCompanyNameEl.value;
+                            Checkout.methods.updatePhone(true, 'shipping');  
+                        } else {
                             for (var i = 0; i < shipCont.length; i++) { shipCont[i].classList.remove('hide'); }
+
+                            shippingFirstNameEl.value = hiddenShippingFirstNameEl.value || '';
+                            shippingLastNameEl.value = hiddenShippingLastNameEl.value || '';
+                            shippingEmailEl.value = hiddenShippingEmailEl.value || '';
+                            shippingCompanyNameEl.value = hiddenShippingCompanyNameEl.value || '',
+                            Checkout.methods.updatePhone(false, 'shipping');  
                         }
                     });
                 }
             },
-            initBillingDetailsListener(){                               
-                if (billingSameWithShipping) {
-                    billingSameWithShipping.addEventListener('insCheck', (event) => {
-                        let isChecked = event.detail.checked;                                                                        
+            initBillingDetailsListener(){                 
+                if (billingSameWithShippingEl) {
+                    billingSameWithShippingEl.addEventListener('insCheck', (event) => {
+                        let isChecked = event.detail.checked;       
+                        billingSamewithShippingFlag = isChecked;                                                                 
                         let addressCards = document.getElementById("address-cards");
                         if (isChecked){
                             if(addressCards) addressCards.classList.add('hide');
                             if(addAddressBtn[0]) addAddressBtn[0].classList.add('hide');                            
                             if(billingContactFields) billingContactFields.classList.add('hide');
                             if(billingAddressFields) billingAddressFields.classList.add('hide');
-                            Checkout.methods.updateBillingContact(true);
-                        }else{
+
+                            billingFirstNameEl.value = hiddenBillingShippingFirstNameEl.value;
+                            billingLastNameEl.value = hiddenBillingShippingLastNameEl.value; 
+                            billingEmailEl.value = hiddenBillingShippingEmailEl.value;
+                            billingCompanyNameEl.value = hiddenBillingShippingCompanyNameEl.value;
+                            selectedCardId = hiddenSelectedShippingAddressId.value;
+                            Checkout.methods.updatePhone(true, 'billing');  
+                        } else {
                             if(addressCards) addressCards.classList.remove('hide');                            
                             if (addAddressBtn[0]) addAddressBtn[0].classList.remove('hide');
                             if(billingContactFields) billingContactFields.classList.remove('hide');
                             if(billingAddressFields) billingAddressFields.classList.add('hide');
-                            Checkout.methods.updateBillingContact(false);
+
+                            billingFirstNameEl.value = hiddenBillingFirstNameEl.value || '';
+                            billingLastNameEl.value = hiddenBillingLastNameEl.value || '';
+                            billingEmailEl.value = hiddenBillingEmailEl.value || '';
+                            billingCompanyNameEl.value = hiddenBillingCompanyNameEl.value || '',
+                            Checkout.methods.updatePhone(false, 'billing');  
                         }
                     });
                 }
@@ -466,13 +657,19 @@ let Checkout = (function () {
                 addressCards.forEach(address => {
                     address.addEventListener('insClick', () => {
                         Checkout.events.selectAddressCard(address);
+                        Checkout.methods.removeAddressRequiredAttribute();
+                        newAddressFlag = false;
                     });
                 });
+
+                Checkout.methods.checkSelectedCard();
             },
             initAddressBtnListener() {
                 addAddressBtn.forEach(btn => {
                     btn.addEventListener('insClick', () => {
                         Checkout.events.addNewAddress(btn);
+                        selectedCardId = null;
+                        newAddressFlag = true;
                     });
                 });
             },
@@ -513,7 +710,6 @@ let Checkout = (function () {
                     }
                 }
             }
-            
         }
     }
 })();

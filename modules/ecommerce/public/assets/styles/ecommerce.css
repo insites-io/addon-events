@@ -176,12 +176,19 @@ ins-button.button-large button.ins-button.size--large span {
     padding: 16px;
 }
 .product-carousel .ins-carousel_ctrl-btns ins-button button {
-    top: 0px;
+    top: 0px;    
+    right: 28px;
     border-radius: 50% !important;
+}
+.product-carousel .carouselDesktop .ins-carousel_ctrl-btns ins-button button{
+    right: 104px;
 }
 .product-carousel .ins-carousel_ctrl-btns ins-button:nth-child(1) button {
     left: initial;
-    right: 58px;
+    right: 86px;
+}
+.product-carousel .carouselDesktop .ins-carousel_ctrl-btns ins-button:nth-child(1) button{
+    right: 162px;
 }
 @media only screen and (max-width: 768px) {
     .product-carousel .ins-carousel.layout-1 .ins-carousel_ctrl-btns{
@@ -191,15 +198,21 @@ ins-button.button-large button.ins-button.size--large span {
 .shop-all-link {    
     position: absolute;
     top: 0px;
-    right: 116px;
+    right: 148px;
     display: inline-block;
     height: 42px;
     align-content: center;
+}
+.carouselDesktop .shop-all-link {
+    right: 228px;
 }
 
 
 
 /* Product Cards */
+.carouselDesktop .product-cards {
+    margin-left: -16px;
+}
 .product-cards .cell {
     padding: 12px;
 }
@@ -260,6 +273,11 @@ ins-button.button-large button.ins-button.size--large span {
 .filter-item__options{
     height: 288px;
     overflow-y: scroll;
+}
+/* Overview - Purchase Again */
+.purchase-again-cards-wrap {
+    margin-left: -12px;
+    margin-right: -12px;
 }
 
 

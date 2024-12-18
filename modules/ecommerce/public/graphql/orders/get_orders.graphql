@@ -3,9 +3,8 @@ query get_orders (
   $size: Int = 10,
   $keyword: String,
   $dateFrom: String,
-  $user_id: String,
-  $dateTo: String,
-  $sortBy: [RecordsSortInput!] = { updated_at: { order: DESC } }
+  $order_contact_uuid: String,
+  $dateTo: String
 ) {
   items: records (
     per_page: $size,
@@ -16,34 +15,24 @@ query get_orders (
       },
       properties: [
         { name: "order_number", contains: $keyword }
-        { name: "user_id", value: $user_id }
+        { name: "order_contact_uuid", value: $order_contact_uuid }
       ],
       updated_at: {
         gte: $dateFrom
         lte: $dateTo
       }
     },
-    sort: $sortBy
-  ) {
-    current_page
-    per_page
-    total_pages
+    sort: { id: { order: DESC } }
+  ) {            
     total_entries
     results {
-      id
-      created_at
-      properties
-      user: related_user(join_on_property: "user_id") {
-        id
-        name
-        email
-      }
-      cart: related_records(
-        table: "modules/insites_ecommerce/cart"
-        foreign_property: "order_id", 
-        join_on_property: "id") {
-          quantity: property(name: "quantity")
-      }
+      id            
+      #properties      
+      order_number: property(name: "order_number")
+      date_time: property(name: "date_time")
+      total_amount: property_float(name: "total_amount") 
+      order_status: property(name: "order_status") 
+      order_shipping_status: property(name: "order_shipping_status")               
     }
   }
 }

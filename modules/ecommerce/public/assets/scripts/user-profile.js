@@ -25,14 +25,7 @@ let tmpUserPayload = {
 let addCardBtn = document.getElementById('add-credit-card');
 let cardModal = document.getElementById('stripe-modal');
 
-/* Variables that handles the data for the Order History  Table*/
-var orderListTable = document.getElementById('order-list-table');
-let pageBaseUrl = "";
-let orderListFilter = {
-    "page": "1",
-    "per_page": "10",
-    "sort_by": ""
-};
+
 
 
 let UserProfileScript = (function () {
@@ -186,93 +179,7 @@ let UserProfileScript = (function () {
                     noCardNotif.classList.remove('hide');
                 else 
                     noCardNotif.classList.add('hide');
-            },
-            initBaseURL(){
-                pageBaseUrl = window.location.pathname;
-            },
-            initOrderTableContents(){
-                // Prepare / process data for adding to the Order Table History
-                orderListTable.tableHeaders = tableHeaders;
-                
-                let tableData = tableContent.results.map(data => {
-                    let props = data.properties;
-                    let shippingArray = [];
-                    //Combine the fields connected to address to make a full address
-                    if (props.shipping_address_1){
-                        shippingArray.push(props.shipping_address_1);
-                    }
-                    if (props.shipping_address_2){
-                        shippingArray.push(props.shipping_address_2);
-                    }
-                    if (props.shipping_city){
-                        shippingArray.push(props.shipping_city);
-                    }
-                    if (props.shipping_state){
-                        shippingArray.push(props.shipping_state);
-                    }
-                    if (props.shipping_postcode){
-                        shippingArray.push(props.shipping_postcode);
-                    }
-                    if (props.shipping_country){
-                        shippingArray.push(props.shipping_country);
-                    }
-                    let fullAddress = shippingArray.join(", ");
-
-                    //Format date to human radable one
-                    let tmpDate = new Date(props.date_time);
-                    let formattedDate = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();
-
-                    return {
-                        id: data.id,
-                        "Order Number": data.id,
-                        "Items": data.cart.length,
-                        "Total Price": this.pricify(props.total_amount / 100.0),
-                        "Shipping Address": fullAddress,
-                        "Date Ordered": formattedDate,
-                        "Status": props.order_status
-                    }
-                })
-                
-                // Add the created data to the table 
-                orderListTable.tableData = tableData;
-                // Add event litener to link to detail of each row
-                orderListTable.addEventListener('insTableRowAction', event => {
-                    window.location.href = '/order-history/' + event.detail.data.id;
-                });
-
-            },
-            initOrderFilterValues(){
-                let query = window.location.search.substring(1);
-                let vars = query.split("&");
-                for(var i=0;i<vars.length;i++){
-                    let pair = vars[i].split("=");
-                    orderListFilter[pair[0]] = pair[1];
-                }
-                UserProfileScript.methods.putOrderFilterValues();
-            },
-            putOrderFilterValues(){
-                if(orderListTable){
-                    orderListTable.pageSize = orderListFilter.per_page;
-                    orderListTable.pageNumber = orderListFilter.page;
-                    if(maxCount){
-                        orderListTable.totalCount = maxCount;
-                    }
-                }
-            },
-            buildParamlist(){
-                //Get all items on the object and buld them as parameters
-                let entries = Object.entries(orderListFilter);
-                let tmpParamArr = [];
-                for(let a = 0; a < entries.length; a++){
-                    if(entries[a][1] != ""){
-                        tmpParamArr.push(entries[a].join('='));
-                    }
-                }
-                let tmpParam = tmpParamArr.join('&');
-                return tmpParam;
-            },
-
-
+            }
         },
         events: {
             async removeCard(selectedEl) {
@@ -291,15 +198,6 @@ let UserProfileScript = (function () {
                     App.events.notyf('success', "Credit card has been removed");
                     UserProfileScript.methods.checkCardCount();
                 }
-            },
-            tablePaginationHandler(event){
-                orderListFilter.page = event.detail.pageNumber;
-                orderListFilter.per_page = event.detail.pageSize;
-
-                let paramStr = UserProfileScript.methods.buildParamlist();
-                let urlStr = pageBaseUrl + "?" + paramStr;
-                window.location.href = urlStr;
-
             }
         },
         init: {
@@ -329,15 +227,6 @@ let UserProfileScript = (function () {
                             clearInterval(setStateInterval);
                     }
                 }, 300);
-            },
-            initOrderListing(){
-                if(orderListTable){
-                    UserProfileScript.methods.initBaseURL();
-                    UserProfileScript.methods.initOrderFilterValues();
-                    UserProfileScript.methods.initOrderTableContents();
-                    orderListTable.addEventListener('insPaginationChange', UserProfileScript.events.tablePaginationHandler);
-                }
-
             }
         }
     }
@@ -346,6 +235,5 @@ let UserProfileScript = (function () {
 
 setTimeout(() => {
     UserProfileScript.init.initEventListener();
-    UserProfileScript.init.initOrderListing();
 }, 200);
 

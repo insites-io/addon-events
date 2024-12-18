@@ -145,7 +145,7 @@ layout: modules/insites_core/insites_internal_email_layout
       {% assign shipping_address = shipping_address | default: '-' %}
       {% assign properties = properties | append: ',' | append: '"shipping_address": "' | append: shipping_address | append: '"' %}
       
-      {% assign shipping_instruction = props.shipping_instructions | default: '-' %}
+      {% assign shipping_instructions = props.shipping_instructions | default: '-' %}
       {% assign properties = properties | append: ',' | append: '"shipping_instructions": "' | append: shipping_instructions | append: '"' %}
 
       {{ properties }}

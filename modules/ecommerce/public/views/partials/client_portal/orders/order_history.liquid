@@ -1,0 +1,257 @@
+<h1>Order History</h1>
+<div class="spacer small"></div>
+<p>Check the status of your order and review your order history.</p>
+<div class="spacer x-large"></div>
+
+
+{%- graphql user = 'modules/ecommerce/account/get_current_user' | dig: 'current_user' -%}
+
+{%- assign page_num = context.params.page | default: 1 -%}
+{%- assign page_size = context.params.per_page | default: 100 -%}
+
+{%- parse_json filters -%}
+{
+    "order_contact_uuid": "{{user.uuid}}",
+    "page": {{page_num}},
+    "size": {{page_size}}
+}
+{%- endparse_json -%}
+
+{%- graphql order_list = 'modules/ecommerce/orders/get_orders', args: filters -%}
+
+
+
+<div class="small-12 cell">
+    {%- if order_list.items.total_entries > 0 -%}
+    
+    <ins-filter 
+        id="order-filter"
+        label="Filter by:"
+        with-date-filter 
+        date-title="Date">
+
+        <ins-filter-item
+            name="Order Status"
+            options='["All", "Open", "Processing", "Cancelled", "Completed"]'>
+        </ins-filter-item>
+    </ins-filter>
+
+    <ins-table 
+        id="order-table" 
+        sort-keyword="order-number"
+        searchbar-placeholder="Search by order number">         
+    </ins-table>
+
+    {%- else -%}
+
+    <ins-card class="empty-state full" steady>
+        <p>No Order History</p>
+    </ins-card>
+
+    {%- endif -%}
+</div>
+
+
+{%- if order_list.items.total_entries > 0 -%}
+
+{% function localisation_date_format = 'modules/ecommerce/localisation/get_localisation' %}
+
+<script>
+    let date_format = "{{ localisation_date_format | default: 'DD/MM/YYYY' }}";
+    let maxCount = {{ order_list.items.total_entries }};
+    let pageNumber = 1;
+    let pageSize = 10;
+    let searchKeyword = '';
+    let sortedKeyword = 'id';
+    let orderListTable = document.getElementById('order-table');
+    let orderFilter = document.getElementById('order-filter');
+
+    let tableContent = {{ order_list.items.results }};
+    let tableHeaders = [
+        { label: 'Order Number', type: "string" },
+        { label: 'Date Ordered', type: "date" },
+        { label: 'Total Amount', type: "currency" },
+        { label: 'Order Status', type: "string", hasTag: true },
+        { label: 'Shipping Status', type: "string", hasTag: true}
+    ];
+
+    
+    function initOrderTableContents(){
+        orderListTable.tableHeaders = tableHeaders;
+        orderListTable.rowActions = ['View Order'];        
+        processTableData(tableContent);
+
+        orderListTable.addEventListener('insTableRowAction', event => {
+            window.location.href = '/order-history/' + event.detail.data.id;
+        });
+    }
+
+    function mapData(tableData) {
+        return tableData.map(data => {                                
+            let dateOrdered = TableScript.methods.formatDate(TableScript.methods.toDateOnly(data.date_time), date_format);
+            let shipping_status = data.order_shipping_status || 'Processing';
+            let order_status = TableScript.methods.toTitleCase(resolveStatus(data.order_status));
+
+            return {
+                id: data.id,
+                "Order Number": data.id,
+                "Date Ordered": dateOrdered,
+                "Total Amount": TableScript.methods.pricify(data.total_amount),
+                "Order Status": order_status,
+                "Shipping Status": shipping_status
+            }
+        });
+    }
+
+
+    function tablePaginationHandler(event){
+        pageNumber = event.detail.pageNumber;
+        pageSize = event.detail.pageSize;
+        processTableData();
+    }
+
+
+    function processTableData(){
+        var last_index = pageNumber * pageSize;
+        var first_index = (last_index - pageSize);        
+
+        displayedData = [];
+        tableData = (searchKeyword)? filteredData : tableContent;
+    
+        tableData.forEach((value, index) => {                
+            if (index >= first_index && index < last_index) {
+                displayedData.push(value);
+            }
+        });
+        orderListTable.totalCount = tableData.length;
+        
+        if (sortedKeyword && displayedData.length > 1) {
+            //Sort
+            displayedData.sort(TableScript.methods.dynamicKeySort(sortedKeyword));
+            //Descending order
+            if(sortedKeyword == "id") displayedData.reverse();
+        }
+
+        orderListTable.tableData = mapData(displayedData);
+        orderListTable.loadingScreen = false;
+    }
+
+    
+    function tableSearchHandler(event){
+        filterData(event.detail.value, ["id"]);
+    }
+
+
+    function filterData(searchKey, filterKey=["id"]){
+
+        orderListTable.loadingScreen = true;
+
+        if(filterKey.includes("order_status") && filterKey.includes("date_time")){
+            searchKeyword = searchKey["Order Status"];
+            dateFrom = new Date(searchKey["Date"].from);
+            dateTo = new Date(searchKey["Date"].to);
+        } else {
+            searchKeyword = searchKey;
+            if(filterKey == "date_time"){
+                dateFrom = new Date(searchKey.from);
+                dateTo = new Date(searchKey.to);
+            }
+        }
+
+        if (!searchKeyword) {
+            processTableData();
+            return;
+        }
+
+        filteredData = [];
+        tableContent.forEach((value) => {
+            is_date_time_matched = false; 
+            is_value_matched = false;
+            Object.keys(value).forEach((key) => {
+                if (filterKey.includes(key)){                    
+                    if(key == "date_time"){                               
+                        dateSelected = TableScript.methods.toDateOnly(value.date_time);                                       
+                        if (dateSelected >= dateFrom && dateSelected <= dateTo) is_date_time_matched = true;
+                    } else {
+                        match = resolveStatus(value[key]);  
+                        if (match.toLowerCase().includes(searchKeyword.toLowerCase())) is_value_matched = true;
+                    }
+                }            
+            });
+
+            if(filterKey.includes("order_status") && filterKey.includes("date_time")){
+                if(is_value_matched && is_date_time_matched) 
+                    filteredData.push(value);
+            } else if(filterKey.includes("date_time")){
+                if(is_date_time_matched) 
+                    filteredData.push(value);
+            } else if(is_value_matched){
+                filteredData.push(value);
+            }
+        });
+
+        
+        orderListTable.pageNumber = pageNumber = 1;
+        processTableData();
+
+        if (!filteredData.length) {
+            orderListTable.loadingScreen = true;
+            orderListTable.loaderTitle = '';
+            orderListTable.loaderMessage = 'No result found for "' + searchKeyword + '"';
+            orderListTable.loaderIcon = '';
+        }
+    }
+
+
+    function filterHandler(event){
+        let dateSelected = event.detail["Date"];
+        let orderStatus = event.detail["Order Status"];
+
+        if(dateSelected == "All" && orderStatus == "All"){
+            searchKeyword = '';
+            processTableData();
+        } else if(dateSelected == "All"){
+            filterData(orderStatus, ["order_status"]);
+        } else if(orderStatus == "All"){
+            filterData(dateSelected, ["date_time"]);
+        } else {
+            filterData(event.detail, ["order_status","date_time"]);
+        }
+    }
+
+
+    function initOrderTable(){
+        if(orderListTable){
+            initOrderTableContents();
+            orderListTable.addEventListener('insPaginationChange', tablePaginationHandler);
+            orderListTable.addEventListener('insTableSearch', tableSearchHandler);
+        }
+    }
+
+
+    function initFilter(){
+        if(orderFilter){
+            orderFilter.addEventListener('insFilterApply', filterHandler);
+        }
+    }
+
+    function resolveStatus(status){
+        //This would solve problem involving order_status = 'complete' or 'completed'
+        if(status.toLowerCase() === "complete") {            
+            status = "Completed"
+        } 
+        return status;
+    }
+    
+
+    setTimeout(() => {
+        initOrderTable();
+        initFilter();
+}, 200);
+
+
+
+</script>
+
+<script src="{{ 'modules/ecommerce/scripts/table.min.js' | asset_url }}"></script>
+{%- endif -%}

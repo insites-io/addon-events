@@ -18,7 +18,7 @@ authorization_policies:
 {% assign order_uuid = context.params.id %}
 {% if order_uuid != blank %}
     {% graphql order = "modules/ecommerce/orders/get_order_details", 
-        uuid: order_uuid, is_more: true | dig: 'items' | dig: 'results' | first %}
+        uuid: order_uuid, is_shipping_info_needed: true | dig: 'items' | dig: 'results' | first %}
 {% endif %}
 {% log context.session, type: "====context.session in confirmation====" %}
 
@@ -180,8 +180,8 @@ authorization_policies:
             {%- comment -%}Payment Details: Customer is logged in{%- endcomment -%}
             {%- if context.current_user.id -%}
                 {% include 'modules/ecommerce/layout/order_summary', 
-                    show_product: true,
-                    order_uuid: context.params.order_uuid %}
+                    show_product: true, is_ordered_items: true,
+                    order_uuid: context.params.id %}
             {%- endif -%}
         </div>
     </div>

@@ -1,0 +1,24 @@
+query get_localisation (
+  $page: Int = 1,
+  $size: Int = 10,
+) {
+  items: records (
+    per_page: $size,
+    page: $page,
+    filter: {
+      table: {
+        value: "modules/insites_core/localisation"
+      },
+    }
+  ) {            
+    total_entries
+    results {
+      id            
+      #properties      
+      date_format: property(name: "date_format")
+      time_format: property(name: "time_format")
+      is_daylight_savings_time: property_boolean(name: "is_daylight_savings_time") 
+      time_zone: property(name: "time_zone")            
+    }
+  }
+}

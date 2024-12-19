@@ -66,15 +66,19 @@
         };
     }    
 
-    pagination.addEventListener('insValueChange', paginationHandler);
+    if(pagination) pagination.addEventListener('insValueChange', paginationHandler);
 
-    previousBtn.forEach(btn => {
-        btn.addEventListener('insClick', paginationHandler);
-    });
+    if(previousBtn){
+        previousBtn.forEach(btn => {
+            btn.addEventListener('insClick', paginationHandler);
+        });
+    }
 
-    nextBtn.forEach(btn => {
-        btn.addEventListener('insClick', paginationHandler);
-    });
+    if(nextBtn){
+        nextBtn.forEach(btn => {
+            btn.addEventListener('insClick', paginationHandler);
+        });
+    }
 
     function paginationHandler(e){
         console.log('paginationHandler', e);

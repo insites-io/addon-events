@@ -8,8 +8,24 @@ metadata: {
     "page_type": "content", 
     "page_name": "Purchase Again",
     "page_title": "Purchase Again",
-    "meta_title": "Purchase Again"       
+    "meta_title": "Purchase Again",
+    "heading": "Purchase Again"      
 }
+dynamic_cache:
+  layout: true
+  key: |-
+    {%- parse_json models -%}
+    [
+      "modules/insites_cms/global",
+      "modules/insites_core/localisation",
+      "modules/insites_ecommerce/category",
+      "modules/insites_ecommerce/order",
+      "modules/insites_ecommerce/order_item",
+      "modules/insites_ecommerce/product"
+    ]
+    {%- endparse_json -%}
+    {%- include "modules/website/cache/generate_cache_key", models: models -%}
+    {{context.current_user.id}}
 authorization_policies:
   - modules/client/is_user_logged_in 
 ---
@@ -239,11 +255,7 @@ authorization_policies:
     {%- endfor -%}
 
     </div>
-    <div class="spacer x-large"></div>
-
-    
-    {% assign ordered_items = ordered_items | add_hash_key: 'total_entries', total_items %}
-    {% include "modules/ecommerce/layout/pagination",  data: ordered_items, per_page, label: 'Items' %}
+    <div class="spacer x-large"></div>    
 
 {%- else -%}
 
@@ -257,6 +269,10 @@ authorization_policies:
     </ins-card>
 
 {%- endif -%}
+
+{% comment %} Pagination {% endcomment %}
+{% assign ordered_items = ordered_items | add_hash_key: 'total_entries', total_items %}
+{% include "modules/ecommerce/layout/pagination",  data: ordered_items, per_page, label: 'Items' %}
 
 
 <script>

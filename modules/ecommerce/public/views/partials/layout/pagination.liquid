@@ -1,3 +1,5 @@
+{% if data.total_entries > 0 %}
+
         <div class="paginations grid-x grid-padding-x align-right align-middle">
             <div class="shrink cell">
                 <span class="per__page color-font-head form-label"><strong>{{label | default: 'Items'}} per page:</strong></span>
@@ -49,6 +51,8 @@
                 </div>
             </div>
         </div>
+
+{% endif %}
 
 <script>
     let pagination = document.getElementById("pagination");

@@ -23,10 +23,31 @@
     console.log('cartItems', cartItems);
     console.log('productUUIDs', productUUIDs);
 
-    if( cartItems.length > 0){
+    if (cartItems.length > 0) {
         listCartItems(cartItems, productUUIDs);                       
+    } else {
+        renderEmptyCartMessage();
     }
 
+    function renderEmptyCartMessage() {
+        const shoppingCartItemsWrap = document.querySelector('#shopping-cart-items-wrap'); 
+
+        // HTML content for empty cart
+        const emptyCartHtml = `
+            <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
+                <div class="small-12 cell">
+                    <ins-card steady class="empty-state">
+                        <span>No Cart Items</span>
+                    </ins-card>
+                </div>
+            </div>
+        `;
+
+        // Insert the empty cart message if the shopping cart container exists
+        if (shoppingCartItemsWrap) {
+            shoppingCartItemsWrap.innerHTML = emptyCartHtml;
+        }
+    };
 
     async function listCartItems(carts, productUUIDs){
         let url = `/get-cart-products.json?product_uuids=`+ productUUIDs;
@@ -185,8 +206,10 @@
                         <div class="spacer small"></div>
                         <ins-input-stepper
                             class="cart-stepper" 
+                            data-id="${ data.cart.id }"
                             data-product_uuid="${ data.cart.product_uuid }"
                             data-product_sku="${ data.cart.product_sku }"
+                            data-product_name="${ data.cart.product_name }"
                             value="${ data.cart.quantity }" 
                             step="1" min="1" 
                             max="${ data.selected_prop.stock_level }" 

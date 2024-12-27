@@ -61,8 +61,10 @@
                         <div class="spacer small"></div>
                         <ins-input-stepper
                             class="cart-stepper" 
+                            data-id="{{ item.id }}"
                             data-product_uuid="{{ item.product_uuid }}"
                             data-product_sku="{{ item.product_sku }}"
+                            data-product_name="{{ item.product_name }}"
                             value="{{ item.quantity }}" 
                             step="1" min="1" 
                             max="{{ cart.selected_prop.stock_level  }}" 
@@ -107,10 +109,17 @@
         </div>
 
     {%- else -%}
-
         <div id="shopping-cart-items-wrap">
             {% comment %} Javascript generated content will be place here {% endcomment %}
-        </div>        
+        </div>      
+        
+        <ins-loader
+            id="shopping-guest-cart-loader"
+            state-title="Processing"
+            state-message="Please wait, we're processing your data."
+            state-icon="processing"
+            style="display: none;">
+        </ins-loader>
 
     {%- endif -%}
 

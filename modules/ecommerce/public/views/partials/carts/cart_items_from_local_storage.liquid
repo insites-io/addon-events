@@ -73,6 +73,8 @@
             let shoppingCartHtml = "";
             let orderSummaryHtml = "";
 
+            console.log('carts.length;', carts.length)
+
             for (let i = 0; i < carts.length; i++) {  
 
                 cart = JSON.parse(carts[i]); //convert string to object     
@@ -191,11 +193,14 @@
 
 
     //This template is for /shopping-cart page
-    function createShoppingCartHtml(data, i){     
+    function createShoppingCartHtml(data, i){   
         let content = `<div id="cart-item-${data.selected_prop.id}" class="cart-item-wrap cell">`;
 
         if( i > 0 ) content = content + `<hr><div class="spacer x-large"></div>`;                                    
-        
+
+        // Check if stock level is less than 1
+        let stepperMax = data.selected_prop.stock_level < 1 ? '' : `max="${data.selected_prop.stock_level}"`;
+
         content = content + `
                 <div class="grid-x" >
                     <div class="img-wrap" style="width:88px;">
@@ -226,7 +231,7 @@
                             data-product_name="${ data.cart.product_name }"
                             value="${ data.cart.quantity }" 
                             step="1" min="1" 
-                            max="${ data.selected_prop.stock_level }" 
+                            ${stepperMax}
                             small>
                         </ins-input-stepper>
                         <div class="spacer small"></div>

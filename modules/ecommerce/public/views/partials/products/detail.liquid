@@ -15,10 +15,9 @@
     else 
         assign price = selected_prop.regular_price
     endif
+
+    
 %}
-
-
-
 
 <div class="product-detail grid-x grid-padding-x">
     <div class="large-7 medium-12 small-12 cell">        
@@ -141,28 +140,44 @@
                             assign variants = variants | array_add:variant
                         %}
                     {%- endfor -%}
-
+            
+  
                     {% comment %} Get variant options {% endcomment %}
                     {% graphql variant_options = 'modules/ecommerce/products/variant_options/get_product_variant_options', 
                             product_uuid: product.uuid | dig: 'items','results' %}
 
-                    {%- for option in variant_options -%}
-                         <ins-select 
-                            class="variant-select" 
-                            label="{{ option.product_option_label | capitalize }}"
-                            label-key="{{ option.product_option_label }}"
-                            placeholder="Select Variant"
-                            error-message="Please select a variant"
-                            small>
-
-                            {%- for value in option.product_option_values -%}
-                                {% comment %} {% if forloop.first %} default {% endif %} {% endcomment %}
-                                <ins-select-option label="{{ value }}" value="{{ value }}" ></ins-select-option>
-                            {%- endfor -%}
-
-                        </ins-select>
-                        <div class="spacer"></div>
-                    {%- endfor -%}
+                        {%- for option in variant_options -%}
+                            <ins-select 
+                                class="variant-select" 
+                                label="{{ option.product_option_label | capitalize }}"
+                                label-key="{{ option.product_option_label }}"
+                                placeholder="Select Variant"
+                                error-message="Please select a variant"
+                                small>
+                        
+                                {%- for value in option.product_option_values -%}
+                                    {% comment %}
+                                        - Check if the value exists in the product variants, and render the option if found
+                                    {% endcomment %}
+                                    {%- assign value_exists = false -%}
+                                    {%- for variant_option in product.variant -%}
+                                        {%- if variant_option.options[0].product_option_value == value -%}
+                                            {%- assign value_exists = true -%}
+                                        {%- endif -%}
+                                    {%- endfor -%}
+                        
+                                    {%- if value_exists -%}
+                                        {%- if forloop.first -%}
+                                            <ins-select-option label="{{ value }}" value="{{ value }}" default ></ins-select-option>
+                                        {%- else -%}
+                                            <ins-select-option label="{{ value }}" value="{{ value }}"></ins-select-option>
+                                        {%- endif -%}
+                                    {%- endif -%}
+                                {%- endfor -%}
+                        
+                            </ins-select>
+                            <div class="spacer"></div>
+                        {%- endfor -%}
                 </div>
             </div>
         {%- endif -%} 
@@ -222,8 +237,22 @@
     const productPrice = document.getElementById("product-price");
     const regularProductPrice = document.getElementById("regular-product-price");
     const ourOfStockWrap = document.getElementById("out-of-stock-wrap");
-
     let variantSelect = document.querySelectorAll(".variant-select");
+
+    //Extracts and processes the first product option to update the content
+    document.addEventListener("DOMContentLoaded", function() {
+        const productOption = JSON.parse(variants[0].product_options[0]);
+        options = [
+            {
+                product_option_label: productOption.product_option_label,
+                product_option_value: productOption.product_option_value
+            }
+
+        ]
+        // Call the 'updateContent' function with the 'options' array as an argument
+        updateContent(options);
+    });
+
     variantSelect.forEach(el => {
         el.addEventListener('insValueChange', event => { 
             getSelectedVariant();

@@ -218,7 +218,8 @@ ins-button.button-large button.ins-button.size--large span {
     height: 100%;
     cursor: pointer;
 }
-.product-cards .cell:hover h6{
+.product-cards .cell:hover h6,
+.purchase-again .grid-x:hover h6 {
     color: var(--color-main);
 }
 .product-cards .wrap {
@@ -265,6 +266,7 @@ ins-button.button-large button.ins-button.size--large span {
 .purchase-again, 
 .purchase-again .grid-x{
     gap: 24px;
+    cursor: pointer;
 }
 .purchase-again>.grid-x{
     border-radius: 8px;
@@ -909,5 +911,18 @@ ins-filter .date-filter .fas  {
         width: fit-content;
         gap: 8px;
         align-items: baseline;
+    }
+}
+
+/* Ins-Table */
+.ibt-table .img-wrap, .ibt-table-accordion .img-wrap {
+    margin-right: 5px;
+}
+@media (max-width: 1023px) {
+    .ibt-table-wrap .ibt-table {
+        display: none;
+    }
+    .ibt-table-wrap .ibt-table-accordion {
+        display: block;
     }
 }

@@ -34,23 +34,8 @@
         {%- assign order_status = "Open" -%}
     {%- endif -%}
 
-
 {%- comment -%}
-Step 2: Update inventory, cart and order models.
-{%- endcomment -%}
-{% include 'modules/ecommerce/checkout/callback_update_records'
-    payment_response: payment_response,
-    status: status,
-    order_status: order_status,
-    order_payment_status: order_payment_status,
-    user_id: user_id,
-    order_uuid: order_uuid,
-    form: form,
-    gateway: gateway,
-    currency: currency %}
-
-{%- comment -%}
-Step 3: (optional) Create address models
+Step 2: (optional) Create address models
 {%- endcomment -%}
 {%- if context.current_user.id -%}
     {% include 'modules/ecommerce/checkout/callback_create_address', 
@@ -61,6 +46,22 @@ Step 3: (optional) Create address models
     {% assign guest_user = true %}
 {%- endif -%}
 
+
+{%- comment -%}
+Step 3: Update inventory, cart and order models.
+{%- endcomment -%}
+{% include 'modules/ecommerce/checkout/callback_update_records'
+    payment_response: payment_response,
+    status: status,
+    order_status: order_status,
+    order_payment_status: order_payment_status,
+    user_id: user_id,
+    order_uuid: order_uuid,
+    form: form,
+    gateway: gateway,
+    currency: currency,
+    guest_user: guest_user
+    %}
 
 {%- comment -%}
 Step 4: Trigger autoresponder, workflow email & API 

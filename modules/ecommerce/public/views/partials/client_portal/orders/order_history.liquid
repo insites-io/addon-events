@@ -75,7 +75,7 @@
     let tableContent = {{ orders.items.results }};
     let tableHeaders = [
         { label: 'Order Number', type: "string" },
-        { label: 'Date Ordered', type: "date" },
+        { label: 'Date Ordered', type: "string" },
         { label: 'Total Amount', type: "currency" },
         { label: 'Order Status', type: "string", hasTag: true },
         { label: 'Shipping Status', type: "string", hasTag: true}
@@ -93,8 +93,10 @@
     }
 
     function mapData(tableData) {
-        return tableData.map(data => {                                
-            let dateOrdered = TableScript.methods.formatDate(TableScript.methods.toDateOnly(data.date_time), date_format);
+        return tableData.map(data => {                 
+            let toDateOnly = TableScript.methods.toDateOnly(data.date_time);                
+            let formatDate = TableScript.methods.formatDate(toDateOnly, date_format);
+            let dateOrdered = changeDateFormat(formatDate);
             let shipping_status = data.order_shipping_status || 'Processing';
             let order_status = TableScript.methods.toTitleCase(resolveStatus(data.order_status));
 
@@ -107,6 +109,14 @@
                 "Shipping Status": shipping_status
             }
         });
+    }
+    
+
+    function changeDateFormat(dateString) {
+        // Split the input date string
+        const [month, day, year] = dateString.split('/');
+        // Rearrange into DD/MM/YYYY
+        return `${day}/${month}/${year}`;
     }
 
 

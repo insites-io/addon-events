@@ -183,6 +183,7 @@
 <script>
     let page = "{{ context.params.slug }}";
     let user_uuid = "{{ user_uuid }}";
+    let cartCounts = document.querySelectorAll('.cart-count')
     let cartDrawer = document.getElementById('cartDrawer');
     let cartItemsWrap = document.getElementById('cart-items-wrap');
     let emptyCartWrap = document.getElementById('empty-cart-wrap');
@@ -601,6 +602,13 @@
 
         cartSubtotal.textContent = `$${subTotal.toFixed(2)}`;
         cartDrawer.label = `Cart (${prices.length})`;
+
+        //Update total in cart icon
+        if(cartCounts.length > 0){
+            cartCounts.forEach(cartCount => {
+                cartCount.textContent = prices.length;
+            });
+        }
 
         if(prices.length == 0){
             bottomWrap.classList.add('hide');

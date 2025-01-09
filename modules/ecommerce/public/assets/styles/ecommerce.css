@@ -97,6 +97,10 @@ ins-button.button-large button.ins-button.size--large span {
     line-height: 24px; /* 150% */
     text-transform: uppercase;
 }
+ins-button.button-large button .btn__icon {
+    font-size: 14px;
+    text-align: right;
+}
 
 .ui-sidebar {
     font-family: var(--font-family-02);
@@ -968,4 +972,10 @@ ins-filter .date-filter .fas  {
     .ibt-table-wrap .ins-searchbar-container {
         width: 100%;
     }
+}
+
+/* Product Detailed View */
+.go-back button {
+    padding-left: 0px !important;
+    padding-right: 10px !important;
 }

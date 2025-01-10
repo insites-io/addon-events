@@ -35,7 +35,7 @@
                 <div class="out-of-stock"></div>
             {% endif %}
             {% if selected_prop.is_on_sale == true %}
-                <div class="on-sale-tag">SALE</div>
+                <div class="sale-tag">SALE</div>
             {% endif %}
             {% if product.product_image.url %}
                 <img  src="{{ product.product_image.url }}" alt="{{ product.product_name }}" >

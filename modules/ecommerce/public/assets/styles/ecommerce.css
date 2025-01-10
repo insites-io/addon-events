@@ -331,21 +331,35 @@ ins-button.button-large button .btn__icon {
 }
 
 /* Sale */
-.on-sale-tag {
+.sale-tag,
+.on-sale-tag {    
+    background: var(--error);
+    color: var(--font-color-inv);        
+    font-family: var(--font-family-02);
+}
+.sale-tag {
     position: absolute;
     top: 16px;
     left: 10px;
     z-index: 1;
-    padding: 4px 16px;
-    background: var(--error);
-    border-radius: 2px;
-    color: var(--font-color-inv);        
-    font-family: var(--font-family-02);
-    font-size: 14px;
-    font-style: normal;
+    padding: 4px 16px;    
+    border-radius: 2px;    
+    font-size: 14px;    
     font-weight: 700;
     line-height: 20px; /* 142.857% */
 }
+.on-sale-tag {        
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 40px;
+    padding: 4px 16px;
+    font-size: 20px;    
+    font-weight: 400;
+    line-height: 32px; /* 160% */
+}
+
+
 
 
 /* Product List - Sidebar Categories */
@@ -1006,4 +1020,45 @@ ins-filter .date-filter .fas  {
 .breadcrumbs span {
     margin: initial;
     margin-left: initial !important;
+}
+/* Product Detail Gallery */
+.product-detail .ins-gallery_thumbnails>div {
+    width: 100% !important;
+    transform: none !important;
+}
+.product-detail .ins-gallery.with-indicator .ins-gallery_progress {
+    display: none;
+}
+.product-detail .ins-gallery_thumbnails>div div {
+    display: inline-block !important;
+    float: none !important;
+    width: initial !important;
+}
+.no-stock {
+    border-radius: 4px;
+    border: 1px dashed var(--color-warning);
+    background-color: var(--color-ui-01);
+    color: var(--color-warning);
+    padding: 8px;
+}
+
+.product-detail .no-stock-text {
+    background-color: rgba(242, 116, 116, 0.2);
+    padding: 8px 0px;
+}
+
+.product-detail .gallery {
+    position: relative;
+    text-align: center;
+}
+
+.product-detail #product-quantity .ins-input-stepper_input,
+.cart-item-cont .ins-input-stepper_input {
+    padding-top: 0px;
+    vertical-align: bottom;
+}
+
+.product-detail #product-quantity .ins-input-stepper_input-wrap input,
+.cart-item-cont .ins-input-stepper_input-wrap input {
+    margin-bottom: 0px;
 }

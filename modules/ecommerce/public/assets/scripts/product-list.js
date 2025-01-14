@@ -81,9 +81,11 @@ let productList = (function () {
                     if(btnId == 'view-grid-btn'){
                         prodContainer.classList.add('medium-up-3');
                         prodContainer.classList.add('small-up-1');
+                        prodContainer.classList.remove('list-view'); 
                     } else {
                         prodContainer.classList.remove('medium-up-3');
                         prodContainer.classList.remove('small-up-1');
+                        prodContainer.classList.add('list-view'); 
                     }
                 }
             },

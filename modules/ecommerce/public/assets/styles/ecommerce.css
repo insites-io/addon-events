@@ -258,6 +258,26 @@ ins-button.button-large button .btn__icon {
     display: flex;
     flex-direction: column;
 }
+.product-cards.list-view .cell .grid-y{
+    flex-direction: row;
+     gap: 24px;
+ }
+ .product-cards.list-view .cell .grid-y .spacer.medium {
+     display: none;
+ }    
+ .product-cards.list-view img, 
+ .product-cards.list-view .placeholder-img {
+     width: 250px;
+     max-width: initial;
+     height: 184px;
+     min-height: initial;
+}
+.product-cards.list-view .container {
+    min-height: initial;
+}
+.product-cards.list-view .buttons {
+    min-width: 186px;
+}
 ins-carousel .product-cards .cell {
     height: 100%;
 }
@@ -614,6 +634,21 @@ ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
 }
 .cart-stepper .ins-form-field-wrap {
     display: inline-flex;
+}
+ins-drawer.cart-drawer .ins-drawer-header h4 {
+    color: var(--font-color-head);
+    font-family: var(--font-family-01);
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 32px; /* 133.333% */
+}
+.cart-drawer #bottom-wrap {
+    position: fixed;
+    bottom: 0px;
+    width: 343px;
+    padding-bottom: 24px;
+    background: var(--color-ui-01);
 }
 
 .cart-price {

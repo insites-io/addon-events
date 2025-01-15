@@ -83,7 +83,7 @@ whatsHotCarousel.forEach(carousel => {
         var carouselCtrlBtns = document.querySelector(`#${carouselID} .ins-carousel_ctrl-btns`);  
         if(carouselCtrlBtns && showAllLink[carouselID] !== true){            
             var newLink = document.createElement('a');
-                newLink.href = "/";
+                newLink.href = "/products";
                 newLink.textContent = "Shop All";
                 newLink.className = "shop-all-link"; 
             carouselCtrlBtns.appendChild(newLink);  

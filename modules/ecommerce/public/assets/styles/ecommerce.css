@@ -632,6 +632,9 @@ ins-drawer.cart-drawer .ins-drawer-wrap {
 ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     padding: 24px 16px;
 }
+.cart-drawer #cart-items-wrap {
+    padding-bottom: 200px;
+}
 .cart-drawer .ins-form-field-wrap {
     margin-bottom: 0px;
 }

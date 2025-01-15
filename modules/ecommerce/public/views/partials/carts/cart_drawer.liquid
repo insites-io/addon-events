@@ -444,6 +444,7 @@
 
     function cartItemHtml(data){
         const total_price = data.item_total_price || data.price;
+        const formattedTotalPrice = formatNumber(parseFloat(total_price.replace(/[^0-9.]/g, '')));
 
         return ` <div id="cart-item-${data.id}" class="cart-item-wrap">
                 <div class="grid-x" >
@@ -453,11 +454,11 @@
                         <div class="spacer x-small"></div>
                         <p>
                             <span class="body-x-small-bold">Price:</span>
-                            <span class="body-x-small item-price">$${ parseFloat(data.price).toFixed(2) }</span>
+                            <span class="body-x-small item-price">$${ formattedTotalPrice }</span>
                         </p>
                     </div>
                     <div class="cell grid-y large-5 medium-5 small-5 text-right">
-                        <p class="cart-price compute-price">$${ parseFloat(total_price).toFixed(2) }</p>
+                        <p class="cart-price compute-price">$${ formattedTotalPrice }</p>
                         <div class="spacer x-small"></div>
                         <ins-input-stepper
                             class="cart-stepper" 
@@ -594,12 +595,16 @@
         localStorage.setItem('carts', JSON.stringify(carts));        
     }
 
+    function formatNumber(num) {
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     function computeItemTotal(itemWrap, qty) {
-        let itemPrice = itemWrap.querySelector(".item-price");
+        let itemPrice = itemWrap.querySelector(".item-price").textContent;
+        let parseItemPrice = parseFloat(itemPrice.replace(/[^0-9.]/g, ''));
         let computePrice = itemWrap.querySelector(".compute-price");
-        let parseItemPrice = parseFloat(itemPrice.textContent.replace('$', ''))
         let itemTotalPrice = parseItemPrice * qty;
-        computePrice.textContent = `$${itemTotalPrice.toFixed(2)}`;
+        computePrice.textContent = "$" + formatNumber(itemTotalPrice);
 
         return {
             price: parseItemPrice,
@@ -612,10 +617,10 @@
         let prices = document.querySelectorAll(".compute-price");
 
         prices.forEach(price => {
-            subTotal += parseFloat(price.textContent.replace('$', ''));
+            subTotal += parseFloat(price.textContent.replace(/[^0-9.]/g, ''));
         });
 
-        cartSubtotal.textContent = `$${subTotal.toFixed(2)}`;
+        cartSubtotal.textContent = "$" + formatNumber(subTotal);
         cartDrawer.label = `Cart (${prices.length})`;
 
         //Update total in cart icon

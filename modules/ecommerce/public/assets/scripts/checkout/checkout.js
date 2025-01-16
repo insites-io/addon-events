@@ -70,7 +70,7 @@ const addressCards = document.getElementById("address-cards");
 
 const billingAddress1El = document.getElementById('billing_address_1');
 const billingAddress2El = document.getElementById('billing_address_2');
-const billingCityEl = document.getElementById('billing_city');
+const billingSuburbEl = document.getElementById('billing_suburb');
 const billingStateEl = document.getElementById('billing_state');
 const billingPostCodeEl = document.getElementById('billing_postcode');
 const billingCountryEl = document.getElementById('billing_country');
@@ -82,7 +82,7 @@ const hiddenBillingShippingEmailEl = document.getElementById('hidden-shipping-em
 const hiddenBillingShippingCompanyNameEl = document.getElementById('hidden-shipping-company-name');
 const hiddenBillingShippingAddress1El = document.getElementById('hidden-shipping-address-1');
 const hiddenBillingShippingddress2El = document.getElementById('hidden-shipping-address-2');
-const hiddenBillingShippingCityEl = document.getElementById('hidden-shipping-city');
+const hiddenBillingShippingSuburbEl = document.getElementById('hidden-shipping-suburb');
 const hiddenBillingShippingStateEl = document.getElementById('hidden-shipping-state');
 const hiddenBillingShippingPostCodeEl = document.getElementById('hidden-shipping-postcode');
 const hiddenBillingShippingCountryEl = document.getElementById('hidden-shipping-country')
@@ -322,7 +322,7 @@ let Checkout = (function () {
                     if (guestUserFlag) {
                         billingAddress1El.value = hiddenBillingShippingAddress1El.value;
                         billingAddress2El.value = hiddenBillingShippingddress2El.value;
-                        billingCityEl.value = hiddenBillingShippingCityEl.value;
+                        billingSuburbEl.value = hiddenBillingShippingSuburbEl.value;
                         billingStateEl.value = hiddenBillingShippingStateEl.value;
                         billingPostCodeEl.value = hiddenBillingShippingPostCodeEl.value;
                         billingCountryEl.value = hiddenBillingShippingCountryEl.value;
@@ -346,7 +346,7 @@ let Checkout = (function () {
                         billingCompanyNameEl.value = '';
                         billingAddress1El.value = '';
                         billingAddress2El.value = '';
-                        billingCityEl.value = '';
+                        billingSuburbEl.value = '';
                         billingStateEl.value = '';
                         billingPostCodeEl.value = '';
                         billingCountryEl.value = '';
@@ -506,7 +506,7 @@ let Checkout = (function () {
                     const guestPayload = {
                         [`${address}_address_1`]: document.getElementById(`${address}_address_1`).value,
                         [`${address}_address_2`]: document.getElementById(`${address}_address_2`).value,
-                        [`${address}_city`]: document.getElementById(`${address}_city`).value,
+                        [`${address}_suburb`]: document.getElementById(`${address}_suburb`).value,
                         [`${address}_state`]: document.getElementById(`${address}_state`).value,
                         [`${address}_postcode`]: document.getElementById(`${address}_postcode`).value,
                         [`${address}_country`]: document.getElementById(`${address}_country`).value,
@@ -555,7 +555,7 @@ let Checkout = (function () {
                 document.getElementById(`${type}_address_id`).value = addressCard.value || "";
                 document.getElementById(`${type}_address_1`).value = addressCard.dataset.address_1 || "";
                 document.getElementById(`${type}_address_2`).value = addressCard.dataset.address_2 || "";
-                document.getElementById(`${type}_city`).value = addressCard.dataset.city || "";
+                document.getElementById(`${type}_suburb`).value = addressCard.dataset.suburb || "";
                 document.getElementById(`${type}_state`).value = addressCard.dataset.state || "";
                 document.getElementById(`${type}_postcode`).value = addressCard.dataset.postcode || "";
                 document.getElementById(`${type}_country`).value = addressCard.dataset.country || "";
@@ -635,7 +635,7 @@ let Checkout = (function () {
                 document.getElementById(`${type}_address_id`).value = "";
                 document.getElementById(`${type}_address_1`).value = "";
                 document.getElementById(`${type}_address_2`).value = "";
-                document.getElementById(`${type}_city`).value = "";
+                document.getElementById(`${type}_suburb`).value = "";
                 document.getElementById(`${type}_state`).value = "";
                 document.getElementById(`${type}_postcode`).value = "";
                 document.getElementById(`${type}_country`).value = "";

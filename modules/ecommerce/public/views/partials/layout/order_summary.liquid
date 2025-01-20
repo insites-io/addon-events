@@ -23,7 +23,7 @@
 {%- endif -%}
 
 
-<div id="order-summary-wrap" class="show-for-medium">
+<div id="order-summary-main-wrap" class="show-for-medium">
     
     {% unless no_heading %}
         <h2 class="color-font-sub heading-2">Order Summary</h2>
@@ -305,8 +305,8 @@
 </ins-drawer>
 
 <script>
-    let orderSummaryWrap = document.getElementById('order-summary-wrap');
-    let orderSummaryHtmlContent = orderSummaryWrap.innerHTML;
+    let orderSummaryMainWrap = document.getElementById('order-summary-main-wrap');
+    let orderSummaryHtmlContent = orderSummaryMainWrap.innerHTML;
     let viewOrderSummaryBtn = document.getElementById('view-order-summary-btn');
     let orderSummaryDrawer = document.getElementById('order-summary-drawer');
     let orderSummaryDrawerContent = document.getElementById('order-summary-drawer-content');    

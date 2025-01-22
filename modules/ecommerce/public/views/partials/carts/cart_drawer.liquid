@@ -377,7 +377,6 @@
                 }
                 for (const item of all_items) {
                     let response = await apiServices.processRequest("post", "/add-to-cart.json", item);
-                    console.log('add reorder response', response); 
                     is_added = (response.state && response.data.items)? true : false;
                 }
                 return is_added;

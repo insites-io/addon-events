@@ -44,7 +44,6 @@
   
 
   function sortHandler(event){
-    console.log('sortHandler', event.detail);
     tableData.sort(TableScript.methods.dynamicKeySort("order_item_name"));
     if(event.detail.order == "desc"){
       tableData.reverse();

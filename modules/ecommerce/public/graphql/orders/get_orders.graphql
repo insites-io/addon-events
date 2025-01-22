@@ -23,8 +23,7 @@ query get_orders (
   ) {            
     total_entries
     results {
-      id            
-      #properties      
+      id             
       uuid: property(name: "uuid")
       order_number: property(name: "order_number")
       date_time: property(name: "date_time")

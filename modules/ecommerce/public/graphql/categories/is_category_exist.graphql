@@ -26,24 +26,17 @@ query is_category_exist (
         join_on_property: "parent_category_uuids"
         foreign_property: "uuid"
       ){
-        #uuid: property(name: "uuid") 
         slug: property(name: "slug")
         category_name: property(name: "category_name")
-        #parent_category_uuids: property_array(name: "parent_category_uuids")
-        #properties
         main_category: related_record(
           table: "modules/insites_ecommerce/category"
           join_on_property: "parent_category_uuids"
           foreign_property: "uuid"
           ){
-            #uuid: property(name: "uuid") 
             slug: property(name: "slug")
             category_name: property(name: "category_name")
-            #parent_category_uuids: property_array(name: "parent_category_uuids")
-            #properties
           }
       }
-      #properties
     }
   }
 }

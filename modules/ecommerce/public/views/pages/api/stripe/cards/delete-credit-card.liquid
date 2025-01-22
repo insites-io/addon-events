@@ -3,7 +3,6 @@ slug: api/stripe/delete-credit-card
 format: json
 method: post
 searchable: false
-# enable_profiler: true
 searchable: false
 metadata: {
   status: "published",
@@ -18,8 +17,8 @@ metadata: {
   sitemap_order: 9999, ## secondary order (ASC)
   sitemap_changefreq: "never"
 }
-#authorization_policies:
-#  - modules/client/customer_logged_in
+authorization_policies:
+  - modules/client/is_user_logged_in
 ---
 
 {%- assign payload = context.params.payload | parse_json -%}

@@ -8,35 +8,16 @@ flash_notice: "Success-UserAddressShipping"
 fields:
   properties:
     uuid:
-      #validation: 
-      #  presence: true
     related_uuid:
-      #validation: 
-      #  presence: true
     related_type: 
       property_options:
         default: "contact"
     address_1:
-      #validation: 
-      #  presence: 
-      #    message: Address is required
     address_2:
     suburb:
-      validation: 
-        presence: 
-          message: Suburb is required
     state:
-      #validation: 
-      #  presence: 
-      #    message: State is required
     postcode:
-      #validation: 
-      #  presence: 
-      #    message: Postal code is required
-    country:
-      #validation: 
-      #  presence: 
-      #    message: Country is required     
+    country:     
     same_shipping:
       property_options:
         virtual: true 

@@ -56,8 +56,7 @@ query search_products_with_related_record(
       category_uuids: property_array(name: "category_uuids")
       product_image: property_upload(name: "product_image") {
         url
-      }
-      #properties   
+      }  
     }
   }
 }

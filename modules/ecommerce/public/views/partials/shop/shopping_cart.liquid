@@ -16,7 +16,7 @@
                     <div class="spacer x-large"></div>
                 {% endif %}
                 <div class="grid-x" >
-                    <div class="img-wrap" style="width:88px;">
+                    <div class="img-wrap">
                         {% if cart.selected_prop.product_image.url %}
                             <img  src="{{ cart.selected_prop.product_image.url }}" alt="{{ cart.product_name }}" >
                         {% else %}
@@ -97,10 +97,10 @@
     </div>
     <ins-loader
         id="shopping-cart-loader"
+        class="hide"
         state-title="Processing"
         state-message="Please wait, we're processing your data."
-        state-icon="processing"
-        style="display: none;">
+        state-icon="processing">
     </ins-loader>
 {%- else -%}
 
@@ -121,10 +121,10 @@
         
         <ins-loader
             id="shopping-guest-cart-loader"
+            class="hide"
             state-title="Processing"
             state-message="Please wait, we're processing your data."
-            state-icon="processing"
-            style="display: none;">
+            state-icon="processing">
         </ins-loader>
 
     {%- endif -%}

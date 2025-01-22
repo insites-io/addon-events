@@ -97,7 +97,7 @@ Step: Call the search GraphQL with the parameters
 <div class="grid-x grid-padding-x">
     <div class="small-10 small-offset-1 cell text-center">
         {%- if keyword and keyword != blank -%}
-            <h1 class="heading-1"><span style="font-weight:400;">Search result for</span> <br>"{{ keyword }}"</h1>
+            <h1 class="heading-1 weight-normal">Search result for <br><b>"{{ keyword }}"</b></h1>
         {%- else -%}
             {%- if params.slug2 -%}
                 <h1 class="heading-1">{{ category_name }}</h1>

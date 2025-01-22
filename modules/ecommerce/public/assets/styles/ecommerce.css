@@ -48,6 +48,9 @@ h6, .heading-6 {
     line-height: 24px; /* 150% */
 }
 
+.weight-normal {
+    font-weight: 400;
+}
 .bold {
     font-weight: 700;
 }
@@ -740,6 +743,9 @@ ins-drawer.cart-drawer .ins-drawer-header h4 {
     margin-right: -16px; 
     padding-right: 16px; 
     box-sizing: content-box;
+}
+#shopping-cart-list .img-wrap{
+    width:88px;
 }
 #shopping-cart-list .cart-item-wrap .grid-x {
     column-gap: 24px;

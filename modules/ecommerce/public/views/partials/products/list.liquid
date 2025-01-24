@@ -62,6 +62,7 @@
     "page": {{page_num}},
     "size": {{per_page}},
     "keyword": "{{keyword}}",
+    "brand": "{{brand}}",
     "min_price": "{{min_price}}",
     "max_price": "{{max_price}}",
     "category_uuids": {{category_uuid | default: '[]'}},
@@ -73,24 +74,14 @@
         "not_number": 0,
     {%- endif -%}
 
-    {%- comment %} Filter by: brand {% endcomment %}
-    {% if brand and brand != '' %}
-        "brand": "{{brand}}",
-    {%- endif -%}
-
     "sort":{{ sort_by | json }}
 }
 {%- endparse_json -%}
 
 {%- comment -%}
 Step: Call the search GraphQL with the parameters
-<!-- This GraphQL is optimized for the list, thus not including gallery and variant items -->
 {%- endcomment -%}
-{% if brand and brand != '' %}
-    {%- graphql products = 'modules/ecommerce/products/search_products_with_related_record', args: filters -%}
-{% else %}
-    {%- graphql products = 'modules/ecommerce/products/search_products', args: filters -%}
-{% endif %}
+{%- graphql products = 'modules/ecommerce/products/search_products', args: filters -%}
 
 
 {% comment %} Title Heading {% endcomment %}

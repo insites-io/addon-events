@@ -16,6 +16,7 @@ query get_order_details (
   ){
     results {
 			
+      created_at
       id
       uuid: property(name: "uuid")      
       order_reference: property(name: "order_reference")

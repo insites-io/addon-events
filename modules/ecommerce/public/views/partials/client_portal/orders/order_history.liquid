@@ -159,6 +159,8 @@
     function filterData(searchKey, filterKey=["id"]){
 
         orderListTable.loadingScreen = true;
+        
+        let dateFrom, dateTo;
 
         if(filterKey.includes("order_status") && filterKey.includes("date_time")){
             searchKeyword = searchKey["Order Status"];

@@ -162,19 +162,21 @@
     
     {% comment %} user_cart = blank if the user has a guest account {% endcomment %}
     <div id="bottom-wrap" class="bottom-wrap {% if user_cart.items.size <= 0 or user_cart == blank %}hide{% endif %}">
-        <div class="spacer"></div>
-        <div class="grid-x align-justify" >
-            <p class="heading-3-small font-color-head">Sub Total</p>
-            <p id="cart-subtotal" class="heading-3-small font-color-head">{{ subtotal | plus: 0 | pricify: 'USD', no_cents_if_whole: false }}</p>
+        <div class="wrap">
+            <div class="spacer"></div>
+            <div class="grid-x align-justify" >
+                <p class="heading-3-small font-color-head">Sub Total</p>
+                <p id="cart-subtotal" class="heading-3-small font-color-head">{{ subtotal | plus: 0 | pricify: 'USD', no_cents_if_whole: false }}</p>
+            </div>
+            <div class="spacer"></div>
+            <ins-button id="go-to-cart" label="Go to Cart" icon="icon-shopping-cart" solid class="full" 
+                onclick="goToShoppingCartPage()">
+            </ins-button>
+            <div class="spacer x-small"></div>
+            <ins-button label="Continue Shopping" icon="icon-arrow-back" id="continue-shopping-btn" class="full"></ins-button>
+            <div class="spacer"></div>
+            <p class="body-small text-center">Shipping calculated at checkout</p>
         </div>
-        <div class="spacer"></div>
-        <ins-button id="go-to-cart" label="Go to Cart" icon="icon-shopping-cart" solid class="full" 
-            onclick="goToShoppingCartPage()">
-        </ins-button>
-        <div class="spacer x-small"></div>
-        <ins-button label="Continue Shopping" icon="icon-arrow-back" id="continue-shopping-btn" class="full"></ins-button>
-        <div class="spacer"></div>
-        <p class="body-small text-center">Shipping calculated at checkout</p>
     </div>    
     
 

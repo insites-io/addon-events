@@ -675,7 +675,8 @@ ins-button.view-button.active button {
 }
 
 /* Cart Drawer */
-#cartDrawer .ins-content {
+#cartDrawer .ins-content,
+#order-summary-drawer .ins-content {
     max-width: 100%;
 }
 ins-drawer.cart-drawer .ins-drawer-wrap {
@@ -891,6 +892,16 @@ ins-tag.preorder-tag span.ins-tag {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+}
+
+/* Summary Drawer */
+#order-summary-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
+    width: 430px;
+    max-width: 100%;
+    padding: 24px 16px;
+}
+#order-summary-drawer .ins-drawer-header {
+    max-width: 100%;
 }
 #order-summary-drawer .ins-drawer-header .ins-drawer-close-btn {
     color: var(--color-main);

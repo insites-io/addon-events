@@ -25,7 +25,7 @@
     <ins-step data-step="1" 
         {% if currentStep == 1 %}active{% endif %}
         {% if latestStep < 1 %}disabled {% endif %}
-        {% if latestStep > 1 and currentStep != 1 %}complete{% endif %}
+        {% if latestStep > 1 and currentStep > 1 %}complete{% endif %}
         content="account-details" 
         link="/checkout" 
         description="Account Details" 
@@ -36,7 +36,7 @@
     <ins-step data-step="2" 
         {% if currentStep == 2 %}active{% endif %}
         {% if latestStep < 2 %}disabled {% endif %}
-        {% if latestStep > 2 and currentStep != 2 %}complete{% endif %}
+        {% if latestStep > 2 and currentStep > 2 %}complete{% endif %}
         content="shipping-details" 
         link="/checkout/shipping" 
         description="Shipping" 
@@ -46,7 +46,7 @@
     <ins-step data-step="3" 
         {% if currentStep == 3 %}active{% endif %}
         {% if latestStep < 3 %}disabled {% endif %}
-        {% if latestStep > 3 and currentStep != 3 %}complete{% endif %}
+        {% if latestStep > 3 and currentStep > 3 %}complete{% endif %}
         content="billing-details" 
         link="/checkout/billing" 
         description="Billing" 
@@ -56,7 +56,7 @@
     <ins-step data-step="4" 
         {% if currentStep == 4 %}active{% endif %}
         {% if latestStep < 4 %}disabled {% endif %}
-        {% if latestStep > 4 and currentStep != 4 %}complete{% endif %}
+        {% if latestStep > 4 and currentStep > 4 %}complete{% endif %}
         content="payment-details" 
         link="/checkout/payment" 
         description="Payment" 

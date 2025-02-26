@@ -28,79 +28,83 @@ metadata:
     assign address_id = context.params.address_id | default: null
     assign user_uuid = context.current_user.external_id
     assign guest_user = context.params.guest_user
+%}
 
-    if guest_user and guest_user == true
-        # Assign address-related session variables for guest
-        if context.params.billing_address_1
-            session billing_address_1 = context.params.billing_address_1
-        endif
-        if context.params.billing_address_2
-            session billing_address_2 = context.params.billing_address_2
-        endif
-        if context.params.billing_suburb
-            session billing_suburb = context.params.billing_suburb
-        endif
-        if context.params.billing_state
-            session billing_state = context.params.billing_state
-        endif
-        if context.params.billing_postcode
-            session billing_postcode = context.params.billing_postcode
-        endif
-        if context.params.billing_country
-            session billing_country = context.params.billing_country
-        endif
+{% parse_json account_details %}
+{
+    "company_name": "{{ context.session.account_company_name }}",
+    "contact_first_name": "{{ context.current_user.first_name }}",
+    "contact_last_name": "{{ context.current_user.last_name }}",
+    "contact_email": "{{ context.current_user.email }}",
+    "contact_phone_number": "{{ context.session.account_mobile_number }}",
+    "contact_phone_country_code": "{{ context.session.account_mobile_country_code }}"
+}
+{% endparse_json %}
 
-        if context.params.shipping_address_1
-            session shipping_address_1 = context.params.shipping_address_1
-        endif
-        if context.params.shipping_address_2
-            session shipping_address_2 = context.params.shipping_address_2
-        endif
-        if context.params.shipping_suburb
-            session shipping_suburb = context.params.shipping_suburb
-        endif
-        if context.params.shipping_state
-            session shipping_state = context.params.shipping_state
-        endif
-        if context.params.shipping_postcode
-            session shipping_postcode = context.params.shipping_postcode
-        endif
-        if context.params.shipping_country
-            session shipping_country = context.params.shipping_country
-        endif
+{% parse_json param_shipping %}
+{
+    "company_name": "{{ context.params.shipping_company_name }}",
+    "contact_first_name": "{{ context.params.shipping_contact_first_name }}",
+    "contact_last_name": "{{ context.params.shipping_contact_last_name }}",
+    "contact_email": "{{ context.params.shipping_contact_email }}",
+    "contact_phone_number": "{{ context.params.shipping_contact_phone_number }}",
+    "contact_phone_country_code": "{{ context.params.shipping_contact_phone_country_code }}",
 
-        # Assign order-summary-related session variables for guest
-        assign guest_order_summary = '{}' | parse_json 
+    "address_1": "{{ context.params.shipping_address_1 }}",
+    "address_2": "{{ context.params.shipping_address_2 }}",
+    "suburb": "{{ context.params.shipping_suburb }}",
+    "state": "{{ context.params.shipping_state }}",
+    "postcode": "{{ context.params.shipping_postcode }}",
+    "country": "{{ context.params.shipping_country }}",
 
-        if context.params.sub_total_amount
-            assign guest_order_summary = guest_order_summary | add_hash_key: "sub_total_amount", context.params.sub_total_amount
-        endif
-        if context.params.shipping_amount
-            assign guest_order_summary = guest_order_summary | add_hash_key: "shipping_amount", context.params.shipping_amount
-        endif
-        if context.params.total_discount_amount
-            assign guest_order_summary = guest_order_summary | add_hash_key: "total_discount_amount", context.params.total_discount_amount
-        endif
-        if context.params.processing_fee
-            assign guest_order_summary = guest_order_summary | add_hash_key: "processing_fee", context.params.processing_fee
-        endif
-        if context.params.tax_label
-            assign guest_order_summary = guest_order_summary | add_hash_key: "tax_label", context.params.tax_label
-        endif
-        if context.params.tax_amount
-            assign guest_order_summary = guest_order_summary | add_hash_key: "tax_amount", context.params.tax_amount
-        endif
-        if context.params.tax_included_in_price
-            assign guest_order_summary = guest_order_summary | add_hash_key: "tax_included_in_price", context.params.tax_included_in_price
-        endif
-        if context.params.total_amount
-            assign guest_order_summary = guest_order_summary | add_hash_key: "total_amount", context.params.total_amount
-        endif
+    "instructions": "{{ context.params.shipping_instructions }}"    
+}
+{% endparse_json %}
 
-        # Only store in session if guest_order_summary is not still the initial empty object
-        if guest_order_summary != '{}' 
-            session guest_order_summary = guest_order_summary
-        endif
+{% parse_json session_shipping %}
+{
+    "company_name": "{{ context.session.shipping_company_name }}",
+    "contact_first_name": "{{ context.session.shipping_contact_first_name }}",
+    "contact_last_name": "{{ context.session.shipping_contact_last_name }}",
+    "contact_email": "{{ context.session.shipping_contact_email }}",
+    "contact_phone_number": "{{ context.session.shipping_contact_phone_number }}",
+    "contact_phone_country_code": "{{ context.session.shipping_contact_phone_country_code }}",
+
+    "address_1": "{{ context.session.shipping_address_1 }}",
+    "address_2": "{{ context.session.shipping_address_2 }}",
+    "suburb": "{{ context.session.shipping_suburb }}",
+    "state": "{{ context.session.shipping_state }}",
+    "postcode": "{{ context.session.shipping_postcode }}",
+    "country": "{{ context.session.shipping_country }}",
+
+    "instructions": "{{ context.session.shipping_instructions }}"    
+}
+{% endparse_json %}
+
+{% parse_json param_billing %}
+{
+    "same_with_shipping": "{{ context.params.billing_same_with_shipping }}",
+
+    "company_name": "{{ context.params.billing_company_name }}",
+    "contact_first_name": "{{ context.params.billing_contact_first_name }}",
+    "contact_last_name": "{{ context.params.billing_contact_last_name }}",
+    "contact_email": "{{ context.params.billing_contact_email }}",
+    "contact_phone_number": "{{ context.params.billing_contact_phone_number }}",
+    "contact_phone_country_code": "{{ context.params.billing_contact_phone_country_code }}",    
+
+    "address_1": "{{ context.params.billing_address_1 }}",
+    "address_2": "{{ context.params.billing_address_2 }}",
+    "suburb": "{{ context.params.billing_suburb }}",
+    "state": "{{ context.params.billing_state }}",
+    "postcode": "{{ context.params.billing_postcode }}",
+    "country": "{{ context.params.billing_country }}" 
+}
+{% endparse_json %}
+
+
+{% if guest_user and guest_user == true %}
+        
+    {% liquid
 
         # Assign order-cart-related session variables for guest
         if context.params.cart
@@ -109,82 +113,79 @@ metadata:
         if context.params.products
           session guest_products = context.params.products
         endif 
-    else
-        if address_id != null and user_uuid
-            graphql addresses = 'modules/ecommerce/address/get_address', user_uuid: user_uuid id: address_id | dig: 'items', 'results'
+    %}
 
-            if addresses.size > 0
-                assign address = addresses | first
+{% endif %}
 
-                if context.params.billing_same_with_shipping
-                    session billing_address_1 = address.address_1
-                    session billing_address_2 = address.address_2
-                    session billing_suburb = address.suburb
-                    session billing_state = address.state
-                    session billing_postcode = address.postcode
-                    session billing_country = address.country
-                    session billing_address_id = address_id
-                else
-                    session shipping_address_1 = address.address_1
-                    session shipping_address_2 = address.address_2
-                    session shipping_suburb = address.suburb
-                    session shipping_state = address.state
-                    session shipping_postcode = address.postcode
-                    session shipping_country = address.country
-                    session shipping_address_id = address_id
-                endif
+
+    {% comment %} Update Sessions for Shipping Details {% endcomment %}
+    {% if context.params.type == 'shipping' %}
+        {%  liquid
+                        
+            if address_id
+                session shipping_address_id = address_id
             endif
-        endif
-    endif
 
-    # Assign shipping-related session variables if provided
-    if context.params.same_shipping
-        session same_shipping = context.params.same_shipping
-    endif
-    if context.params.shipping_instructions
-        session shipping_instructions = context.params.shipping_instructions
-    endif
-    if context.params.shipping_company_name
-        session shipping_company_name = context.params.shipping_company_name
-    endif
-    if context.params.shipping_contact_first_name
-        session shipping_contact_first_name = context.params.shipping_contact_first_name
-    endif
-    if context.params.shipping_contact_last_name
-        session shipping_contact_last_name = context.params.shipping_contact_last_name
-    endif
-    if context.params.shipping_contact_email
-        session shipping_contact_email = context.params.shipping_contact_email
-    endif
-    if context.params.shipping_contact_phone_number
-        session shipping_contact_phone_number = context.params.shipping_contact_phone_number
-    endif
-    if context.params.shipping_contact_phone_country_code
-        session shipping_contact_phone_country_code = context.params.shipping_contact_phone_country_code
-    endif
+            session shipping_same_with_account = context.params.shipping_same_with_account
 
-    # Assign billing-related session variables if provided
-    if context.params.billing_same_with_shipping
-        session billing_same_with_shipping = context.params.billing_same_with_shipping
-    endif
-    if context.params.billing_company_name
-        session billing_company_name = context.params.billing_company_name
-    endif
-    if context.params.billing_contact_first_name
-        session billing_contact_first_name = context.params.billing_contact_first_name
-    endif
-    if context.params.billing_contact_last_name
-        session billing_contact_last_name = context.params.billing_contact_last_name
-    endif
-    if context.params.billing_contact_email
-        session billing_contact_email = context.params.billing_contact_email
-    endif
-    if context.params.billing_contact_phone_number
-        session billing_contact_phone_number = context.params.billing_contact_phone_number
-    endif
-    if context.params.billing_contact_phone_country_code
-        session billing_contact_phone_country_code = context.params.billing_contact_phone_country_code
-    endif
+            ## Select which contact details to use
+            if context.params.shipping_same_with_account == true or context.params.shipping_same_with_account == 'true'
+                assign data_contact_details = account_details
+            else
+                assign data_contact_details = param_shipping
+            endif
+
+            ## Shipping Contact Details
+            session shipping_company_name = data_contact_details.company_name
+            session shipping_contact_first_name = data_contact_details.contact_first_name
+            session shipping_contact_last_name = data_contact_details.contact_last_name
+            session shipping_contact_email = data_contact_details.contact_email
+            session shipping_contact_phone_number = data_contact_details.contact_phone_number
+            session shipping_contact_phone_country_code = data_contact_details.contact_phone_country_code
+
+            ## Shipping Address Details      
+            assign data = param_shipping      
+            session shipping_address_1 = data.address_1
+            session shipping_address_2 = data.address_2
+            session shipping_suburb = data.suburb
+            session shipping_state = data.state
+            session shipping_postcode = data.postcode
+            session shipping_country = data.country
+
+            session shipping_instructions = param_shipping.instructions  
+        %}
+    {% endif %}
+
+    {% comment %} Update Sessions for Billing Details {% endcomment %}
+    {% if context.params.type == 'billing' %}
+        {%  liquid
+
+            if context.params.billing_same_with_shipping == true or context.params.billing_same_with_shipping == 'true' 
+                assign data = session_shipping
+            else 
+                assign data = param_billing
+            endif
+
+            session billing_same_with_shipping = context.params.billing_same_with_shipping
+
+            session billing_company_name = data.company_name
+            session billing_contact_first_name = data.contact_first_name
+            session billing_contact_last_name = data.contact_last_name
+            session billing_contact_email = data.contact_email
+            session billing_contact_phone_number = data.contact_phone_number
+            session billing_contact_phone_country_code = data.contact_phone_country_code
+
+            session billing_address_1 = data.address_1
+            session billing_address_2 = data.address_2
+            session billing_suburb = data.suburb
+            session billing_state = data.state
+            session billing_postcode = data.postcode
+            session billing_country = data.country            
+        %}
+    {% endif %}
+
+
+{% liquid
 
     # Assign the latest step if present
     if context.params.latest_step
@@ -193,7 +194,7 @@ metadata:
 
     # Add response status
     assign response = response | add_hash_key: 'status', 200
-    assign response = response | add_hash_key: 'data', context.session
+    assign response = response | add_hash_key: 'data', context.session    
 
 %}
 

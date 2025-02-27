@@ -272,8 +272,13 @@ authorization_policies:
 {%- endif -%}
 
 {% comment %} Pagination {% endcomment %}
-{% assign ordered_items = ordered_items | add_hash_key: 'total_entries', total_items %}
-{% include "modules/ecommerce/layout/pagination",  data: ordered_items, per_page, label: 'Items' %}
+{% parse_json data  %}
+{
+    "total_entries": {{ total_items }},
+    "current_page": {{ page_num }}
+}
+{% endparse_json %}
+{% include "modules/ecommerce/layout/pagination", data: data, per_page, label: 'Items' %}
 
 
 <script>

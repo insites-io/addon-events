@@ -424,7 +424,7 @@ let Checkout = (function () {
                 if(isValid && emailIsClean) {
                     form.submit();
                 } else {
-                    App.events.notyf("error", "Please check missing fields");
+                    App.events.notyf("error", "Please check missing fields.");
                     accountSubmitBtn.loading = false;
                 }
                 return false;
@@ -451,7 +451,7 @@ let Checkout = (function () {
                         Checkout.events.saveSessionApi(true);
                     }
                 } else {
-                    App.events.notyf("error", "Please check missing fields");
+                    App.events.notyf("error", "Please check missing fields.");
                     shippingSubmitBtn.loading = false;
                 }
                 return false;
@@ -481,7 +481,7 @@ let Checkout = (function () {
                         }
                     }, 1000);                        
                 } else {
-                    App.events.notyf("error", "Please check missing fields");
+                    App.events.notyf("error", "Please check missing fields.");
                     billingSubmitBtn.loading = false;
                 }                
                             
@@ -752,7 +752,7 @@ let Checkout = (function () {
                 if(isValid) {
                     form.submit();
                 } else {
-                    App.events.notyf("error", "Please check missing fields");
+                    App.events.notyf("error", "Please check missing fields.");
                     checkoutSubmitBtn.loading = false
                 }
                 return false;

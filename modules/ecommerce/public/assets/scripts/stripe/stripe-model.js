@@ -18,7 +18,7 @@ let StripeModel = (() => {
                     } 
                     return response;
                 } else {
-                    App.events.notyf('error', "Failed to create creditcard");
+                    App.events.notyf('error', "Failed to create creditcard.");
                     return response;
                 }
             },
@@ -31,7 +31,7 @@ let StripeModel = (() => {
                 if (response.state) {
                     return response;
                 } else {
-                    App.events.notyf('error', "Failed to delete creditcard");
+                    App.events.notyf('error', "Failed to delete creditcard.");
                     return response;
                 }
             }

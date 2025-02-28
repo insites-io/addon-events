@@ -8,7 +8,6 @@ metadata: {
 {% function has_profile = "modules/website/layout/check_if_user_has_profile" %}
 {%- unless has_profile -%}
     {%- assign user_uuid = null -%}
-    bananana
 {%- endunless -%}
 
 {%- if is_ordered_items == true and order_uuid != '' -%}   
@@ -20,7 +19,7 @@ metadata: {
 {%- else -%}
 
     {% comment %} Get Cart Items {% endcomment %}    
-    {% if user_uuid %}
+    {% if user_uuid != blank %}
         {% comment %} Logged in user {% endcomment %}
         {% include 'modules/ecommerce/carts/cart_items', user_uuid %}
         {% assign cart_items = context.exports.cart_items %}
@@ -63,12 +62,10 @@ metadata: {
     {% endunless %}
         
     <div id="order-summary-cart-wrap" class="order-summary">  
-        user_uuid = {{ user_uuid }} 
         {% comment %}
             - This is only for logged-in users
         {% endcomment %}
-        {%- if show_product and user_uuid != '' -%}   
-            asdsadasds
+        {%- if show_product and user_uuid != blank -%}   
 
             {%- for item in carts -%}
 
@@ -108,7 +105,7 @@ metadata: {
         {%- endif -%}
     </div>
 
-    {%- if show_product and carts.size > 0 and user_uuid != '' -%}
+    {%- if show_product and carts.size > 0 and user_uuid != blank -%}
         <div class="spacer"></div>
         <hr>
         <div class="spacer"></div>

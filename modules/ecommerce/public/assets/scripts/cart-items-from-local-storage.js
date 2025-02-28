@@ -276,7 +276,7 @@ function createOrderSummaryHtml(data){
                     <p>${ data.cart.quantity }x</p>
                 </div>
                 <div class="text-right large-3 medium-12 small-12 cell">                        
-                    <p class="font-color-sub">${ data.item_total_price }</p>
+                    <p class="font-color-sub">$${ data.price.toFixed(2) }</p>
                 </div>
             </div>
             <div class="spacer small"></div>`;

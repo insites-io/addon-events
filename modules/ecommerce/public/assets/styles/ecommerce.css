@@ -689,7 +689,8 @@ ins-button.view-button.active button {
 ins-drawer.cart-drawer .ins-drawer-wrap {
     z-index: 1000;
 }
-ins-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
+#cartDrawer .ins-drawer-wrap .ins-content .ins-drawer-body,
+#order-summary-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     width: 390px;
     max-width: 100%;
     padding: 24px 16px;

@@ -50,7 +50,7 @@ function renderEmptyCartMessage() {
         <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
             <div class="small-12 cell">
                 <ins-card steady class="empty-state">
-                    <span>No Cart Items</span>
+                    <span>Your cart is empty.</span>
                 </ins-card>
             </div>
         </div>

@@ -1055,8 +1055,17 @@ ins-card.overview .wrap{
 }
 .order-filter-wrap {
     position: relative;
-    bottom: -41px;
+    bottom: -46px;
     z-index: 100;
+}
+#order-table .ins-searchbar-container {
+    min-width: 300px;
+    max-width: 300px;
+}
+@media (max-width: 768px) {
+    #order-table .ins-searchbar-container {
+        min-width: auto;
+    }
 }
 @media only screen and (max-width: 1023px) {
     .order-filter-wrap {
@@ -1259,7 +1268,6 @@ ins-filter .date-filter {
     padding: 8px 12px;
     justify-content: center;
     align-items: center;    
-    line-height: 20px;
 }
 ins-filter-item .filter-item__button--option{
     align-items: center;
@@ -1281,8 +1289,8 @@ ins-filter .date-filter .fas  {
     margin-top: 3px;
     margin-bottom: -3px;
 }
-#purchased-filter .filter-item__button,
-#purchased-filter .ins-filter-datepicker-wrap {
+.filter-item__button,
+.ins-filter-datepicker-wrap {
     line-height: 0px; /* remove extra height */
 }
 #purchased-filter ins-filter-item .filter-item,

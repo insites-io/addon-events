@@ -60,7 +60,7 @@ metadata: {
         - STEP 3: Trigger the Stripe API to create the charge 
     {%- endcomment -%}
     {% graphql stripe_create_charge = 'modules/ecommerce/system/trigger_api_call', 
-        name: "modules/ecommerce/create_charge",
+        name: "modules/portal/create_charge",
         data: create_charge 
         | dig: "items" | dig: "response" %}
         

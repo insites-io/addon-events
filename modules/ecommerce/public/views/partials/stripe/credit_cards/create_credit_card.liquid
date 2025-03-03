@@ -4,7 +4,7 @@ metadata: {
 }
 ---
 {% comment %} Create Stripe card {% endcomment %}
-    {% graphql create_stripe_card = 'modules/ecommerce/system/trigger_api_call', name: "modules/ecommerce/create_card",
+    {% graphql create_stripe_card = 'modules/ecommerce/system/trigger_api_call', name: "modules/portal/create_card",
                 data: data | dig: 'items','response' %}
 
     {%- assign stripe_response = create_stripe_card.body | parse_json -%}

@@ -138,7 +138,7 @@ metadata: {
             "description": ""
         }
         {%- endparse_json -%}
-        {%- graphql create_stripe_customer = 'modules/ecommerce/system/trigger_api_call', name: "modules/ecommerce/create_customer", data: customer_data | dig: 'items' | dig: 'response' -%}    
+        {%- graphql create_stripe_customer = 'modules/ecommerce/system/trigger_api_call', name: "modules/portal/create_customer", data: customer_data | dig: 'items' | dig: 'response' -%}    
 
         {%- assign stripe_customer_response = create_stripe_customer.body | parse_json -%}
         {%- assign stripe_customer_id = stripe_customer_response.id -%}

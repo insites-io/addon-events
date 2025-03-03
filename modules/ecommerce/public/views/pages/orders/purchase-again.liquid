@@ -108,34 +108,33 @@ authorization_policies:
 %}
 
     
-<div class="grid-x align-bottom no-margin">
-    <ins-filter 
-        id="purchased-filter"
-        class="cell large-8 medium-12 small-12"
-        label="Filter by:"
-        with-date-filter 
-        date-from="{{dateFrom}}"
-        date-to="{{dateTo}}"
-        date-title="Date">
+<div class="grid-x no-margin">
+    <div class="cell large-8 medium-12 small-12">
+        <ins-filter 
+            id="purchased-filter"        
+            label="Filter by:"
+            with-date-filter 
+            date-from="{{dateFrom}}"
+            date-to="{{dateTo}}"
+            date-title="Date">
 
-        <ins-filter-item
-            selected="{{category_filter}}"
-            name="Category"                
-            options='{{ categories }}'>
-        </ins-filter-item>
-    </ins-filter>
-
-    <div class="spacer hide-for-large cell"></div>
-
-    <ins-input
-        id="search-by-name"
-        class="cell large-4 medium-12 small-12"
-        placeholder="Search by name"
-        label=""
-        field="search"
-        value="{{ product_name }}"
-        icon="icon-search-1">
-    </ins-input>
+            <ins-filter-item
+                selected="{{category_filter}}"
+                name="Category"                
+                options='{{ categories }}'>
+            </ins-filter-item>
+        </ins-filter>
+    </div>
+    <div class="cell large-4 medium-12 small-12">    
+        <ins-input
+            id="search-by-name"        
+            placeholder="Search by name"
+            label=""
+            field="search"
+            value="{{ product_name }}"
+            icon="icon-search-1">
+        </ins-input>
+    </div>
 </div>
 
 

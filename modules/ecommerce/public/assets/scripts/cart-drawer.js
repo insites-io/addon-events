@@ -203,8 +203,6 @@ async function addToCart(data, type, all_items, reorder_iteration){
             if(response.state) {
                 goToCartButtonEnabled();
                 if (page == 'shopping-cart') {
-                    shoppingCartListEl.style.display = 'flex';
-                    shoppingCartLoaderEl.classList.add("hide");
                     location.reload();
                 } 
 
@@ -213,7 +211,7 @@ async function addToCart(data, type, all_items, reorder_iteration){
                 return true;          
             } else {
                 goToCartButtonEnabled();
-                App.events.notyf("error", "Something went wrong. Please try again");
+                App.events.notyf("error", "Something went wrong. Please try again.");
             }
          
         }
@@ -307,7 +305,7 @@ async function removeToCart(data){
             return true;          
         } else {
             goToCartButtonEnabled();
-            App.events.notyf("error", "Something went wrong. Please try again");
+            App.events.notyf("error", "Something went wrong. Please try again.");
         }
     } else {
         removeCartFromLocalStorage(data);            

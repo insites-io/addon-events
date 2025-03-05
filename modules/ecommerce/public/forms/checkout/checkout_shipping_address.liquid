@@ -107,7 +107,6 @@ callback_actions: |-
 
     
   <div id="shipping-details" class="insites-form">
-
     <h2 class="heading-2">Shipping Contact</h2>
     <div class="spacer x-large"></div>
 
@@ -194,10 +193,17 @@ callback_actions: |-
       
       {% if has_profile %}      
 
+      {% liquid 
+         if context.current_user
+            assign temp_shipping_address_id = context.session.shipping_address_id | default: ''
+         else 
+            assign temp_shipping_address_id = 'new'
+         endif        
+      %}
       <ins-input validate
         id="shipping_address_id" 
         class="hidden-input"
-        value="{{ context.session.shipping_address_id | default: '' }}"
+        value="{{ temp_shipping_address_id }}"
         name="{{ prop.shipping_address_id.name }}"
         error-message="Shipping address is required. Please select from the list below or add new address.">
       </ins-input> 

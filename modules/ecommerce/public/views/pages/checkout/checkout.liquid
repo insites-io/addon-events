@@ -6,9 +6,9 @@ max_deep_level: 3
 metadata: {
     "status": "published",
     "page_type": "content", 
-    "page_name": "checkout",
-    "page_title": "checkout",
-    "meta_title": "checkout"       
+    "page_name": "Checkout",
+    "page_title": "Checkout",
+    "meta_title": "Checkout"       
 }
 ---
 {%- include "modules/insites_cms/globals" -%}
@@ -22,4 +22,10 @@ metadata: {
     {% redirect_to '/checkout/shipping' %}
 {%- else -%}
     {%- include 'modules/ecommerce/checkout/landing_page' -%}
+{%- endif -%}
+
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/portal/scripts/login-scripts.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/portal/scripts/login-scripts.min.js' | asset_url }}"></script>
 {%- endif -%}

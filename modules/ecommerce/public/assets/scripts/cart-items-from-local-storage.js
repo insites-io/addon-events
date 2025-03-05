@@ -50,7 +50,7 @@ function renderEmptyCartMessage() {
         <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
             <div class="small-12 cell">
                 <ins-card steady class="empty-state">
-                    <span>No Cart Items</span>
+                    <span>Your cart is empty.</span>
                 </ins-card>
             </div>
         </div>
@@ -180,7 +180,7 @@ async function listCartItems(carts, productUUIDs){
             }
                 
             if(shoppingCartItemsWrap) shoppingCartHtml += createShoppingCartHtml(data, i);  
-            if(page_url !=='/shopping-cart' && orderSummaryWrap) orderSummaryHtml += createOrderSummaryHtml(data, i); 
+            //if(page_url !=='/shopping-cart' && orderSummaryWrap) orderSummaryHtml += createOrderSummaryHtml(data, i); 
         };
 
             

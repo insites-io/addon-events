@@ -195,7 +195,7 @@ let UserProfileScript = (function () {
                         }
                     } 
                     selectedEl.parentNode.remove();
-                    App.events.notyf('success', "Credit card has been removed");
+                    App.events.notyf('success', "Credit card has been removed.");
                     UserProfileScript.methods.checkCardCount();
                 }
             }

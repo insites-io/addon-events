@@ -186,7 +186,7 @@ let CheckoutSteps = (function () {
             },
             incompleteStep(event) {
                 event.currentStep.hasError = true;
-                App.events.notyf("error", "Please check missing fields");
+                App.events.notyf("error", "Please check missing fields.");
             },
             addressCardsHasError(step, error) {
                 step.querySelectorAll('.address-options ins-checkbox-card')

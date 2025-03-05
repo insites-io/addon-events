@@ -14,7 +14,7 @@ metadata: {
 ---
 {%- assign status = 200 -%}
 {%- assign discount_uuid = context.params.uuid -%}
-{%-  assign user_uuid = context.current_user.external_id -%}
+{%- assign user_uuid = context.current_user.external_id -%}
 
 
 {%- if user_uuid and discount_uuid -%}

@@ -16,8 +16,6 @@ layout: modules/insites_core/insites_internal_email_layout
 {% include "modules/insites_cms/globals" %}
 {% assign global = context.exports.global %}
 
-{% log data, type: "==test order_success data" %}
-
 {% assign user = data.customer_info %}
 {% assign form = data.form %}
 {% assign order = data.order_info %}

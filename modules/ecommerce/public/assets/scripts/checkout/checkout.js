@@ -750,6 +750,7 @@ let Checkout = (function () {
                 Checkout.validation.validateCreditCard(form);
 
                 if(isValid) {
+                    localStorage.removeItem('discount_uuids');
                     form.submit();
                 } else {
                     App.events.notyf("error", "Please check missing fields.");

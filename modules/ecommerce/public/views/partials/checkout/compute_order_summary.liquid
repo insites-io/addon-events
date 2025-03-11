@@ -147,6 +147,15 @@ metadata: {
 {% endif %}
 
 {% assign temp_total = sub_total_amount | plus: sub_total_shipping | minus: sub_total_discount | plus: sub_total_tax | minus: sub_total_tax_included %}
+
+{% comment %} ? ADD VALUE FOR TAX INCLUDED AND NOT INCLUDED {% endcomment %}
+{% assign sub_total_tax_not_included = sub_total_tax | minus: sub_total_tax_included %}
+{% if sub_total_tax_not_included != 0 and sub_total_tax_included != 0 %}
+    {% assign tax_applied = "both" %}
+{% else %}
+    {% assign tax_applied = "single" %}        
+{% endif %}
+
 {% assign processing_fee = temp_total | times: 0.017 %}
 {% assign total_amount = temp_total | plus: processing_fee %}
 
@@ -160,8 +169,16 @@ metadata: {
     "tax_label": "{{ tax_label }}",
     "tax_amount": {{ sub_total_tax | default: 0 }},
     "tax_included_in_price": {{ sub_total_tax_included | default: 0 }},
-    "total_amount": {{ total_amount | default: 0 }}
+    "total_amount": {{ total_amount | default: 0 }},
+    "sub_total_tax_not_included": {{ sub_total_tax_not_included | times: 1 | default: 0 }},
+    "sub_total_tax_included": {{ sub_total_tax_included | times: 1 | default: 0 }},
+    "tax_applied": "{{ tax_applied }}"
 }
 {% endparse_json %}
 
+{% comment %} ? add to session for confirmation {% endcomment %}
+ {% session sub_total_tax_not_included = sub_total_tax_not_included | times: 1 | default: 0 %}
+ {% session sub_total_tax_included = sub_total_tax_included | times: 1 | default: 0 %}
+ {% session tax_applied = tax_applied %}
+ 
 {% export computed %}

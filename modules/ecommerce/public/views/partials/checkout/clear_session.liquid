@@ -53,3 +53,8 @@ metadata: {
 {%- session guest_info = null -%}
 {%- session guest_cart = null -%}
 {%- session guest_products = null -%}
+
+{% comment %} ? Clear tax details for confirmation {% endcomment %}
+{% session sub_total_tax_not_included = null %}
+{% session sub_total_tax_included = null %}
+{% session tax_applied = null %}

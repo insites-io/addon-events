@@ -30,7 +30,7 @@ metadata: {
     {% else %}
         {% comment %} Guest user {% endcomment %}
         {% assign carts = context.session.guest_cart %}
-        
+
         {% comment %} Get product info {% endcomment %}
         {%  liquid  
             assign product_uuids = carts | array_map: 'product_uuid' | array_flatten
@@ -66,9 +66,13 @@ metadata: {
             - This is only for logged-in users
         {% endcomment %}
         {%- if show_product and user_uuid != blank -%}   
-
             {%- for item in carts -%}
-
+                {% comment %} ? TAX LABEL {% endcomment %}
+                {% if item.is_fixed_tax_amount %}
+                    {% assign tax_label = "Includes Tax" %}
+                {% else %}
+                    {% assign tax_label = "Tax" %}        
+                {% endif %} 
                 {%- if params.slug == 'confirmation' and params.id != '' -%}
                     {%  liquid 
                         assign cart = '' | parse_json
@@ -79,8 +83,7 @@ metadata: {
                     {% include 'modules/ecommerce/carts/cart_details', products, item, user_uuid %}
                     {% assign cart = context.exports.cart %}   
                 {%- endif -%}
-                                
-            
+
                 <div class="grid-x grid-padding-x body-large">
                     <div class="product-name large-6 medium-8 small-6 cell">
                         <p class="font-color-sub">{{ cart.product_name }}</p>
@@ -121,7 +124,6 @@ metadata: {
     {%- endif -%}
     {% assign computed = context.exports.computed %}
 
-
    {% comment %} Subtotal {% endcomment %}
     <div class="grid-x grid-padding-x">
         <div class="large-6 medium-6 small-6 cell">
@@ -153,8 +155,7 @@ metadata: {
         </div>
     </div>     
     <div class="spacer x-small"></div>           
-          
-    
+
     {% comment %} Discounts {% endcomment %}
     {% if discounts.size > 0 or computed.total_discount_amount > 0 %}
         <div class="list-discount-codes">
@@ -246,7 +247,6 @@ metadata: {
     {%- endif -%}
     {% comment %} END Discount Codes {% endcomment %}
 
-
     {% comment %} Processing Fee {% endcomment %}
     <div class="grid-x grid-padding-x">
         <div class="large-6 medium-6 small-6 cell">
@@ -266,22 +266,100 @@ metadata: {
 
     {% comment %} Tax {% endcomment %}
     <div class="grid-x grid-padding-x">
-        <div class="large-6 medium-6 small-6 cell">
-            <p class="font-color-sub" id="summary_tax_label">{{ computed.tax_label | default: 'Tax' }}</p>
-        </div>
-        <div class="large-6 medium-6 small-6 cell text-right">
-            {%- assign tax_amount = computed.tax_amount | advanced_format: '%.2f' | default: "0.00" -%}
-            {%- assign tax_amount = tax_amount | pricify -%}
-            {%- unless tax_amount contains '.' -%}
-                {%- assign tax_amount = tax_amount | append: '.00' -%}
-            {%- endunless -%}
-            <p id="summary_tax">{{ tax_amount }}</p>
-        </div>
+        {% comment %} ? Confirmation {% endcomment %}
+        {% if context.params.slug == 'confirmation' %}
+            {% comment %} ? Tax Applied = Both or Single {% endcomment %}
+            {% if context.session.tax_applied == "both" %}
+                {% comment %} ? IF BOTH INCLUDES AND NOT INCLUDES TAX IS ON CART {% endcomment %}
+                <div class="large-6 medium-6 small-6 cell pb-8">
+                    <p class="font-color-sub" id="summary_tax_label">Includes Tax </p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign sub_total_tax_included = context.session.sub_total_tax_included | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign sub_total_tax_included = sub_total_tax_included | pricify -%}
+                    {%- unless sub_total_tax_included contains '.' -%}
+                        {%- assign sub_total_tax_included = sub_total_tax_included | append: '.00' -%}
+                    {%- endunless -%}
+                    <p id="summary_tax">({{ sub_total_tax_included }})</p>
+                </div>
+
+                <div class="large-6 medium-6 small-6 cell">
+                    <p class="font-color-sub" id="summary_tax_label">Tax </p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign sub_total_tax_not_included = context.session.sub_total_tax_not_included | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign sub_total_tax_not_included = sub_total_tax_not_included | pricify -%}
+                    {%- unless sub_total_tax_not_included contains '.' -%}
+                        {%- assign sub_total_tax_not_included = sub_total_tax_not_included | append: '.00' -%}
+                    {%- endunless -%}
+                    <p id="summary_tax">{{ sub_total_tax_not_included }}</p>
+                </div>
+            {% else %}
+                <div class="large-6 medium-6 small-6 cell">
+                    <p class="font-color-sub" id="summary_tax_label">{{ computed.tax_label | default: 'Tax' }}</p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign tax_amount = computed.tax_amount | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign tax_amount = tax_amount | pricify -%}
+                    {%- unless tax_amount contains '.' -%}
+                        {%- assign tax_amount = tax_amount | append: '.00' -%}
+                    {%- endunless -%}
+                    {% if context.session.sub_total_tax_included != 0 %}
+                        <p id="summary_tax">({{ tax_amount }})</p>
+                    {% else %}
+                        <p id="summary_tax">{{ tax_amount }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            {% if computed.tax_applied == "both" %}
+                {% comment %} ? IF BOTH INCLUDES AND NOT INCLUDES TAX IS ON CART {% endcomment %}
+                <div class="large-6 medium-6 small-6 cell pb-8">
+                    <p class="font-color-sub" id="summary_tax_label">Includes Tax </p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign sub_total_tax_included = computed.sub_total_tax_included | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign sub_total_tax_included = sub_total_tax_included | pricify -%}
+                    {%- unless sub_total_tax_included contains '.' -%}
+                        {%- assign sub_total_tax_included = sub_total_tax_included | append: '.00' -%}
+                    {%- endunless -%}
+                    <p id="summary_tax">({{ sub_total_tax_included }})</p>
+                </div>
+
+                <div class="large-6 medium-6 small-6 cell">
+                    <p class="font-color-sub" id="summary_tax_label">Tax </p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign sub_total_tax_not_included = computed.sub_total_tax_not_included | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign sub_total_tax_not_included = sub_total_tax_not_included | pricify -%}
+                    {%- unless sub_total_tax_not_included contains '.' -%}
+                        {%- assign sub_total_tax_not_included = sub_total_tax_not_included | append: '.00' -%}
+                    {%- endunless -%}
+                    <p id="summary_tax">{{ sub_total_tax_not_included }}</p>
+                </div>
+            {% else %}
+                {% comment %} ? IF SINGLE TAX IS ON CARD {% endcomment %}
+                <div class="large-6 medium-6 small-6 cell">
+                    <p class="font-color-sub" id="summary_tax_label">{{ computed.tax_label | default: 'Tax' }}</p>
+                </div>
+                <div class="large-6 medium-6 small-6 cell text-right">
+                    {%- assign tax_amount = computed.tax_amount | advanced_format: '%.2f' | default: "0.00" -%}
+                    {%- assign tax_amount = tax_amount | pricify -%}
+                    {%- unless tax_amount contains '.' -%}
+                        {%- assign tax_amount = tax_amount | append: '.00' -%}
+                    {%- endunless -%}
+                    {% if computed.sub_total_tax_included != 0 %}
+                        <p id="summary_tax">({{ tax_amount }})</p>
+                    {% else %}
+                        <p id="summary_tax">{{ tax_amount }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
     <div class="spacer medium"></div>    
     <hr>
     <div class="spacer medium"></div>
-
 
     <div class="grid-x grid-padding-x font-color-head">
         <div class="large-6 medium-6 small-6 cell">

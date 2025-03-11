@@ -87,7 +87,7 @@ authorization_policies:
         <div class="large-7 medium-6 small-12 cell">
             <h2 class="heading-2">Order Details</h2>
             <div class="spacer xx-large"></div>
-
+       
             <div class="grid-x grid-padding-x">
 
                 {% if has_profile %}
@@ -171,6 +171,7 @@ authorization_policies:
 
                 {% comment %} Payment Details {% endcomment %}
                 
+                {% if has_profile %}
                 <div class="{% if has_profile %}large-offset-1{% endif %} large-5 medium-12 small-12 cell">
                     <h3 class="heading-3">Payment Details</h3>
                     <div class="spacer small"></div>
@@ -182,6 +183,8 @@ authorization_policies:
                     <p class="font-cabin">{{ month }} / {{ order.payment.card_expiry_year }}</p>
                     <div class="spacer xx-large"></div>
                 </div>
+                {% endif %}
+                    
                                               
 
             </div>

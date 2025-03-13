@@ -18,11 +18,20 @@ metadata: {
         ## If not exist: Create new Company
         unless company.id 
             assign uuid = '' | uuid
-            graphql company = 'modules/ecommerce/companies/create_company', company_name: company_name, uuid: uuid | dig: 'items' 
-        endunless        
+            assign data = '{}' | parse_json
+            assign properties = '{}' | parse_json
+            assign properties = properties | add_hash_key: 'company_name', 'Liquid Sample'
+            assign data = data | add_hash_key: 'properties', properties
 
+            graphql add_company = 'modules/website/trigger_api_call', name: 'modules/portal/add_company', data: data | dig: 'items','response','body' | parse_json
+            assign company = add_company | dig: 'items'
+        endunless 
+        
         ## Assign Company to Contact
-        graphql assign_contact = 'modules/ecommerce/contacts/assign_company_contact', id: user_id, company_uuid: company.uuid | dig: 'items' 
+        assign api_data = '{}' | parse_json
+        assign api_data = api_data | add_hash_key: 'company_uuid', company.uuid
+        assign api_data = api_data | add_hash_key: 'contact_ids', user_id
+        graphql assign_contact = 'modules/website/trigger_api_call', name: 'modules/portal/assign_company_contact', data: api_data | dig: 'items','response','body' | parse_json
 
         assign company_id = company.id
         assign company_uuid = company.uuid

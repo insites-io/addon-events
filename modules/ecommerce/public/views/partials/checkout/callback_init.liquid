@@ -43,7 +43,6 @@ metadata: {
 Step 2: (optional) Create address models
 {%- endcomment -%}
 {%- if context.current_user.id -%}
-    {% include 'modules/ecommerce/checkout/callback_create_address', form: form %}
     {% assign guest_user = false %}
     {% assign products = context.exports.cart_items.products  %}
     {% assign cart = context.exports.cart_items.carts  %}

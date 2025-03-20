@@ -6,8 +6,9 @@ metadata: {
 {%- assign user_uuid = form.properties.order_contact_uuid -%}
 {%- assign date_time = "now" | date: "%Y-%m-%dT%H:%M:%SZ" -%}
 {%- capture payment_gateway_details -%}{{ payment_response }}{%- endcapture -%}
-{%- assign amount = payment_response.amount | divided_by: 100 -%}
+{%- assign amount = payment_response.amount | divided_by: 100.00 -%}
 
+{%- log payment_response, type: "Payment Response --><>" -%}
 
 {%- parse_json card -%}
 {
@@ -18,27 +19,35 @@ metadata: {
 }
 {%- endparse_json -%}
 
-
+{% parse_json temp_computed %}
+{
+    "total_amount": {{ amount }}
+}
+{% endparse_json %}
 {%- comment -%}Step 2.0: Create payment data{%- endcomment -%}
-{% assign uuid = '' | uuid %}
-{% graphql create_payment = "modules/ecommerce/payment/create_payment", 
-    uuid: uuid,
-    order_uuid: order_uuid,
-    source: "Payment Gateway",
-    status: order_payment_status,
-    payment_gateway_name: gateway,
-    payment_gateway_details: payment_gateway_details,
-    notes: "",
-    date_time: date_time,
-    card_last_four_digits: card.last4,
-    card_brand: card.brand,
-    card_expiry_month: card.exp_month,
-    card_expiry_year: card.exp_year,
-    currency: currency,
-    amount: amount %}
-    
-{% log create_payment, type: "Payment Created" %}
-
+{% parse_json data %}
+{
+    "order_id": "{{ order_id }}",
+    "order_uuid": "{{ order_uuid }}",
+    "payment_source": "Payment Gateway",
+    "payment_status": "{{ order_payment_status }}",
+    "payment_gateway_name": "{{ gateway | titleize }}",
+    "date_time": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}",
+    "last_updated_by_id": "{{ context.current_user.id }}",
+    "is_enabled": true,
+    "card_last4": "{{ card.last4 }}",
+    "card_brand": "{{ card.brand }}",
+    "card_exp_month": "{{ card.exp_month }}",
+    "card_exp_year": "{{ card.exp_year }}",
+    "currency": "{{ currency }}",
+    "order_value": {{ amount }},
+    "amount": {{ amount }},
+    "amount_due": {{ amount }}
+}
+{% endparse_json %}
+{% assign data = data | add_hash_key: "payment_gateway_details", payment_gateway_details %}
+{% assign data = data | add_hash_key: "computed", temp_computed %}
+{%- graphql add_payment = 'modules/website/trigger_api_call', name: "modules/portal/add_payment", data: data | dig: 'items','response','body' | parse_json -%}   
 
 
 {% comment %} Create Order Items {% endcomment %}
@@ -49,7 +58,9 @@ metadata: {
 {%- comment -%} Delete the user cart if the status is not 'failed'. {%- endcomment -%}
 {% assign tmp_order_payment_status = order_payment_status | downcase %}
 {% unless tmp_order_payment_status contains 'failed' %}
-    {% graphql delete_cart = 'modules/ecommerce/carts/delete_cart', id: user_cart.id %}
+    {% if user_cart.id %}
+        {% graphql delete_cart = 'modules/ecommerce/carts/delete_cart', id: user_cart.id %}
+    {% endif %}
 {% endunless %}
 
 
@@ -59,15 +70,19 @@ metadata: {
 
 
 {%- comment -%}Step 2.3: Update order status fields{%- endcomment -%}
-{% graphql updated_order = "modules/ecommerce/orders/update_order", 
-    id: form.id,
-    date_time: date_time,
-    order_payment_status: order_payment_status,
-    order_status: order_status,
-    shipping_company_name: form.properties.shipping_company_name,
-    billing_company_name: form.properties.billing_company_name %}
+{%- parse_json order_update_data -%}
+{
+    "id": "{{ form.id }}",
+    "date_time": "{{ date_time }}",
+    "order_payment_status": "{{ order_payment_status }}",
+    "order_status": "{{ order_status }}",
+    "shipping_company_name": "{{ form.properties.shipping_company_name }}",
+    "billing_company_name": "{{ form.properties.billing_company_name }}"
+}
+{%- endparse_json -%}
+{%- graphql updated_order = 'modules/website/trigger_api_call', name: "modules/portal/update_order", data: order_update_data | dig: 'items','response','body' | parse_json -%}
 
-{% log updated_order.items.id, type: "Order Updated" %}
+{% log updated_order, type: "Order Updated -->" %}
 
 
 
@@ -111,5 +126,6 @@ metadata: {
     {%- endif -%}
 {%- endif -%}
 
+{%- log updated_order, type: "===========updated_order================" -%}
 
 {% export updated_order %}

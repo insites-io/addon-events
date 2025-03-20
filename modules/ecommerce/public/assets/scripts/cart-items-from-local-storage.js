@@ -17,22 +17,38 @@ let summary_tax_amount = 0;
 let tax_included_in_price = 0;
 let summary_total_amount = 0;
 
-let cartItems = localStorage.getItem('carts');
+let cartItems = parseArray(localStorage.getItem('carts'));
+
+// Check if local_discount_uuids is already declared
+if (typeof local_discount_uuids === 'undefined') {
+    let local_discount_uuids = parseArray(localStorage.getItem('discount_uuids'));
+} else {
+    // If it's already declared, just update its value
+    local_discount_uuids = parseArray(localStorage.getItem('discount_uuids'));
+}
+
 let products = [];
 let cartData = [];
 
 let page_url = window.location.pathname;
+let segments = page_url.split('/').filter(Boolean); // Remove empty elements
+let slug = segments[0];
 
-// Check if cartItems is not null and not an empty string
-if (cartItems) {
-    try {
-        cartItems = JSON.parse(cartItems);
-    } catch (e) {
-        console.error("Error parsing JSON from localStorage:", e);
-        cartItems = []; 
+
+// Parse an Array of strings into an Array of objects
+function parseArray(data) {
+    let parsed_data;
+    if (data) {
+        try {
+            parsed_data = JSON.parse(data);
+        } catch (e) {
+            console.error("Error parsing JSON from localStorage:", e);
+            parsed_data = [];
+        }
+    } else {
+        parsed_data = [];
     }
-} else {
-    cartItems = []; 
+    return parsed_data;
 }
 
 let productUUIDs = cartItems.map(item => JSON.parse(item).product_uuid);
@@ -178,7 +194,6 @@ async function listCartItems(carts, productUUIDs){
                 "item_total_price": item_total_price,
                 "summary_subtotal_amount": summary_subtotal_amount
             }
-                
             if(shoppingCartItemsWrap) shoppingCartHtml += createShoppingCartHtml(data, i);  
             //if(page_url !=='/shopping-cart' && orderSummaryWrap) orderSummaryHtml += createOrderSummaryHtml(data, i); 
         };
@@ -196,7 +211,6 @@ async function listCartItems(carts, productUUIDs){
 
         // for checkout pages - Order Summary
         if(page_url !=='/shopping-cart' && orderSummaryWrap) {                
-            orderSummaryHtml +=  `<hr><div class="spacer"></div>`;
             orderSummaryWrap.insertAdjacentHTML('afterbegin', orderSummaryHtml);                
         }
             
@@ -267,6 +281,7 @@ function createShoppingCartHtml(data, i){
     return content;
 }
 
+/*
 function createOrderSummaryHtml(data){
     let content = `<div class="grid-x grid-padding-x body-large">
                 <div class="product-name large-6 medium-8 small-6 cell">
@@ -283,6 +298,7 @@ function createOrderSummaryHtml(data){
         
     return content;
 }
+*/
 
 let formatter = new Intl.NumberFormat('en-US', {
     style: 'decimal',
@@ -291,10 +307,13 @@ let formatter = new Intl.NumberFormat('en-US', {
 });
    
 // Push the cart from local storage into the database.
+/*
 if( is_new_user && is_new_user == true && user_uuid != ""){
     pushLocalCartToDB({carts:cartItems, user_uuid: user_uuid});
 }    
+*/
 
+/*
 async function pushLocalCartToDB(data){        
     let response = await apiServices.processRequest("post", "/push-local-cart-to-db.json", data);
               
@@ -303,3 +322,27 @@ async function pushLocalCartToDB(data){
         localStorage.setItem('carts', []); 
     }
 } 
+*/
+
+
+if(slug == 'checkout'){
+    compareSessionsAndLocal();
+}
+
+// Compare the POS sessions with the local storage
+async function compareSessionsAndLocal() {
+    if (cartItems.length != session_carts.length || local_discount_uuids.length != session_discount_uuids.length){
+        const payload = {
+            guest_user: true,
+            cart: cartItems,
+            discount_uuids: local_discount_uuids,
+            type: 'cart-items-from-local-storage'
+        };
+        const url = '/save-checkout-session.json';
+        const response = await apiServices.processRequest('post', url, payload);
+        console.log('compare', response);
+        setTimeout(() => {
+            window.location.href = '/shopping-cart'
+        }, 1000); // add delay to allow the session to be saved
+    }
+}

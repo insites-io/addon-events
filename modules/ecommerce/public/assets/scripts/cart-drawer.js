@@ -40,6 +40,7 @@ addToCartBtn.forEach(btn => {
 });
 
 function addToCartPreProcess(event, type){
+   
     //show hide
     emptyCartWrap.classList.add("hide");
     bottomWrap.classList.remove("hide");
@@ -61,16 +62,17 @@ function addToCartPreProcess(event, type){
         reorder_iteration = 0;
         type = event.detail.label
     }         
+    
         
     //used for product with variants in product details page
     if (productSKU && variantID != 0) {
-        if (productSKU.textContent == data.product_sku){
+        if (productSKU.textContent != data.product_sku){
             data.id = variantID;
             data.price = variantPrice;
             data.product_sku = productSKU.textContent;
         }     
     }
-       
+   
     let cartItem = document.getElementById(`cart-item-${data.id}`);
  
     if(cartItem == null){

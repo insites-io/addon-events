@@ -84,6 +84,61 @@ function renderEmptyCartMessage() {
     }
 };
 
+
+//This template is for /shopping-cart page
+function createShoppingCartHtml(data, i){   
+    let content = `<div id="cart-item-${data.selected_prop.id}" class="cart-item-wrap cell">`;
+
+    if( i > 0 ) content = content + `<hr><div class="spacer x-large"></div>`;                                    
+
+        // Check if stock level is less than 1
+    let stepperMax = data.selected_prop.stock_level < 1 ? '' : `max="${data.selected_prop.stock_level}"`;
+
+    content = content + `
+        <div class="grid-x" >
+            <div class="img-wrap">
+                ${data.img}
+            </div>
+            <div class="text-wrap">
+                <h6>
+                    ${ data.cart.product_name }
+                    ${ data.preorder }
+                </h6> 
+                <p class="body-small">SKU: ${ data.cart.product_sku }</p>
+                <div class="spacer small"></div>
+                ${ data.variant_option }
+                <p>
+                    <span class="body-x-small-bold">Price:</span>
+                    <span class="body-x-small item-price">$${ formatNumber(data.price) }</span>
+                    ${ data.price_strikethrough }
+                </p>
+            </div>
+            <div class="btn-wrap grid-y">
+                <p class="cart-price compute-price">$${ formatNumber(data.item_total_price) }</p>
+                <div class="spacer small"></div>
+                <ins-input-stepper
+                    class="cart-stepper" 
+                    data-id="${ data.cart.id }"
+                    data-product_uuid="${ data.cart.product_uuid }"
+                    data-product_sku="${ data.cart.product_sku }"
+                    data-product_name="${ data.cart.product_name }"
+                    value="${ data.cart.quantity }" 
+                    step="1" min="1" 
+                    ${stepperMax}
+                    small>
+                </ins-input-stepper>
+                <div class="spacer small"></div>
+                <div class="text-right" >
+                    <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"product_uuid":"${data.cart.product_uuid}","product_sku":"${data.cart.product_sku}"}' ></ins-button>                            
+                </div> 
+            </div>        
+        </div>                   
+        <div class="spacer x-large"></div>
+    </div>`;    
+
+    return content;
+}
+
 async function listCartItems(carts, productUUIDs){
     let url = `/get-cart-products.json?product_uuids=`+ productUUIDs;
     let response = await apiServices.processRequest("get", url); 
@@ -227,59 +282,7 @@ var placeholderImage = `<div class="placeholder-img vertical-align-middle">
     </div>`;
 
 
-//This template is for /shopping-cart page
-function createShoppingCartHtml(data, i){   
-    let content = `<div id="cart-item-${data.selected_prop.id}" class="cart-item-wrap cell">`;
 
-    if( i > 0 ) content = content + `<hr><div class="spacer x-large"></div>`;                                    
-
-        // Check if stock level is less than 1
-    let stepperMax = data.selected_prop.stock_level < 1 ? '' : `max="${data.selected_prop.stock_level}"`;
-
-    content = content + `
-        <div class="grid-x" >
-            <div class="img-wrap">
-                ${data.img}
-            </div>
-            <div class="text-wrap">
-                <h6>
-                    ${ data.cart.product_name }
-                    ${ data.preorder }
-                </h6> 
-                <p class="body-small">SKU: ${ data.cart.product_sku }</p>
-                <div class="spacer small"></div>
-                ${ data.variant_option }
-                <p>
-                    <span class="body-x-small-bold">Price:</span>
-                    <span class="body-x-small item-price">$${ formatNumber(data.price) }</span>
-                    ${ data.price_strikethrough }
-                </p>
-            </div>
-            <div class="btn-wrap grid-y">
-                <p class="cart-price compute-price">$${ formatNumber(data.item_total_price) }</p>
-                <div class="spacer small"></div>
-                <ins-input-stepper
-                    class="cart-stepper" 
-                    data-id="${ data.cart.id }"
-                    data-product_uuid="${ data.cart.product_uuid }"
-                    data-product_sku="${ data.cart.product_sku }"
-                    data-product_name="${ data.cart.product_name }"
-                    value="${ data.cart.quantity }" 
-                    step="1" min="1" 
-                    ${stepperMax}
-                    small>
-                </ins-input-stepper>
-                <div class="spacer small"></div>
-                <div class="text-right" >
-                    <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"product_uuid":"${data.cart.product_uuid}","product_sku":"${data.cart.product_sku}"}' ></ins-button>                            
-                </div> 
-            </div>        
-        </div>                   
-        <div class="spacer x-large"></div>
-    </div>`;    
-
-    return content;
-}
 
 /*
 function createOrderSummaryHtml(data){

@@ -18,14 +18,7 @@ let tax_included_in_price = 0;
 let summary_total_amount = 0;
 
 let cartItems = parseArray(localStorage.getItem('carts'));
-
-// Check if local_discount_uuids is already declared
-if (typeof local_discount_uuids === 'undefined') {
-    let local_discount_uuids = parseArray(localStorage.getItem('discount_uuids'));
-} else {
-    // If it's already declared, just update its value
-    local_discount_uuids = parseArray(localStorage.getItem('discount_uuids'));
-}
+let this_local_discount_uuids = parseArray(localStorage.getItem('discount_uuids'));
 
 let products = [];
 let cartData = [];
@@ -334,11 +327,11 @@ if(slug == 'checkout'){
 
 // Compare the POS sessions with the local storage
 async function compareSessionsAndLocal() {
-    if (cartItems.length != session_carts.length || local_discount_uuids.length != session_discount_uuids.length){
+    if (cartItems.length != session_carts.length || this_local_discount_uuids.length != session_discount_uuids.length){
         const payload = {
             guest_user: true,
             cart: cartItems,
-            discount_uuids: local_discount_uuids,
+            discount_uuids: this_local_discount_uuids,
             type: 'cart-items-from-local-storage'
         };
         const url = '/save-checkout-session.json';

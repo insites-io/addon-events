@@ -19,10 +19,10 @@ query search_products(
       }
       properties:[
       	{ name: "status", value: "enabled" }
-        { name: "category_uuids", value_in: $category_uuids }
+        { name: "category_uuids", array_overlaps: $category_uuids }
         { name: "is_on_sale", value_boolean: $is_on_sale }
         { name: "stock_level", not_value_int: $not_number }
-        { name: "brand_name", value: $brand }
+        { name: "brand_name", contains: $brand }
       ]
       fulltext:{
         keyword:$keyword
@@ -42,7 +42,6 @@ query search_products(
       slug: property(name: "slug")
       sku: property(name: "sku")
       stock_level: property_int(name: "stock_level")
-      is_variant_enabled: property_boolean(name: "is_variant_enabled")
       is_featured: property_boolean(name: "is_featured")
       is_on_sale: property_boolean(name: "is_on_sale")
       regular_price: property_float(name: "regular_price")

@@ -1,15 +1,14 @@
-query get_api_endpoint($name: String!) {
+query get_api_endpoint($event_type: String!) {
   items: records (
     page: 1,
     per_page: 1,
     filter: {
       table: {
-        value: "modules/insites_ecommerce/insites_api_call_endpoint"
+        value: "modules/insites_ecommerce/webhook"
       },
       properties: [
         {
-          name: "name"
-          value: $name
+          name: "event_type" value: $event_type
         }
       ]
     }

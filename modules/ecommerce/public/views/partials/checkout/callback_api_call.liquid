@@ -24,13 +24,13 @@ metadata: {
 
 {%- comment -%}Verify that API endpoint was configured{%- endcomment -%}
 {%- graphql check_endpoint = 'modules/ecommerce/system/get_api_endpoint',
-    name: endpoint_name
+    event_type: endpoint_name
     | dig: "items" | dig: "results" | first -%}
 
 {% log api_name, type: "==== Trigger API call: api_name ====" %}
 {% log check_endpoint, type: "==== Trigger API call: api_name ====" %}
 
-{%- if check_endpoint.properties.endpoint != nil -%}
+{%- if check_endpoint.properties.webhook_url != nil -%}
     {% comment %} Send API Call {% endcomment %}
     {%- graphql trigger = "modules/ecommerce/system/trigger_api_call",
         name: api_name,

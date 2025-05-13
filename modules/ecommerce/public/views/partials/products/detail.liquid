@@ -81,9 +81,9 @@ metadata: {
         <div class="spacer xx-large"></div>
         <div class="show-for-large">
             {%- if product.long_description != blank -%}
-            <h2>Key Features</h2>
+            <h4>Key Features</h4>
             <div class="spacer"></div>
-            <div>
+            <div class="body description">                
                 {{ product.long_description  | html_safe }}
             </div>
             {%- endif -%}
@@ -97,12 +97,12 @@ metadata: {
             {% comment %} Text heading {% endcomment %}
             <div>
                 <h1 class="heading-1">{{ product.product_name }}</h1>                
-                <p class="body-paragraph">SKU: <span id="product-sku">{% if product.is_product_variant_enabled != true %}{{ product.sku }}{% endif %}</p>
+                <p>SKU: <span id="product-sku">{% if product.is_product_variant_enabled != true %}{{ product.sku }}{% endif %}</p>
             </div>
             
             {% comment %} Price {% endcomment %}
             <div>                                                
-                <p id="product-price" class="heading-4">{{ price | pricify: 'USD', no_cents_if_whole: false }}</p>
+                <h5 id="product-price" class="heading-5-small">{{ price | pricify: 'USD', no_cents_if_whole: false }}</h5>
                 {% if price_strikethrough != '' %}
                 <p id="regular-product-price" class="strikethrough">{{ price_strikethrough | pricify: 'USD', no_cents_if_whole: false }}</p>
                 {% endif %}
@@ -111,7 +111,7 @@ metadata: {
             {% comment %} Description {% endcomment %}
             {% if product.short_description %}
             <div>
-                {{ product.short_description }}
+                <p>{{ product.short_description }}</p>
             </div>
             {% endif %}
         
@@ -233,13 +233,15 @@ metadata: {
     <div class="hide-for-large">        
         {%- if product.long_description != blank -%}
          <div class="spacer x-large"></div>
-        <h2>Key Features</h2>
+        <h4>Key Features</h4>
         <div class="spacer large"></div>
-        <div>
+        <div class="body description">
             {{ product.long_description  | html_safe }}
         </div>
         {%- endif -%}
     </div>
+
+    <div class="cell show-for-large spacer xxxx-large"></div>
 
     <div class="cell">
         {% include 'modules/ecommerce/blocks/you_may_also_like', not_uuid: product.uuid %}

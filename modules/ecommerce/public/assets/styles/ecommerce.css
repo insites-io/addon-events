@@ -28,12 +28,41 @@ body :not(header) > .wrapper {
     font-weight: 700;
     line-height: 32px; /* 133.333% */
 }
+.heading-5-small,
+h5.heading-5-small {
+    color: var(--font-color-head) !important;
+    font-family: var(--font-family-01) !important;
+    font-size: 18px !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    line-height: 130% !important; /* 23.4px */
+    letter-spacing: 0.18px !important;
+}
 h6, .heading-6 {
     font-family: var(--font-family-01);
     font-size: 16px;
     font-style: normal;
     font-weight: 700;
     line-height: 120%; /* 19.2px */
+}
+ul,
+ol,
+li {
+    color: var(--font-color-body);
+    font-family: var(--font-family-02);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    margin-bottom: 16px;
+}
+body {
+    color: var(--font-color-body);
+    font-family: var(--font-family-02);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 24px */
 }
 .body-x-small {
     color: var(--font-color-body);
@@ -164,7 +193,7 @@ ins-input.hidden-input input {
 
 /* Mega Menu */
 #mega-menu .ins-modal-wrap.show-modal ins-card .ins-card-wrap {
-    max-width: 100%;
+    max-width: 1344px;
     border-radius: 0px;
     background: var(--color-ui-01);
     border-top: 1px solid var(--color-ui-04);
@@ -201,10 +230,10 @@ ins-input.hidden-input input {
     height: 24px;
 }
 #mega-menu-btn button.ins-button span, .icon-angle-down:before {
-    text-transform: none;
+    /* text-transform: none;
     font-size: 14px !important;
     color: var(--font-color-head);
-    letter-spacing: 0 !important;
+    letter-spacing: 0 !important; */
 }
 #mega-menu-btn  button.blue:not([disabled]):hover {
     background: none;
@@ -212,8 +241,11 @@ ins-input.hidden-input input {
 #mega-menu-btn .ripple-wave.show {
     display: none;
 }
+#mega-menu-btn button.ins-button span {
+    font-weight: 700;
+}
 #mega-menu-btn.show-modal button.ins-button span, #mega-menu-btn.show-modal .icon-angle-down:before{
-    color: var(--color-main);
+    /* color: var(--color-main); */    
 }
 
 
@@ -227,17 +259,22 @@ ins-input.hidden-input input {
 .product-carousel .ins-carousel_ctrl-btns ins-button button {
     top: 0px;    
     right: 28px;
+    padding: 0px !important;
+    border: none;    
     border-radius: 50% !important;
 }
+.product-carousel .ins-carousel_ctrl-btns ins-button button:hover {
+    background: var(--color-main-hover-light);
+}
 .product-carousel .carouselDesktop .ins-carousel_ctrl-btns ins-button button{
-    right: 104px;
+    right: 0px;
 }
 .product-carousel .ins-carousel_ctrl-btns ins-button:nth-child(1) button {
     left: initial;
     right: 86px;
 }
 .product-carousel .carouselDesktop .ins-carousel_ctrl-btns ins-button:nth-child(1) button{
-    right: 162px;
+    right: 60px;
 }
 @media only screen and (max-width: 768px) {
     .product-carousel .ins-carousel.layout-1 .ins-carousel_ctrl-btns{
@@ -250,13 +287,26 @@ ins-input.hidden-input input {
     height: 48px;
 }
 .product-carousel .carouselMobile .ins-carousel_ctrl-btns ins-button:nth-child(1) button {
-    right: 64px;
+    right: 76px;
 } 
 .product-carousel .carouselMobile .ins-carousel_ctrl-btns ins-button:nth-child(2) button {
-    right: 0px;
+    right: 12px;
 } 
+.product-carousel .ins-carousel_ctrl-btns .btn__icon{
+    color: var(--font-color-body);
+    font-size: 24px;
+}
+.product-carousel .ins-carousel_ctrl-btns .icon-angle-left:before {
+    content: "\e91f";
+}
+.product-carousel .ins-carousel_ctrl-btns .icon-angle-right:before {
+    content: "\e921";
+}
+.product-carousel .product-cards {
+    margin-top: -12px;
+}
 .carouselMobile .product-cards {
-    margin-top: 96px;
+    margin-top: 116px;
 }
 .carouselMobile  .product-cards .cell {
     padding: 0px;
@@ -276,11 +326,11 @@ ins-input.hidden-input input {
     color: var(--color-main) !important;
 }
 .product-carousel .carouselMobile .shop-all-link {
-    top: 62px;
+    top: 72px;
     left: 0px;
 }
 .carouselDesktop .shop-all-link {
-    right: 228px;
+    right: 152px;
 }
 
 
@@ -364,7 +414,7 @@ ins-carousel .product-cards .placeholder-img {
     min-height: 211px;
 }
 .product-current-price {
-    color: var(---font-color-head);
+    color: var(--font-color-head);
     font-family: var(--font-family-01);
     font-size: 16px;
     font-style: normal;
@@ -1492,6 +1542,10 @@ ins-filter .date-filter .fas  {
 .product-detail #product-quantity .ins-input-stepper_input-wrap input,
 .cart-item-cont .ins-input-stepper_input-wrap input {
     margin-bottom: 0px;
+}
+
+.product-detail .description p {
+    margin-bottom: 16px;
 }
 
 /* Credit Card */

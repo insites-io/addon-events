@@ -18,13 +18,13 @@ metadata: {
 
 {% comment %} Date Format {% endcomment %}
 {%  liquid
-    function localisation_date_format = 'modules/ecommerce/localisation/get_localisation'
+  function localisation_date_format = 'modules/ecommerce/localisation/get_localisation'
 
-    if localisation_date_format == 'DD/MM/YYYY'
-      assign date_time = order.date_time | date: '%d/%m/%Y'
-    else
-      assign date_time = order.date_time | date: '%m/%d/%Y'
-    endif
+  if localisation_date_format == 'DD/MM/YYYY'
+    assign date_time = order.date_time | date: '%d/%m/%Y'
+  else
+    assign date_time = order.date_time | date: '%m/%d/%Y'
+  endif
 %}
 
 

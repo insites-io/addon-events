@@ -1,14 +1,3 @@
-<input type="hidden" 
-id="hidden-shipping-phone" 
-name="{{ prop.shipping_contact_phone_number.name }}"
-value="{{ context.session.shipping_contact_phone_number }}" > 
-
-<input type="hidden" 
-id="hidden-shipping-phone-country-code"
-name="{{ prop.shipping_contact_phone_country_code.name }}"
-value="{{ context.session.shipping_contact_phone_country_code }}" >
-
-
 {% comment %} Shipping contact {% endcomment %}
 <div id="shipping-details" class="insites-form">
 <h4>Shipping contact</h4>
@@ -76,6 +65,16 @@ value="{{ context.session.shipping_contact_phone_country_code }}" >
       phonenum-value="{{ context.session.shipping_contact_phone_number | default: ''}}"
       phonenum-placeholder="Phone" no-areacode>
     </ins-input-tel>
+
+    <input type="hidden" 
+      id="phone-number"
+      name="{{ prop.shipping_contact_phone_number.name }}"
+      value="{{ context.session.shipping_contact_phone_number }}" > 
+
+    <input type="hidden" 
+      id="phone-country-code"
+      name="{{ prop.shipping_contact_phone_country_code.name }}"
+      value="{{ context.session.shipping_contact_phone_country_code }}" >
   </div>
 </div>
 

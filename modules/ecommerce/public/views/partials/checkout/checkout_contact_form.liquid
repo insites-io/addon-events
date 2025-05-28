@@ -10,43 +10,22 @@
   %} 
 {% else %}
   {%  liquid      
-      assign first_name = context.session.guest_user.first_name
-      assign last_name = context.session.guest_user.last_name
-      assign email = context.session.guest_user.email
+      assign first_name = context.session.contact_first_name
+      assign last_name = context.session.contact_last_name
+      assign email = context.session.contact_email
   %} 
 {% endif %}
 
-
-{%- form 
-  html-id: "checkout-account-detail" 
-  html-novalidate: true 
-  html-enctype="multipart/form-data" 
-  html-onsubmit:"return Checkout.events.accountSubmit(event);" -%}
-
-
-  {% unless context.current_user or context.session.guest_user.id %}
-    <input type="hidden" name="{{ profiles_prop.uuid.name }}" value="{{ '' | uuid }}">
-  {% endunless %}
 
   <div id="account-details">
     <h4>Contact information</h4>
     <div class="spacer x-large"></div>
 
-    <div class="grid-x grid-padding-x account-details">
-
-      <input type="hidden" 
-        id="hidden-account-phone"
-        name="{{ profiles_prop.mobile_phone_number.name }}"
-        value="{{ profiles_prop.mobile_phone_number.value }}" >
-
-      <input type="hidden" 
-        id="hidden-account-phone-country-code"
-        name="{{ profiles_prop.mobile_phone_country_code.name }}"
-        value="{{ profiles_prop.mobile_phone_country_code.value }}" >
-
+    <div class="grid-x grid-padding-x account-details">      
 
       <div class="large-12 medium-12 small-12 cell">
         <ins-input   
+          id="contact-company-name"
           class="label-input" 
           label="Company Name"
           placeholder="Company Name" 
@@ -58,7 +37,9 @@
       </div>
 
       <div class="large-6 medium-6 small-12 cell">
-        <ins-input required validate  class="label-input"
+        <ins-input required validate  
+          id="contact-first-name"
+          class="label-input"
           label="First Name*"
           placeholder="First Name" 
           value="{{ first_name }}"
@@ -70,6 +51,7 @@
 
       <div class="large-6 medium-6 small-12 cell">
         <ins-input required validate  
+          id="contact-last-name"
           class="label-input"
           label="Last Name*"
           placeholder="Last Name" 
@@ -81,7 +63,8 @@
       </div>
 
       <div class="large-6 medium-6 small-12 cell">
-        <ins-input required validate  
+        <ins-input required validate 
+          id="contact-email"
           class="label-input"
           {% if context.current_user and context.current_user.email %} readonly {% endif %} 
           label="Email*"
@@ -97,13 +80,23 @@
       <div class="large-6 medium-6 small-12 cell">
         <ins-input-tel  
           class="label-input" 
-          id="account-phone"
+          id="contact-phone"
           label="Phone"
-          country-code="{{ context.session.crm_contact_mobile_country_code | default: '61' }}"  
-          phonenum-value="{{ context.session.crm_contact_mobile_number }}"
+          country-code="{{ context.session.contact_phone_country_code | default: '61' }}"  
+          phonenum-value="{{ context.session.contact_phone_number }}"
           phonenum-placeholder="Phone" 
           no-areacode>
         </ins-input-tel>
+
+        <input type="hidden" 
+          id="phone-number"
+          name="{{ profiles_prop.mobile_phone_number.name }}"
+          value="{{ context.session.contact_phone_number }}" >
+
+        <input type="hidden" 
+          id="phone-country-code"
+          name="{{ profiles_prop.mobile_phone_country_code.name }}"
+          value="{{ context.session.contact_phone_country_code }}" >
       </div>
 
     </div>
@@ -117,10 +110,8 @@
       </div>
       <div class="cell show-for-small-only spacer x-small"></div>
       <div class="large-6 medium-6 small-12 cell text-right">
-        <ins-button solid type="submit" id="account-submit" class="w-100 checkout-btn" label="Continue to shipping" icon-right="icon-arrow-forward
+        <ins-button solid type="submit" id="contact-submit" class="w-100 checkout-btn" label="Continue to shipping" icon-right="icon-arrow-forward
 "></ins-button>
       </div>
     </div>
-  </div>
-        
-{%- endform -%}
+  </div>      

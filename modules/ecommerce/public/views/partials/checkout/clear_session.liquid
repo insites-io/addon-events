@@ -3,9 +3,14 @@ metadata: {
     partial_name: 'Ecommerce | Checkout | Clear Session'
 }
 ---
-{%- session crm_company_name = null -%}
-{%- session crm_contact_mobile_number = null -%}
-{%- session crm_contact_mobile_country_code = null -%}
+
+{% comment %} Contact {% endcomment %}
+{%- session contact_company_name = null -%}
+{%- session contact_first_name = null -%}
+{%- session contact_last_name = null -%}
+{%- session contact_email = null -%}
+{%- session contact_phone_number = null -%}
+{%- session contact_phone_country_code = null -%}
 
 {% comment %} Shipping {% endcomment %}
 {%- session shipping_same_with_account = null -%}
@@ -50,6 +55,7 @@ metadata: {
 
 
 {% comment %} Clear guest session data when available {% endcomment %}
+{%- session guest_user = null -%}
 {%- session guest_info = null -%}
 {%- session guest_cart = null -%}
 {%- session guest_products = null -%}

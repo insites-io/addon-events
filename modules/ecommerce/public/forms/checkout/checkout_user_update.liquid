@@ -32,15 +32,18 @@ fields:
         mobile_phone_country_code:
 
 callback_actions: |- 
-  {%- session crm_company_name = form.company_name | default: "" -%}  
-  {%- session crm_contact_mobile_number = form.profiles['modules/insites_core/crm_contact'].properties.mobile_phone_number | default: "" -%}
-  {%- session crm_contact_mobile_country_code = form.profiles['modules/insites_core/crm_contact'].properties.mobile_phone_country_code | default: "" -%}
+  {%- session contact_first_name = form.first_name -%}  
+  {%- session contact_last_name = form.last_name -%}  
+  {%- session contact_email = form.email -%}  
+  {%- session contact_company_name = form.company_name -%}  
+  {%- session contact_phone_number = form.profiles['modules/insites_core/crm_contact'].properties.mobile_phone_number | default: "" -%}
+  {%- session contact_phone_country_code = form.profiles['modules/insites_core/crm_contact'].properties.mobile_phone_country_code | default: "" -%}
 
   {% unless context.current_user %}
     {%- parse_json guest_user -%}
     {
-        "id": "{{ context.session.guest_user.id }}",
-        "external_id": "{{ context.session.guest_user.external_id }}",
+        "id": "{{ form.id }}",
+        "uuid": "{{ context.session.guest_user.uuid }}",
         "email": "{{ form.email }}",
         "first_name": "{{ form.first_name }}",
         "last_name" : "{{ form.last_name }}"
@@ -52,4 +55,12 @@ callback_actions: |-
   {%- session latest_step = 2 -%}
 ---
 
-{% include 'modules/ecommerce/checkout/checkout_contact_form' %}
+{%- form 
+  html-id: "checkout-account-detail" 
+  html-novalidate: true 
+  html-enctype="multipart/form-data" 
+  html-onsubmit:"return Checkout.events.contactSubmit(event);" -%}
+
+  {% include 'modules/ecommerce/checkout/checkout_contact_form' %}
+
+{%- endform -%}

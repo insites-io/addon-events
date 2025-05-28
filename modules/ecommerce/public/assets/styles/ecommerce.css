@@ -1130,7 +1130,8 @@ ins-card.overview .wrap{
     font-weight: 400;
     color: #575757;
     line-height: 24px;
-    text-decoration-skip-ink: none;    
+    text-decoration-skip-ink: none;  
+    margin-bottom: 0px;  
 }
 #order-tab .ins-tab .ins-tab-headers .ins-tab-header.active {
     font-weight: 700;
@@ -1325,49 +1326,50 @@ ins-card.overview .wrap{
     line-height: 20px; 
     padding: 4px 8px;
     border-radius: 2px;
+    color: var(--neutral-hover);
     background: var(--neutral-hover-light);
 }
 #order-table .tagged span {
     border-radius: 4px;
 }
-ins-tag.tagged.For.collection span,
-ins-tag.tagged.For.delivery span,
+ins-tag.tagged.For.Collection span,
+ins-tag.tagged.For.Delivery span,
 ins-tag.tagged.Open span,
 ins-tag.tagged.Packed span,
-ins-tag.tagged.Picked.up span,
-ins-tag.tagged.In.transit span,
+ins-tag.tagged.Picked.Up span,
+ins-tag.tagged.In.Transit span,
 ins-tag.tagged.Processing span,
-.tagged.For.collection span,
-.tagged.For.delivery span,
+.tagged.For.Collection span,
+.tagged.For.Delivery span,
 .tagged.Open span,
 .tagged.Packed span,
-.tagged.Picked.up span,
-.tagged.In.transit span,
+.tagged.Picked.Up span,
+.tagged.In.Transit span,
 .tagged.Processing span {
-    color: var(--color-info);
+    color: var(--info);
     background: var(--info-hover-light);
 }
-ins-tag.tagged.Back.ordered span,
-ins-tag.tagged.On.hold span,
+ins-tag.tagged.Back.Ordered span,
+ins-tag.tagged.On.Hold span,
 ins-tag.tagged.Unpaid span,
-ins-tag.tagged.Part.paid span,
-.tagged.Back.ordered span,
-.tagged.On.hold span,
+ins-tag.tagged.Part.Paid span,
+.tagged.Back.Ordered span,
+.tagged.On.Hold span,
 .tagged.Unpaid span,
-.tagged.Part.paid span {
+.tagged.Part.Paid span {
     color: var(--warning);
     background: var(--warning-hover-light);
 }
 ins-tag.tagged.Complete span,
 ins-tag.tagged.Completed span,
 ins-tag.tagged.Placed span,
-ins-tag.tagged.Subscription.active span,
+ins-tag.tagged.Subscription.Active span,
 ins-tag.tagged.Paid span,
 ins-tag.tagged.Delivered span,
 .tagged.Complete span,
 .tagged.Completed span,
 .tagged.Placed span,
-.tagged.Subscription.active span,
+.tagged.Subscription.Active span,
 .tagged.Paid span,
 .tagged.Delivered span {
     color: var(--success);

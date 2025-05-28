@@ -85,7 +85,7 @@ metadata: {
                 <ins-filter-item
                     name="Order Status"
                     id="order-filter-status"
-                    options='["All", "Open", "Processing", "Cancelled", "Completed"]'
+                    options='["All", "Cancelled", "Completed", "Open", "Processing"]'
                     {%- if context.params.status -%}
                         selected='{{context.params.status | capitalize}}'
                     {%- endif -%}
@@ -161,10 +161,6 @@ metadata: {
         return status;
     }
 
-    function capitalize(val){
-        return String(val).charAt(0).toUpperCase() + String(val).slice(1);
-    }
-
     function mapData(tableData) {
         return tableData.map(data => {                 
             let toDateOnly = TableScript.methods.toDateOnly(data.date_time);                
@@ -177,7 +173,7 @@ metadata: {
             } else {
                 tmp_order_status = data.order_status;
             }
-            let order_status = capitalize(resolveStatus(tmp_order_status));
+            let order_status = TableScript.methods.toTitleCase(resolveStatus(tmp_order_status));
 
             return {
                 id: data.id,

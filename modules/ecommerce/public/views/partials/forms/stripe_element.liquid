@@ -5,9 +5,10 @@
         assign first_name = context.current_user.first_name
         assign last_name = context.current_user.last_name
     else
-        assign email = context.session.billing_contact_email
-        assign first_name = context.session.billing_contact_first_name
-        assign last_name = context.session.billing_contact_last_name
+        # Use contact info here rather than billing info, becase the stripe_id is connected in crm_profile
+        assign email = context.session.contact_email
+        assign first_name = context.session.contact_first_name
+        assign last_name = context.session.contact_last_name
     endif
 %}
 

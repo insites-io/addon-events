@@ -64,12 +64,15 @@ fields:
 
         ## Transaction Details
         order_reference:
+        order_company_name:
         order_contact_uuid:
             validation:
                 presence: true
         order_contact_email:
         order_contact_first_name:
-        order_contact_last_name:                
+        order_contact_last_name:     
+        order_contact_phone_number:    
+        order_contact_phone_country_code:       
         order_status: ## String = "Paid" ??
         order_payment_status: ## String = "Paid" ??
         order_shipping_status: ## String = "Processing" 
@@ -141,10 +144,13 @@ default_payload: >
             "billing_postcode": "{{context.session.billing_postcode | default: ''}}",
             "billing_country": "{{context.session.billing_country | default: ''}}",
             "order_reference": "{{ '' | uuid | split: '-' | first }}", 
+            "order_company_name": "{{ context.session.contact_company_name }}", 
             "order_contact_uuid": "{{ order_contact_uuid }}", 
             "order_contact_first_name": "{{ order_contact_first_name }}", 
             "order_contact_last_name": "{{ order_contact_last_name }}", 
             "order_contact_email": "{{ order_contact_email }}", 
+            "order_contact_phone_number": "{{ context.session.contact_phone_number }}", 
+            "order_contact_phone_country_code": "{{ context.session.contact_phone_country_code }}", 
             "order_status": "Open", 
             "order_payment_status": "Open",
             "order_shipping_status": "", 
@@ -179,6 +185,7 @@ callback_actions: >
 
     {%- session latest_step = 5 -%}
 ---    
+
 {% function has_profile = "modules/website/layout/check_if_user_has_profile" %}
 {%- if has_profile -%}
     {% assign contact_uuid = context.current_user.external_id %}
@@ -281,7 +288,7 @@ callback_actions: >
         <div class="spacer xx-small"></div>
 
 
-        {%- comment -%}Check if there's items to pay for{%- endcomment -%}
+        {%- comment -%} Check if stripe settings are configured {%- endcomment -%}
         {%- include 'modules/ecommerce/checkout/compute_order_summary' -%}
         <div class="grid-x grid-padding-x">
             <div class="large-12 medium-12 small-12 cell">                             
@@ -293,24 +300,19 @@ callback_actions: >
                         label="Payment settings not configured, please contact website administrator.">
                     </ins-button>
                 {%- else -%}
-                    {% comment %} context.exports.order.total_amount > 0 {% endcomment %}
-                    {%- if true -%}
-                        <div id="submit-buttons" class="grid-x grid-padding-x {% if cards.total_entries < 1 %} hide {% endif %}">  
-                            <div class="large-6 medium-6 small-12 cell">
-                                <a href="/checkout/billing">
-                                    <ins-button type="button" label="Back" outlined icon="icon-arrow-back"></ins-button>
-                                </a>
-                            </div>
-                            <div class="show-for-small-only spacer xxx-large"></div> 
-                            <div class="large-6 medium-6 small-12 cell text-right">
-                                <ins-button solid type="submit" icon="icon-task-completed" id="checkout-submit-btn" class="w-100 checkout-btn" label="Purchase Order"></ins-button>
-                            </div>
+                
+                    <div id="submit-buttons" class="grid-x grid-padding-x {% if cards.total_entries < 1 or cards == null %} hide {% endif %}">  
+                        <div class="large-6 medium-6 small-12 cell">
+                            <a href="/checkout/billing">
+                                <ins-button type="button" label="Back" outlined icon="icon-arrow-back"></ins-button>
+                            </a>
                         </div>
-                        
-                    {%- else -%}
-                        <ins-button disabled color="negative" label="No items to pay">
-                        </ins-button>
-                    {%- endif -%}
+                        <div class="show-for-small-only spacer xxx-large"></div> 
+                        <div class="large-6 medium-6 small-12 cell text-right">
+                            <ins-button solid type="submit" icon="icon-task-completed" id="checkout-submit-btn" class="w-100 checkout-btn" label="Purchase Order"></ins-button>
+                        </div>
+                    </div>
+
                 {%- endif -%}
             </div>
         </div>

@@ -19,7 +19,6 @@ metadata: {
 
 {% comment %} Autoresponder / Email notification {% endcomment %}
 {% log email_name, type: "==== Trigger autoresponder notification: email_name ====" %}
-{% log data, type: email autoresponder data %}
 {%- graphql trigger = "modules/ecommerce/system/trigger_email_notification", 
     name: email_name, 
     data: data -%}
@@ -65,6 +64,7 @@ metadata: {
         "customer_info": {{ data.customer_info  }}
     }
     {% endparse_json %}
+    {% log data, type: "preorder Data" %}
 
     {%- graphql trigger = "modules/ecommerce/system/trigger_email_notification", 
         name: "modules/ecommerce/pre_order_success", 

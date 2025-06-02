@@ -1,0 +1,460 @@
+{%- parse_json sampdata -%}
+{
+   "payment_response":{
+      "id":"ch_3RVShJDKXN2B4Z9Y2qe5vF28",
+      "object":"charge",
+      "amount":15153,
+      "amount_captured":15153,
+      "amount_refunded":0,
+      "application":null,
+      "application_fee":null,
+      "application_fee_amount":null,
+      "balance_transaction":"txn_3RVShJDKXN2B4Z9Y2HwUCwRE",
+      "billing_details":{
+         "address":{
+            "city":null,
+            "country":null,
+            "line1":null,
+            "line2":null,
+            "postal_code":"23434",
+            "state":null
+         },
+         "email":null,
+         "name":null,
+         "phone":null,
+         "tax_id":null
+      },
+      "calculated_statement_descriptor":"INSITES.IO",
+      "captured":true,
+      "created":1748848937,
+      "currency":"aud",
+      "customer":"cus_RdxKnQX8pkJxYy",
+      "description":"Insites Order ID: 2016 (Insites Customer UUID: a7d8da8c-ca48-45e1-9015-04e704403d04)",
+      "destination":null,
+      "dispute":null,
+      "disputed":false,
+      "failure_balance_transaction":null,
+      "failure_code":null,
+      "failure_message":null,
+      "fraud_details":{
+         
+      },
+      "invoice":null,
+      "livemode":false,
+      "metadata":{
+         "Insites Company Name":"ivy com",
+         "Insites Customer UUID":"a7d8da8c-ca48-45e1-9015-04e704403d04",
+         "Insites Order":"https://ins-addon-ecom-v110-dev2.staging.oregon.platform-os.com/admin/insites#/ecommerce/orders/c61d0bde-7d39-4624-8e76-e0e06d2486de",
+         "Insites Order ID":"2016"
+      },
+      "on_behalf_of":null,
+      "order":null,
+      "outcome":{
+         "advice_code":null,
+         "network_advice_code":null,
+         "network_decline_code":null,
+         "network_status":"approved_by_network",
+         "reason":null,
+         "risk_level":"normal",
+         "risk_score":49,
+         "seller_message":"Payment complete.",
+         "type":"authorized"
+      },
+      "paid":true,
+      "payment_intent":null,
+      "payment_method":"card_1REPrvDKXN2B4Z9Yq3uGhDpW",
+      "payment_method_details":{
+         "card":{
+            "amount_authorized":15153,
+            "authorization_code":"947891",
+            "brand":"visa",
+            "checks":{
+               "address_line1_check":null,
+               "address_postal_code_check":"pass",
+               "cvc_check":null
+            },
+            "country":"US",
+            "exp_month":4,
+            "exp_year":2027,
+            "extended_authorization":{
+               "status":"disabled"
+            },
+            "fingerprint":"xIynyWyOV9xlTBUN",
+            "funding":"credit",
+            "incremental_authorization":{
+               "status":"unavailable"
+            },
+            "installments":null,
+            "last4":"4242",
+            "mandate":null,
+            "multicapture":{
+               "status":"unavailable"
+            },
+            "network":"visa",
+            "network_token":{
+               "used":false
+            },
+            "network_transaction_id":"120731211101218",
+            "overcapture":{
+               "maximum_amount_capturable":15153,
+               "status":"unavailable"
+            },
+            "regulated_status":"unregulated",
+            "three_d_secure":null,
+            "wallet":null
+         },
+         "type":"card"
+      },
+      "receipt_email":null,
+      "receipt_number":null,
+      "receipt_url":"https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xSmdpUWdES1hOMkI0WjlZKKqi9cEGMgZgdwHgusk6LBaEgEygjQ133x76Pl9x0-y27jHyvun2yMeioOTC7wYUMnzKvBHcDGh0gxwr",
+      "refunded":false,
+      "refunds":{
+         "object":"list",
+         "data":[
+            
+         ],
+         "has_more":false,
+         "total_count":0,
+         "url":"/v1/charges/ch_3RVShJDKXN2B4Z9Y2qe5vF28/refunds"
+      },
+      "review":null,
+      "shipping":null,
+      "source":{
+         "id":"card_1REPrvDKXN2B4Z9Yq3uGhDpW",
+         "object":"card",
+         "address_city":null,
+         "address_country":null,
+         "address_line1":null,
+         "address_line1_check":null,
+         "address_line2":null,
+         "address_state":null,
+         "address_zip":"23434",
+         "address_zip_check":"pass",
+         "allow_redisplay":"unspecified",
+         "brand":"Visa",
+         "country":"US",
+         "customer":"cus_RdxKnQX8pkJxYy",
+         "cvc_check":null,
+         "dynamic_last4":null,
+         "exp_month":4,
+         "exp_year":2027,
+         "fingerprint":"xIynyWyOV9xlTBUN",
+         "funding":"credit",
+         "last4":"4242",
+         "metadata":{
+            
+         },
+         "name":null,
+         "regulated_status":"unregulated",
+         "tokenization_method":null,
+         "wallet":null
+      },
+      "source_transfer":null,
+      "statement_descriptor":null,
+      "statement_descriptor_suffix":null,
+      "status":"succeeded",
+      "transfer_data":null,
+      "transfer_group":null
+   },
+   "customer_info":{
+      "first_name":"Ivory",
+      "last_name":"Santos",
+      "email":"ivory@combinate.me",
+      "id":"29",
+      "slug":"ivory-santos",
+      "external_id":"a7d8da8c-ca48-45e1-9015-04e704403d04"
+   },
+   "cart_ids":0,
+   "cart":[
+      {
+         "product_uuid":"7d55ad0f-913e-4ba6-862d-3e8a6a818ff7",
+         "quantity":"1",
+         "product_sku":"RUSTIC-OTTOMAN-01"
+      }
+   ],
+   "products":[
+      {
+         "id":"434",
+         "uuid":"7d55ad0f-913e-4ba6-862d-3e8a6a818ff7",
+         "category_uuids":[
+            "8b6795ca-3ff9-4ace-86b4-3c50b9b31b04",
+            "cd9882a8-e858-4594-a924-4d6d5689ff94",
+            "d0a5cf85-daf5-49d5-8d9c-67671a1f1714"
+         ],
+         "product_name":"Rustic Storage Ottoman",
+         "slug":"rustic-storage-ottoman",
+         "product_sku":"RUSTIC-OTTOMAN-01",
+         "is_on_sale":false,
+         "regular_price":149.0,
+         "sale_price":null,
+         "stock_level":15,
+         "variants":[
+            
+         ],
+         "is_free_shipping":false,
+         "freight_amount":null,
+         "is_fixed_tax_amount":false,
+         "is_tax_included":true,
+         "tax_amount":null,
+         "product_image":{
+            "url":"https://cdn.staging.oregon.platform-os.com/instances/12552/property_uploads/modules/insites_ecommerce/product/product_image/171a780c-36f7-4649-aea9-b03e01ffab79/product-new-07.webp"
+         }
+      }
+   ],
+   "order_info":{
+      "id":"2016",
+      "created_at":"2025-06-02T07:22:17.038Z",
+      "updated_at":"2025-06-02T07:22:19.327Z",
+      "properties":{
+         "uuid":"c61d0bde-7d39-4624-8e76-e0e06d2486de",
+         "notes":null,
+         "currency":"AUD",
+         "date_time":"2025-06-02T07:22:18.000Z",
+         "quote_uuid":null,
+         "billing_city":null,
+         "freight_uuid":null,
+         "is_recurring":null,
+         "is_scheduled":null,
+         "order_number":null,
+         "order_status":"Completed",
+         "total_amount":151.533,
+         "billing_state":"Lane Cove Municipal Council ",
+         "shipping_city":null,
+         "billing_county":null,
+         "billing_suburb":"NSW",
+         "freight_method":null,
+         "freight_option":[
+            
+         ],
+         "shipping_state":"Lane Cove Municipal Council ",
+         "billing_country":"Australia",
+         "billing_geojson":null,
+         "order_reference":"2a28ea71",
+         "shipping_county":null,
+         "shipping_suburb":"NSW",
+         "subtotal_amount":149.0,
+         "tax_invoice_pdf":{
+            
+         },
+         "billing_district":null,
+         "billing_latitude":null,
+         "billing_postcode":"2066",
+         "opportunity_uuid":null,
+         "picking_slip_pdf":{
+            
+         },
+         "shipping_country":"Australia",
+         "shipping_geojson":null,
+         "total_tax_amount":0.0,
+         "billing_address_1":"21 Mars Road ",
+         "billing_address_2":"Lane Cove West ",
+         "billing_address_3":null,
+         "billing_longitude":null,
+         "shipping_district":null,
+         "shipping_latitude":null,
+         "shipping_postcode":"2066",
+         "total_amount_paid":151.533,
+         "order_company_name":"ivy com",
+         "order_company_uuid":null,
+         "order_contact_uuid":"a7d8da8c-ca48-45e1-9015-04e704403d04",
+         "recurring_group_id":null,
+         "shipping_address_1":"21 Mars Road ",
+         "shipping_address_2":"Lane Cove West ",
+         "shipping_address_3":null,
+         "shipping_longitude":null,
+         "order_company_email":null,
+         "order_contact_email":"ivory@combinate.me",
+         "packaging_label_pdf":{
+            
+         },
+         "billing_company_name":"ivy com",
+         "billing_company_uuid":null,
+         "billing_contact_uuid":null,
+         "billing_country_code":null,
+         "order_payment_status":"Paid",
+         "billing_company_email":null,
+         "billing_contact_email":"ivory@combinate.me",
+         "freight_supplier_name":null,
+         "freight_tracking_code":null,
+         "freight_tracking_link":null,
+         "order_shipping_status":null,
+         "shipping_company_name":"ivy com",
+         "shipping_company_uuid":null,
+         "shipping_contact_uuid":null,
+         "shipping_country_code":null,
+         "shipping_instructions":"SHIPPIINNGG",
+         "total_discount_amount":0.0,
+         "total_shipping_amount":0.0,
+         "shipping_company_email":null,
+         "shipping_contact_email":"ivory@combinate.me",
+         "order_contact_last_name":"Santos",
+         "order_contact_first_name":"Ivory",
+         "billing_contact_last_name":"Santos",
+         "billing_contact_first_name":"Ivory",
+         "order_company_phone_number":null,
+         "order_contact_phone_number":"123456",
+         "shipping_contact_last_name":"Santos",
+         "freight_delivered_date_time":null,
+         "shipping_contact_first_name":"Ivory",
+         "billing_company_phone_number":null,
+         "billing_contact_phone_number":"123456",
+         "freight_dispatched_date_time":null,
+         "shipping_company_phone_number":null,
+         "shipping_contact_phone_number":"123456",
+         "order_company_phone_country_code":null,
+         "order_contact_phone_country_code":"61",
+         "billing_company_phone_country_code":null,
+         "billing_contact_phone_country_code":"61",
+         "shipping_company_phone_country_code":null,
+         "shipping_contact_phone_country_code":"61"
+      },
+      "user":{
+         "id":"29",
+         "name":"Ivory Santos",
+         "email":"ivory@combinate.me",
+         "first_name":"Ivory",
+         "last_name":"Santos"
+      },
+      "custom_field":null,
+      "payments":[
+         {
+            "id":"2017",
+            "properties":{
+               "uuid":"f8124cab-7692-457f-84ba-feda2baafa2a",
+               "notes":"No notes available",
+               "amount":151.53,
+               "source":"credit_card",
+               "status":"paid",
+               "bank_bsb":null,
+               "currency":"AUD",
+               "bank_name":null,
+               "date_time":"2025-06-02T07:22:18.000Z",
+               "card_brand":"Visa",
+               "order_uuid":"c61d0bde-7d39-4624-8e76-e0e06d2486de",
+               "card_expiry_year":"2027",
+               "card_expiry_month":"4",
+               "payment_method_name":null,
+               "payment_gateway_name":"Stripe",
+               "bank_last_four_digits":null,
+               "card_last_four_digits":"4242",
+               "payment_gateway_details":"{\"id\":\"ch_3RVShJDKXN2B4Z9Y2qe5vF28\",\"object\":\"charge\",\"amount\":15153,\"amount_captured\":15153,\"amount_refunded\":0,\"application\":null,\"application_fee\":null,\"application_fee_amount\":null,\"balance_transaction\":\"txn_3RVShJDKXN2B4Z9Y2HwUCwRE\",\"billing_details\":{\"address\":{\"city\":null,\"country\":null,\"line1\":null,\"line2\":null,\"postal_code\":\"23434\",\"state\":null},\"email\":null,\"name\":null,\"phone\":null,\"tax_id\":null},\"calculated_statement_descriptor\":\"INSITES.IO\",\"captured\":true,\"created\":1748848937,\"currency\":\"aud\",\"customer\":\"cus_RdxKnQX8pkJxYy\",\"description\":\"Insites Order ID: 2016 (Insites Customer UUID: a7d8da8c-ca48-45e1-9015-04e704403d04)\",\"destination\":null,\"dispute\":null,\"disputed\":false,\"failure_balance_transaction\":null,\"failure_code\":null,\"failure_message\":null,\"fraud_details\":{},\"invoice\":null,\"livemode\":false,\"metadata\":{\"Insites Company Name\":\"ivy com\",\"Insites Customer UUID\":\"a7d8da8c-ca48-45e1-9015-04e704403d04\",\"Insites Order\":\"https://ins-addon-ecom-v110-dev2.staging.oregon.platform-os.com/admin/insites#/ecommerce/orders/c61d0bde-7d39-4624-8e76-e0e06d2486de\",\"Insites Order ID\":\"2016\"},\"on_behalf_of\":null,\"order\":null,\"outcome\":{\"advice_code\":null,\"network_advice_code\":null,\"network_decline_code\":null,\"network_status\":\"approved_by_network\",\"reason\":null,\"risk_level\":\"normal\",\"risk_score\":49,\"seller_message\":\"Payment complete.\",\"type\":\"authorized\"},\"paid\":true,\"payment_intent\":null,\"payment_method\":\"card_1REPrvDKXN2B4Z9Yq3uGhDpW\",\"payment_method_details\":{\"card\":{\"amount_authorized\":15153,\"authorization_code\":\"947891\",\"brand\":\"visa\",\"checks\":{\"address_line1_check\":null,\"address_postal_code_check\":\"pass\",\"cvc_check\":null},\"country\":\"US\",\"exp_month\":4,\"exp_year\":2027,\"extended_authorization\":{\"status\":\"disabled\"},\"fingerprint\":\"xIynyWyOV9xlTBUN\",\"funding\":\"credit\",\"incremental_authorization\":{\"status\":\"unavailable\"},\"installments\":null,\"last4\":\"4242\",\"mandate\":null,\"multicapture\":{\"status\":\"unavailable\"},\"network\":\"visa\",\"network_token\":{\"used\":false},\"network_transaction_id\":\"120731211101218\",\"overcapture\":{\"maximum_amount_capturable\":15153,\"status\":\"unavailable\"},\"regulated_status\":\"unregulated\",\"three_d_secure\":null,\"wallet\":null},\"type\":\"card\"},\"receipt_email\":null,\"receipt_number\":null,\"receipt_url\":\"https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xSmdpUWdES1hOMkI0WjlZKKqi9cEGMgZgdwHgusk6LBaEgEygjQ133x76Pl9x0-y27jHyvun2yMeioOTC7wYUMnzKvBHcDGh0gxwr\",\"refunded\":false,\"refunds\":{\"object\":\"list\",\"data\":[],\"has_more\":false,\"total_count\":0,\"url\":\"/v1/charges/ch_3RVShJDKXN2B4Z9Y2qe5vF28/refunds\"},\"review\":null,\"shipping\":null,\"source\":{\"id\":\"card_1REPrvDKXN2B4Z9Yq3uGhDpW\",\"object\":\"card\",\"address_city\":null,\"address_country\":null,\"address_line1\":null,\"address_line1_check\":null,\"address_line2\":null,\"address_state\":null,\"address_zip\":\"23434\",\"address_zip_check\":\"pass\",\"allow_redisplay\":\"unspecified\",\"brand\":\"Visa\",\"country\":\"US\",\"customer\":\"cus_RdxKnQX8pkJxYy\",\"cvc_check\":null,\"dynamic_last4\":null,\"exp_month\":4,\"exp_year\":2027,\"fingerprint\":\"xIynyWyOV9xlTBUN\",\"funding\":\"credit\",\"last4\":\"4242\",\"metadata\":{},\"name\":null,\"regulated_status\":\"unregulated\",\"tokenization_method\":null,\"wallet\":null},\"source_transfer\":null,\"statement_descriptor\":null,\"statement_descriptor_suffix\":null,\"status\":\"succeeded\",\"transfer_data\":null,\"transfer_group\":null}"
+            }
+         }
+      ],
+      "opportunity":null,
+      "order_items":[
+         {
+            "id":"2018",
+            "properties":{
+               "sku":"RUSTIC-OTTOMAN-01",
+               "uuid":"22381be6-2490-4ff8-a319-5afddf382bb5",
+               "item_tax":0.0,
+               "quantity":1,
+               "item_price":null,
+               "order_uuid":"c61d0bde-7d39-4624-8e76-e0e06d2486de",
+               "tax_amount":0.0,
+               "unit_price":149.0,
+               "tax_percent":null,
+               "product_uuid":"7d55ad0f-913e-4ba6-862d-3e8a6a818ff7",
+               "line_item_tax":null,
+               "line_item_total":149.0,
+               "order_item_name":"Rustic Storage Ottoman",
+               "order_item_image":{
+                  "path":"modules/insites_ecommerce/product/product_image/171a780c-36f7-4649-aea9-b03e01ffab79/product-new-07.webp",
+                  "versions":{
+                     
+                  },
+                  "extension":"webp",
+                  "file_name":"product-new-07.webp"
+               },
+               "is_fixed_tax_amount":false,
+               "product_variant_uuid":null
+            },
+            "products":[
+               {
+                  "id":"434",
+                  "product_name":"Rustic Storage Ottoman",
+                  "tax_amount":null,
+                  "is_fixed_tax_amount":"false",
+                  "custom_fields":{
+                     "id":"435",
+                     "properties":{
+                        "brand":null,
+                        "product_uuid":"7d55ad0f-913e-4ba6-862d-3e8a6a818ff7"
+                     }
+                  }
+               }
+            ]
+         }
+      ]
+   },
+   "total_discounted_amount":0,
+   "form":{
+      "id":2016,
+      "properties":{
+         "shipping_company_name":"ivy com",
+         "shipping_contact_first_name":"Ivory",
+         "shipping_contact_last_name":"Santos",
+         "shipping_contact_email":"ivory@combinate.me",
+         "shipping_contact_phone_number":"123456",
+         "shipping_contact_phone_country_code":"61",
+         "shipping_address_id":"1532",
+         "shipping_address_1":"21 Mars Road ",
+         "shipping_address_2":"Lane Cove West ",
+         "shipping_address_3":null,
+         "shipping_suburb":"NSW",
+         "shipping_state":"Lane Cove Municipal Council ",
+         "shipping_postcode":"2066",
+         "shipping_country":"Australia",
+         "shipping_instructions":"SHIPPIINNGG",
+         "billing_company_name":"ivy com",
+         "billing_contact_first_name":"Ivory",
+         "billing_contact_last_name":"Santos",
+         "billing_contact_email":"ivory@combinate.me",
+         "billing_contact_phone_number":"123456",
+         "billing_contact_phone_country_code":"61",
+         "billing_address_id":"1532",
+         "billing_address_1":"21 Mars Road ",
+         "billing_address_2":"Lane Cove West ",
+         "billing_address_3":null,
+         "billing_suburb":"NSW",
+         "billing_state":"Lane Cove Municipal Council ",
+         "billing_postcode":"2066",
+         "billing_country":"Australia",
+         "gateway_id":null,
+         "stripe_credit_card":"card_1REPrvDKXN2B4Z9Yq3uGhDpW",
+         "statement_descriptor":null,
+         "order_reference":"2a28ea71",
+         "order_company_name":"ivy com",
+         "order_contact_uuid":"a7d8da8c-ca48-45e1-9015-04e704403d04",
+         "order_contact_email":"ivory@combinate.me",
+         "order_contact_first_name":"Ivory",
+         "order_contact_last_name":"Santos",
+         "order_contact_phone_number":"123456",
+         "order_contact_phone_country_code":"61",
+         "order_status":"Open",
+         "order_payment_status":"Open",
+         "order_shipping_status":null,
+         "date_time":null,
+         "notes":null,
+         "currency":"AUD",
+         "subtotal_amount":149.0,
+         "total_tax_amount":0.0,
+         "total_shipping_amount":0.0,
+         "total_discount_amount":0.0,
+         "total_amount":151.533,
+         "total_amount_paid":151.533,
+         "processing_fee":2.533,
+         "discount_code_uuids":null,
+         "uuid":"c61d0bde-7d39-4624-8e76-e0e06d2486de"
+      },
+      "errors":{
+         
+      }
+   },
+   "guest_user":false
+}
+{%- endparse_json -%}
+
+{% return sampdata %}

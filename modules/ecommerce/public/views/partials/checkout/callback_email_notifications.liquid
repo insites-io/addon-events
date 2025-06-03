@@ -64,7 +64,6 @@ metadata: {
         "customer_info": {{ data.customer_info  }}
     }
     {% endparse_json %}
-    {% log data, type: "preorder Data" %}
 
     {%- graphql trigger = "modules/ecommerce/system/trigger_email_notification", 
         name: "modules/ecommerce/pre_order_success", 

@@ -26,7 +26,9 @@ metadata: {
 
 
     if product.is_product_variant_enabled
-        assign selected_prop = product.variants[0]          
+        assign selected_prop = product.variants[0] 
+        assign variant_id = selected_prop.id
+        assign variant_uuid = selected_prop.uuid        
         
         ## Variant Galleries        
         for variant in product.variants
@@ -35,7 +37,9 @@ metadata: {
             assign index = index | plus: 1
         endfor
     else 
-        assign selected_prop = product        
+        assign selected_prop = product    
+        assign variant_id = null
+        assign variant_uuid = null    
     endif
 
     if selected_prop.is_on_sale == true 
@@ -211,15 +215,26 @@ metadata: {
             </div>
     
             {% comment %} Buttons {% endcomment %}
-            {% parse_json add_to_cart_data %}
-            {
-                "id": "{{ product.id }}",
-                "product_uuid": "{{ product.uuid }}",
-                "product_sku": "{{ selected_prop.sku }}",
-                "product_name": "{{ product.product_name | replace: "'", "`" }}",
-                "price": "{{ price | default: 0 }}"
-            }
-            {% endparse_json %}
+            {% if variant_uuid %}
+                {% comment %} The product has variants: The data will vary. {% endcomment %}
+                {% parse_json add_to_cart_data %}
+                {
+                    "variant_product": true
+                }
+                {% endparse_json %}
+            {% else %}    
+                {% comment %} The product has no variants: The data will remain unchanged {% endcomment %}
+                {% parse_json add_to_cart_data %}
+                {
+                    "id": "{{ product.id }}",
+                    "product_uuid": "{{ product.uuid }}",
+                    "variant_uuid": "",
+                    "product_name": "{{ product.product_name | replace: "'", "`" }}",
+                    "price": "{{ price | default: 0 }}",
+                    "product_sku": "{{ product.sku }}"
+                }
+                {% endparse_json %}
+            {% endif %} 
             <div>
                 <ins-button id="add-to-cart-btn-{{ add_to_cart_data.id }}"  class="full add-to-cart-btn" data='{{ add_to_cart_data }}' label="{{ btnLabel }}" solid></ins-button>
                 <div class="spacer small"></div>
@@ -251,13 +266,20 @@ metadata: {
 
 <script>
     let variants = {{ variants }};
+    let variant_data = {
+       "id": {{ variant_id }},
+        "product_uuid": "{{ product.uuid }}",
+        "variant_uuid": "{{ variant_uuid }}",
+        "product_name": "{{ product.product_name | replace: "'", "`" }}",
+        "sku": "{{ product.sku }}",
+        "price": "{{ price | default: 0 }}",
+        "quantity": 1
+    };
     let galleryIndexes = {{ gallery_indexes | default: '[]' }};
     let onSaleTag = document.getElementById('on-sale-tag');
     let productGalleries = document.getElementById('product-galleries');    
 
-    //variantID <-- This is already set in cart_drawer.liquid
-    //variantPrice <-- This is already set in cart_drawer.liquid
-    //productSKU = document.getElementById("product-sku"); //this is already set in cart_drawer.liquid
+    let productSKU = document.getElementById("product-sku");
     let productPrice = document.getElementById("product-price");
     let regularProductPrice = document.getElementById("regular-product-price");
     let ourOfStockWrap = document.getElementById("out-of-stock-wrap");
@@ -311,27 +333,27 @@ metadata: {
             } 
         });
 
-
         //Update active view in galleries based on selected variant
         productGalleries.activate(galleryIndexes[selectedVariant.id]); 
 
         if(selectedVariant.id){
-            //ID
-            variantID = selectedVariant.id;
+            //Identifiers
+            variant_data.id = selectedVariant.id;
+            variant_data.variant_uuid = selectedVariant.uuid;                        
             //SKU
+            variant_data.sku = selectedVariant.sku;
             productSKU.textContent = `${selectedVariant.sku}`;
             //Product Price
             if(selectedVariant.is_on_sale){
-                variantPrice = selectedVariant.sale_price;
+                variant_data.price = selectedVariant.sale_price;
                 productPrice.textContent = `$${selectedVariant.sale_price}`;
                 regularProductPrice.textContent = `$${selectedVariant.regular_price}`;                
             } else {
-                variantPrice = selectedVariant.regular_price;
+                variant_data.price = selectedVariant.sale_price;
                 productPrice.textContent = `$${selectedVariant.regular_price}`;
                 if (regularProductPrice) {
                     regularProductPrice.textContent = "";
                 }
-            
             }
             //Out of Stock Notice
             if(selectedVariant.stock_level < 1){

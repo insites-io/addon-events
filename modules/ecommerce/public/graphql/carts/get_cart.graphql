@@ -1,4 +1,4 @@
-query get_user_cart (
+query get_cart (
   $page: Int=1,
   $size: Int=1,
   $contact_uuid: String!,
@@ -17,10 +17,26 @@ query get_user_cart (
   ) {
     total_entries    
     results {
-      id 
+      id
+      uuid: property(name: "uuid")
       contact_uuid: property(name: "contact_uuid")
-      items: property_array(name: "items")      
-      discount_code_uuids: property_array(name: "discount_code_uuids")       
+      discount_code_uuids: property_array(name: "discount_code_uuids")    
+      cart_items: related_records(
+        table: "modules/insites_ecommerce/cart_item"
+        join_on_property: "uuid"
+        foreign_property: "cart_uuid"
+        sort: {
+          created_at: {order: DESC}
+        }
+      ){
+        id
+        uuid: property(name: "uuid")
+        cart_uuid: property(name: "cart_uuid")
+        product_uuid: property(name: "product_uuid")
+        variant_uuid: property(name: "variant_uuid")
+        quantity: property_int(name: "quantity")
+        #properties
+      }
     },
     results @include(if: $show_discount_details){
       discounts: related_records(

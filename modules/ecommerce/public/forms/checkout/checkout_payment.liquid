@@ -226,40 +226,40 @@ callback_actions: >
                 <div class="spacer large"></div>
                 <p class="error-message hide">Credit Card is required.</p>
                 <div class="grid-container">
-                <div id="card-options-list" class="grid-x grid-padding-x grid-padding-y">
-                    {%- if email != '' and email != null -%}
+                    <div id="card-options-list" class="grid-x grid-padding-x grid-padding-y">
+                        {%- if email != '' and email != null -%}
 
-                        {% comment %} 
-                            Check first if the user crm_contact.properties.stripe_id has value,
-                            - because it is possible that the user has card record in payment_method but no crm_contact.properties.stripe_id (during test: manual deletiong of stripe_id)
-                        {% endcomment %}
-                        {%- graphql user_stripe = 'modules/portal/customers/get_user_stripe_id', email: email | dig: 'items','results' | first -%}
-                        {%- assign stripe_id = user_stripe | dig: 'profiles' | first | dig: 'stripe_id' -%}
+                            {% comment %} 
+                                Check first if the user crm_contact.properties.stripe_id has value,
+                                - because it is possible that the user has card record in payment_method but no crm_contact.properties.stripe_id (during test: manual deletiong of stripe_id)
+                            {% endcomment %}
+                            {%- graphql user_stripe = 'modules/portal/customers/get_user_stripe_id', email: email | dig: 'items','results' | first -%}
+                            {%- assign stripe_id = user_stripe | dig: 'profiles' | first | dig: 'stripe_id' -%}
 
-                        {% if stripe_id != '' and stripe_id != null %}
-                            {%- graphql cards = "modules/ecommerce/payment_method/get_payment_method", 
-                                contact_uuid: contact_uuid
-                                size: 50 | dig: 'items' -%}
-                            {%- for card in cards.results -%}
-                                {%  liquid
-                                    assign is_card_active = ''
-                                    if forloop.first
-                                        assign selected_card = card.payment_method_token
-                                        assign is_card_active = 'active'
-                                    endif
-                                %}
-                                <div class="large-6 medium-6 small-12 cell card-options">
-                                    <ins-credit-card {{ is_card_active }} data-id="{{ card.id }}" brand="{{ card.card_brand }}"
-                                        last-four="{{ card.card_last_four_digits }}" expiry-month="{{ card.card_expiry_month }}"
-                                        expiry-year="{{ card.card_expiry_year }}" full-year
-                                        value="{{ card.payment_method_token }}"
-                                        compact>
-                                    </ins-credit-card>
-                                </div>
-                            {%- endfor -%}
+                            {% if stripe_id != '' and stripe_id != null %}
+                                {%- graphql cards = "modules/ecommerce/payment_method/get_payment_method", 
+                                    contact_uuid: contact_uuid
+                                    size: 50 | dig: 'items' -%}
+                                {%- for card in cards.results -%}
+                                    {%  liquid
+                                        assign is_card_active = ''
+                                        if forloop.first
+                                            assign selected_card = card.payment_method_token
+                                            assign is_card_active = 'active'
+                                        endif
+                                    %}
+                                    <div class="large-6 medium-6 small-12 cell card-options">
+                                        <ins-credit-card {{ is_card_active }} data-id="{{ card.id }}" brand="{{ card.card_brand }}"
+                                            last-four="{{ card.card_last_four_digits }}" expiry-month="{{ card.card_expiry_month }}"
+                                            expiry-year="{{ card.card_expiry_year }}" full-year
+                                            value="{{ card.payment_method_token }}"
+                                            compact>
+                                        </ins-credit-card>
+                                    </div>
+                                {%- endfor -%}
+                            {%- endif -%}
                         {%- endif -%}
-                    {%- endif -%}
-                </div>
+                    </div>
                 </div>
                 <ins-input required validate
                     field="hidden"
@@ -289,7 +289,7 @@ callback_actions: >
 
 
         {%- comment -%} Check if stripe settings are configured {%- endcomment -%}
-        {%- include 'modules/ecommerce/checkout/compute_order_summary' -%}
+        {% comment %} {%- include 'modules/ecommerce/checkout/compute_order_summary' -%} {% endcomment %}
         <div class="grid-x grid-padding-x">
             <div class="large-12 medium-12 small-12 cell">                             
                             

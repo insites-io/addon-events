@@ -19,10 +19,11 @@ metadata: {
         endif
     elsif product.is_product_variant_enabled
         assign selected_prop = product.variant
+        assign variant_uuid = product.variant.uuid
     else 
         assign selected_prop = product
+        assign variant_uuid = null
     endif
-
     
 
     if selected_prop.is_on_sale == true 
@@ -80,9 +81,10 @@ metadata: {
                     {
                         "id": "{{ selected_prop.id }}",
                         "product_uuid": "{{ product.uuid }}",
-                        "product_sku": "{{ selected_prop.sku }}",
+                        "variant_uuid": "{{ variant_uuid }}",
                         "product_name": "{{ product.product_name | replace: "'", "`"}}",
-                        "price": "{{ price | default: 0 }}"
+                        "price": "{{ price | default: 0 }}",
+                        "product_sku": "{{ selected_prop.sku }}"
                     }
                     {% endparse_json %}
 

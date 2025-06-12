@@ -3,7 +3,7 @@ metadata: {
     partial_name: 'Ecommerce | Checkout | Callback Update Records'
 }
 ---
-{%- assign user_uuid = form.properties.order_contact_uuid -%}
+
 {%- assign date_time = "now" | date: "%Y-%m-%dT%H:%M:%SZ" -%}
 {%- capture payment_gateway_details -%}{{ payment_response }}{%- endcapture -%}
 {%- assign amount = payment_response.amount | divided_by: 100.00 -%}
@@ -50,15 +50,17 @@ metadata: {
 {%- graphql add_payment = 'modules/website/trigger_api_call', name: "modules/portal/add_payment", data: data | dig: 'items','response','body' | parse_json -%}   
 
 {% comment %} Create Order Items {% endcomment %}
-{%- include 'modules/ecommerce/order_items/create_order_items', user_uuid, order_uuid, guest_user -%}
-{% assign user_cart = context.exports.user_cart %}
+{%- include 'modules/ecommerce/order_items/create_order_items', order_uuid, guest_user -%}
+{% assign cart = context.exports.cart %}
 
 
 {%- comment -%} Delete the user cart if the status is not 'failed'. {%- endcomment -%}
 {% assign tmp_order_payment_status = order_payment_status | downcase %}
 {% unless tmp_order_payment_status contains 'failed' %}
-    {% if user_cart.id %}
-        {% graphql delete_cart = 'modules/ecommerce/carts/delete_cart', id: user_cart.id %}
+    {% if cart.id %}
+        {% comment %} Delete Cart and Cart Items {% endcomment %}
+        {%- graphql delete_cart = 'modules/ecommerce/carts/delete_cart', id: cart.id -%}
+        {%- graphql delete_cart_items = 'modules/ecommerce/cart_items/delete_cart_items', cart_uuid: cart.uuid | dig: 'records_delete_all' -%}
     {% endif %}
 {% endunless %}
 

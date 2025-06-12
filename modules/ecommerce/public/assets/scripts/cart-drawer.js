@@ -1,6 +1,5 @@
 
-//let page = "{{ context.params.slug }}";
-//let user_uuid = "{{ user_uuid }}";
+//let page, user_uuid;  <-- already declared at cart_drawer.liquid
 let cartCounts = document.querySelectorAll('.cart-count')
 let cartDrawer = document.getElementById('cartDrawer');
 let cartItemsWrap = document.getElementById('cart-items-wrap');
@@ -8,11 +7,9 @@ let emptyCartWrap = document.getElementById('empty-cart-wrap');
 let bottomWrap = document.getElementById('bottom-wrap');
 let cartSubtotal = document.getElementById('cart-subtotal');
 let cartQuantity = 1;
+let stepperDebounceTimer;
 
-//product detailed page          
-let variantID = 0;
-let variantPrice = 0;
-let productSKU = document.getElementById("product-sku");
+//product detailed page   
 let cartQuantityInput = document.getElementById('cart-quantity');  
 if(cartQuantityInput){  
     cartQuantityInput.addEventListener('insValueChange', event => {
@@ -30,6 +27,13 @@ cartDrawer.addEventListener('didLoad', () => {
     cartDrawer.classList.remove('hide');
 });
 
+// Open the cart drawer modal after reordering items from Order History.
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('openCartDrawer') === 'true') {
+        cartDrawer.setDrawerState(true);  // Open modal
+        sessionStorage.removeItem('openCartDrawer'); // Clean up
+    }
+});
 
 /* Add to Cart */
 let addToCartBtn = document.querySelectorAll(".add-to-cart-btn");
@@ -39,7 +43,7 @@ addToCartBtn.forEach(btn => {
     });
 });
 
-function addToCartPreProcess(event, type){
+async function addToCartPreProcess(event, type){
    
     //show hide
     emptyCartWrap.classList.add("hide");
@@ -50,41 +54,37 @@ function addToCartPreProcess(event, type){
         cartDrawer.setDrawerState(true); 
     } 
 
-    if(type == "reorder"){
-        data = event.detail.data;
-        all_items = event.detail.all_items;        
-        reorder_iteration = event.detail.iteration;
-    } else {
-        data = JSON.parse(event.detail.data);
-        data.quantity = cartQuantity;
-        //used for reorder only
-        all_items = []; 
-        reorder_iteration = 0;
-        type = event.detail.label
-    }         
+    data = JSON.parse(event.detail.data);
     
+    if(type != "reorder"){
+        data.quantity = cartQuantity;    
+        type = event.detail.label 
+    }            
         
     //used for product with variants in product details page
-    if (productSKU && variantID != 0) {
-        if (productSKU.textContent != data.product_sku){
-            data.id = variantID;
-            data.price = variantPrice;
-            data.product_sku = productSKU.textContent;
-        }     
+    if(data.variant_product){
+        data.id = variant_data.id;
+        data.product_uuid = variant_data.product_uuid;
+        data.price = variant_data.price;
+        data.product_name = variant_data.product_name;
+        data.variant_uuid = variant_data.variant_uuid; 
+        data.product_sku = variant_data.sku;  
     }
    
     let cartItem = document.getElementById(`cart-item-${data.id}`);
  
+    // Clicking the Add-to-cart button will add the item only if it is not already in the cart.
     if(cartItem == null){
       
-        if(addToCart(data, type, all_items, reorder_iteration)){        
+        let cart_item = await addToCart(data, type);
+        if(cart_item.state){        
 
             if (!emptyCartWrap.classList.contains('hide')) {
                 emptyCartWrap.classList.add('hide');
                 bottomWrap.classList.remove('hide');
             }          
                                 
-            cartItemsWrap.insertAdjacentHTML('afterbegin', cartItemHtml(data));
+            cartItemsWrap.insertAdjacentHTML('afterbegin', cartItemHtml(data, cart_item.data.items));
 
             let newItemAdded = document.getElementById(`cart-item-${data.id}`);
             if (newItemAdded) {                   
@@ -114,41 +114,37 @@ cartStepper.forEach(step => {
 function cartStepperEventListener(step){
     step.addEventListener('insValueChange', event => {   
         goToCartButtonDisabled();
+        clearTimeout(stepperDebounceTimer);
 
-        if (user_uuid != '') {
+        //Add debounce timer to allow multiple click in + or - before calling the api/add-to-cart.json
+        stepperDebounceTimer = setTimeout(() => {
+
             if (shoppingCartListEl && shoppingCartLoaderEl) {
                 shoppingCartListEl.style.display = 'none';  
                 shoppingCartLoaderEl.classList.remove("hide");
             }
-        } else {
-            const shoppingCartListQuery = document.querySelector("#shopping-cart-list");
-            const shoppingGuestCartLoaderQuery = document.querySelector("#shopping-guest-cart-loader");
 
-            if (shoppingCartListQuery && shoppingGuestCartLoaderQuery) {
-                shoppingCartListQuery.style.display = 'none';  
-                shoppingGuestCartLoaderQuery.classList.remove("hide");
-            }
-        }
+            let itemWrap = event.target.closest(".cart-item-wrap");            
+            let stepperData = event.target.closest("ins-input-stepper").dataset;
 
-        let itemWrap = event.target.closest(".cart-item-wrap");            
-        let stepperData = event.target.closest("ins-input-stepper").dataset;
+            // Calculate the total price for the item
+            let priceData = computeItemTotal(itemWrap, event.detail);
 
-        // Calculate the total price for the item
-        let priceData = computeItemTotal(itemWrap, event.detail);
+            let data = {
+                "id": stepperData.id,
+                "product_name": stepperData.product_name,
+                "product_uuid": stepperData.product_uuid,
+                "variant_uuid": stepperData.variant_uuid,
+                "price": priceData.price,  
+                "item_total_price": priceData.item_total_price,
+                "quantity": event.detail
+            };   
 
-        let data = {
-            "id": stepperData.id,
-            "product_name": stepperData.product_name,
-            "product_uuid": stepperData.product_uuid,
-            "product_sku": stepperData.product_sku,
-            "price": priceData.price,  
-            "item_total_price": priceData.item_total_price,
-            "quantity": event.detail
-        };   
-
-        if(addToCart(data, 'stepper')){                
-            computeSubTotal();
-        }       
+            if(addToCart(data, 'stepper')){                
+                computeSubTotal();
+            }                  
+            
+        }, 1000); 
     });
 }    
 
@@ -181,7 +177,7 @@ function removeCartEventListener(btn){
 
 
 /* Add cart to Database or to localStorage */
-async function addToCart(data, type, all_items, reorder_iteration){        
+async function addToCart(data, type){        
     data["type"] = type;
     // Reset the cartQuantity
     cartQuantity = 1;
@@ -190,41 +186,44 @@ async function addToCart(data, type, all_items, reorder_iteration){
         setButtonLoadingState(data.id, true)
     }
 
-    if(user_uuid != ""){
-        data["contact_uuid"] = user_uuid;          
-     
-        if (type == "reorder") {
-            if(reorder_iteration > 0){
-                return true;
-            }
-            for (const item of all_items) {
-                let response = await apiServices.processRequest("post", "/add-to-cart.json", item);
-                is_added = (response.state && response.data.items)? true : false;
-            }
-            return is_added;
-        } else {
-            goToCartButtonDisabled();
-            let response = await apiServices.processRequest("post", "/add-to-cart.json", data);     
+                         
+    if (type == "reorder") {
+        // Add items to the cart using the Reorder button from Order History.
+        // Each item from the selected order will be added individually by calling the API.
+        // A delay is applied to prevent simultaneous API requests.
+        const responses = [];
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-            if(response.state) {
-                goToCartButtonEnabled();
-                if (page == 'shopping-cart') {
-                    location.reload();
-                } 
-
-                handleShoppingCartRedirect(type, data)
-
-                return true;          
-            } else {
-                goToCartButtonEnabled();
-                App.events.notyf("error", "Something went wrong. Please try again.");
-            }
-         
+        for (const item of data) {
+            item["contact_uuid"] = user_uuid;
+            await delay(1000); 
+            const response = await apiServices.processRequest("post", "/add-to-cart.json", item);
+            responses.push(response);
         }
+
+        // Save the session before reloading the page. 
+        // This will open the Cart Drawer modal after the reload.
+        sessionStorage.setItem('openCartDrawer', 'true');
+
+        // Reload the page to reflect the added items in the cart drawer.            
+        location.reload();           
     } else {
-        addCartToLocalStorage(data);    
-        handleShoppingCartRedirect(type, data)        
+        data["contact_uuid"] = user_uuid;
+        goToCartButtonDisabled();
+        let response = await apiServices.processRequest("post", "/add-to-cart.json", data);
+        if(response.state) {
+            goToCartButtonEnabled();
+            if (page == 'shopping-cart') {
+                location.reload();
+            } 
+            handleShoppingCartRedirect(type, data)
+            return response;          
+        } else {
+            goToCartButtonEnabled();
+            App.events.notyf("error", "Something went wrong. Please try again.");
+        }         
     }
+    
 }      
 
 /* Redirects the user to the shopping cart page if the type is not "Add to Cart" or "stepper",
@@ -257,10 +256,8 @@ function goToShoppingCartPage() {
 function goToCartButtonEnabled() {
 
     //if the user is on the checkout page and adds, removes, or updates an item using the cart drawer.
-    // - Reload the page if the user is Trade Customer
-    // - Go to /shopping-cart if the user is a guest to allow the session to take effect first.
     if(page == 'checkout'){
-        user_uuid === '' ? (window.location.href = '/shopping-cart') : location.reload();
+        location.reload();
     }
 
     goToCartBtn.disabled = false;
@@ -296,31 +293,27 @@ async function removeToCart(data){
         shoppingGuestCartLoaderQuery.classList.remove("hide");
     }
 
-    if(user_uuid != ""){
-        goToCartButtonDisabled();       
-        data["contact_uuid"] = user_uuid;
-        let response = await apiServices.processRequest("post", "/remove-to-cart.json", data);
-
-        if(response.state && response.data.items) {
-            if (page == 'shopping-cart') {
-                shoppingCartListEl.style.display = 'flex';
-                shoppingCartListEl.style.display = 'none';
-                location.reload();
-            } 
-            goToCartButtonEnabled();
-            return true;          
-        } else {
-            goToCartButtonEnabled();
-            App.events.notyf("error", "Something went wrong. Please try again.");
-        }
+    
+    goToCartButtonDisabled();
+    let response = await apiServices.processRequest("post", "/remove-to-cart.json", data);
+    if(response.state && response.data.id) {
+        if (page == 'shopping-cart') {
+            shoppingCartListEl.style.display = 'flex';
+            shoppingCartListEl.style.display = 'none';
+            location.reload();
+        } 
+        goToCartButtonEnabled();
+        return true;          
     } else {
-        removeCartFromLocalStorage(data);            
+        goToCartButtonEnabled();
+        App.events.notyf("error", "Something went wrong. Please try again.");
     }
+    
 
     reloadIfShoppingCartPage();
 }       
 
-function cartItemHtml(data){
+function cartItemHtml(data, cart_item){
     const item_price = formatNumber(data.price);
     const item_total_price = formatNumber(data.item_total_price || data.price);
 
@@ -342,7 +335,7 @@ function cartItemHtml(data){
                         class="cart-stepper" 
                         data-id="${ data.id }"
                         data-product_uuid="${ data.product_uuid }"
-                        data-product_sku="${ data.product_sku }"
+                        data-variant_uuid="${ data.variant_uuid }"
                         data-product_name="${ data.product_name }"
                         value="${ data.quantity }"
                         step="1" min="1" 
@@ -351,63 +344,10 @@ function cartItemHtml(data){
                 </div>        
             </div>
             <div class="text-right" >
-                <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"product_uuid":"${data.product_uuid}","product_sku":"${data.product_sku}"}' ></ins-button>
+                <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"id":"${cart_item.id}","uuid":"${cart_item.uuid}","cart_uuid":"${cart_item.cart_uuid}"}' ></ins-button>
             </div>    
             <div class="spacer x-large"></div>
         </div>`;    
-}
-
-
-/* Guest user - Get cart from local storage */
-if (user_uuid === "") {
-    const carts = getCartFromLocalStorage();
-
-    if (carts.length > 0) {
-        carts.forEach(cart => {
-            const cartData = JSON.parse(cart);
-            cartItemsWrap.insertAdjacentHTML('afterbegin', cartItemHtml(cartData));
-
-            const newItemAdded = document.getElementById(`cart-item-${cartData.id}`);
-            if (window.location.pathname !== "/shopping-cart") {
-                if (newItemAdded) {
-                    // Handle cart item outside the shopping cart page
-                    const cartStepper = newItemAdded.querySelector(".cart-stepper");
-                    if (cartStepper) cartStepperEventListener(cartStepper);
-                    const removeCartBtn = newItemAdded.querySelector(".cart-remove-btn");
-                    if (removeCartBtn) removeCartEventListener(removeCartBtn);
-                }
-            }
-        });
-
-        computeSubTotal();
-
-        // Handle cart item on the shopping cart page
-        if (window.location.pathname === "/shopping-cart") {
-            // Poll for cart stepper elements every 1 second for a maximum of 15 seconds
-            let retryCount = 0;
-            const maxRetries = 15;
-            const pollInterval = 1000; // 1 second
-
-            const pollForCartSteppers = setInterval(() => {
-                const cartSteppers = document.querySelectorAll(".cart-stepper");
-                const removeCartBtn = document.querySelectorAll(".cart-remove-btn");
-
-                if (cartSteppers.length > 0) {
-                    // Attach event listener to each stepper
-                    cartSteppers.forEach(cartStepperEventListener);
-                    removeCartBtn.forEach(removeCartEventListener);
-                    clearInterval(pollForCartSteppers);  // Stop polling once we have the elements
-                }
-                retryCount++;
-                if (retryCount >= maxRetries) {
-                    console.warn("Max retries reached. Could not find cart steppers.");
-                    clearInterval(pollForCartSteppers); // Stop polling after max retries
-                }
-            }, pollInterval);
-        }
-    } else {
-        emptyCartWrap.classList.remove('hide');
-    }
 }
 
 
@@ -451,20 +391,7 @@ function addCartToLocalStorage(data){
 
 function reloadIfShoppingCartPage() {
     if (window.location.pathname === "/shopping-cart") {
-        if( user_uuid == ""){
-            // Guest user
-            if (saveCheckoutSessionForGuest()) {
-                setTimeout(() => {
-                    location.reload();
-                }, 1000); // add delay to allow the session to be saved
-            }
-        } else {
-            // Logged in user
-            location.reload();
-        }
-    } else if(user_uuid == "" ){
-        // Save session data for guest user
-        saveCheckoutSessionForGuest();
+        location.reload();
     }
 }
 

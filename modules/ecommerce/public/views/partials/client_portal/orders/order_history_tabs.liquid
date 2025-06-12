@@ -82,7 +82,7 @@ metadata: {
   <div class="spacer hide-for-large cell"></div>
 
   <div class="large-5 medium-12 small-12 text-right">
-      <ins-button label="Re-Order" class="reorder-btn" data='{{ reorder_items }}' icon="icon-shopping-cart" outlined ></ins-button>
+      <ins-button label="Re-Order" id="reorder-btn" class="reorder-btn" data='{{ reorder_items }}' icon="icon-shopping-cart" outlined ></ins-button>
 
       <div class="spacer x-small hide-for-large cell"></div>
 
@@ -124,23 +124,11 @@ metadata: {
 
 {% comment %} Reorder - Cart {% endcomment %}
 <script>
-let reorderBtn = document.querySelectorAll(".reorder-btn ");
-reorderBtn.forEach(btn => {
-  btn.addEventListener('insClick', async event => {  
-    let data = JSON.parse(event.detail.data);       
-    for (let i = 0; i < data.length; i++) {     
-      newEvent = {
-        "detail": {
-          "data": data[i],
-          "label": "Add to Cart",
-          "iteration": i,
-          "all_items": data
-        }
-      }
-      await addToCartPreProcess(newEvent, "reorder");
-    };    
+  const reorderBtn = document.getElementById("reorder-btn");
+  reorderBtn.addEventListener('insClick', async event => {   
+    reorderBtn.loading = true;
+    await addToCartPreProcess(event, 'reorder');
   });
-});
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>

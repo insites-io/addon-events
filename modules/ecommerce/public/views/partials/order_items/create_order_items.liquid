@@ -3,24 +3,15 @@ metadata: {
     partial_name: 'Ecommerce | Order Items | Create Order Items'
 }
 ---
-{%- comment -%} Get user cart {%- endcomment -%}
-{% graphql user_cart = 'modules/ecommerce/carts/get_user_cart', 
-        contact_uuid: user_uuid | dig: 'items','results' | first %}
+
+{% function user_cart_uuid = 'modules/ecommerce/user/get_user_uuid' %}
 
 {%  liquid    
     ## Get cart
-    if guest_user == false
+    if user_cart_uuid and user_cart_uuid != ''
         assign cart_items = '' | split: ','     
-        graphql user_cart = 'modules/ecommerce/carts/get_user_cart', contact_uuid: user_uuid | dig: 'items','results' | first 
-
-        for cart_item in user_cart.items
-            ## Convert an array of strings into an array of objects
-            assign temp_item = cart_item | parse_json
-            assign cart_items = cart_items | array_add: temp_item                
-        endfor
-
-    else 
-        assign cart_items = context.session.guest_cart
+        graphql cart = 'modules/ecommerce/carts/get_cart', contact_uuid: user_cart_uuid | dig: 'items','results' | first 
+        assign cart_items = cart.cart_items
     endif
 
     ## Get product info
@@ -36,23 +27,16 @@ metadata: {
 
         assign product = products | array_detect: uuid: cart_item.product_uuid
         assign product_name = product.product_name
-
-        ## to fix issues in comparing '' versus null
-        if product.product_sku == null 
-            assign product = product | add_hash_key: 'product_sku', ''
-        endif
         
         ## Check if the cart_item is a product or a variant of the product
-        assign temp_variant_uuid = ''
-        if cart_item.product_sku == product.product_sku
+        if cart_item.variant_uuid == '' or cart_item.variant_uuid == null
             ## item is NOT a variant
             assign selected_prop = product
         else 
             ## cart_item is a variant                
             for variant in product.variants
-                if cart_item.product_sku == variant.product_sku
+                if cart_item.variant_uuid == variant.uuid
                     assign selected_prop = variant
-                    assign temp_variant_uuid = variant.uuid
                 endif
             endfor
         endif            
@@ -69,7 +53,7 @@ metadata: {
 
         assign properties = properties | add_hash_key: 'order_uuid', order_uuid
         assign properties = properties | add_hash_key: 'product_uuid', cart_item.product_uuid
-        assign properties = properties | add_hash_key: 'product_variant_uuid', temp_variant_uuid
+        assign properties = properties | add_hash_key: 'product_variant_uuid', cart_item.variant_uuid
         assign properties = properties | add_hash_key: 'order_item_image', order_item_image
         assign properties = properties | add_hash_key: 'order_item_name', product_name
         assign properties = properties | add_hash_key: 'sku', cart_item.product_sku
@@ -99,9 +83,8 @@ metadata: {
 
 %}
 
-{% graphql create_order_item = 'modules/ecommerce/system/trigger_api_call', name: "modules/ecommerce/add_order_items", data: order_items_payload %}
-{%- comment %}
-{% graphql create_order_item = 'modules/ecommerce/order_items/create_order_items', items: order_items %}
-{%- endcomment %}
+{% graphql create_order_item = 'modules/ecommerce/system/trigger_api_call', 
+    name: "modules/ecommerce/add_order_items", 
+    data: order_items_payload %}
 
-{% export user_cart %}
+{% export cart %}

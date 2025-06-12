@@ -11,7 +11,7 @@ metadata: {
 
         {%- for item in carts -%}          
 
-            {% include 'modules/ecommerce/carts/cart_details', products, item, user_uuid %}
+            {% include 'modules/ecommerce/carts/cart_details', products, item %}
             {% assign cart = context.exports.cart %}
             
                                                 
@@ -71,7 +71,7 @@ metadata: {
                             class="cart-stepper" 
                             data-id="{{ item.id }}"
                             data-product_uuid="{{ item.product_uuid }}"
-                            data-product_sku="{{ item.product_sku }}"
+                            data-variant_uuid="{{ item.variant_uuid }}"
                             data-product_name="{{ item.product_name }}"
                             value="{{ item.quantity }}" 
                             step="1" min="1" 
@@ -109,30 +109,12 @@ metadata: {
     </ins-loader>
 {%- else -%}
 
-    {% function has_profile = "modules/website/layout/check_if_user_has_profile" %}
-    {% if has_profile %}
-
-        <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
-            <div class="small-12 cell">
-                <ins-card steady class="empty-state">
-                    <span>Your cart is empty.</span>
-                </ins-card>
-            </div>
+    <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
+        <div class="small-12 cell">
+            <ins-card steady class="empty-state">
+                <span>Your cart is empty.</span>
+            </ins-card>
         </div>
-
-    {%- else -%}
-        <div id="shopping-cart-items-wrap">
-            {% comment %} Javascript generated content will be place here {% endcomment %}
-        </div>      
-        
-        <ins-loader
-            id="shopping-guest-cart-loader"
-            class="hide"
-            state-title="Processing"
-            state-message="Please wait, we're processing your data."
-            state-icon="processing">
-        </ins-loader>
-
-    {%- endif -%}
+    </div>
 
 {%- endif -%}

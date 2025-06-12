@@ -8,48 +8,19 @@ metadata: {
     liquid
 
     assign params = context.params
-    assign user_uuid = context.current_user.external_id
-
-    function has_profile = "modules/website/layout/check_if_user_has_profile"
-    unless has_profile
-        assign user_uuid = null
-    endunless
+    function user_uuid = 'modules/ecommerce/user/get_user_uuid'
 
     if is_ordered_items == true and order_uuid != ''
-        comment
-            Get Order Summary for already purchased item(s) 
-        endcomment
+        ## Get Order Summary for already purchased item(s) 
         graphql carts = 'modules/ecommerce/order_items/get_order_items', order_uuid: order_uuid  | dig: 'items','results'
     else
-        comment
-            Get Cart Items
-        endcomment
-        if user_uuid != blank
-            comment
-                Logged in user 
-            endcomment
-            include 'modules/ecommerce/carts/cart_items', user_uuid
-            assign cart_items = context.exports.cart_items
-            assign user_cart = cart_items.user_cart
-            assign carts = cart_items.carts
-            assign products = cart_items.products
-            assign discounts = user_cart.discounts
-        else 
-            comment
-                Guest user 
-            endcomment
-            assign carts = context.session.guest_cart
-
-            comment
-                Get product info 
-            endcomment
-            assign product_uuids = carts | array_map: 'product_uuid' | array_flatten
-            graphql products = 'modules/ecommerce/products/get_cart_products', uuid: product_uuids, size: carts.size | dig: 'items','results'
-
-            if context.session.discount_uuids
-                graphql discounts = 'modules/ecommerce/discount/get_discount_by_uuids', uuids: context.session.discount_uuids | dig: 'items', 'results'
-            endif
-        endif
+        ## Get Cart Items
+        include 'modules/ecommerce/carts/cart_items'
+        assign cart_items = context.exports.cart_items
+        assign user_cart = cart_items.user_cart
+        assign carts = cart_items.carts
+        assign products = cart_items.products
+        assign discounts = user_cart.discounts
     endif
 
     comment
@@ -71,7 +42,7 @@ metadata: {
     {% endunless %}
     <div id="order-summary-cart-wrap" class="order-summary">  
         {% comment %} This is only for logged-in users {% endcomment %}
-        {%- if show_product and user_uuid != blank -%}   
+        {%- if show_product -%}   
             {%- for item in carts -%}
                 {% comment %} ? TAX LABEL {% endcomment %}
                 {%- if item.is_fixed_tax_amount -%}
@@ -84,10 +55,10 @@ metadata: {
                         liquid 
                         assign cart = '' | parse_json
                         assign cart = cart | add_hash_key: 'product_name', item.order_item_name
-                        assign cart = cart | add_hash_key: 'price', item.item_price
+                        assign cart = cart | add_hash_key: 'price', item.unit_price
                     -%}
                 {%- else -%}
-                    {%- include 'modules/ecommerce/carts/cart_details', products, item, user_uuid -%}
+                    {%- include 'modules/ecommerce/carts/cart_details', products, item -%}
                     {%- assign cart = context.exports.cart -%}
                 {%- endif -%}
 
@@ -127,7 +98,7 @@ metadata: {
         {% include 'modules/ecommerce/checkout/compute_completed_order_amounts', uuid: order_uuid %}
     {%- else -%}
         {%- include 'modules/ecommerce/checkout/compute_order_summary' 
-            order_id, user_uuid, user_cart, carts, products, guest_discounts: discounts -%}
+            order_id, user_cart, carts, products -%}
     {%- endif -%}
     {%- assign computed = context.exports.computed -%}
 
@@ -418,12 +389,6 @@ metadata: {
     let viewOrderSummaryBtn = document.getElementById('view-order-summary-btn');
     let orderSummaryDrawer = document.getElementById('order-summary-drawer');
     let orderSummaryDrawerContent = document.getElementById('order-summary-drawer-content');
-
-    // For Guest account: Compare the POS sessions with the localStorage
-    {%- unless has_profile -%}
-    let session_carts = {{ carts | default: '[]' }};
-    let session_discount_uuids = {{ context.session.discount_uuids |  default: '[]' }};
-    {%- endunless -%}
 
     viewOrderSummaryBtn.addEventListener('insClick', async event => {
         let orderSummaryHtmlContent = orderSummaryMainWrap.innerHTML;

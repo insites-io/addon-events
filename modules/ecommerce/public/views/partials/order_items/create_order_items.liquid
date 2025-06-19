@@ -21,7 +21,10 @@ metadata: {
 
 {% comment %} Create data for order_items  {% endcomment %}
 {%  liquid   
+    comment
     assign order_items = '' | split: ','
+    endcomment
+    assign order_items = '[]' | parse_json
 
     for cart_item in cart_items
 
@@ -45,16 +48,18 @@ metadata: {
             assign price = selected_prop.sale_price
         else 
             assign price = selected_prop.regular_price
-        endif          
+        endif 
 
         assign order_item_image = selected_prop.product_image.url | default: ''
 
         assign properties = '' | parse_json
 
-        assign properties = properties | add_hash_key: 'order_uuid', order_uuid
-        assign properties = properties | add_hash_key: 'product_uuid', cart_item.product_uuid
-        assign properties = properties | add_hash_key: 'product_variant_uuid', cart_item.variant_uuid
-        assign properties = properties | add_hash_key: 'order_item_image', order_item_image
+        assign properties = properties | add_hash_key: 'order.uuid', order_uuid
+        assign properties = properties | add_hash_key: 'product.uuid', cart_item.product_uuid
+        assign properties = properties | add_hash_key: 'product_variant.uuid', cart_item.variant_uuid
+        if order_item_image
+            assign properties = properties | add_hash_key: 'order_item_image', order_item_image
+        endif
         assign properties = properties | add_hash_key: 'order_item_name', product_name
         assign properties = properties | add_hash_key: 'sku', cart_item.product_sku
         assign temp_cart_item_quantity = cart_item.quantity | plus: 0
@@ -75,19 +80,18 @@ metadata: {
         assign line_item_total = price | times: cart_item.quantity | times: 1.00
         assign properties = properties | add_hash_key: 'line_item_total', line_item_total
 
+        comment
+        assign order_items = order_items | array_add: properties
+        endcomment
         assign order_items = order_items | array_add: properties
     endfor
 
     assign order_items_payload = '{}' | parse_json
     assign order_items_payload = order_items_payload | add_hash_key: 'payload', order_items
-
 %}
 
-{%- log order_items_payload, type: "Create Order Items - payload" -%}
 {% graphql create_order_item = 'modules/ecommerce/system/trigger_api_call', 
     name: "modules/ecommerce/add_order_items", 
     data: order_items_payload %}
-
-{%- log create_order_item, type: "Create Order Items API" -%}
 
 {% export cart %}

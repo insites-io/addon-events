@@ -32,7 +32,7 @@ metadata: {
     "payment_source": "Payment Gateway",
     "payment_status": "{{ order_payment_status }}",
     "payment_gateway_name": "{{ gateway | titleize }}",
-    "date_time": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}",
+    "date_time": "{{ date_time }}",
     "last_updated_by_id": "{{ context.current_user.id }}",
     "is_enabled": true,
     "card_last4": "{{ card.last4 }}",
@@ -121,7 +121,5 @@ metadata: {
         {% log "==== Inventory tracking is disabled: inventory was not updated ==== " %}
     {%- endif -%}
 {%- endif -%}
-
-{%- log updated_order, type: "===========updated_order================" -%}
 
 {% export updated_order %}

@@ -1755,6 +1755,15 @@ ins-button.add-credit-card button.ins-button>div,
     z-index: 9999 !important;
 }
 
+
+/* Swal */
+.swal2-popup.swal2-modal {
+    padding: 32px !important;
+}
+.swal2-popup.swal2-modal .ins-loader-wrap--title {
+    margin-top: 24px;
+}
+
 .empty-box {
     padding: 80px 24px;
     flex-direction: column;

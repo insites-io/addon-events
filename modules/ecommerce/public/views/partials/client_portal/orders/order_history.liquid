@@ -207,7 +207,6 @@ metadata: {
  
     function buildFilterParameter(){
         let urlWithParams = new URL(window.location.origin + window.location.pathname);
-        console.log("buildFilterParameter - old", urlWithParams);
 
         if(sortOrder != 'DESC' && sortOrder != 'desc'){ urlWithParams.searchParams.append('sort_order', sortOrder); }
         if(pageSize > 10){ urlWithParams.searchParams.append('per_page', pageSize); }

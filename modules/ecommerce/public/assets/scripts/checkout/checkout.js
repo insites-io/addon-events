@@ -181,7 +181,6 @@ let Checkout = (function () {
             },                     
             // Update shipping details based on whether shipping info is the same as account info
             updateShippingContact(sameDetails){
-                console.log('sameDetails',sameDetails);
                 let requiredInputs = document.querySelectorAll('#shipping-contact-inputs ins-input[required]');
                 if(sameDetails){
                     shippingSamewithAccountFlag = true;
@@ -277,7 +276,6 @@ let Checkout = (function () {
                         //Add CRM Company
                         if (contactCompanyNameEl.value) {  
                             var companies = await apiServices.processRequest('post','/create-company.json',companyPayload);
-                            console.log('companies', companies);
                         }
 
                         //Update CRM Contact
@@ -285,7 +283,6 @@ let Checkout = (function () {
                             contactPayload['company.uuid'] = companies?.data.uuid;
                         }
                         var contacts = await apiServices.processRequest('put','/update-contact.json',contactPayload);
-                        console.log('contacts', contacts);
 
                         // Submit
                         if(contacts?.data?.email){
@@ -304,7 +301,6 @@ let Checkout = (function () {
                         //Add CRM Company
                         if (contactCompanyNameEl.value) {
                             var companies = await apiServices.processRequest('post','/create-company.json',companyPayload);
-                            console.log('companies', companies);
                         }                        
 
                         //Add CRM Contact
@@ -312,7 +308,6 @@ let Checkout = (function () {
                             contactPayload['company.uuid'] = companies?.data.uuid;
                         }
                         var contacts = await apiServices.processRequest('post','/create-contact.json',contactPayload);
-                        console.log('contacts', contacts);
 
                         // Submit
                         if(contacts?.data?.email){
@@ -536,7 +531,6 @@ let Checkout = (function () {
                             "longitude": modalLongitudeEl.value
                         }
                     let response = await apiServices.processRequest('post',url,payload);
-                    console.log('create-contact-address',response);
                     if(response.state && response.data.id) {            
                         addressFormModal.close();
                         App.events.notyf("success", "Address added successfully.");                        
@@ -631,7 +625,6 @@ let Checkout = (function () {
             initVitualContactFormListener() {
                 if (virtualContactSubmitBtn) {
                     virtualContactSubmitBtn.addEventListener('insClick', (event) => {                        
-                        console.log('virtualContactSubmitBtn');
                         Checkout.events.virtualContactSubmit(event);
                     });                    
                 }

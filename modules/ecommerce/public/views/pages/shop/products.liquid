@@ -8,7 +8,8 @@ metadata: {
     "page_type": "content", 
     "page_name": "Products",
     "page_title": "Products",
-    "meta_title": "Products"       
+    "meta_title": "Products",
+    "source_name": "modules/insites_ecommerce/product"       
 }
 ---
 
@@ -23,14 +24,14 @@ URL Structures:
     {%- assign slug_type = 'category' -%}
     {% comment %} Check if slug2 is a category {% endcomment %}
     {%- graphql category_exist = 'modules/ecommerce/categories/is_category_exist', slug: context.params.slug2 | dig: 'items','total_entries' -%}    
-    {%- unless category_exist == 1 -%}
+    {%- if category_exist < 1 -%}
         {%- assign slug_type = 'product' -%}
         {% comment %} Check if slug2 is a product {% endcomment %}
         {%- graphql product_exist = 'modules/ecommerce/products/is_product_exist', slug: context.params.slug2 | dig: 'items','total_entries' -%}
         {%- if product_exist == 0 -%}
             {% redirect_to '/404' %}
         {%- endif -%}    
-    {%- endunless -%}
+    {%- endif -%}
 {%- endif -%}    
 
 

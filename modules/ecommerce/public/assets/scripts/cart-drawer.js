@@ -22,6 +22,14 @@ let shoppingCartListEl = document.getElementById("shopping-cart-list");
 let shoppingCartLoaderEl = document.getElementById("shopping-cart-loader");
 let proceedToCheckoutBtns = document.querySelectorAll(".proceed-to-checkout-btn");
 
+const placeholderImage = `<div class="placeholder-img vertical-align-middle">
+        <div>
+            <div class="spacer x-large"></div>    
+            <i class="icon-panorame"></i>
+            <div class="spacer x-large"></div>   
+        </div>
+    </div>`;
+
 // Remove the 'hide' class from the cart drawer when it has loaded
 cartDrawer.addEventListener('didLoad', () => {
     cartDrawer.classList.remove('hide');
@@ -318,10 +326,16 @@ async function removeToCart(data){
 function cartItemHtml(data, cart_item){
     const item_price = formatNumber(data.price);
     const item_total_price = formatNumber(data.item_total_price || data.price);
+    const img = data.image && data.image.trim() !== ''
+        ? `<img src="${encodeURI(data.image)}" width="66px" height="66px">`
+        : placeholderImage;
 
     return ` <div id="cart-item-${data.id}" class="cart-item-wrap">
             <div class="grid-x" >
-                <div class="cell grid-y large-7 medium-7 small-7">
+                <div class="image_wrap">
+                    ${ img }
+                </div>
+                <div class="grid-y cart-details flex-child-auto">
                     <h6>${ data.product_name }</h6>
                     <p class="body-x-small">SKU ${ data.product_sku }</p>
                     <div class="spacer x-small"></div>
@@ -330,7 +344,8 @@ function cartItemHtml(data, cart_item){
                         <span class="body-x-small item-price">$${ item_price }</span>
                     </p>
                 </div>
-                <div class="cell grid-y large-5 medium-5 small-5 text-right">
+                <div class="cell spacer small show-for-small-only"></div>
+                <div class="grid-y flex-child-auto text-right">
                     <p class="cart-price compute-price">$${ item_total_price }</p>
                     <div class="spacer x-small"></div>
                     <ins-input-stepper
@@ -344,10 +359,11 @@ function cartItemHtml(data, cart_item){
                         step="1" min="1" 
                         small>
                     </ins-input-stepper>
+                    <div class="spacer small"></div>
+                    <div class="text-right" >
+                        <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"id":"${cart_item.id}","uuid":"${cart_item.uuid}","cart_uuid":"${cart_item.cart_uuid}"}' ></ins-button>
+                    </div>   
                 </div>        
-            </div>
-            <div class="text-right" >
-                <ins-button label="Remove" icon="icon-trash-2" size="small" class="cart-remove-btn" data='{"id":"${cart_item.id}","uuid":"${cart_item.uuid}","cart_uuid":"${cart_item.cart_uuid}"}' ></ins-button>
             </div>    
             <div class="spacer x-large"></div>
         </div>`;    

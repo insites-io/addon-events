@@ -1076,8 +1076,8 @@ ins-tag.preorder-tag span.ins-tag {
     padding-top:  0px;
     padding-bottom: 40px;
 }
-#view-order-summary-btn .btn__label {
-    width: 154px;
+#view-order-summary-btn button {
+    padding: 0px 24px;
 }
 
 
@@ -1740,6 +1740,26 @@ ins-button.add-credit-card button.ins-button>div,
 /* Checkout */
 #identify-customer a {
     color: var(--color-main);
+}
+
+@media screen and (max-width: 639px) {
+    #account-details button {
+        width: 100%;
+    }
+    #shipping-address-form ins-button:not(#add-address-btn) button{
+        width: 100%;
+    }
+    #shipping-address-fields ins-button{
+        display: block;
+    }
+    #shipping-address-fields button{
+        width: 100%;
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+    #shipping-address-fields #address-cancel-btn{
+        margin-bottom: 16px;
+    }
 }
 
 /* Checkout Shipping */

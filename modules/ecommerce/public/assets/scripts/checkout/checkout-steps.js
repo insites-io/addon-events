@@ -126,7 +126,7 @@ let CheckoutSteps = (function () {
                     if(event.currentStep.dataset.step > event.nextStep.dataset.step) {
                         // go back to previous step
                         let nextStep = event.nextStep.description.split(' ')[0].toLowerCase() + '-details';
-                            nextStep = document.getElementById(nextStep);
+                        nextStep = document.getElementById(nextStep);
                         CheckoutSteps.events.goToPreviousStep(event, currentStep, nextStep);
                     } else {
                         // validate fields before navigate to next step

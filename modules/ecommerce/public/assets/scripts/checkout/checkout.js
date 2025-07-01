@@ -179,7 +179,6 @@ let Checkout = (function () {
                 });
             },
             addAddressRequiredAttribute() {
-                console.info('addAddressRequiredAttribute function triggered. Add required and validate attributes.');
                 // List of input IDs to exclude
                 const excludedIds = ['shipping_address_2', 'billing_address_2'];
             
@@ -196,7 +195,6 @@ let Checkout = (function () {
             },                     
             // Update shipping details based on whether shipping info is the same as account info
             updateShippingContact(sameDetails){
-                console.log('sameDetails',sameDetails);
                 let requiredInputs = document.querySelectorAll('#shipping-contact-inputs ins-input[required]');
                 if(sameDetails){
                     shippingSamewithAccountFlag = true;
@@ -492,7 +490,6 @@ let Checkout = (function () {
                 addressCard.setAttribute('selected', true);
                 addressCard.selected = true;
                 selectedAddressId = addressCard.value;
-                console.info('selected card', selectedAddressId);
 
                 selectedAddress = {
                     "address_1": addressCard.getAttribute('data-address_1'),
@@ -510,28 +507,13 @@ let Checkout = (function () {
                 if(billingAddressID){
                     billingAddressID.setValue(selectedAddressId);
                 }                
-            },
-            // fillAddressField(addressCard) {
-            //     let name = addressCard.getAttribute('name');
-            //     let type = name.split('-')[0];
-                
-            //     document.getElementById('address-uuid').value = addressCard.dataset.uuid;
-            //     document.getElementById(`${type}-address-search`).value = addressCard.dataset.address;
-            //     document.getElementById(`${type}_address_id`).value = addressCard.value || "";
-            //     document.getElementById(`${type}_address_1`).value = addressCard.dataset.address_1 || "";
-            //     document.getElementById(`${type}_address_2`).value = addressCard.dataset.address_2 || "";
-            //     document.getElementById(`${type}_suburb`).value = addressCard.dataset.suburb || "";
-            //     document.getElementById(`${type}_state`).value = addressCard.dataset.state || "";
-            //     document.getElementById(`${type}_postcode`).value = addressCard.dataset.postcode || "";
-            //     document.getElementById(`${type}_country`).value = addressCard.dataset.country || "";
-            // },        
+            },     
             async addressSubmit() {
                 let isValid = await App.validation.validateForm(addressFormModal);
-                console.log('isValid',isValid);
                 if(isValid){
-                    let url = '/v1/contacts/addresses' ;
+                    let url = '/v2/contacts/addresses' ;
                     let payload = {
-                            "contact_uuid": contactUuid, //REQUIRED
+                            "contact.uuid": contactUuid, //REQUIRED
                             "address_label": shipping_address_1.value, //REQUIRED
                             "default_address": false,
                             "address_1": shipping_address_1.value,
@@ -547,7 +529,7 @@ let Checkout = (function () {
                             "latitude": shipping_latitude.value,
                             "longitude": shipping_longitude.value
                         }
-                    let response = await apiServices.processRequest('post',url,payload,undefined,'/core/api');
+                    let response = await apiServices.processRequest('post',url,payload,undefined,'/crm/api');
                     if(response.state && response.data.items.id) {            
                         addressFormModal.close();
                         App.events.notyf("success", "Address added successfully.");                        
@@ -585,28 +567,6 @@ let Checkout = (function () {
                 });
                 selectedAddressId = null;
             },
-            // clearAddressField(btnAddress){
-            //     let name = btnAddress.getAttribute('name');
-            //     let type = name.split('-')[0];
-
-            //     document.getElementById(`${type}-address-search`).value = "";
-            //     document.getElementById(`${type}_address_id`).value = "";
-            //     document.getElementById(`${type}_address_1`).value = "";
-            //     document.getElementById(`${type}_address_2`).value = "";
-            //     document.getElementById(`${type}_suburb`).value = "";
-            //     document.getElementById(`${type}_state`).value = "";
-            //     document.getElementById(`${type}_postcode`).value = "";
-            //     document.getElementById(`${type}_country`).value = "";
-            // },
-            // setAddressCardError(){
-            //     // let addressCards = Array.from(document.querySelectorAll('ins-checkbox-card'));
-            //     let addressCardsWrap = Array.from(document.querySelectorAll('.ins-checkbox-card-wrap'));
-
-            //     addressCardsWrap.forEach(address => {
-            //         address.style.borderColor = '';
-            //         address.style.borderColor = 'red';
-            //     });
-            // },
             // Function to remove 'is-invalid' class from all form elements
             removeInvalidClassFromForm() {
                 const invalidElements = document.querySelectorAll('.is-invalid');
@@ -648,7 +608,6 @@ let Checkout = (function () {
             },
             initAddressListener() {
                 if(addAddressBtn && addressCancelBtn && addressSubmitBtn) {
-                    console.log('initAddressListener');
                     addAddressBtn.addEventListener('insClick', () => {        
                         addressFormModal.open(); 
                     });
@@ -665,7 +624,6 @@ let Checkout = (function () {
             initVitualContactFormListener() {
                 if (virtualContactSubmitBtn) {
                     virtualContactSubmitBtn.addEventListener('insClick', (event) => {                        
-                        console.log('virtualContactSubmitBtn');
                         Checkout.events.virtualContactSubmit(event);
                     });                    
                 }

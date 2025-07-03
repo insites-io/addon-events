@@ -33,11 +33,11 @@ metadata: {
                             <h6>
                                 {{ cart.product_name }} 
                                 {% if cart.selected_prop.stock_level < 1 %}
-                                <ins-tag label="Pre-Order" class='preorder-tag body-x-small' ></ins-tag>
+                                <ins-tag label="Pre-order" class='preorder-tag body-x-small' ></ins-tag>
                                 {% endif %}
                             </h6> 
                         </a>
-                        <p class="body-small">SKU: {{ item.product_sku }}</p>
+                        <p class="body-small font-color-body">SKU: {{ cart.product_sku }}</p>
                         <div class="spacer small"></div>
                         {% comment %} Get variant info {% endcomment %}
                         {% if cart.is_variant == true %}
@@ -115,9 +115,9 @@ metadata: {
 
     <div id="shopping-cart-list" class="shopping-cart grid-x grid-padding-x grid-padding-y">
         <div class="small-12 cell">
-            <ins-card steady class="empty-state">
-                <span>Your cart is empty.</span>
-            </ins-card>
+            <div class="empty-box">
+                    <span>Your cart is empty.</span>
+            </div>
         </div>
     </div>
 

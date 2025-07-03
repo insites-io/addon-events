@@ -39,8 +39,7 @@
         placeholder="Last Name"
         name="{{ prop.shipping_contact_last_name.name }}" 
         id="shipping-last-name" 
-        value="{{ context.session.shipping_contact_last_name | default: ''}}"
-        {% if form.errors['properties.shipping_contact_last_name'] %} has-error {% endif %}
+        value="{{ context.session.shipping_contact_last_name | default: ''}}"        
         error-message="Last name is required.">
       </ins-input>
     </div>
@@ -52,7 +51,6 @@
         name="{{ prop.shipping_contact_email.name }}" 
         id="shipping-email" 
         value="{{ context.session.shipping_contact_email | default: ''}}"
-        {% if form.errors['properties.shipping_contact_email'] %} has-error {% endif %}
         error-message="Email is required."
         position="right">
       </ins-input>

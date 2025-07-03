@@ -30,7 +30,7 @@ metadata: {
 
   // set table headers
   orderListTable.tableHeaders = [
-    { label: 'Product Name', type: "string", hasImage: true, sortable: true},
+    { label: 'Product name', type: "string", hasImage: true, sortable: true},
     { label: 'SKU', type: "string" },
     { label: 'Variant', type: "string" },
     { label: 'Qty', type: "number" },
@@ -69,8 +69,8 @@ metadata: {
 
         return {
             id: data.id,
-            "Product Name": data.order_item_name,
-            "Product Name_Img": product_img,
+            "Product name": data.order_item_name,
+            "Product name_Img": product_img,
             "SKU": data.sku,
             "Variant": variation,
             "Qty": data.quantity,

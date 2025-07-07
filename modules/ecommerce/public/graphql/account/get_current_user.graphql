@@ -19,6 +19,7 @@ query get_current_user {
         join_on_property: "company_uuid"
         foreign_property: "uuid"
       ){
+        uuid: property(name: "uuid")
         company_name: property(name: "company_name")
       }
     }    

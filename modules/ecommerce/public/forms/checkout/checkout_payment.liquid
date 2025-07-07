@@ -64,6 +64,7 @@ fields:
 
         ## Transaction Details
         order_reference:
+        order_company_uuid:
         order_company_name:
         order_contact_uuid:
             validation:
@@ -144,6 +145,7 @@ default_payload: >
             "billing_postcode": "{{context.session.billing_postcode | default: ''}}",
             "billing_country": "{{context.session.billing_country | default: ''}}",
             "order_reference": "{{ '' | uuid | split: '-' | first }}", 
+            "order_company_uuid": "{{ context.session.company_uuid }}", 
             "order_company_name": "{{ context.session.contact_company_name }}", 
             "order_contact_uuid": "{{ order_contact_uuid }}", 
             "order_contact_first_name": "{{ order_contact_first_name }}", 

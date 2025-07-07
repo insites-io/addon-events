@@ -14,7 +14,8 @@ metadata: {
         {%- if context.current_user -%}
             {% comment %} The user is logged in: Get user info {% endcomment %}
             {%- graphql user = 'modules/ecommerce/account/get_current_user' -%}
-            {% assign crm_contact = user.current_user.crm_contact[0] %}            
+            {% assign crm_contact = user.current_user.crm_contact[0] %}
+            {% session company_uuid = crm_contact.crm_company.uuid %}        
 
             {% comment %} Edit current_user {% endcomment %}
             {% include_form 'modules/ecommerce/checkout_user_update', 

@@ -12,7 +12,9 @@ searchable: false
 {%- graphql add_company = 'modules/website/trigger_api_call', 
      name: 'modules/portal/add_company', 
      data: payload 
-     | dig: 'items','response','body' | parse_json -%}            
+     | dig: 'items','response','body' | parse_json -%}   
+     
+{% session company_uuid = add_company.uuid %} 
 
 {% comment %} Set Status {% endcomment %}
 {%- liquid

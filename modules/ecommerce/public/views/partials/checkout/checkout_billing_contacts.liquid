@@ -1,8 +1,6 @@
 {% comment %} Billing contact {% endcomment %}
 <div id="billing-details" class="insites-form">
-  <h4>Billing contact</h4>
-  <div class="spacer x-large"></div>
-
+ 
   <ins-checkbox class="inline" 
     {% if context.session.billing_same_with_shipping == true %} checked {% endif %}
     name="{{ prop.billing_same_with_shipping.name }}"
@@ -12,6 +10,13 @@
   </ins-checkbox>
 
   <div id="billing-contact-inputs" class="grid-x grid-padding-x billing-contact {% if context.session.billing_same_with_shipping == true %} hide {% endif %}">
+
+    <div class="cell">
+      <div class="spacer x-large"></div>
+      <h4>Billing contact</h4>
+      <div class="spacer x-large"></div>
+    </div>
+
     <div class="large-12 medium-12 small-12 cell">
       <ins-input  
         class="label-input" 

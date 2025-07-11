@@ -87,8 +87,7 @@ callback_actions: |-
             placeholder="Address 1" 
             name="{{ prop.address_1.name }}"
             value="{{ context.session.shipping_address_1 }}"
-            {% if form.errors['properties.address_1'] %} has-error {% endif %}
-            error-message="{{ prop.address_1.validation.rules.presence.message }}">
+            error-message="Address 1 is required.">
           </ins-input>
         </div>
         <div class="large-6 medium-6 small-12 cell">
@@ -97,9 +96,7 @@ callback_actions: |-
             id="shipping_address_2" 
             placeholder="Address 2"
             name="{{ prop.address_2.name }}"
-            value="{{ context.session.shipping_address_2 }}"
-            {% if form.errors['properties.address_2'] %} has-error {% endif %}
-            error-message="{{ prop.address_2.validation.rules.presence.message }}">
+            value="{{ context.session.shipping_address_2 }}">
           </ins-input>
         </div>
         <div class="large-6 medium-6 small-12 cell">
@@ -109,8 +106,7 @@ callback_actions: |-
             placeholder="Suburb"
             name="{{ prop.suburb.name }}"
             value="{{ context.session.shipping_suburb }}" 
-            {% if form.errors['properties.suburb'] %} has-error {% endif %}
-            error-message="{{ prop.suburb.validation.rules.presence.message }}">
+            error-message="Suburb is required.">
           </ins-input>
         </div>
         <div class="large-6 medium-6 small-12 cell">
@@ -120,8 +116,7 @@ callback_actions: |-
             placeholder="State"
             name="{{ prop.state.name }}"
             value="{{ context.session.shipping_state }}"
-            {% if form.errors['properties.state'] %} has-error {% endif %}
-            error-message="{{ prop.state.validation.rules.presence.message }}">
+            error-message="State is required.">
           </ins-input>
         </div>
         <div class="large-6 medium-6 small-12 cell">
@@ -131,8 +126,7 @@ callback_actions: |-
             placeholder="Postcode" 
             name="{{ prop.postcode.name }}"
             value="{{ context.session.shipping_postcode }}"
-            {% if form.errors['properties.postcode'] %} has-error {% endif %}
-            error-message="{{ prop.postcode.validation.rules.presence.message }}">
+            error-message="Postcode is required.">
           </ins-input>
         </div>
         <div class="large-6 medium-6 small-12 cell">
@@ -142,8 +136,7 @@ callback_actions: |-
             placeholder="Country" 
             name="{{ prop.country.name }}"
             value="{{ context.session.shipping_country }}"
-            {% if form.errors['properties.country'] %} has-error {% endif %}
-            error-message="{{ prop.country.validation.rules.presence.message }}">
+            error-message="Country is required.">
           </ins-input>
         </div>
       </div>

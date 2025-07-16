@@ -1,0 +1,51 @@
+query get_events (
+  $page: Int=1
+  $size: Int=10
+  $sort:[RecordsSortInput!] = {
+    properties:[
+      { name: "start_date_time", order: ASC }
+    ]
+  }
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_events/event" }
+    }
+    sort: $sort  
+  ) {
+    total_entries    
+    results {
+      id
+      uuid: property(name: "uuid")
+      event_name: property(name: "event_name")
+      start_date_time: property(name: "start_date_time")
+      end_date_time: property(name: "end_date_time")
+      event_time_zone: property(name: "event_time_zone")
+      event_type: property(name: "event_type")
+      venue_name: property(name: "venue_name")
+      venue_state: property(name: "venue_state")
+      
+      event_image: property_upload(name: "event_image") {
+        url
+      }        
+      # venue: related_record(
+      #   table: "modules/insites_events/venue"
+      #   join_on_property: "venue_uuid"
+      #   foreign_property: "uuid"
+      # ){
+      #   properties
+      # }
+      category: related_record(
+        table: "modules/insites_events/event_system_field"
+        join_on_property: "category_uuid"
+        foreign_property: "uuid"
+      ){
+        value: property(name: "value")
+      }
+			#properties
+    }
+  }
+}

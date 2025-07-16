@@ -1,0 +1,64 @@
+<div class="wrap" >
+     <div class="img-wrap">
+          {% if item.event_image.url %}
+               <img src="{{ item.event_image.url }}" loading="lazy" width="920" height="585">
+          {% else %}
+               {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+          {% endif %}
+     </div>
+</div>
+<div class="wrap" >
+
+     {% comment %} Spacer {% endcomment %}
+     {% if list == true %}                         
+          <div class="spacer"></div>
+     {% else %}
+          <div class="spacer show-for-small-only"></div>
+     {% endif %}
+
+     {% comment %} State | Category {% endcomment %}
+     <div class="grid-x">
+          <p class="venue-state">{{ item.venue_state |  default: 'State' }}</p>
+          <div class="flex-child-auto text-right">
+               <i class="icon-bookmark-1"></i>
+               <span>{{ item.category.value }}</span>
+          </div>
+     </div>
+
+     <hr>
+
+     {% comment %} Event Name | Button {% endcomment %}
+     <div class="event-heading-wrap">
+          {% if list == true %}                         
+               <h5 class="flex-child-auto">{{ item.event_name }}</h5>
+          {% else %}
+               <h4 class="flex-child-auto">{{ item.event_name }}</h4>
+          {% endif %}                         
+          <div class="event-button-wrap">
+               <a href="/events/{{ item.uuid }}">
+                    <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label=""></ins-button>
+               </a>
+          </div>                         
+     </div>
+     
+     <div class="spacer small"></div>
+     
+     {% comment %} TIME AND TIMEZONE {% endcomment %}
+     {% include 'modules/events/events/event_time_and_time_zone', item: item %}   
+
+     <div class="spacer xx-small"></div>
+
+     <div class="grid-x">
+          <i class="icon-map-pin"></i>
+          {% if item.event_type == 'venue' %}
+               {% assign venue = item.venue_name %} 
+          {% else %}
+               {% if item.event_type == "online_event" %}
+                    {% assign venue = "Online Event" %}
+               {% else %}
+                    {% assign venue = "To be Announced" %}
+               {% endif %}   
+          {% endif %}
+          {{ venue }}
+     </div>
+</div>

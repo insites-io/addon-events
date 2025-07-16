@@ -1,0 +1,55 @@
+---
+metadata: {
+    partial_name: 'Events | Blocks | Discover whats happening'
+}
+---
+
+{% graphql events = 'modules/events/events/get_events', size: 4 | dig: 'items' %}
+
+{% if events.total_entries > 0 %}
+
+     {% assign main_event = events.results[0] %}
+     <div class="bg-color-ui-02">
+
+          {% comment %} Main Event {% endcomment %}
+          <section class="wrapper width-1440">          
+               <div class="spacer xxxx-large"></div>
+               <div class="text-center">
+                    <h2>Discover what's happening</h2>
+                    <div class="spacer small"></div>
+                    <p>Event updates - stay informed about upcoming and current events!</p>
+               </div>
+               <div class="spacer section"></div>
+
+               <div id="main-event" class="event-card-wrap">
+                    {% include 'modules/events/events/card', item: main_event %}
+               </div>               
+          </section> 
+          
+          <div class="spacer xxxx-large hide-for-small-only"></div>
+          <div class="spacer xx-large show-for-small-only"></div>
+
+          {% comment %} Event List {% endcomment %}
+          <section class="wrapper width-1440">
+               <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
+                    {% for item in events.results offset:1 %}
+                         <div class="cell large-4 medium-6 small-12">
+                              {% include 'modules/events/events/card', item: item, list: true %}
+                         </div>
+                         <div class="cell large-0 medium-0 small-12 spacer xx-large show-for-small-only"></div>
+                    {% endfor %}
+               </div>               
+          </section> 
+          
+          <div class="spacer xxxx-large hide-for-small-only"></div>
+          <div class="spacer xx-large show-for-small-only"></div>
+
+     </div>
+
+     {%- if context.environment == "staging" -%}
+          <script src="{{ 'modules/events/scripts/events-addon.js' | asset_url }}" defer></script>          
+      {%- else -%}
+          <script src="{{ 'modules/events/scripts/events-addon.min.js' | asset_url }}" defer></script>          
+      {%- endif -%}
+
+{% endif %}

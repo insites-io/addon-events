@@ -1,0 +1,89 @@
+{% comment %} ? Comparing Start Date and End Date {% endcomment %}
+{% assign start_date_comparison = item.start_date_time | date: "%b %d, %y" %}
+{% assign end_date_comparison =  item.end_date_time | date: "%b %d, %y"  %}
+
+{% assign is_AEDT = item.custom_fields.daylight_savings_time %}
+
+
+{% comment %} CONVERT TIMEZONE ABBR {% endcomment %}
+{% assign time_zone = item.event_time_zone | split: "@" %}
+{% assign time_zone = time_zone | first %}
+{% if time_zone == "+0800" %}
+    {% assign time_zone_abbr = "AWST" %}
+{% elsif time_zone == "+0930" %}
+    {% assign time_zone_abbr = "ACST" %}
+{% elsif time_zone == "+1000" %}
+    {% assign time_zone_abbr = "AEST" %}
+{% elsif time_zone == "+1030" %}
+    {% assign time_zone_abbr = "ACDT" %}
+{% elsif time_zone == "+1100" %}
+    {% assign time_zone_abbr = "AEDT" %}  
+{% elsif time_zone == "+0100" %}
+    {% assign time_zone_abbr = "BST" %}
+{% elsif time_zone == "+0000" %}
+    {% assign time_zone_abbr = "GMT" %} 
+{% else %}
+    {% if item.event_time_zone != nil %}
+        {% assign time_zone_abbr = "UTC" %}
+    {% endif %}
+{% endif %}
+
+
+{% comment %} Check if AEDT is Toogled {% endcomment %}
+{% if is_AEDT == 'true' %}
+    {% assign time_zone_abbr = "AEDT" %}
+{% endif %}
+
+{% if start_date_comparison == end_date_comparison %}
+    {% comment %} Calendar {% endcomment %}
+    <div class="grid-x">
+        <i class="icon-calendar"></i>
+        <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
+    </div>
+    <div class="spacer xx-small"></div>
+    {% comment %} Clock {% endcomment %}
+    <div class="grid-x">
+        <i class="icon-clock"></i>
+        <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+    </div>
+{% else %}
+    {% if context.params.slug2 or context.params.slug == "purchase-ticket" %}
+        {% comment %} ? DETAILS VIEW TIME AND TIMEZONE {% endcomment %}
+        <div class="details_page_start_end_time">
+            <div class="start_time">
+                <span class="body-x-small-bold">Start Date & Time</span>
+                <div class="grid-x">
+                    <i class="icon-calendar"></i>
+                    <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
+                </div>
+                <div class="grid-x">
+                    <i class="icon-clock"></i>
+                    <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+                </div>    
+            </div>
+            <div class="end_time">
+                <span class="body-x-small-bold">End Date & Time</span>
+                <div class="grid-x">
+                    <i class="icon-calendar"></i>
+                    <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
+                </div>
+                <div class="grid-x">
+                    <i class="icon-clock"></i>
+                    <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+                </div>
+            </div>
+        </div>       
+    {% else %}
+        {% comment %} ? LIST VIEW TIME AND TIMEZONE {% endcomment %}
+        <div class="grid-x">
+            <i class="icon-calendar"></i>
+            <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }} - {{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
+        </div>
+        <div class="spacer xx-small"></div>
+        <div class="grid-x">
+            <i class="icon-clock"></i>
+            <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone_abbr }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+        </div>    
+    {% endif %}
+{% endif %}
+

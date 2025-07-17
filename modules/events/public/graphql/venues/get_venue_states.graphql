@@ -1,0 +1,27 @@
+query get_venue_states (
+  $page: Int=1
+  $size: Int=50
+  $sort_by: [RecordsSortInput!] = {
+      properties: [
+          { name: "state", order: ASC }
+      ]
+  }
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_events/venue" }
+    } 
+    sort: $sort_by
+  ) {
+    total_entries    
+    results {
+      id
+      uuid: property(name: "uuid")
+      state: property(name: "state")
+      #properties
+    }
+  }
+}

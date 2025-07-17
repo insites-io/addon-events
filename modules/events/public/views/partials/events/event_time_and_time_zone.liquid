@@ -34,6 +34,8 @@
     {% assign time_zone_abbr = "AEDT" %}
 {% endif %}
 
+{%  assign time_zone_abbr = time_zone_abbr | append: time_zone %}
+
 {% if start_date_comparison == end_date_comparison %}
     {% comment %} Calendar {% endcomment %}
     <div class="grid-x">
@@ -44,7 +46,7 @@
     {% comment %} Clock {% endcomment %}
     <div class="grid-x">
         <i class="icon-clock"></i>
-        <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+        <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
     </div>
 {% else %}
     {% if context.params.slug2 or context.params.slug == "purchase-ticket" %}
@@ -58,7 +60,7 @@
                 </div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
-                    <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+                    <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
                 </div>    
             </div>
             <div class="end_time">
@@ -69,7 +71,7 @@
                 </div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
-                    <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+                    <span>{{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
                 </div>
             </div>
         </div>       
@@ -82,7 +84,7 @@
         <div class="spacer xx-small"></div>
         <div class="grid-x">
             <i class="icon-clock"></i>
-            <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone_abbr }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone_abbr }}</span>        
+            <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }}) - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
         </div>    
     {% endif %}
 {% endif %}

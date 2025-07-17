@@ -1,0 +1,257 @@
+---
+slug: upcoming-events
+layout: modules/website/website_default
+searchable: "false"
+max_deep_level: 2
+metadata: {
+    "status": "published",
+    "page_type": "content", 
+    "page_name": "Upcoming Events",
+    "page_title": "Upcoming Events",
+    "meta_title": "Upcoming Events" 
+}
+---
+
+
+{%  liquid      
+     ## Query Strings
+     assign page_num = context.params.page | default: 1 | plus: 0
+     assign per_page = context.params.per_page | default: 12 | plus: 0
+     assign keyword = context.params.search | default: ""
+     assign selected_category = context.params.category | default: ""
+     assign selected_location = context.params.location | default: ""
+     assign sort = context.params.sort
+
+     ## Sort by     
+     if sort == "Earliest to latest"
+          assign order = "ASC"    
+     elsif sort == "Latest to earlier"
+          assign order = "DESC"
+     endif
+%}
+
+{% comment %} Sort by {% endcomment %}
+{% parse_json sort_by %}
+{
+     "properties": [
+               { "name": "start_date_time", "order": "{{ order |  default: 'ASC' }}" }
+          ]
+}
+{% endparse_json %}
+
+
+{% comment %} Filter: Categories {% endcomment %}
+{% parse_json category_payload %}
+{
+     "query_string": "system_field=event_category"
+}
+{% endparse_json %}
+{%- graphql categories = 'modules/website/trigger_api_call', 
+     name: 'modules/events/get_system_fields', 
+     data: category_payload
+     | dig: 'items','response','body' | parse_json
+     | dig: 'results' -%}  
+
+{% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
+{% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
+
+{% capture category_options %}  
+     {{ categories_name | array_prepend: 'All' }}
+{% endcapture %}
+
+     
+{% comment %} Filter: Locations {% endcomment %}
+{% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
+{% capture location_options %}  
+     {{ locations | map: 'state' | array_uniq | array_prepend: 'All' }}
+{% endcapture %}
+
+
+{% comment %} Get Events {% endcomment %}
+{% parse_json filters %}
+{
+     "page": {{ page_num }},
+     "size": {{ per_page }},
+     "keyword": "{{ keyword }}",
+     {% comment %} Category {% endcomment %}
+     {% if selected_category_uuid and selected_category_uuid != '' %}
+          "category_uuid": "{{ selected_category_uuid }}",
+     {% endif %}
+     {% comment %} Location {% endcomment %}
+     {% if selected_location != '' %}
+          "venue_state": "{{ selected_location }}",
+     {% endif %}
+     {% comment %} Search by name {% endcomment %}
+     {% if keyword != '' %}
+          "event_name": "{{ keyword }}",
+     {% endif %}
+     "sort_by": {{ sort_by }}
+}
+{% endparse_json %} 
+{% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' -%}
+     
+
+{% comment %} Hero title and description {% endcomment %}
+{% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
+{% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
+
+<div class="wrapper">
+
+     {% comment %} Filters | Search {% endcomment %}
+     <div class="news-filter-container width-1440">
+        <div class="grid-container">
+            <div class="grid-x gutter-medium grid-padding-x grid-padding-y">
+                <div class="large-8 medium-12 small-12 cell filter-container-cell">
+                    <ins-filter id="list-filter">
+                        <ins-filter-item
+                            name="Category"
+                            options='{{ category_options }}'
+                            selected="{{ context.params.category }}">
+                        </ins-filter-item>
+                        <ins-filter-item
+                            name="Location"
+                            options='{{ location_options }}'
+                            selected="{{ context.params.location }}">
+                        </ins-filter-item>
+                        <ins-filter-item
+                            name="Sort by"
+                            options='["Earliest to latest", "Latest to earlier"]'
+                            selected="{{ sort }}">
+                        </ins-filter-item>
+                    </ins-filter>
+                </div>
+                <div class="large-4 medium-12 small-12 cell search-container-cell">
+                    <div class="">
+                        <ins-input                 
+                            id="search-event"
+                            class="search-award search-bars"
+                            placeholder="Search by event name"
+                            icon-event
+                            icon="icon-search-1"
+                            value="{{ context.params.search }}">
+                        </ins-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+     <div class="spacer xxxx-large"></div>
+
+{% if events.total_entries == 0 %}
+     <div class="wrapper width-1440">
+        <div class="grid-x align-center">
+            {% if context.params.search != blank %}
+                <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>
+            {% else %}
+                <p class="subHeading">No results found</p>    
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+     <div class="wrapper width-1440">     
+          
+          {% comment %} List {% endcomment %}
+          <div class="grid-x grid-padding-x event-card-wrap">
+               {% for item in events.results %}
+                    <div class="cell large-4 medium-6 small-12">
+                         {% include 'modules/events/events/card', item: item, list: true %}
+                         <div class="spacer xxx-large hide-for-small-only"></div>
+                    </div>                    
+                    <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
+               {% endfor %}	
+          </div>                  
+          <div class="spacer xxxx-large"></div>
+
+          {% comment %} Pagination {% endcomment %}
+          <ins-table no-wrap
+               static-table
+               id="paginationTable"
+               without-search>    
+          </ins-table>
+     </div>
+     <div class="spacer xxxx-large"></div>
+
+{%- if context.environment == "staging" -%}
+     <script src="{{ 'modules/events/scripts/events-addon.js' | asset_url }}" defer></script>          
+{%- else -%}
+     <script src="{{ 'modules/events/scripts/events-addon.min.js' | asset_url }}" defer></script>          
+{%- endif -%}
+
+<script>
+    const paginationTable = document.getElementById('paginationTable');
+    const searchKey = document.getElementById('search-event');
+    const filterEl = document.getElementById('list-filter');
+
+    if (paginationTable) {
+        paginationTable.pageSizeOptions = [12, 24, 30];
+        paginationTable.totalCount = {{ events.total_entries | default: 0}};
+        paginationTable.pageNumber = {{ page_num }};
+        paginationTable.pageSize = {{ per_page }};
+
+        setTimeout(() => {
+            const paginationLabel = paginationTable.querySelector(".ibt-table-wrap__pagination > span");
+            if (paginationLabel) paginationLabel.innerHTML = 'Items per page';
+        }, 600);
+
+        paginationTable.addEventListener('insPaginationChange', handlePaginationChange);
+    }
+
+    function handlePaginationChange(event) {
+        const { pageNumber, pageSize } = event.detail;
+        updateUrlParams({ page: pageNumber, per_page: pageSize });
+    }
+
+    if (searchKey) {
+        searchKey.addEventListener('insIconClick', handleSearch);
+        searchKey.addEventListener('insInput', e => {
+            if (e.detail.keyCode === 13) handleSearch();
+        });
+     //    searchKey.addEventListener('insValueChange', () => {
+     //        //toggleInputError(searchKey.value === "");
+     //    });
+    }
+
+    function handleSearch() {
+        updateUrlParams({ search: searchKey.value.trim(), page: 1 }); 
+    }
+
+     // Filters
+    if (filterEl) {
+          filterEl.addEventListener('insFilterApply', (event) => {
+               console.log('event.detail',event.detail);
+               const { Category, Location, "Sort by": sortLabel } = event.detail;
+               const updatedParams = {};
+
+               // Categories
+               updatedParams.category = (Category && Category.toLowerCase() !== 'all') ? Category : null;
+
+               // Locations
+               updatedParams.location = (Location && Location.toLowerCase() !== 'all') ? Location : null;
+
+               // Sort by
+               updatedParams.sort = (sortLabel) ? sortLabel : null;
+
+               updatedParams.page = 1; 
+               updateUrlParams(updatedParams);
+               console.log('updatedParams', updatedParams);
+          });
+    }
+
+    function updateUrlParams(params) {
+        const url = new URL(window.location.href);
+        console.log('url',url);
+
+        Object.entries(params).forEach(([key, value]) => {
+            if (value === null || value === undefined) {
+                url.searchParams.delete(key);
+            } else {
+                url.searchParams.set(key, value);
+            }
+        });
+
+        console.log('new url',url.toString());
+
+        window.location.href = url.toString();
+    }
+</script>

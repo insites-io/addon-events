@@ -18,7 +18,12 @@
 
      {% comment %} State | Category {% endcomment %}
      <div class="grid-x">
-          <p class="venue-state">{{ item.venue_state |  default: 'State' }}</p>
+          {% if item.event_type == 'online_event' %}
+               {% assign venue_state = 'WEB' %}
+          {% else %}     
+               {% assign venue_state = item.venue_state |  default: 'State' %}
+          {% endif %}
+          <p class="venue-state">{{ venue_state }}</p>
           <div class="flex-child-auto text-right">
                <i class="icon-bookmark-1"></i>
                <span>{{ item.category.value }}</span>

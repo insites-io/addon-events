@@ -34,7 +34,8 @@
     {% assign time_zone_abbr = "AEDT" %}
 {% endif %}
 
-{%  assign time_zone_abbr = time_zone_abbr | append: time_zone %}
+{% capture formatted_time_zone %}{{ time_zone | slice: 0, 3 }}.{{ time_zone | slice: 3, 2 }}{% endcapture %}
+{%  assign time_zone_abbr = time_zone_abbr | append: formatted_time_zone %}
 
 {% if start_date_comparison == end_date_comparison %}
     {% comment %} Calendar {% endcomment %}

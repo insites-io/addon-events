@@ -2,6 +2,7 @@ query get_events (
   $page: Int=1
   $size: Int=20
   $event_name: String
+  $event_type: String
   $category_uuid: String
   $venue_state: String
   $sort_by: [RecordsSortInput!] = {
@@ -21,6 +22,7 @@ query get_events (
           properties: [
             { name: "status", contains: "enabled" }
             { name: "event_name", contains: $event_name, exists: true }
+            { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }
             { name: "category_uuid", value: $category_uuid }
             { name: "venue_state", value: $venue_state, exists: true }
@@ -30,6 +32,7 @@ query get_events (
           properties: [
             { name: "status", contains: "enabled" }
             { name: "event_name", value: $event_name, exists: true }
+            { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }
             { name: "category_uuid", value: $category_uuid }
             ## venue_state can be null as long as the event_type is online_event

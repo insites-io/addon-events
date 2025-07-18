@@ -3,6 +3,8 @@ query get_events (
   $size: Int=20
   $event_name: String
   $event_type: String
+  $gt_date_now: String
+  $lt_date_now: String
   $category_uuid: String
   $venue_state: String
   $sort_by: [RecordsSortInput!] = {
@@ -24,6 +26,7 @@ query get_events (
             { name: "event_name", contains: $event_name, exists: true }
             { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }
+            { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
             { name: "category_uuid", value: $category_uuid }
             { name: "venue_state", value: $venue_state, exists: true }
           ] 
@@ -34,6 +37,7 @@ query get_events (
             { name: "event_name", value: $event_name, exists: true }
             { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }
+            { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
             { name: "category_uuid", value: $category_uuid }
             ## venue_state can be null as long as the event_type is online_event
             { name: "venue_state", value: $venue_state, exists: false}

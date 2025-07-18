@@ -1,0 +1,186 @@
+---
+metadata:
+    partial_name: 'Events list'
+---
+
+{%  liquid      
+     ## Query Strings
+     assign page_num = context.params.page | default: 1 | plus: 0
+     assign per_page = context.params.per_page | default: 12 | plus: 0
+     assign keyword = context.params.search | default: ""
+     assign selected_category = context.params.category | default: ""
+     assign selected_location = context.params.location | default: ""
+     assign sort = context.params.sort
+
+     ## Sort by     
+     if sort == "Earliest to latest"
+          assign order = "ASC"    
+     elsif sort == "Latest to earlier"
+          assign order = "DESC"
+     endif
+%}
+
+{% comment %} Sort by {% endcomment %}
+{% parse_json sort_by %}
+{
+     "properties": [
+               { "name": "start_date_time", "order": "{{ order |  default: 'ASC' }}" }
+          ]
+}
+{% endparse_json %}
+
+
+{% comment %} Filter: Categories {% endcomment %}
+{% parse_json category_payload %}
+{
+     "query_string": "system_field=event_category&page=1&size=50"
+}
+{% endparse_json %}
+{%- graphql categories = 'modules/website/trigger_api_call', 
+     name: 'modules/events/get_system_fields', 
+     data: category_payload
+     | dig: 'items','response','body' | parse_json
+     | dig: 'results' -%}  
+
+{% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
+{% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
+
+{% capture category_options %}  
+     {{ categories_name | array_prepend: 'All' }}
+{% endcapture %}
+
+     
+{% comment %} Filter: Locations {% endcomment %}
+{% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
+{% capture location_options %}  
+     {{ locations | map: 'state' | array_uniq | array_prepend: 'Web' | array_prepend: 'All'  }}
+{% endcapture %}
+
+
+{% comment %} Get Events {% endcomment %}
+{% parse_json filters %}
+{
+     "page": {{ page_num }},
+     "size": {{ per_page }},
+     "keyword": "{{ keyword }}",
+     {% comment %} Upcoming || Previous list {% endcomment %}
+     {% if list == 'upcoming-events' %}
+          "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+     {% elsif list == 'previous-events' %}
+          "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+     {% endif %}
+     {% comment %} Category {% endcomment %}
+     {% if selected_category_uuid and selected_category_uuid != '' %}
+          "category_uuid": "{{ selected_category_uuid }}",
+     {% endif %}
+     {% comment %} Event Type || Location {% endcomment %}
+     {% if selected_location == 'Web' %}
+          "event_type": "online_event",
+     {% elsif selected_location != '' %}
+          "venue_state": "{{ selected_location }}",
+     {% endif %}
+     {% comment %} Search by name {% endcomment %}
+     {% if keyword != '' %}
+          "event_name": "{{ keyword }}",
+     {% endif %}
+     "sort_by": {{ sort_by }}
+}
+{% endparse_json %} 
+{% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' -%}
+     
+
+<div class="wrapper">
+
+     {% comment %} Filters | Search {% endcomment %}
+     <div class="width-1440">
+        <div class="grid-container">
+            <div class="grid-x gutter-medium grid-padding-x grid-padding-y">
+                <div class="large-8 medium-12 small-12 cell filter-container-cell">
+                    <ins-filter id="list-filter">
+                        <ins-filter-item
+                            name="Category"
+                            options='{{ category_options }}'
+                            selected="{{ context.params.category }}">
+                        </ins-filter-item>
+                        <ins-filter-item
+                            name="Location"
+                            options='{{ location_options }}'
+                            selected="{{ context.params.location }}">
+                        </ins-filter-item>
+                        <ins-filter-item
+                            name="Sort by"
+                            options='["Earliest to latest", "Latest to earlier"]'
+                            selected="{{ sort }}">
+                        </ins-filter-item>
+                    </ins-filter>
+                </div>
+                <div class="large-4 medium-12 small-12 cell search-container-cell">
+                    <div class="">
+                        <ins-input                 
+                            id="search-event"
+                            class="search-award search-bars"
+                            placeholder="Search by event name"
+                            icon-event
+                            icon="icon-search-1"
+                            value="{{ context.params.search }}">
+                        </ins-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+     <div class="spacer xx-large"></div>
+
+{% if events.total_entries == 0 %}
+     <div class="wrapper width-1440">
+        <div class="grid-x align-center">
+            {% if context.params.search != blank %}
+                <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>
+            {% else %}
+                <p class="subHeading">No results found</p>    
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+     <div class="wrapper width-1440">     
+          
+          {% comment %} List {% endcomment %}
+          <div class="grid-x grid-padding-x event-card-wrap">
+               {% for item in events.results %}
+                    <div class="cell large-4 medium-6 small-12">
+                         {% include 'modules/events/events/card', item: item, list: true %}
+                         <div class="spacer xxx-large hide-for-small-only"></div>
+                    </div>                    
+                    <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
+               {% endfor %}	
+          </div>
+
+          {% comment %} Pagination {% endcomment %}
+          <ins-table no-wrap
+               static-table
+               id="paginationTable"
+               without-search>    
+          </ins-table>
+     </div>
+     <div class="spacer section hide-for-small-only"></div>
+     <div class="spacer xxx-large show-for-small-only"></div>
+
+
+<script id="pagination-data" type="application/json">
+{
+     "totalCount": {{ events.total_entries | default: 0 }},
+     "pageNumber": {{ page_num }},
+     "pageSize": {{ per_page }},
+     "pageSizeOptions": [12, 24, 30],
+     "paginationText": "Items per page"
+}
+</script>
+
+{%- if context.environment == "staging" -%}
+     <script src="{{ 'modules/events/scripts/events-addon.js' | asset_url }}" defer></script>
+     <script src="{{ 'modules/events/scripts/events-list.js' | asset_url }}" defer></script>
+{%- else -%}
+     <script src="{{ 'modules/events/scripts/events-addon.min.js' | asset_url }}" defer></script>
+     <script src="{{ 'modules/events/scripts/events-list.min.js' | asset_url }}" defer></script>
+{%- endif -%}

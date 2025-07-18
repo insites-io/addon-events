@@ -1,0 +1,19 @@
+---
+slug: previous-events
+layout: modules/website/website_default
+searchable: "false"
+max_deep_level: 2
+metadata: {
+    "status": "published",
+    "page_type": "content", 
+    "page_name": "Previous Events",
+    "page_title": "Previous Events",
+    "meta_title": "Previous Events" 
+}
+---
+
+{% comment %} Hero title and description {% endcomment %}
+{% assign description = "A look back! Missed out on the fun? Explore photos and highlights from all our past events and revisit some great times we've shared." %}
+{% include 'modules/website/content/hero_title', title: 'Previous events', description: description %} 
+
+{% include 'modules/events/events/events_list', list: 'previous-events' %}

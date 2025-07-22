@@ -254,6 +254,10 @@ ins-input.hidden-input input {
     margin-left: -20px !important;
     margin-right: -20px !important;
 }
+.event-card-wrap.grid-x.grid-padding-y {
+    margin-top: -20px !important;
+    margin-bottom: -20px !important;
+}
 .event-card-wrap.grid-padding-x>.cell {
     padding-left: 20px;
     padding-right: 20px;
@@ -382,6 +386,9 @@ ins-button.event-card-btn .btn__icon {
 }
 .event-sponsors .cell {
     cursor: pointer;
+}
+.event-modal .ins-card-wrap{
+    width: 692px;
 }
 .event-modal .ins-modal-wrap.show-modal .ins-modal-head {
     border-bottom: 0px;
@@ -2072,6 +2079,18 @@ ins-button.add-credit-card button.ins-button>div,
 /* Confirmation */
 .confirmation_wrapper .heading-5-small{
     color: var(--font-color-sub) !important;
+}
+
+/* Modal */
+.ins-card-wrap {
+    max-width: calc(100% - 24px) !important;
+    margin: 30px auto 1.75rem !important;
+}
+
+/* Grid */
+.grid-container:not(.full) .grid-padding-y {
+    margin-top: calc(-1 * var(--gutter));
+    margin-bottom: calc(-1 * var(--gutter));
 }
 
 /* Swal */

@@ -40,7 +40,7 @@
                <h4 class="flex-child-auto">{{ item.event_name }}</h4>
           {% endif %}                         
           <div class="event-button-wrap">
-               <a href="/events/{{ item.uuid }}">
+               <a href="/{{page}}/{{ item.slug }}">
                     <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label=""></ins-button>
                </a>
           </div>                         
@@ -48,22 +48,12 @@
      
      <div class="spacer small"></div>
      
-     {% comment %} TIME AND TIMEZONE {% endcomment %}
-     {% include 'modules/events/events/event_time_and_time_zone', item: item %}   
+     {% comment %} Date & Time {% endcomment %}
+     {% include 'modules/events/events/event_date_time', item: item %}   
 
      <div class="spacer xx-small"></div>
 
-     <div class="grid-x">
-          <i class="icon-map-pin"></i>
-          {% if item.event_type == 'venue' %}
-               {% assign venue = item.venue_name %} 
-          {% else %}
-               {% if item.event_type == "online_event" %}
-                    {% assign venue = "Online Event" %}
-               {% else %}
-                    {% assign venue = "To be Announced" %}
-               {% endif %}   
-          {% endif %}
-          {{ venue }}
-     </div>
+     {% comment %} Locataion {% endcomment %}
+     {% include 'modules/events/events/event_location', item: item %} 
+
 </div>

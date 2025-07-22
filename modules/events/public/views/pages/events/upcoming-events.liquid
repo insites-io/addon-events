@@ -1,14 +1,14 @@
 ---
 slug: upcoming-events
 layout: modules/website/website_default
-searchable: "false"
+searchable: true
 max_deep_level: 2
 metadata: {
     "status": "published",
     "page_type": "content", 
-    "page_name": "Upcoming Events",
-    "page_title": "Upcoming Events",
-    "meta_title": "Upcoming Events" 
+    "page_name": "Upcoming Events | Insites",
+    "page_title": "Upcoming Events | Insites",
+    "meta_title": "Upcoming Events | Insites" 
 }
 ---
 
@@ -16,4 +16,4 @@ metadata: {
 {% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
 {% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
 
-{% include 'modules/events/events/events_list', list: 'upcoming-events' %}
+{% include 'modules/events/events/list', page: 'upcoming-events' %}

@@ -52,6 +52,7 @@ query get_events (
     results {
       id
       uuid: property(name: "uuid")
+      slug: property(name: "slug")
       event_name: property(name: "event_name")
       start_date_time: property(name: "start_date_time")
       end_date_time: property(name: "end_date_time")

@@ -1,0 +1,56 @@
+query get_event (
+  $page: Int=1
+  $size: Int=1
+  $slug: String!  
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_events/event" }
+     properties: [
+        { name: "status", contains: "enabled" }
+        { name: "slug", value: $slug }            
+      ]             
+    } 
+  ) {
+    total_entries    
+    results {
+      id
+      uuid: property(name: "uuid")
+      slug: property(name: "slug")
+      event_name: property(name: "event_name")
+      start_date_time: property(name: "start_date_time")
+      end_date_time: property(name: "end_date_time")
+      event_time_zone: property(name: "event_time_zone")
+      event_type: property(name: "event_type")
+      
+      venue_name: property(name: "venue_name")      
+      venue_address_1: property(name: "venue_address_1")
+      venue_address_2: property(name: "venue_address_2")
+      venue_address_3: property(name: "venue_address_3")
+      venue_city: property(name: "venue_city")
+      venue_suburb: property(name: "venue_suburb")
+      venue_state: property(name: "venue_state")
+      venue_postcode: property(name: "venue_postcode")
+      venue_country: property(name: "venue_country")      
+      venue_geojson: property_json(name: "venue_geojson")
+      
+      long_description: property(name: "long_description")
+      
+      event_image: property_upload(name: "event_image") {
+        url
+      }        
+
+      category: related_record(
+        table: "modules/insites_events/event_system_field"
+        join_on_property: "category_uuid"
+        foreign_property: "uuid"
+      ){
+        value: property(name: "value")
+      }
+			#properties
+    }
+  }
+}

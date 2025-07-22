@@ -1,0 +1,33 @@
+<div class="grid-x">
+     <i class="icon-map-pin"></i>
+     <div class="wrap">
+          {% if item.event_type == 'venue' %}
+               <div>{{ item.venue_name }}</div>
+               {% if show_address == true %}
+                    {%- assign address_parts = "," | split: "," -%}
+
+                    {%- if item.venue_address_1 %} {%- assign address_parts = address_parts | array_add: item.venue_address_1 -%} {% endif %}
+                    {%- if item.venue_address_2 %} {%- assign address_parts = address_parts | array_add: item.venue_address_2 -%} {% endif %}
+                    {%- if item.venue_address_3 %} {%- assign address_parts = address_parts | array_add: item.venue_address_3 -%} {% endif %}
+
+                    {%- comment %} Combine suburb + state + postcode with spaces and only if at least one exists {% endcomment -%}
+                    {%- assign suburb_state_postcode = "" -%}
+                    {%- if item.venue_suburb %} {%- assign suburb_state_postcode = suburb_state_postcode | append: item.venue_suburb -%} {% endif %}
+                    {%- if item.venue_state %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_state -%} {% endif %}
+                    {%- if item.venue_postcode %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_postcode | strip -%} {% endif %}
+                    {%- if suburb_state_postcode != "" %} {%- assign address_parts = address_parts | array_add: suburb_state_postcode  -%} {% endif %}
+
+                    {%- if item.venue_country %} {%- assign address_parts = address_parts | array_add: item.venue_country -%} {% endif %}
+
+                    <div>{{ address_parts | join: ', ' }}</div>
+
+               {% endif %}
+          {% else %}
+               {% if item.event_type == "online_event" %}
+                    <span>Online Event</span>
+               {% else %}
+                    <span>To be Announced</span>
+               {% endif %}   
+          {% endif %}          
+     </div>
+</div>

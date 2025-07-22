@@ -290,7 +290,7 @@ ins-input.hidden-input input {
 .event-card-wrap img:hover,
 .event-card-wrap img:hover {
     transform: scale(1.1);
-    filter: brightness(1.1);
+    opacity: 0.9;
 }
 .event-card-wrap hr{
     margin: 16px 0px;
@@ -353,27 +353,63 @@ ins-button.event-card-btn .btn__icon {
     text-decoration: underline;
 }
 
-/* Event Speakers */
+/* Event Speakers & Sponsors */
 .event-speakers img,
-.event-speakers .placeholder-img {
+.event-speakers .placeholder-img,
+.event-sponsors img,
+.event-sponsors .placeholder-img {
     border-radius: 12px;
     width: 100%;
-    height: 280px;
+    height: 280px !important;
     object-fit: cover;
+    cursor: pointer;
 }
-.event-speakers .ins-modal-wrap.show-modal .ins-modal-head {
+.event-sponsors .img-wrap {
+    border: 1px solid var(--color-ui-04);
+    height: 170px;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+}
+.event-sponsors img,
+.event-sponsors .placeholder-img {
+    width: 170px;
+    height: auto !important;
+}
+.event-sponsors img:hover,
+.event-sponsors .placeholder-img:hover {
+    opacity: 0.7;
+}
+.event-sponsors .cell {
+    cursor: pointer;
+}
+.event-modal .ins-modal-wrap.show-modal .ins-modal-head {
     border-bottom: 0px;
-    padding: 32px 32px 24px 32px;
+    padding: 32px 32px 0px 32px;
+}
+.event-modal .ins-modal-head-h1 {
+    color: var(--font-color-head) !important;
+    font-family: var(--font-family-01) !important;
+    font-size: 32px !important;
+    font-style: normal;
+    font-weight: 700 !important;
+    line-height: 130%; /* 41.6px */
+    letter-spacing: 0.32px;
+}
+.event-modal .ins-modal-wrap.show-modal .ins-modal-body {
+    overflow: auto;
 }
 .event-speakers .ins-modal-wrap.show-modal .ins-modal-body {
-    overflow: auto;
     max-height: calc(100vh - 230px) !important;
 }
-#speaker-modal .sub-heading *{
-    font-size: 14px;
-    line-height: 150%;
+.event-sponsors .ins-modal-wrap.show-modal .ins-modal-body {
+    max-height: calc(100vh - 210px) !important;
 }
-#speaker-modal .sub-heading i[class^="icon-"]{
+.event-modal .sub-heading *{
+    font-size: 14px !important;
+    line-height: 150% !important;
+}
+.event-modal .sub-heading i[class^="icon-"]{
     color: var(--font-color-body);
 }
 

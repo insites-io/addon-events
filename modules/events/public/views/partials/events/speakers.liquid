@@ -33,10 +33,10 @@
           <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
 
                {% for item in speakers %}
-                    <div class="cell large-3 medium-4 small-12">
+                    <div class="cell large-3 medium-4 small-12" data-id="{{item.id}}">
                          <div class="img-wrap">
                               {% if item.image.url %}
-                                   <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" data-id="{{item.id}}">
+                                   <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" >
                               {% else %}
                                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                               {% endif %}
@@ -55,13 +55,12 @@
 
      <ins-modal
      id="speaker-modal"
-     class="event-speakers"
+     class="event-speakers event-modal"
      heading=""
      full-height
      with-backdrop
      no-button>
      <div>
-          <hr>
           <div class="spacer"></div>
           <div id="speaker-content"></div>
      </div>

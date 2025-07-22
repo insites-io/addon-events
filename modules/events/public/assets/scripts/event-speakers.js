@@ -1,15 +1,15 @@
-const dataElement = document.getElementById('speakers-data');
-const evntImages = document.querySelectorAll('.event-speakers img');
+const speakersDataEl = document.getElementById('speakers-data');
+const speakerItems = document.querySelectorAll('.event-speakers .cell');
 const speakerModal = document.getElementById('speaker-modal');
 const speakerContent = document.getElementById('speaker-content');
 
-if (dataElement) {
-     const mapData = JSON.parse(dataElement.textContent);
+if (speakersDataEl) {
+     const mapData = JSON.parse(speakersDataEl.textContent);
      const { speakers } = mapData;
 
-     evntImages.forEach(evntImage => {
-          evntImage.addEventListener('click', () => {
-               const speaker = speakers.find(item => item.id === evntImage.dataset.id);
+     speakerItems.forEach(speakerItem => {
+          speakerItem.addEventListener('click', () => {
+               const speaker = speakers.find(item => item.id === speakerItem.dataset.id);
                if (!speaker) return;
 
                speakerModal.heading = `${speaker.first_name} ${speaker.last_name}`;
@@ -21,15 +21,17 @@ if (dataElement) {
 
                const subHeadingHtml = `
                <div class="sub-heading">
-               <div class="spacer x-small"></div>
-               <p id="speaker-job-title">${speaker.job_title}</p>
-               <div class="spacer small"></div>
-               <div class="event-card-wrap">
-                    <div class="grid-x">
-                    <i class="icon-email-1"></i>
-                    <span id="speaker-email">${speaker.contact.email}</span>
+                    <div class="spacer x-small"></div>
+                    <p id="speaker-job-title">${speaker.job_title}</p>
+                    <div class="spacer small"></div>
+                    <div class="event-card-wrap">
+                         <div class="grid-x">
+                         <i class="icon-email-1"></i>
+                         <span id="speaker-email">${speaker.contact.email}</span>
+                         </div>
                     </div>
-               </div>
+                    <div class="spacer"></div>
+                    <hr>
                </div>
                `;
 

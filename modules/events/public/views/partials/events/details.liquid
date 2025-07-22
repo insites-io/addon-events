@@ -103,7 +103,7 @@
 </script>
 
 {%- if context.environment == "staging" -%}
-     <script src="{{ 'modules/events/scripts/events-details.js' | asset_url }}" defer></script>
+     <script src="{{ 'modules/events/scripts/event-details.js' | asset_url }}" defer></script>
 {%- else -%}
-     <script src="{{ 'modules/events/scripts/events-details.min.js' | asset_url }}" defer></script>
+     <script src="{{ 'modules/events/scripts/event-details.min.js' | asset_url }}" defer></script>
 {%- endif -%}     

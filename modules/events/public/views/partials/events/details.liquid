@@ -82,10 +82,11 @@
 
 {% comment %} Speakers {% endcomment %}
 {% include 'modules/events/events/speakers', event: event %}
-<div class="spacer xxx-large"></div>
+
 
 {% comment %} Sponsors {% endcomment %}
-<div class="spacer xxx-large"></div>
+{% include 'modules/events/events/sponsors', event: event %}
+
 
 {% comment %} Photo library {% endcomment %}
 <div class="spacer xxx-large"></div>

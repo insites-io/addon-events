@@ -19,61 +19,64 @@
 }
 {% endparse_json %}
 
-{%- graphql speakers = 'modules/website/trigger_api_call', 
+{% graphql speakers = 'modules/website/trigger_api_call', 
      name: 'modules/events/get_speakers', 
      data: speakers_payload
      | dig: 'items','response','body' | parse_json
-     | dig: 'results' -%}
+     | dig: 'results' %}
      
+{% if speakers.size > 0 %}
 
-<section class="event-speakers wrapper width-1296">
-     <h2 class="heading-2-xsmall">Speakers</h2>
-     <div class="spacer"></div>
-     <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
+     <section class="event-speakers wrapper width-1296">
+          <h2 class="heading-2-xsmall">Speakers</h2>
+          <div class="spacer"></div>
+          <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
 
-          {% for item in speakers %}
-               <div class="cell large-3 medium-4 small-12">
-                    <div class="img-wrap">
-                         {% if item.image.url %}
-                              <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" data-id="{{item.id}}">
-                         {% else %}
-                              {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
-                         {% endif %}
+               {% for item in speakers %}
+                    <div class="cell large-3 medium-4 small-12">
+                         <div class="img-wrap">
+                              {% if item.image.url %}
+                                   <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" data-id="{{item.id}}">
+                              {% else %}
+                                   {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+                              {% endif %}
+                         </div>
+                         <div class="spacer"></div>
+                         <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
+                         <div class="spacer x-small"></div>
+                         <p class="body-small">{{ item.job_title }}</p>
+                         <div class="spacer"></div>
                     </div>
-                    <div class="spacer"></div>
-                    <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
-                    <div class="spacer x-small"></div>
-                    <p class="body-small">{{ item.job_title }}</p>
-                    <div class="spacer"></div>
-               </div>
-          {% endfor %}
+               {% endfor %}
 
+          </div>
+     </section>
+     <div class="spacer xxx-large"></div>
+
+     <ins-modal
+     id="speaker-modal"
+     class="event-speakers"
+     heading=""
+     full-height
+     with-backdrop
+     no-button>
+     <div>
+          <hr>
+          <div class="spacer"></div>
+          <div id="speaker-content"></div>
      </div>
-</section>
+     </ins-modal>
 
+     {% comment %} Modal Script {% endcomment %}
+     <script id="speakers-data" type="application/json">
+     {
+          "speakers": {{ speakers | default: '[]' | parse_json }}
+     }
+     </script>
+     {% if context.environment == "staging" %}
+          <script src="{{ 'modules/events/scripts/event-speakers.js' | asset_url }}" defer></script>
+     {% else %}
+          <script src="{{ 'modules/events/scripts/event-speakers.min.js' | asset_url }}" defer></script>
+     {% endif %}  
 
-<ins-modal
-  id="speaker-modal"
-  class="event-speakers"
-  heading=""
-  full-height
-  with-backdrop
-  no-button>
-  <div>
-     <hr>
-     <div class="spacer"></div>
-     <div id="speaker-content"></div>
-  </div>
-</ins-modal>
-
-{% comment %} Modal Script {% endcomment %}
-<script id="speakers-data" type="application/json">
-{
-     "speakers": {{ speakers | default: '[]' | parse_json }}
-}
-</script>
-{%- if context.environment == "staging" -%}
-     <script src="{{ 'modules/events/scripts/event-speakers.js' | asset_url }}" defer></script>
-{%- else -%}
-     <script src="{{ 'modules/events/scripts/event-speakers.min.js' | asset_url }}" defer></script>
-{%- endif -%}  
+{% endif %}

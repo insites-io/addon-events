@@ -1,0 +1,105 @@
+{% parse_json filters %}
+{
+  "page": 1,
+  "size": 20,
+  "sort_by": "speaker_weighting",
+  "order": "ASC"
+  {% comment %}  
+  Additional filters that can be used to retrieve speakers:
+  "search_by": "first_name",
+  "keyword": "John",
+  {% endcomment %}
+}
+{% endparse_json %}
+
+{% parse_json speakers_payload %}
+{
+     "uuid": "{{ event.uuid }}",
+     "query_string": "{{ filters | querify }}"
+}
+{% endparse_json %}
+
+{%- graphql speakers = 'modules/website/trigger_api_call', 
+     name: 'modules/events/get_speakers', 
+     data: speakers_payload
+     | dig: 'items','response','body' | parse_json
+     | dig: 'results' -%}
+     
+
+<section class="event-speakers wrapper width-1296">
+     <h2 class="heading-2-xsmall">Speakers</h2>
+     <div class="spacer"></div>
+     <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
+
+          {% for item in speakers %}
+               <div class="cell large-3 medium-4 small-12">
+                    <div class="img-wrap">
+                         {% if item.image.url %}
+                              <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" data-id="{{item.id}}">
+                         {% else %}
+                              {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+                         {% endif %}
+                    </div>
+                    <div class="spacer"></div>
+                    <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
+                    <div class="spacer x-small"></div>
+                    <p class="body-small">{{ item.job_title }}</p>
+                    <div class="spacer"></div>
+               </div>
+          {% endfor %}
+
+     </div>
+</section>
+
+
+<ins-modal
+  id="speaker-modal"
+  class="event-speakers"
+  heading=""
+  full-height
+  with-backdrop
+  no-button>
+  <div>
+     <hr>
+     <div class="spacer"></div>
+     <div id="speaker-content"></div>
+  </div>
+</ins-modal>
+
+<script>
+  let speakers = {{ speakers | default: '[]' | parse_json }};
+  const evntImages = document.querySelectorAll('.event-speakers img');
+  const speakerModal = document.getElementById('speaker-modal');
+  const speakerContent = document.getElementById('speaker-content');
+
+  evntImages.forEach(evntImage => {
+    evntImage.addEventListener('click', () => {
+      const speaker = speakers.find(item => item.id === evntImage.dataset.id);
+      if (!speaker) return;
+
+      speakerModal.heading = `${speaker.first_name} ${speaker.last_name}`;
+      speakerContent.innerHTML = speaker.content;
+
+      // Remove any existing sub-heading
+      const oldSubHeading = document.querySelector('#speaker-modal .sub-heading');
+      if (oldSubHeading) oldSubHeading.remove();
+
+      const subHeadingHtml = `
+        <div class="sub-heading">
+          <div class="spacer x-small"></div>
+          <p id="speaker-job-title">${speaker.job_title}</p>
+          <div class="spacer small"></div>
+          <div class="event-card-wrap">
+            <div class="grid-x">
+              <i class="icon-email-1"></i>
+              <span id="speaker-email">${speaker.contact.email}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.querySelector('#speaker-modal .icon-close-1').insertAdjacentHTML('afterend', subHeadingHtml);
+      speakerModal.open();
+    });
+  });
+</script>

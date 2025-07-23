@@ -41,7 +41,11 @@ query get_event (
       
       event_image: property_upload(name: "event_image") {
         url
-      }        
+      }       
+
+      gallery_1: property_array(name: "gallery_1") 
+      gallery_2: property_array(name: "gallery_2")
+      gallery_3: property_array(name: "gallery_3") 
 
       category: related_record(
         table: "modules/insites_events/event_system_field"

@@ -420,6 +420,15 @@ ins-button.event-card-btn .btn__icon {
     color: var(--font-color-body);
 }
 
+/* Event Galleries */
+.event-galleries img {
+    width: 100%;
+    height: 200px !important;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+
 /* Product Cards */
 .carouselDesktop .product-cards {
     margin-left: -16px;

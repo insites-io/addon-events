@@ -1,0 +1,255 @@
+{% comment %} Gallery 1,2,3 uuids {% endcomment %}
+{%   liquid
+     assign gallery_uuids = ',' | split: ','
+     if event.gallery_1.size > 0
+          assign gallery_uuids =  gallery_uuids | array_add: event.gallery_1
+     endif
+     if event.gallery_2.size > 0
+          assign gallery_uuids =  gallery_uuids | array_add: event.gallery_2
+     endif
+     if event.gallery_3.size > 0
+          assign gallery_uuids =  gallery_uuids | array_add: event.gallery_3
+     endif
+     assign gallery_uuids = gallery_uuids | array_flatten
+%}
+
+{% comment %} Galleries {% endcomment %}
+{% graphql galleries = 'modules/events/attachments/get_galleries', uuids: gallery_uuids, size: 100 | dig: 'items','results' -%}
+     
+
+{% comment %} 
+     Pagination 
+     - we will get all galleries in graphql queries then will do the pagination here
+{% endcomment %}
+{% assign per_page = 12 %}
+{% assign float_denominator = per_page | times: 1.0 %}
+{% assign total_pages = galleries.size | divided_by: float_denominator | ceil %}
+{% assign start_page = 2 %}
+
+{% comment %} galleries.size={{galleries.size}}.<hr>
+divided_by={{galleries.size | divided_by: 12}}.<hr>
+divided_by={{galleries.size | divided_by: 12.0}}.<hr>
+total_pages={{total_pages}}.<hr> {% endcomment %}
+
+{% if galleries.size > 0 %}
+
+     <div class="grid-container wrapper width-1296">
+          <hr>
+     </div>     
+     <div class="spacer xxxx-large"></div>
+
+     <section id="event-galleries" class="event-galleries grid-container wrapper width-1296">
+          <h2 class="heading-2-xsmall">Photo library</h2>
+          <div class="spacer"></div>
+          <div class="grid-x grid-padding-x grid-padding-y">
+          
+               {% assign item_number = 1 %}
+               {% for item in galleries limit:12 %}
+                    {% if item.file.url %}
+                         <div class="cell large-3 medium-4 small-12 pagination-item" data-item="{{ item_number }}">
+                              <div class="img-wrap">
+                                   <img src="{{ item.file.url }}" loading="lazy" width="288" height="200" >
+                              </div>
+                         </div>
+                         {% assign item_number = item_number | plus: 1 %}
+                    {% endif %}
+               {% endfor %}
+
+               {% for page in (start_page..total_pages) %}
+                    {% assign offset = page | minus: 1 | times: per_page %}
+                    
+                    {% if galleries.size > offset %}
+                         {% for item in galleries limit: per_page offset: offset %}
+                              {% if item.file.url %}
+                                   <div class="cell large-3 medium-4 small-12 pagination-item hide" data-item="{{ item_number }}">
+                                        <div class="img-wrap">
+                                             <img src="{{ item.file.url }}" loading="lazy" width="288" height="200">
+                                        </div>
+                                   </div>
+                                   {% assign item_number = item_number | plus: 1 %}
+                              {% endif %}
+                         {% endfor %}
+                    {% endif %}
+               {% endfor %}
+          
+          </div>
+          <div class="spacer xxx-large"></div>
+
+          {% comment %} Pagination {% endcomment %}
+          <ins-table no-wrap
+               static-table
+               id="event-galleries-pagination"
+               without-search>    
+          </ins-table>
+     </section>
+     <div class="spacer xxx-large"></div>
+
+
+
+
+
+     
+     <style>
+          #galleries-modal {
+               height: 1px;
+          }
+          #galleries-modal .ins-backdrop-wrap {
+               background: rgba(0,0,0,.8);
+          }
+          #galleries-modal .ins-card-wrap {
+               border: 0px;
+               box-shadow: 0 0;
+               background: transparent;
+          }
+          #galleries-modal .ins-carousel_paginations {
+               display: none;
+          }
+          @media screen and (max-width: 768px) {
+               #galleries-modal .ins-carousel_paginations {
+                    display: block;
+               }    
+          }          
+          #galleries-modal ins-button button.blue.outlined {
+               border-color: var(--color-ui-01);
+               border-radius: 50% !important;
+               height: 40px;
+               width: 40px !important;
+               padding: 0px 0px !important;
+          }
+          #galleries-modal .ins-carousel_ctrl-btns .btn__icon {
+               color: var(--color-ui-01);
+          }
+          .carousel-wrapper {
+               width: calc(100% - 48px);
+               margin: 0 auto;               
+               min-height: 300px;
+          }
+          .carousel-wrapper,
+          .carousel-wrapper .ins-carousel img{
+               height: calc(80vh);
+          }
+          .carousel-wrapper .ins-carousel img{
+               width: auto;
+          }
+          .carousel-wrapper .ins-carousel .img-wrap {
+               text-align: center;
+          }
+     </style>
+
+     <div id="galleries-modal" class="ins-modal-wrap no-button full-height show-modal">
+          <div class="ins-backdrop-wrap hide"></div>
+          <div class="ins-card-wrap steady no-padding">
+               <div class="ins-modal-content">
+                    <div class="ins-modal-head no-heading">
+                        <span class="icon-close-1"></span>
+                    </div>
+               </div>
+          </div>
+          <div class="carousel-wrapper">
+               <ins-carousel 
+                    id="galleries-carousel"                
+                    bind-to="galleries-carousel-img">
+                    <div id="galleries-carousel-img">                         
+                         {% for item in galleries %}
+                              {% if item.file.url %}
+                                   <div class="img-wrap">
+                                        <img src="{{ item.file.url }}" alt="img-{{ item.id}}" >
+                                   </div>
+                              {% endif %}
+                         {% endfor %}  
+                    </div>   
+               </ins-carousel>    
+          </div>
+     </div>
+
+
+     
+
+
+
+
+
+     {% comment %} Photo library: pagination and modal script {% endcomment %}
+     <script id="galleries-data" type="application/json">
+     {
+          "perPage": {{ per_page | default: 12 }},
+          "totalCount": {{ galleries.size | default: 1 }}
+     }
+     </script>
+     <script>
+          // Pagination
+          let perPage = {{ per_page }};
+          let totalCount = {{ galleries.size | default: 1 }};
+          const galleriesPagination = document.getElementById('event-galleries-pagination');
+               galleriesPagination.pageSizeOptions = [12,20,40];
+               galleriesPagination.totalCount = totalCount;
+               galleriesPagination.pageSize = perPage;
+               galleriesPagination.paginationText = "Items per page";    
+          galleriesPagination.addEventListener('insPaginationChange', paginationHandler);
+
+          // Modal carousel
+          const galleriesModal = document.getElementById('galleries-modal');
+          const galleriesModalBackdrop = document.querySelector('#galleries-modal .ins-backdrop-wrap');          
+          const galleriesCarousel = document.getElementById('galleries-carousel');
+          const galleryItems = document.querySelectorAll('#event-galleries .pagination-item');
+
+          galleryItems.forEach(galleryItem => {
+               galleryItem.addEventListener('click', () => {
+                    galleriesCarousel.goTo(galleryItem.dataset.item - 1);
+                    galleriesModalBackdrop.classList.remove('hide');
+                    galleriesModal.style.height = 'calc(100vh)';                    
+               });
+          });
+         
+
+          // Stop clicks inside buttons or images from bubbling up
+          document.querySelectorAll('#galleries-modal *').forEach(el => {
+               el.addEventListener('click', event => {
+                    const isInsideButtonOrImage = event.target.closest('button') || event.target.closest('img');
+                    if (isInsideButtonOrImage) {
+                         event.stopPropagation();
+                    }
+               });
+          });
+
+          const allElements = document.querySelectorAll('#galleries-modal *');
+          const filteredElements = Array.from(allElements).filter(el => {
+               return !el.closest('button') && !el.closest('img');
+          });
+          filteredElements.forEach(el => {
+               el.addEventListener('click', event => {
+               if (event.target.closest('button') || event.target.closest('img')) return;
+                    galleriesModalBackdrop.classList.add('hide');
+                    galleriesModal.style.height = '1px';
+               });
+          });
+
+
+
+          // Pagination
+          function showPaginatedItems(page, perPage) {
+               const cells = document.querySelectorAll('.pagination-item');
+               const start = (page - 1) * perPage + 1;
+               const end = page * perPage;
+               cells.forEach(cell => {
+                    const itemNumber = parseInt(cell.dataset.item, 10);
+                    if (itemNumber >= start && itemNumber <= end) {
+                         cell.classList.remove('hide');
+                    } else {
+                         cell.classList.add('hide');
+                    }
+               });
+          }
+
+          function paginationHandler(event) {
+               perPage = event.detail.pageSize;
+               page = event.detail.pageNumber;             
+               showPaginatedItems(page, perPage)               
+               document.getElementById('event-galleries').scrollIntoView({ behavior: 'smooth' });
+          }
+
+          
+          </script>
+     
+
+{% endif %}

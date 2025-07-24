@@ -12,8 +12,18 @@ metadata: {
 }
 ---
 
-{% comment %} Hero title and description {% endcomment %}
-{% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
-{% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
+{% if context.params.slug2 %}
+    {% comment %} Details view {% endcomment %}
 
-{% include 'modules/events/events/list', page: 'upcoming-events' %}
+    {% include 'modules/events/events/upcoming/details' %}
+
+{% else %}
+    {% comment %} List view {% endcomment %}
+
+    {% comment %} Hero title and description {% endcomment %}
+    {% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
+    {% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
+
+    {% include 'modules/events/events/list', page: 'upcoming-events' %}
+
+{% endif  %}

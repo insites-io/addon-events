@@ -1,0 +1,52 @@
+{% parse_json filters %}
+{
+  "page": 1,
+  "size": 50
+}
+{% endparse_json %}
+
+{% parse_json faqs_payload %}
+{
+     "uuid": "{{ event.uuid }}",
+     "query_string": "{{ filters | querify }}"
+}
+{% endparse_json %}
+
+{% graphql faqs = 'modules/website/trigger_api_call', 
+     name: 'modules/events/get_faqs', 
+     data: faqs_payload
+     | dig: 'items','response','body' | parse_json
+     | dig: 'results' %}
+     
+{% if faqs.size > 0 %}
+
+     <section class="event-faqs wrapper width-1296">
+
+          <h2 class="heading-2-xsmall">Frequently asked questions</h2>
+          <div class="spacer"></div>
+          <p class="event-details">Got a question? We're here to answer! If you don't see your question here, drop us a line on our <a href="/contact-us">contact page</a>.</p>
+          <div class="spacer xx-large"></div>
+
+          <div id="faqs_accordion">
+               <div class="grid-container">
+                    <div class="large-12 medium-12 small-12">
+                         <div class="faq-content-questions">
+                              <ins-accordion class="subHeading"> 
+                                   {% for item in faqs %}
+                                        <ins-accordion-item   
+                                        open-icon="icon-plus"
+                                        close-icon="icon-minus"
+                                        heading="{{ item.question }}">
+                                        {{ item.answer }}
+                                        </ins-accordion-item>
+                                   {% endfor %}
+                              </ins-accordion>
+                         </div>
+                    </div>
+               </div>
+          </div>
+          
+     </section>
+     <div class="spacer xxxx-large"></div>      
+
+{% endif %}

@@ -13,25 +13,20 @@
      assign gallery_uuids = gallery_uuids | array_flatten
 %}
 
-{% comment %} Galleries {% endcomment %}
-{% graphql galleries = 'modules/events/attachments/get_galleries', uuids: gallery_uuids, size: 100 | dig: 'items','results' -%}
-     
+{% comment %} Get Galleries {% endcomment %}
+{% graphql galleries = 'modules/events/attachments/get_galleries', uuids: gallery_uuids, size: 100 | dig: 'items','results' -%}     
 
-{% comment %} 
-     Pagination 
-     - we will get all galleries in graphql queries then will do the pagination here
-{% endcomment %}
-{% assign per_page = 12 %}
-{% assign float_denominator = per_page | times: 1.0 %}
-{% assign total_pages = galleries.size | divided_by: float_denominator | ceil %}
-{% assign start_page = 2 %}
-
-{% comment %} galleries.size={{galleries.size}}.<hr>
-divided_by={{galleries.size | divided_by: 12}}.<hr>
-divided_by={{galleries.size | divided_by: 12.0}}.<hr>
-total_pages={{total_pages}}.<hr> {% endcomment %}
 
 {% if galleries.size > 0 %}
+
+     {% comment %} 
+          Pagination 
+          - All galleries will be fetched through a GraphQL query, and pagination will be handled here
+     {% endcomment %}
+     {% assign per_page = 12 %}
+     {% assign float_denominator = per_page | times: 1.0 %}
+     {% assign total_pages = galleries.size | divided_by: float_denominator | ceil %}
+     {% assign start_page = 2 %}
 
      <div class="grid-container wrapper width-1296">
           <hr>
@@ -43,8 +38,9 @@ total_pages={{total_pages}}.<hr> {% endcomment %}
           <div class="spacer"></div>
           <div class="grid-x grid-padding-x grid-padding-y">
           
+               {% comment %} Get the first per_page (12) items {% endcomment %}
                {% assign item_number = 1 %}
-               {% for item in galleries limit:12 %}
+               {% for item in galleries limit:per_page %}
                     {% if item.file.url %}
                          <div class="cell large-3 medium-4 small-12 pagination-item" data-item="{{ item_number }}">
                               <div class="img-wrap">
@@ -55,9 +51,12 @@ total_pages={{total_pages}}.<hr> {% endcomment %}
                     {% endif %}
                {% endfor %}
 
+               {% comment %} 
+                    Get the remaining gallery items, but keep them hidden for now. 
+                    The js function showPaginatedItems will show/hide gallery items depending on the selected page and per_page
+               {% endcomment %}                
                {% for page in (start_page..total_pages) %}
-                    {% assign offset = page | minus: 1 | times: per_page %}
-                    
+                    {% assign offset = page | minus: 1 | times: per_page %}                    
                     {% if galleries.size > offset %}
                          {% for item in galleries limit: per_page offset: offset %}
                               {% if item.file.url %}
@@ -79,63 +78,17 @@ total_pages={{total_pages}}.<hr> {% endcomment %}
           <ins-table no-wrap
                static-table
                id="event-galleries-pagination"
+               class="event-pagination"
                without-search>    
           </ins-table>
-     </section>
-     <div class="spacer xxx-large"></div>
+     </section>     
 
 
 
-
-
-     
-     <style>
-          #galleries-modal {
-               height: 1px;
-          }
-          #galleries-modal .ins-backdrop-wrap {
-               background: rgba(0,0,0,.8);
-          }
-          #galleries-modal .ins-card-wrap {
-               border: 0px;
-               box-shadow: 0 0;
-               background: transparent;
-          }
-          #galleries-modal .ins-carousel_paginations {
-               display: none;
-          }
-          @media screen and (max-width: 768px) {
-               #galleries-modal .ins-carousel_paginations {
-                    display: block;
-               }    
-          }          
-          #galleries-modal ins-button button.blue.outlined {
-               border-color: var(--color-ui-01);
-               border-radius: 50% !important;
-               height: 40px;
-               width: 40px !important;
-               padding: 0px 0px !important;
-          }
-          #galleries-modal .ins-carousel_ctrl-btns .btn__icon {
-               color: var(--color-ui-01);
-          }
-          .carousel-wrapper {
-               width: calc(100% - 48px);
-               margin: 0 auto;               
-               min-height: 300px;
-          }
-          .carousel-wrapper,
-          .carousel-wrapper .ins-carousel img{
-               height: calc(80vh);
-          }
-          .carousel-wrapper .ins-carousel img{
-               width: auto;
-          }
-          .carousel-wrapper .ins-carousel .img-wrap {
-               text-align: center;
-          }
-     </style>
-
+     {% comment %} 
+          Modal Carousel - Gallery Slider 
+          - This does not use the actual <ins-modal> component; it only mimics some of its element classes.
+     {% endcomment %}
      <div id="galleries-modal" class="ins-modal-wrap no-button full-height show-modal">
           <div class="ins-backdrop-wrap hide"></div>
           <div class="ins-card-wrap steady no-padding">
@@ -147,6 +100,7 @@ total_pages={{total_pages}}.<hr> {% endcomment %}
           </div>
           <div class="carousel-wrapper">
                <ins-carousel 
+                    no-pagination
                     id="galleries-carousel"                
                     bind-to="galleries-carousel-img">
                     <div id="galleries-carousel-img">                         
@@ -163,93 +117,18 @@ total_pages={{total_pages}}.<hr> {% endcomment %}
      </div>
 
 
-     
-
-
-
-
-
-     {% comment %} Photo library: pagination and modal script {% endcomment %}
+     {% comment %} Scripts for Pagination and Modal Carousel {% endcomment %}
      <script id="galleries-data" type="application/json">
      {
           "perPage": {{ per_page | default: 12 }},
           "totalCount": {{ galleries.size | default: 1 }}
      }
      </script>
-     <script>
-          // Pagination
-          let perPage = {{ per_page }};
-          let totalCount = {{ galleries.size | default: 1 }};
-          const galleriesPagination = document.getElementById('event-galleries-pagination');
-               galleriesPagination.pageSizeOptions = [12,20,40];
-               galleriesPagination.totalCount = totalCount;
-               galleriesPagination.pageSize = perPage;
-               galleriesPagination.paginationText = "Items per page";    
-          galleriesPagination.addEventListener('insPaginationChange', paginationHandler);
-
-          // Modal carousel
-          const galleriesModal = document.getElementById('galleries-modal');
-          const galleriesModalBackdrop = document.querySelector('#galleries-modal .ins-backdrop-wrap');          
-          const galleriesCarousel = document.getElementById('galleries-carousel');
-          const galleryItems = document.querySelectorAll('#event-galleries .pagination-item');
-
-          galleryItems.forEach(galleryItem => {
-               galleryItem.addEventListener('click', () => {
-                    galleriesCarousel.goTo(galleryItem.dataset.item - 1);
-                    galleriesModalBackdrop.classList.remove('hide');
-                    galleriesModal.style.height = 'calc(100vh)';                    
-               });
-          });
-         
-
-          // Stop clicks inside buttons or images from bubbling up
-          document.querySelectorAll('#galleries-modal *').forEach(el => {
-               el.addEventListener('click', event => {
-                    const isInsideButtonOrImage = event.target.closest('button') || event.target.closest('img');
-                    if (isInsideButtonOrImage) {
-                         event.stopPropagation();
-                    }
-               });
-          });
-
-          const allElements = document.querySelectorAll('#galleries-modal *');
-          const filteredElements = Array.from(allElements).filter(el => {
-               return !el.closest('button') && !el.closest('img');
-          });
-          filteredElements.forEach(el => {
-               el.addEventListener('click', event => {
-               if (event.target.closest('button') || event.target.closest('img')) return;
-                    galleriesModalBackdrop.classList.add('hide');
-                    galleriesModal.style.height = '1px';
-               });
-          });
-
-
-
-          // Pagination
-          function showPaginatedItems(page, perPage) {
-               const cells = document.querySelectorAll('.pagination-item');
-               const start = (page - 1) * perPage + 1;
-               const end = page * perPage;
-               cells.forEach(cell => {
-                    const itemNumber = parseInt(cell.dataset.item, 10);
-                    if (itemNumber >= start && itemNumber <= end) {
-                         cell.classList.remove('hide');
-                    } else {
-                         cell.classList.add('hide');
-                    }
-               });
-          }
-
-          function paginationHandler(event) {
-               perPage = event.detail.pageSize;
-               page = event.detail.pageNumber;             
-               showPaginatedItems(page, perPage)               
-               document.getElementById('event-galleries').scrollIntoView({ behavior: 'smooth' });
-          }
-
-          
-          </script>
+     {% if context.environment == "staging" %}
+          <script src="{{ 'modules/events/scripts/event-photo-library.js' | asset_url }}" defer></script>
+     {% else %}
+          <script src="{{ 'modules/events/scripts/event-photo-library.min.js' | asset_url }}" defer></script>
+     {% endif %}
      
 
 {% endif %}

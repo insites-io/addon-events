@@ -1,0 +1,11 @@
+<div class="wrap event-details" >
+     <div class="img-wrap">
+          {% if event.event_image.url %}
+               <img src="{{ event.event_image.url }}" loading="lazy" width="920" height="585">
+          {% else %}
+               {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+          {% endif %}
+     </div>
+</div>
+<div class="spacer xxxx-large hide-for-small-only"></div>
+<div class="spacer xxx-large show-for-small-only"></div>

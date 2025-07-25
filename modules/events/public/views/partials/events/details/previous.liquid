@@ -1,0 +1,27 @@
+{% graphql event = 'modules/events/events/get_event', slug: context.params.slug2 | dig: 'items','results' | first %}
+
+{% if event.id == null %}
+     {% redirect_to '/404' %}
+{% endif %}
+
+
+{% comment %} Banner {% endcomment %}
+{% include 'modules/events/events/details/banner', event: event %}
+
+
+{% comment %} Main details {% endcomment %}
+{% include 'modules/events/events/details/details', event: event %}
+
+
+{% comment %} Speakers {% endcomment %}
+{% include 'modules/events/events/blocks/speakers', event: event %}
+
+
+{% comment %} Sponsors {% endcomment %}
+{% include 'modules/events/events/blocks/sponsors', event: event %}
+
+
+{% comment %} Photo library {% endcomment %}
+{% include 'modules/events/events/blocks/photo_library', event: event %}
+<div class="spacer section hide-for-small-only"></div>
+<div class="spacer xxx-large show-for-small-only"></div>

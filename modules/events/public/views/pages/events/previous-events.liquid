@@ -15,7 +15,7 @@ metadata: {
 {% if context.params.slug2 %}
     {% comment %} Details view {% endcomment %}
     
-    {% include 'modules/events/events/previous/details' %}
+    {% include 'modules/events/events/details/previous' %}
 
 {% else %}
     {% comment %} List view {% endcomment %}
@@ -24,6 +24,6 @@ metadata: {
     {% assign description = "A look back! Missed out on the fun? Explore photos and highlights from all our past events and revisit some great times we've shared." %}
     {% include 'modules/website/content/hero_title', title: 'Previous events', description: description %} 
 
-    {% include 'modules/events/events/list', page: 'previous-events' %}
+    {% include 'modules/events/events/list/list', page: 'previous-events' %}
 
 {% endif  %}

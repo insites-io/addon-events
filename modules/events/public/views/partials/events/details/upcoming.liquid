@@ -1,0 +1,29 @@
+{% graphql event = 'modules/events/events/get_event', slug: context.params.slug2 | dig: 'items','results' | first %}
+
+{% if event.id == null %}
+     {% redirect_to '/404' %}
+{% endif %}
+
+
+{% comment %} Banner {% endcomment %}
+{% include 'modules/events/events/details/banner', event: event %}
+
+
+{% comment %} Main details {% endcomment %}
+{% include 'modules/events/events/details/details', event: event %}
+
+
+{% comment %} Speakers {% endcomment %}
+{% include 'modules/events/events/blocks/speakers', event: event %}
+
+
+{% comment %} Sponsors {% endcomment %}
+{% include 'modules/events/events/blocks/sponsors', event: event %}
+
+
+{% comment %} FAQ {% endcomment %}
+{% include 'modules/events/events/blocks/faq', event: event %}
+
+
+{% comment %} Get tickets (mobile) {% endcomment %}
+{% include 'modules/events/events/get_tickets_card_mobile' %}     

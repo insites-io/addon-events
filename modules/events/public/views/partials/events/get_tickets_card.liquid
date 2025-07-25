@@ -1,0 +1,25 @@
+{%   liquid
+     ##assign is_sold_out = true
+     assign label = 'Get tickets'
+     if is_sold_out == true
+          assign label = 'Sold out'
+          assign disabled = 'disabled'
+     endif
+%}
+<section id="get-tickets-card">
+     <div class="hide-for-small-only">
+          <div class="spacer x-large"></div>
+          <ins-card steady class="events-card">
+               <h4>Tickets</h4>
+               <div class="spacer small"></div>
+               <hr>
+               <div class="spacer x-large"></div>
+               <p class="body-large ">Price starting from</p>
+               <div class="spacer xx-small"></div>
+               <p class="body-xxlarge-bold font-color-head">$100.00</p>
+               <div class="spacer x-large"></div>
+               <ins-button label="{{label}}" {{disabled}} solid class="btn-full"></ins-button>
+          </ins-card>
+          <div class="spacer x-large"></div>
+     </div>
+</section>

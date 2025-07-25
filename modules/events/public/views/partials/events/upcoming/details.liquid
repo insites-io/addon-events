@@ -17,7 +17,7 @@
 <div class="spacer xxxx-large hide-for-small-only"></div>
 <div class="spacer xxx-large show-for-small-only"></div>
 
-{% comment %}  
+
 <section class="width-1296 event-details wrapper">
 
      {% comment %} Back {% endcomment %}
@@ -27,7 +27,7 @@
 
      <div class="grid-x">
           {% comment %} First Column {% endcomment %}
-          <div class="large-7 medium-7 small-12 grid-y">
+          <div class="large-7 medium-7 small-12 grid-y col-1">
                {% comment %} Category {% endcomment %}
                <div class="event-card-wrap">
                     <div class="grid-x">
@@ -74,11 +74,13 @@
 
           </div>
           {% comment %} Second Column {% endcomment %}
-          <div class="large-5 medium-5 small-0"></div>
+          <div class="large-5 medium-5 small-0 col-2">
+               {% include 'modules/events/events/get_tickets_card' %}
+          </div>
      </div>
      
 </section>
-{% endcomment %}
+
 
 {% comment %} Speakers {% endcomment %}
 {% comment %} {% include 'modules/events/events/speakers', event: event %} {% endcomment %}
@@ -88,8 +90,12 @@
 {% comment %} {% include 'modules/events/events/sponsors', event: event %} {% endcomment %}
 
 
-{% comment %} Photo library {% endcomment %}
+{% comment %} FAQ {% endcomment %}
 {% include 'modules/events/events/faq', event: event %}
+
+
+{% comment %} Get tickets (mobile) {% endcomment %}
+{% include 'modules/events/events/get_tickets_card_mobile' %}
 
 
 

@@ -104,14 +104,6 @@ body,
 .venue-state {
     font-weight: 700;
 }
-.body-large {
-    font-family: var(--font-family-02);
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 150%; /* 27px */
-    color: var(--font-color-head);
-}
 
 .weight-normal {
     font-weight: 400;
@@ -349,8 +341,11 @@ ins-button.event-card-btn .btn__icon {
     height: 300px;
     width: 100%;
 }
-.event-details p {
+.event-details .col-1 p {
     margin-bottom: 24px;
+}
+.event-details .col-2 {
+    padding-left: 80px;
 }
 .event-details a {
     color: var(--color-main);
@@ -482,6 +477,35 @@ ins-button.event-card-btn .btn__icon {
 }
 #galleries-modal .carousel-wrapper .ins-carousel .img-wrap {
     text-align: center;
+}
+
+/* Get tickets card */
+#get-tickets-card {
+    position: sticky;
+    top: 0;
+}
+.events-card .ins-card-wrap {
+    padding: 24px
+}
+#get-tickets-card-mobile .events-card .ins-card-wrap {    
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    padding: 16px 24px 24px;
+    z-index: 100;
+    box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.10);
+    border-radius: 0px;
+}
+#get-tickets-card-mobile.sold-out .events-card .ins-card-wrap{
+    position: relative;
+}
+.ticket-price-mobile {
+    color: var(--font-color-head);
+    font-family: var(--font-family-02);
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 32px */
 }
 
 
@@ -1325,9 +1349,7 @@ ins-card.overview .wrap{
     justify-content: space-between;
 }
 
-.overview .ins-card-wrap:hover {
-    
-}
+
 
 /* Order History */
 #order-table .pagination-wrap {
@@ -2147,7 +2169,7 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 /* Modal */
-.ins-card-wrap {
+ins-modal .ins-card-wrap {
     max-width: calc(100% - 24px) !important;
     margin: 30px auto 1.75rem !important;
 }

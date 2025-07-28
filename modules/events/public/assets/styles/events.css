@@ -281,7 +281,8 @@ ins-input.hidden-input input {
 }
 #main-event img,
 #main-event .placeholder-img {
-    height: 585px;       
+    height: 585px;     
+    max-height: 45vw;  
 }
 .event-card-wrap img:hover,
 .event-card-wrap img:hover {
@@ -1747,18 +1748,13 @@ ins-filter .filter__label,
 ins-filter-item .filter-item__button--text,
 ins-filter .date-filter__text,
 ins-filter .date-filter,
-ins-filter-item .filter-item__button--option,
-.ibt-table .action-item,
-.ibt-table-wrap__page,
-.ibt-table-wrap__pagination,
-.ibt-table-wrap__pagination--option,
-.ibt-table-wrap__prev-next button.page {
+ins-filter-item .filter-item__button--option {
     color: var(--font-color-head);
     font-family: var(--font-family-02);
     font-size: 12px;
     font-style: normal;
     font-weight: 700;
-    line-height: 20px; /* 142.857% */
+    line-height: 16px;
 }
 ins-filter .date-filter,
 ins-filter-item .filter-item__button--option,
@@ -1784,7 +1780,6 @@ ins-filter-item .filter-item__button--option,
 ins-filter-item .filter-item__button,
 ins-filter .date-filter {
     border-radius: 2px;
-    background: var(--color-ui-03);
     padding: 12px 16px;
     justify-content: center;
     align-items: center;    

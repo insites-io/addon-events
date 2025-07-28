@@ -1,3 +1,9 @@
+---
+metadata: {
+    partial_name: 'Events | Details | Previous'
+}
+---
+
 {% graphql event = 'modules/events/events/get_event', slug: context.params.slug2 | dig: 'items','results' | first %}
 
 {% if event.id == null %}

@@ -38,6 +38,7 @@ query get_event (
       venue_geojson: property_json(name: "venue_geojson")
       
       long_description: property(name: "long_description")
+      is_faqs_displayed: property_boolean(name: "is_faqs_displayed")
       
       event_image: property_upload(name: "event_image") {
         url

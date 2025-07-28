@@ -22,7 +22,9 @@
 
 
 {% comment %} FAQ {% endcomment %}
-{% include 'modules/events/events/blocks/faq', event: event %}
+{% if event.is_faqs_displayed == true %}
+     {% include 'modules/events/events/blocks/faq', event: event %}
+{% endif %}
 
 
 {% comment %} Get tickets (mobile) {% endcomment %}

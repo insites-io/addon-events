@@ -285,6 +285,10 @@ ins-input.hidden-input input {
     max-height: 45vw;  
     min-height: 269px
 }
+#main-event img,
+#main-event h4 {
+    cursor: pointer;
+}
 .event-card-wrap img:hover,
 .event-card-wrap img:hover {
     transform: scale(1.1);
@@ -656,16 +660,17 @@ ins-carousel .product-cards .placeholder-img {
         width: 100%;
     }
 }
-.filter-item__options{
-    height: 288px;
-    overflow-y: scroll;
-}
 /* Overview - Purchase Again */
 .purchase-again-cards-wrap {
     margin-left: -12px;
     margin-right: -12px;
 }
 
+/* Filters */
+.filter-item__options{
+    max-height: 288px;
+    overflow-y: auto;
+}
 
 .overflow-hidden {
     overflow: hidden;

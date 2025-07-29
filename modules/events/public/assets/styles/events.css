@@ -283,6 +283,7 @@ ins-input.hidden-input input {
 #main-event .placeholder-img {
     height: 585px;     
     max-height: 45vw;  
+    min-height: 269px
 }
 .event-card-wrap img:hover,
 .event-card-wrap img:hover {

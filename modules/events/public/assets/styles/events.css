@@ -321,6 +321,11 @@ ins-button.event-card-btn .btn__icon {
     margin-right: 8px;
 }
 
+/* Event List */
+.event-pagination-table .ibt-table-wrap .pagination-wrap {
+    padding: 0px 20px;
+}
+
 /* Event Details */
 .event-details img, 
 .event-details .placeholder-img {

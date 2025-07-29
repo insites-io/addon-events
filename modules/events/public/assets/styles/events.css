@@ -377,7 +377,7 @@ ins-button.event-card-btn .btn__icon {
 @media screen and (max-width: 1023px) {
     .event-speakers img,
     .event-speakers .placeholder-img {
-        height: 356px !important;   
+        height: auto !important;   
     }        
 }
 .event-sponsors .img-wrap {

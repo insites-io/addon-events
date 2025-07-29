@@ -331,6 +331,12 @@ ins-button.event-card-btn .btn__icon {
 }
 
 /* Event Details */
+.back-events button {
+    margin-left: -24px;
+}
+.back-events button:hover {
+    background-color: transparent !important;
+}
 .event-details img, 
 .event-details .placeholder-img {
     width: 100%;
@@ -486,10 +492,20 @@ ins-button.event-card-btn .btn__icon {
 #galleries-modal .ins-carousel_ctrl-btns .btn__icon {
     color: var(--color-ui-01);
 }
+#galleries-modal .icon-close-1 {
+    font-size: 24px;
+}
 #galleries-modal .carousel-wrapper {
     width: calc(100% - 48px);
     margin: 0 auto;               
-    min-height: 300px;
+}
+#galleries-modal .ins-modal-head.no-heading {
+    margin-bottom: -32px;
+}
+#galleries-modal .ins-carousel_body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
 }
 #galleries-modal .carousel-wrapper .ins-carousel img{
     width: auto;

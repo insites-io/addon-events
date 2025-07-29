@@ -336,7 +336,7 @@ ins-button.event-card-btn .btn__icon {
 @media screen and (max-width: 1023px) {
     .event-details img, 
     .event-details .placeholder-img {
-        max-height: 55vh;
+        max-height: 300px;
     }
 }
 @media screen and (max-width: 639px) {
@@ -370,17 +370,28 @@ ins-button.event-card-btn .btn__icon {
     object-fit: cover;
     cursor: pointer;
 }
+.event-speakers img,
+.event-speakers .placeholder-img {
+    object-fit: contain;
+}
+@media screen and (max-width: 1023px) {
+    .event-speakers img,
+    .event-speakers .placeholder-img {
+        height: 356px !important;   
+    }        
+}
 .event-sponsors .img-wrap {
     border: 1px solid var(--color-ui-04);
-    height: 170px;
     display: flex;
+    aspect-ratio: 18 / 17;
     align-items: center; 
     justify-content: center;
+    padding: 24px;
 }
 .event-sponsors img,
 .event-sponsors .placeholder-img {
-    width: 170px;
-    height: auto !important;
+    height: 68px !important;
+    object-fit: contain;
 }
 .event-sponsors img:hover,
 .event-sponsors .placeholder-img:hover {

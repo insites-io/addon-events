@@ -50,7 +50,14 @@ metadata: {
                          <div class="spacer"></div>
                          <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
                          <div class="spacer x-small"></div>
-                         <p class="body-small">{{ item.job_title }}</p>
+                         {%   liquid
+                              if item.company_name 
+                                   assign company_text = 'at ' | append: item.company_name
+                              else 
+                                   assign company_text = ''
+                              endif                         
+                         %}
+                         <p class="body-small">{{ item.job_title }} {{ company_text }}</p>
                          <div class="spacer"></div>
                     </div>
                {% endfor %}

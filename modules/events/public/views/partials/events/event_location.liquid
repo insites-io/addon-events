@@ -8,7 +8,7 @@ metadata: {
      <i class="icon-map-pin"></i>
      <div class="wrap">
           {% if item.event_type == 'venue' %}
-               <div>{{ item.venue_name }}</div>
+               <div><span class="body-bold">{{ item.venue_name }}</span></div>
                {% if show_address == true %}
                     {%- assign address_parts = "," | split: "," -%}
 

@@ -1,6 +1,13 @@
 // Select all `.event-card-wrap div`s excluding those inside #main-event
-const cards = Array.from(document.querySelectorAll('.event-card-wrap div'))
-  .filter(el => !document.getElementById('main-event').contains(el));
+const allDivs = document.querySelectorAll('.event-card-wrap div');
+const mainEvent = document.getElementById('main-event');
+let cards;
+if (mainEvent) {
+  cards = Array.from(allDivs).filter(el => !mainEvent.contains(el));
+} else {
+  cards = Array.from(allDivs);
+}
+
 
 // Explicitly select the img and h4 inside #main-event
 const extras = document.querySelectorAll('#main-event img, #main-event h4');

@@ -50,7 +50,7 @@ metadata: {
                     {% if item.file.url %}
                          <div class="cell large-3 medium-4 small-12 pagination-item" data-item="{{ item_number }}">
                               <div class="img-wrap">
-                                   <img src="{{ item.file.url }}" loading="lazy" width="288" height="200" >
+                                   <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" width="288" height="200" alt="gallery_{{ item_number }}">
                               </div>
                          </div>
                          {% assign item_number = item_number | plus: 1 %}
@@ -68,7 +68,7 @@ metadata: {
                               {% if item.file.url %}
                                    <div class="cell large-3 medium-4 small-12 pagination-item hide" data-item="{{ item_number }}">
                                         <div class="img-wrap">
-                                             <img src="{{ item.file.url }}" loading="lazy" width="288" height="200">
+                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" width="288" height="200" alt="gallery_{{ item_number }}">
                                         </div>
                                    </div>
                                    {% assign item_number = item_number | plus: 1 %}
@@ -113,7 +113,7 @@ metadata: {
                          {% for item in galleries %}
                               {% if item.file.url %}
                                    <div class="img-wrap">
-                                        <img src="{{ item.file.url }}" alt="img-{{ item.id}}" >
+                                        <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" alt="img-{{ item.id}}" >
                                    </div>
                               {% endif %}
                          {% endfor %}  

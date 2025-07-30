@@ -7,7 +7,7 @@ metadata: {
 <div class="wrap event-details" >
      <div class="img-wrap">
           {% if event.event_image.url %}
-               <img src="{{ event.event_image.url }}" loading="lazy" width="920" height="585">
+               <img src="{{ event.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" width="920" height="585" alt="{{ event.event_name }}">
           {% else %}
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}

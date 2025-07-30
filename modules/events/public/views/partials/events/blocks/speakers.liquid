@@ -42,7 +42,7 @@ metadata: {
                     <div class="cell large-3 medium-6 small-12" data-id="{{item.id}}">
                          <div class="img-wrap">
                               {% if item.image.url %}
-                                   <img src="{{ item.image.url }}" loading="lazy" width="270" height="280" >
+                                   <img src="{{ item.image.url | replace: ' ', '%20' | escape }}" loading="lazy" width="270" height="280" alt="{{ item.first_name }}">
                               {% else %}
                                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                               {% endif %}

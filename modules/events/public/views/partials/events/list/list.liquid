@@ -54,7 +54,7 @@ metadata: {
 {% comment %} Filter: Locations {% endcomment %}
 {% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
 {% capture location_options %}  
-     {{ locations | map: 'state' | array_uniq | array_prepend: 'Web' | array_prepend: 'All'  }}
+     {{ locations | map: 'state' | array_uniq | array_prepend: 'WEB' | array_prepend: 'All'  }}
 {% endcapture %}
 
 

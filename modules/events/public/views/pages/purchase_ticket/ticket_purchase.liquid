@@ -1,0 +1,766 @@
+---
+slug: purchase-ticket
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Purchase ticket",
+    page_name: "Purchase Ticket",
+    meta_title: "Purchase Ticket",
+    page_title: "Purchase Ticket",
+    sitemap_order: "1",
+    sitemap_enabled: "true",
+    meta_description: "Purchase Event Tickets",
+    open_graph:title: "Purchase Ticket",
+    open_graph_image: "{ \"uuid\": \"bbf29636-a1d0-4884-90d9-6edc2af0a08f\", \"name\": \"og-banner (3).jpg\", \"size\": 59514, \"type\": \"image/jpeg\", \"url\": \"https://uploads.prod01.sydney.platformos.com/instances/612/property_uploads/modules/insites_core/attachment/file/bbf29636-a1d0-4884-90d9-6edc2af0a08f/og-banner %283%29.jpg\" }",
+    open_graph_title: "Purchase Ticket ",
+    sitemap_priority: "1.0",
+    sitemap_changefreq: "monthly",
+    open_graph:description: "Purchase Ticket",
+    open_graph_description: "Purchase Event Tickets",
+    sitemap_change_frequency: "always",
+}
+--- 
+
+<div id="purchase-ticket">
+    <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    </div>
+    {% comment %} Stepper {% endcomment %}
+    <div class="purchase-ticket-wrapper">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/purchase_ticket/stepper' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+  {% comment %} Purchase ticket form {% endcomment %}
+    <div class="purchase-ticket-form">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/purchase_ticket/ticket_purchase_form' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+    {% comment %} <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> {% endcomment %}
+    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/pay-bills.js' | asset_url }}"></script>
+
+    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/client/scripts/user-profile.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout-steps.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/pay-bills.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/user-profile.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase.min.js' | asset_url }}"></script>
+{%- endif -%} 
+
+<script>
+  // SELECT TICKET TYPE AND QUANTITY
+  let ticketSelEL = document.getElementById('select-ticket');
+  let ticketPriceEL = document.getElementById('ticket-price')
+  let ticketQtyEl = document.getElementById('select-ticket-quantity')
+  let ticketQtyGroupEl = document.getElementById('select-ticket-quantity_group')
+  let ticketQtyAmtEl = document.getElementById('ticket-quantity-value')
+
+  // ORDER SUMMARY
+  let ticketSTypeEl = document.getElementById('ticket-type')
+  let ticketSQuantityEL = document.getElementById('ticket-quantity')
+  let ticketSPriceEL = document.getElementById('ticket-price-summary')
+  let ticketSSubtotal = document.getElementById('subtotal-price')
+  let ticketProcFeeEl = document.getElementById('proccessing-container')
+  let ticketSTotal = document.getElementById('total-price')
+  
+  // AMOUNT DETAILS
+  let subTotalFormEl = document.getElementById('bill-order-value')
+  let taxFormEl = document.getElementById('tax-amount')
+  let totalFormEl = document.getElementById('bill-total-amount')
+  let totalDiscountFormEl = document.getElementById('total-discount-amount')
+
+  let ticketNameEl = document.getElementById('ticket-type-name')
+  let stripeField = document.getElementById('stripe-card')
+
+  let ticketType = ""
+  let ticketPrice = ""
+  let ticketQty = ""
+
+  let individualTicketCount = ""
+  let groupTicketCount = ""
+
+  // DISCOUNT CODES
+  let event_uuid_hidden = document.getElementById("event_uuid_hidden");
+  let apply_discount_code = document.getElementById("apply-discount-code");
+  let discount_code_value = document.getElementById("discount-code-value");
+
+  let remove_discount_code = document.getElementById("remove-discount");
+  let discount_code_error_message = document.getElementById("discount-code-error-message");
+
+  // DISPLAY
+  let display_discount_name = document.getElementById("display-discount-name");
+  let display_discount_code = document.getElementById("display-discount-code");
+  let display_discount_value = document.getElementById("display-discount-value");
+  let display_discount_value_summary = document.getElementById("display-discount-value-summary");
+  let display_discount_summary = document.querySelectorAll(".discount-summary");
+  let display_discount_summary_card = document.querySelectorAll(".discount-summary-card");
+
+  let discount_id = document.getElementById("discount-id");
+  let discount_name = document.getElementById("discount-name");
+  let discount_usage_count = document.getElementById("discount-usage-count");
+
+  let priceWithoutDiscount = '';
+  let priceWithDiscountFixed = '';
+  let priceWithDiscountPercent = '';
+  let totalDiscountPercent = '';
+  let totalDiscountFixed = '';
+  let is_discount_code_applied = false;
+
+
+
+
+
+
+  // DISCOUNT CODES
+  apply_discount_code.addEventListener('insClick', async (event) => {
+    apply_discount_code.loading = true;
+
+    if(is_discount_code_applied == true){
+      discount_code_error_message.classList.remove("is_not_visible");
+      apply_discount_code.loading = false;
+    }else{
+      discount_code_error_message.classList.add("is_not_visible");
+      // CHECK FIRST IF THERE ARE SELECTED TICKETS
+      if(ticketQty == 0){
+        setTimeout(() => {
+            App.events.notyf('error', "Please select ticket first, before applying discount code.");  
+        }, 100); 
+        apply_discount_code.loading = false;
+      }else{
+        // CHECK IF DISCOUNT CODE INPUT IS EMPTY
+        if(discount_code_value.value == ""){
+          setTimeout(() => {
+              App.events.notyf('error', "Please enter discount code.");  
+          }, 100); 
+          apply_discount_code.loading = false;
+        }else{
+          let response = await getDiscountCodeDetails();
+          checkIfCodeIsValid();
+        }
+      }
+    }
+  });   
+
+  remove_discount_code.addEventListener('click', async (event) => {
+    discount_code_error_message.classList.add("is_not_visible");
+    hideDiscountDetails();
+    ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount);
+    totalFormEl.setAttribute('value', priceWithoutDiscount);
+    setTimeout(() => {
+        App.events.notyf('success', "Discount code removed.");
+    }, 200); 
+    apply_discount_code.loading = false;
+  });
+
+  async function getDiscountCodeDetails(){
+    let url = '/get_discount_code?'+ 'discount_code='+ discount_code_value.value;
+    let response = await apiServices.processRequest('get', url);
+    return response
+  }
+
+  async function checkIfCodeIsValid(){
+    let response = await getDiscountCodeDetails();
+    
+    if(response.data.discount_code != undefined){
+      checkIfCodeIsLimit();
+      
+    }else{
+      
+      errorDiscountCode();
+    }
+  }
+
+  async function checkIfCodeIsLimit(){
+    let response = await getDiscountCodeDetails();
+
+    if(response.data.usage_count == response.data.usage_limit){
+      setTimeout(() => {
+        App.events.notyf('error', "Discount code has reached the limit.");  
+      }, 100);
+      apply_discount_code.loading = false; 
+    }else{
+      checkIfApplicableToAllEvents();
+    }
+  }
+
+  async function checkIfApplicableToAllEvents(){
+    let response = await getDiscountCodeDetails();
+    if(response.data.is_applicable_to_all_events == "true"){
+      checkAllocations();
+      
+    }else{
+      // CHECK DISCOUNT CODE IF APPLICABLE TO SELECTED EVENT
+      if(response.data.event_uuids.includes(event_uuid_hidden.value)){
+        checkAllocations();
+      }else{
+        errorDiscountCode();
+        
+      }
+    }
+  }
+
+  async function checkAllocations(){
+    let response = await getDiscountCodeDetails();
+
+    let allocation = '';
+
+    if(ticketType == "Individual Ticket") { 
+      allocation = "individuals"
+    }else{
+      allocation = "groups"
+    }
+
+    if(response.data.allocations.includes(allocation)){
+      discountCodeApplied();
+    }else{
+      errorDiscountCode();
+      
+    }
+  }
+
+  async function discountCodeApplied(){
+    let response = await getDiscountCodeDetails();
+
+    // SET THE DISCOUNT ID, NAME and USAGE COUNT
+    discount_id.setAttribute('value', response.data.id);
+    discount_name.setAttribute('value', response.data.discount_name);
+    if(response.data.usage_count == null){
+      discount_usage_count.setAttribute('value', 0);
+    }else{
+      discount_usage_count.setAttribute('value', response.data.usage_count);
+    }
+
+    
+    // GET THE VALUE OF DISCOUNT CODE
+    display_discount_name.textContent = response.data.discount_name;
+    display_discount_code.textContent = response.data.discount_code;
+
+    // CHECK IF PERCENTAGE OR FIXED AMOUNT
+    if(response.data.discount_type == "percentage"){
+        
+        display_discount_value.textContent = parseInt(response.data.discount_value)+"% Off";
+
+        totalDiscountPercent = priceWithoutDiscount * (response.data.discount_value) / 100;
+        display_discount_value_summary.innerText = "-$"+pricify(parseFloat(totalDiscountPercent));
+
+        priceWithDiscountPercent = priceWithoutDiscount - totalDiscountPercent;
+
+        if(priceWithDiscountPercent < 0){
+          ticketSTotal.innerText = "$"+pricify(0);
+          totalDiscountFormEl.setAttribute('value', totalDiscountPercent);
+          taxFormEl.setAttribute('value', (price * 0.10))
+        }else{
+          ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount - totalDiscountPercent);
+          totalDiscountFormEl.setAttribute('value', totalDiscountPercent);
+        }
+
+        
+
+    }else{
+        display_discount_value.textContent = "$"+parseInt(response.data.discount_value)+ " Off";
+
+        totalDiscountFixed = response.data.discount_value;
+        display_discount_value_summary.innerText = "-$"+pricify(parseFloat(totalDiscountFixed));
+       
+        priceWithDiscountFixed = priceWithoutDiscount - totalDiscountFixed;
+
+        if(priceWithDiscountFixed < 0){
+          ticketSTotal.innerText = "$"+pricify(0);
+          totalDiscountFormEl.setAttribute('value', totalDiscountFixed);
+        }else{
+          ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount - totalDiscountFixed);
+          totalDiscountFormEl.setAttribute('value', totalDiscountFixed);
+        }
+    }
+    setTimeout(() => {
+      App.events.notyf('success', "Discount code applied.");   
+      showDiscountDetails();
+      is_discount_code_applied = true;
+      apply_discount_code.loading = false;
+    }, 200); 
+  }
+
+  function showDiscountDetails(){
+    display_discount_summary[0].classList.remove('is_not_visible');
+    display_discount_summary_card[0].classList.remove('is_not_visible');
+  }
+
+  function hideDiscountDetails(){
+    display_discount_summary[0].classList.add('is_not_visible');
+    display_discount_summary_card[0].classList.add('is_not_visible');
+    discount_code_value.value = '';
+
+    totalDiscountFormEl.setAttribute('value', 0);
+    is_discount_code_applied = false;
+    apply_discount_code.loading = false;
+
+    // remove discount details
+    discount_id.setAttribute('value', '');
+    discount_name.setAttribute('value', '');
+    discount_usage_count.setAttribute('value', '');
+  }
+
+  function errorDiscountCode(){
+    setTimeout(() => {
+        App.events.notyf('error', "Sorry, the discount code you entered is invalid. Please ensure that you have entered the code correctly.");  
+    }, 100); 
+    apply_discount_code.loading = false;
+  }
+
+  function resetValue(){
+    ticketSQuantityEL.innerText = "0x"
+    ticketSPriceEL.innerText = "$0"
+
+    ticketSPriceEL.innerText = "$0";
+    ticketSSubtotal.innerText =  "$0";
+    ticketProcFeeEl.innerText = "$0";
+    ticketSTotal.innerText = "$0";
+
+    ticketQtyEl.setAttribute('has-error',false);
+    ticketQtyGroupEl.setAttribute('has-error',false);
+
+    //Set form value
+    subTotalFormEl.setAttribute('value', "")
+    totalFormEl.setAttribute('value', "")
+    is_discount_code_applied = false;
+    apply_discount_code.loading = false;
+  }
+
+  function pricify(number) {
+      return number 
+          ? number.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+          : "0.00";
+  }
+
+
+
+
+
+  let purchaseTicketForm = document.getElementById("purchase-ticket-form")
+  let Session = (function () {
+    return {
+        events: {
+
+            async purchaseHandler(event) { 
+                if(purchaseTicketForm){
+                    event ? event.preventDefault(): ''; 
+                }
+            }
+        }
+    }
+  })();
+  window.Session = Session;
+
+
+  // Stepper
+    const ticketPurchaseStepper = document.getElementById("ticket-purchase-stepper");
+    const step1 = document.getElementById("submit-purchase")
+    const step2 = document.getElementById("submit-billing-info")
+    const step3 = document.getElementById("checkout-ticket-submit-btn")
+
+    const step1Container = document.getElementById("ticket-selection-step")
+    const step1HeaderContainer = document.getElementById("ticket-purchase-header-container");
+    const step1Header = document.getElementById("ticket-purchase-header");
+    const step2Container = document.getElementById("ticket-billing-step")
+    const step3Container = document.getElementById("ticket-payment-step")
+
+    const step1button = document.getElementById("purchase-ticket-button-step-1");
+    const step2button = document.getElementById("purchase-ticket-button-step-2");
+    const step3button = document.getElementById("purchase-ticket-button-step-3");
+
+    const checkbox = document.getElementById("billing-same-with-contact");
+    const billingInputs = document.querySelector("#billing-contact-inputs");
+    const contactPhoneEl = document.getElementById("contact-phone")
+    const userUUID = document.getElementById("user_uuid")
+    let isChecked = false
+
+    function showLoading() {
+        document.getElementById("loadingOverlay").classList.add("active");
+    }
+    function hideLoading() {
+        document.getElementById("loadingOverlay").classList.remove("active");
+    }
+
+    function scrollToTop() {
+        const container = document.getElementById("purchase-ticket-container");
+
+        if (container && container.scrollHeight > container.clientHeight) {
+            // scroll inside container if it’s scrollable
+            container.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            // fallback: scroll page itself
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    }
+
+    function redirectWithParams(params) {
+        const url = new URL(window.location.href);
+
+        // Add or update params
+        for (const key in params) {
+            url.searchParams.set(key, params[key]);
+        }
+
+        // Redirect to the updated URL
+        window.location.href = url.toString();
+    }
+
+    checkbox.addEventListener("insCheck", function() {
+        const fields = billingInputs.querySelectorAll("[validate]");
+
+        if (this.checked) {
+        isChecked = true
+        billingInputs.classList.add("hide");
+
+        fields.forEach(field => {
+            field.removeAttribute("validate");
+            field.classList.remove("has-error");
+        });
+        } else {
+        isChecked = false
+        billingInputs.classList.remove("hide");
+
+        fields.forEach(field => {
+            field.setAttribute("validate", "true");
+        });
+        }
+    });
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const atPaymentPage = urlParams.get('paymentPage');
+
+
+    if (atPaymentPage) {
+        showLoading();
+        setTimeout( async () => {
+            hideLoading();
+            scrollToTop();
+    
+            App.events.notyf("success", "Billing address successfully added");
+            step1Header.innerText = "Payment"
+            steps = await ticketPurchaseStepper.getAllSteps()
+            firstStep = steps[0];
+            secondStep = steps[1];
+            thirdStep = steps[2];
+            firstStep.setAttribute('complete',true)
+            secondStep.setAttribute('complete',true)
+            ticketPurchaseStepper.setStep(3)
+
+            firstStep.hasError = false;
+            secondStep.hasError = false;
+
+            step1Container.classList.add('hide');
+            step1button.classList.add('hide');
+            step2Container.classList.add('hide');
+            step2button.classList.add('hide');
+            step3Container.classList.remove('hide');
+            step3button.classList.remove('hide');
+        },200)
+    }else {
+        step1Container.classList.remove('hide');
+    }
+
+
+    if(step1) {
+        step1.addEventListener('insClick', async function(event) {
+            showLoading();
+            steps = await ticketPurchaseStepper.getAllSteps()
+            firstStep = steps[0];
+            secondStep = steps[1];
+
+            const isValid = await TicketScript.methods.validateForm(event, step1Container); 
+            if(isValid) {
+                setTimeout(() => {
+                    // Keep accordion close after submission
+                    let accordion_card = document.querySelectorAll("#discount-accordion .ins-accordion-item");
+                    let accordion_card_height = document.querySelectorAll("#discount-accordion .ins-accordion-item .ins-accordion-item_content.will-show");
+                    if(accordion_card[0].classList.value.includes('open')){
+                    accordion_card[0].classList.remove('open');
+                    accordion_card[0].classList.add('closed');
+                    accordion_card_height[0].setAttribute("style", "");
+                    }
+                    hideLoading();
+                    step1Container.classList.add('hide');
+                    step1Header.innerText = "Contact & Billing"
+                    step1button.classList.add('hide');
+                    firstStep.hasError = false;
+                    ticketPurchaseStepper.next();
+                    step2Container.classList.remove('hide');
+                    step2button.classList.remove('hide');
+                    scrollToTop();
+                },500)
+            }else {
+                hideLoading();
+                firstStep.hasError = true;
+                firstStep.setAttribute("has-error", true);
+            }
+        })
+    }
+
+    if (step2) {
+        step2.addEventListener('insClick', async function(event) {
+            showLoading();
+            steps = await ticketPurchaseStepper.getAllSteps()
+            secondStep = steps[1];
+            thirdStep = steps[2];
+            step2.loading = true;
+
+            const isValid = await TicketScript.methods.validateForm(event, step2Container); 
+
+        if (isValid) {
+            const getFieldValue = (obj, key) => obj?.[key] || "";
+
+            const orderContactFields = document.querySelectorAll(
+                "#account-details ins-input, #account-details input, #account-details ins-input-tel"
+            );
+            const orderContactData = {};
+            orderContactFields.forEach(field => {
+                const key = (field.name || field.id || "").replace(/-/g, "_");
+                const value = field.value || field.getAttribute("value") || "";
+                orderContactData[key] = value;
+            });
+
+            const billingFields = document.querySelectorAll(
+            "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
+            );
+
+            const billingData = {};
+            billingFields.forEach(field => {
+                const key = field.id.replace(/-/g, "_"); 
+                const value = field.value || field.getAttribute("value") || "";
+                billingData[key] = value;
+            });
+
+            if (isChecked) {
+                Object.keys(orderContactData).forEach(key => {
+                    const billingKey = key.replace(/^contact_/, "billing_"); 
+                    billingData[billingKey] = orderContactData[key];
+                });
+
+                const contactPhoneEl = document.getElementById("contact-phone");
+                if (contactPhoneEl) {
+                    const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+                    const contactPhoneFullValue = await contactPhoneEl.getValue();
+                    const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+                    const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
+
+                    billingData.mobile_phone_country_code = contact_country_code.replace("+", "");
+                    billingData.mobile_phone_number = contact_phone_number;
+                }
+            }
+
+
+            const contactPhoneEl = document.getElementById("contact-phone");
+            const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+            const contactPhoneFullValue = await contactPhoneEl.getValue();
+            const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+            const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
+
+            const sourceData = isChecked ? orderContactData : billingData;
+            billingData.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || ""     
+            //Save to local storage
+            localStorage.setItem("billingData", JSON.stringify(billingData));
+
+
+            const billing_payload = {
+                prefix: getFieldValue(sourceData, "prefix") || "",
+                first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || getFieldValue(billingData, "billing_first_name"),
+                last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || getFieldValue(billingData, "billing_last_name"),
+                email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || getFieldValue(billingData, "billing_email"),
+                company_name: getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || "",                
+                mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
+                mobile_phone_number: contact_phone_number || "",
+                uuid: getFieldValue(sourceData, "user_uuid") || ""
+            };
+            let no_error = false
+            if(billing_payload.uuid) {
+                try {
+                    const response = await contactServices.updateContact(billing_payload);
+                    const firstName = response.data.first_name
+                    const lastName = response.data.last_name
+                    const fullName = firstName + " " + lastName
+                    const profileDiv = document.querySelector(".profileNav");
+                    if (profileDiv) {
+                        profileDiv.setAttribute("label", fullName);
+                    }
+
+                    if(response.data) {
+                        no_error = true
+                        const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
+                        storedData.company_uuid = response.data.company.uuid;
+                        storedData.user_uuid = response.data.uuid
+                        localStorage.setItem("billingData", JSON.stringify(storedData));
+                    }
+                } catch (error) {
+                    console.error('An error occured, Please try again.', error);
+                }
+            }else {
+                try {
+                    const response = await contactServices.addContact(billing_payload)
+                    if(response.data) {
+                        no_error = true
+                        const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
+                        storedData.company_uuid = response.data.company.uuid;
+                        storedData.user_uuid = response.data.uuid
+                        localStorage.setItem("billingData", JSON.stringify(storedData));
+                    }
+                } catch (error) {
+                    console.error('An error occured, Please try again.', error);
+                }
+            }
+
+            if(no_error) {
+                secondStep.hasError = false;
+                step2.loading = true;
+                ticketPurchaseStepper.next();
+                step1Header.innerText = "Payment";
+                step3Container.classList.remove('hide');
+                step2Container.classList.add('hide');
+                step2button.classList.add('hide');
+                redirectWithParams({ paymentPage: 'true'})
+            }else {
+                console.error('An error occured, Please try again.');
+            }
+
+        } else {
+            step2.loading = false;
+            secondStep.hasError = true;
+            secondStep.setAttribute("has-error", true);
+        }
+    });
+    }
+
+
+    
+
+    if(step3) {
+        step3.addEventListener('insClick', async function(event) {
+            showLoading();
+            step3.loading = true
+            steps = await ticketPurchaseStepper.getAllSteps()
+            secondStep = steps[1];
+            fourthStep = steps[3];
+
+
+            const storedBillingData = JSON.parse(localStorage.getItem("billingData"));
+
+            const getFieldValue = (obj, key) => obj?.[key] || "";
+
+            const orderPayload = {
+                order_number: "ORD-20251027-001",
+                billing_address_1: getFieldValue(storedBillingData, "billing_address_1"),
+                billing_city: getFieldValue(storedBillingData, "billing_suburb"),
+                billing_postcode: getFieldValue(storedBillingData, "billing_postcode"),
+
+                "billing_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
+                billing_company_name: getFieldValue(storedBillingData, "company_name") || "",
+                billing_company_email: getFieldValue(storedBillingData, "company_email") || "",
+
+                "billing_contact.uuid":  getFieldValue(storedBillingData, "user_uuid") || "",
+                billing_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
+                billing_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
+                billing_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
+                billing_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
+                billing_contact_phone_number:  getFieldValue(storedBillingData, "mobile_phone_number") || "",
+                order_reference: "PO-CLIENT-007",
+                order_status: "placed",
+                order_payment_status: "paid",
+
+                "order_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
+                order_company_name: getFieldValue(storedBillingData, "company_name") || "",
+                order_company_email: getFieldValue(storedBillingData, "company_email") || "",
+
+                "order_contact.uuid": getFieldValue(storedBillingData, "user_uuid") || "",
+                order_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
+                order_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
+                order_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
+                order_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
+                order_contact_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
+    
+                date_time: new Date().toISOString(),
+                currency: "AUD",
+                subtotal_amount: 10,
+                total_tax_amount: 2,
+                total_discount_amount: 1,
+                total_amount: 10,
+                total_amount_paid: 10,
+                mobile_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
+                mobile_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || ""
+            };
+
+            let no_error = false
+            try {
+                const response = await orderServices.addOrder(orderPayload);
+                if(response.data) {
+                    hideLoading();
+                    scrollToTop();
+                    step3.loading = false
+                    no_error = true
+
+                    localStorage.setItem("orderData", JSON.stringify(response.data));
+
+                }
+            } catch (error) {
+                hideLoading();
+                let no_error = false
+                step3.loading = false
+                console.error('An error occured, Please try again.', error);
+            }
+
+
+
+            // steps = await ticketPurchaseStepper.getAllSteps()
+            // secondStep = steps[1];
+            // thirdStep = steps[2];
+            // step3.loading = true
+
+            
+            // let subTotal = subTotalFormEl.getAttribute('value')
+            // let grandTotal = totalFormEl.getAttribute('value')
+
+            // if (subTotal == 0 && grandTotal == 0 ) {
+            //     stripeField.setAttribute('value','')
+            // }
+
+            // const isValid = await TicketScript.methods.validateForm(event, step2Container); 
+            
+            // if(isValid) {
+            //     secondStep.hasError = false;
+            //     step2.loading = true
+            // }else {
+            //     step2.loading = false
+            //     secondStep.hasError = true;
+            //     secondStep.setAttribute("has-error", true);
+            // }
+        })
+    }
+
+
+
+
+</script>

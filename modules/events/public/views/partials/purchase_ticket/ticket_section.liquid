@@ -1,0 +1,138 @@
+<div class="accordion">
+
+  <div class="item open">
+    <div class="title">
+        <div class="event-ticket-venue-detail">
+            <h3>Venue</h3>
+            <div class="spacer x-small"></div>
+            <p class="ticket-venue-sub-place">Venue place detail</p>
+            <div class="spacer x-small"></div>
+            <p class="ticket-venue-categories">x Ticket categories - Tickets starting from $x</p>
+        </div>
+        <span class="icon"><i class="icon-angle-up"></i></span>
+    </div>
+    <div class="content">
+        <div class="content-inner">
+            <div class="ticket-category-container">
+                <div class="ticket-category">
+                    <i>icon</i>
+                    <p>Tiket category</p>
+                </div>
+                <div class="spacer small"></div>
+                <hr>
+                <div class="spacer small"></div>        
+                <div class="ticket-purchaser">
+                    ticket membership
+                    <div class="ticket-purchaser-counter">
+                        $x
+                        <ins-input-stepper
+                            min="1"
+                            max="100">
+                        </ins-input-stepper>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+const items = document.querySelectorAll(".item");
+
+items.forEach((item) => {
+  const title = item.querySelector(".title");
+  const content = item.querySelector(".content");
+
+  title.addEventListener("click", () => {
+    const isOpen = item.classList.contains("open");
+
+    if (isOpen) {
+      // Closing
+      const contentHeight = content.scrollHeight;
+
+      content.style.height = contentHeight + "px"; // set current height to trigger transition
+      content.offsetHeight; // force reflow
+      content.style.height = "0";
+
+      item.classList.remove("open");
+    } else {
+      // Opening
+      content.style.display = "block"; // make sure visible to measure
+      const contentHeight = content.scrollHeight;
+
+      content.style.height = "0"; // reset before expanding
+      content.offsetHeight; // force reflow
+      content.style.height = contentHeight + "px";
+
+      item.classList.add("open");
+    }
+  });
+
+  // INITIAL STATE: fix default open to avoid cut off
+  if (item.classList.contains("open")) {
+    content.style.display = "block";
+    content.style.height = "auto";  // <-- use auto height for open by default
+  } else {
+    content.style.height = "0";
+    content.style.display = "none";
+  }
+
+  content.addEventListener("transitionend", () => {
+    if (item.classList.contains("open")) {
+      content.style.height = "auto";  // allow content to resize naturally after expand
+    } else {
+      content.style.display = "none"; // hide after collapse
+    }
+  });
+});
+</script>
+
+<style>
+
+
+.item {
+    border-radius: 4px;
+    border: 1px solid var(--color-ui-04, #DFDFDF);
+    background: var(--color-ui-01, #FFF);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.title {
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.content {
+  overflow: hidden;
+  height: 0;
+    transition: height 0.4s ease;
+  padding: 0 24px; /* keep horizontal padding */
+}
+
+.item.open .content {
+ 
+}
+
+.content-inner {
+  padding-bottom: 24px; /* vertical padding moved here */
+}
+
+.icon {
+  transition: transform 0.3s ease;
+}
+
+.item.open .icon {
+  transform: rotate(180deg); /* + becomes × */
+}
+
+</style>

@@ -1,0 +1,41 @@
+query event_venue_area(
+  $event_uuid: String!
+) {
+  items: records(
+    page: 1
+    per_page: 10
+    filter: {
+      table: { value: "modules/insites_events/event_venue_area" }, 
+      deleted_at: { exists: false }, 
+      properties: [
+        { name: "event_uuid", value: $event_uuid }
+      ]
+    }
+  ) {
+      results {
+        id
+        uuid:property(name: "uuid")
+        area_name:property(name: "area_name")
+        event_uuid:property(name: "event_uuid")
+        capacity:property(name: "capacity")
+        venue_uuid:property(name: "venue_uuid")
+        total_capacity:property(name: "total_capacity")
+        venue_area_uuid:property(name: "venue_area_uuid")
+        number_of_groups:property(name: "number_of_groups")
+        capacity_per_group:property(name: "capacity_per_group")
+        group_ticket_price:property(name: "group_ticket_price")
+        group_ticket_price_2:property(name: "group_ticket_price_2")
+        group_ticket_price_3:property(name: "group_ticket_price_3")        
+        individual_ticket_price:property(name: "individual_ticket_price")       
+        is_group_ticket_enabled:property(name: "is_group_ticket_enabled")
+        individual_ticket_price_2:property(name: "individual_ticket_price_2")       
+        individual_ticket_price_3:property(name: "individual_ticket_price_3")             
+        area_group_tickets_remaining:property(name: "area_group_tickets_remaining")
+        is_individual_ticket_enabled:property(name: "is_individual_ticket_enabled")
+        area_individual_tickets_remaining:property(name: "area_individual_tickets_remaining")
+        area_group_tickets_remaining: property(name: "area_group_tickets_remaining")
+        capacity_per_group: property(name: "capacity_per_group")
+      }
+    }
+}
+

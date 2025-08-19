@@ -1,0 +1,98 @@
+<div class="ticket-payment-summary-container">
+    <h2 class="heading-2-xsmall">Order Summary</h2>
+    <div class="spacer x-large"></div>
+    <div class="payment-breakdown">
+        <span id="ticket-type"></span>
+        <span id="ticket-quantity"></span>
+        <span id="ticket-price-summary"></span>
+    </div>
+    <div class="spacer medium"></div>
+    <hr>
+    <div class="spacer medium"></div>
+
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Subtotal</p>
+        <p id="subtotal-price">$0.00</p>
+    </div>
+    <div class="spacer x-small"></div>
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Tax</p>
+        <p id="subtotal-price">$0.00</p>
+    </div>
+    <div class="spacer x-small"></div>
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Processing Fee (1.7%)</p>
+        <p id="proccessing-container">$0.00</p>
+    </div>
+
+    {% comment %} ? DISCOUNT SUMMARY - HIDDEN ON DEFAULT {% endcomment %}
+    <div class="subtotal-container discount-summary is_not_visible">
+        <p class="subtotal-container-title">Discounts</p>
+        <p id="display-discount-value-summary">$0.00</p>
+    </div>
+    <div class="discount-summary-card is_not_visible">
+        <div class="spacer x-small"></div>
+        {% comment %} ? DISCOUNT DETAILS ON CARD {% endcomment %}
+        <ins-card steady>
+            <div class="discount-summary-details">
+                {% comment %} ? DISCOUNT DETAILS {% endcomment %}
+                <div>
+                    <div class="body-x-small-bold"> 
+                        <span id="display-discount-name" class="body-x-small-bold"></span>
+                    </div>
+                    <div class="body-x-small">
+                        <span id="display-discount-code" class="body-x-small"></span> - <span id="display-discount-value" class="body-x-small"> </span>
+                    </div>
+                </div>
+                {% comment %} ? REMOVE DISCOUNT BUTTON {% endcomment %}
+                <div>
+                    <button type="button" id="remove-discount"><i class="icon-close-1"></i></button>
+                </div>
+            </div>
+        </ins-card>
+    </div>
+
+    <div class="spacer medium"></div>
+    <hr>
+    <div class="spacer medium"></div>
+
+    <div class="total-container">
+        <p class="total-container-title">Total</p>
+        <p id="total-price">$0.00</p>
+    </div>
+</div>
+
+{% comment %} ? DISCOUNT CODES {% endcomment %}
+<div class="spacer x-large"></div>
+
+<ins-accordion class="discount-code-purchase-tickets">
+    <ins-accordion-item 
+        id="discount-accordion"
+        heading="Have a Discount Code?" 
+        open-icon="icon-plus"
+        close-icon="icon-minus"
+        active="false">
+        {% comment %} ? DISCOUNT INPUT AND BUTTON {% endcomment %}
+        <div class="discount-code-details-container">
+            {% comment %} ? DISCOUNT INPUT {% endcomment %}
+            <div class="discount-code-input">
+                <ins-input id="discount-code-value" label="" placeholder="Enter Discount Code"></ins-input>
+            </div>
+            {% comment %} ? DISCOUNT BUTTON {% endcomment %}
+            <div class="discount-code-button">
+                <ins-button id="apply-discount-code" type="button" label="Apply" outlined ></ins-button>
+            </div>
+        </div>
+        {% comment %} <div id="discount-code-error-message" class="discountCodeErrorMessage is_not_visible">
+            <div class="allocationErrorIcon">
+                <i class="icon-warning"></i>
+            </div>
+            <div class="allocationErrorMessage">
+                <p class="body-x-small">
+                    Only one discount code can be applied per transaction.
+                </p>
+            </div>
+        </div> {% endcomment %}
+    </ins-accordion-item>
+</ins-accordion>
+<div class="spacer xxxx-large"></div>

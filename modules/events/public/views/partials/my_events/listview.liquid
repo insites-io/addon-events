@@ -1,0 +1,271 @@
+{% comment %} GET PARAMS: PREVIOUS OR UPCOMING {% endcomment %}
+{% assign page_num = context.params.page | default: 1 %}
+{% assign per_page = context.params.per_page | default: 6 %}
+
+{% assign event_category = context.params.category | default: 'Upcoming' %}
+{% assign event_location = context.params.location | default: '' %}
+
+{% assign event_meeting = context.params.meeting | default: '' %}
+{% if event_meeting == "Venue" %}
+    {% assign event_meeting_value = "venue" %}
+{% elsif event_meeting == "To be announced" %}
+    {% assign event_meeting_value = "to_be_announced" %}
+{% elsif event_meeting == "Online event" %}
+    {% assign event_meeting_value = "online_event" %} 
+{% else %}
+    {% assign event_meeting = "" %}
+{% endif %}
+
+{% comment %} ? Change sort default, depends on Category {% endcomment %}
+{% if event_category == "Previous" %}
+    {% assign event_sort = context.params.sort | default: 'Latest to Earliest' %}
+{% else %}
+    {% assign event_sort = context.params.sort | default: 'Earliest to Latest' %}    
+{% endif %}
+
+{% if event_sort == "Latest to Earliest" %}
+    {% assign event_sort_value = "DESC" %}
+{% else %}
+    {% assign event_sort_value = "ASC" %}
+{% endif %}
+
+{% comment %} GET DATE NOW - COMPARE WITH EVENTS {% endcomment %}
+{% assign date_now =  "now" | date: "%Y-%m-%d %H:%M" | date: "%Y-%m-%dT%H:%M:%S.000Z" %}
+
+{% comment %} ? GET DATE NOW + 8UTC {% endcomment %}
+{% assign date_now_cards = "now" | add_to_time: 8, "h" | date: "%s" %}
+
+{% comment %} GET SYSTEM FIELDS LABEL {% endcomment %}
+{% assign context = '{}' | parse_json %}
+{%- function system_field_names =  "modules/insites_events/controllers/utilities/advanced_filters/get_filter_options", context: context  -%}
+       
+{% assign filter_options = '{}' | parse_json %}
+{% for filter_option in system_field_names %}
+    {% assign _data = '{}' | parse_json %}
+    {% capture var %}filter-{{ forloop.index }}{% endcapture %}
+    {% assign filter_options = filter_options | add_hash_key: var, _data %}
+    {% assign filter_options[var] = filter_options[var] | add_hash_key: "field_name", filter_option[0] %}
+    {% if filter_option[1].options != blank %}
+        {% assign filter_options[var] = filter_options[var] | add_hash_key: "field_options", filter_option[1].options | parse_json %}
+    {% endif %}
+{% endfor %}
+
+{% comment %} GET LOCATION FROM SYSTEM FIELDS: NSW, WA, ACT ETC {% endcomment %}
+{% assign get_state_uuid = filter_options.filter-5.field_options | first %}
+{% assign get_state_uuid = get_state_uuid.system_field %}
+
+{% comment %} SET LOCATION FOR FILTERS AND GRAPHQL {% endcomment %}
+{% assign filter_location_value = "All," %}
+{% assign filter_location_uuid = "" %}
+{% for location in filter_options.filter-5.field_options %}
+    {% assign filter_location_value = filter_location_value | append: location.value | append: "," %}
+    {% assign filter_location_uuid = filter_location_uuid | append: location.uuid | append: "," %}
+    {% if event_location == location.value %}
+        {% assign event_location_uuid = location.uuid %}
+    {% endif %}
+{% endfor %}
+
+{% comment %} GET TICKETS OF LOGGED IN USER {% endcomment %}
+{% assign contact_uuid = context.current_user.external_id %}
+
+{%- graphql get_event_uuids_from_tickets = 'modules/client/events/tickets/get_event_tickets', contact_uuid: contact_uuid  | dig: 'items', 'results' -%}
+
+{% assign user_event_uuid = '' %}
+
+{% comment %} GET ALL UUIDS OF EVENTS  {% endcomment %}
+{% for item in get_event_uuids_from_tickets %}
+    {% assign user_event_uuid = user_event_uuid | append: item.event_uuid | append: ","  %}
+{% endfor %}
+
+{% assign user_event_uuid = user_event_uuid | split: "," %}
+
+{% comment %} ARGS FOR GRAPHQL FILTER {% endcomment %}
+{% parse_json filters %}
+{
+    "page": {{ page_num }},
+    "size": {{ per_page }},
+    "date_now": "{{ date_now }}",
+    "location": "{{ event_location_uuid }}",
+    "meeting": "{{ event_meeting_value }}",
+    "sort": "{{ event_sort_value }}",
+    "uuids": {{ user_event_uuid }}
+}
+{% endparse_json %}
+
+{% comment %} GET LIST OF EVENTS DEPENDS ON PARAMS {% endcomment %}
+{% if event_category == "Upcoming" %}
+    {%- graphql get_events = 'modules/website/events/get_upcoming_events', args: filters | dig: "items" -%}
+    {% assign events = get_events | dig: "results" %}
+{% elsif event_category == "Previous" %}
+    {%- graphql get_events = 'modules/website/events/get_previous_events', args: filters | dig: "items" -%}
+    {% assign events = get_events | dig: "results" %}
+{% else %}    
+    {%- graphql get_events = 'modules/website/events/get_all_events', args: filters | dig: "items" -%}
+    {% assign events = get_events | dig: "results" %}
+{% endif %}
+
+{% comment %} HIDDEN FIELDS FOR JAVASCRIPT {% endcomment %}
+<input hidden type="text" id="total_entries" value="{{ get_events.total_entries }}">
+<input hidden type="text" id="per_page" value="{{ per_page }}">
+<input hidden type="text" id="page_num" value="{{ page_num }}">
+
+{% comment %} CONTENT STARTS {% endcomment %}
+{% assign events_count = events | size %}
+{% if events_count == 0 %}
+    {% if event_category == '' and event_location == '' and event_meeting == '' and event_sort == '' %}
+        {%  include 'modules/client/my_events/listview/empty_state' %}
+    {% else %}
+        <section id="events-section" class="filter-portal">
+            <div class="wrapper">
+                {% comment %} FILTERS {% endcomment %}
+                {%  include 'modules/client/my_events/listview/filters', data_event_category: event_category, data_event_location: event_location, data_event_meeting: event_meeting, data_event_sort: event_sort, data_filter_location_value: filter_location_value %}
+            </div>
+        </section>
+        {%  include 'modules/client/my_events/listview/empty_state' %}
+    {% endif %}
+{% else %}
+    <section id="events-section" class="filter-portal">
+        <div class="wrapper">
+            <div class="grid-container">
+                {% comment %} FILTERS {% endcomment %}
+                {%  include 'modules/client/my_events/listview/filters', data_event_category: event_category, data_event_location: event_location, data_event_meeting: event_meeting, data_event_sort: event_sort, data_filter_location_value: filter_location_value %}
+                
+                {% comment %} CARDS {% endcomment %}
+                <div class="grid-x gutter-medium grid-padding-x">
+                    {% for item in events %}
+                        {%  include 'modules/client/my_events/listview/cards', data_item: item, data_date_now_cards: date_now_cards %}
+                    {% endfor %}	
+                    <ins-table no-wrap
+                    static-table
+                    id="insBaseTable"
+                    without-search>    
+                    </ins-table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+{% comment %} JAVASCRIPT {% endcomment %}
+<script>
+    // hidden fields
+    var total_entries = document.getElementById('total_entries');
+    var page_num = document.getElementById('page_num');
+    var per_page = document.getElementById('per_page');
+    
+    // CATEGORY
+    let categorySelect = document.getElementById('select-event-category');
+    categorySelect.addEventListener('insSelect', (e) => {
+        let category = e.detail.option
+        let currentURLcategory = new URL(window.location.href);
+        currentURLcategory.searchParams.set("category", category);
+        
+        // CHECK PARAMS OF PAGE AND PER PAGE
+        const params = new URLSearchParams(currentURLcategory.search);
+        if(params.has("page") || params.has("per_page")){
+            currentURLcategory.searchParams.set("page", "1");
+            currentURLcategory.searchParams.set("per_page", per_page.value);
+        }
+        window.location.href = currentURLcategory.toString();
+    });
+
+    // LOCATION
+    let locationSelect = document.getElementById('select-event-location');
+    locationSelect.addEventListener('insSelect', (e) => {
+        let location = e.detail.option
+        let currentURLlocation = new URL(window.location.href);
+        currentURLlocation.searchParams.set("location", location);
+        
+        // CHECK PARAMS OF PAGE AND PER PAGE
+        const params = new URLSearchParams(currentURLlocation.search);
+        if(params.has("page") || params.has("per_page")){
+            currentURLlocation.searchParams.set("page", "1");
+            currentURLlocation.searchParams.set("per_page", per_page.value);
+        }
+        window.location.href = currentURLlocation.toString();
+    });
+
+    // MEETING
+    let meetingSelect = document.getElementById('select-event-meeting');
+    meetingSelect.addEventListener('insSelect', (e) => {
+        let meeting = e.detail.option
+        let currentURLmeeting = new URL(window.location.href);
+        currentURLmeeting.searchParams.set("meeting", meeting);
+        
+        // CHECK PARAMS OF PAGE AND PER PAGE
+        const params = new URLSearchParams(currentURLmeeting.search);
+        if(params.has("page") || params.has("per_page")){
+            currentURLmeeting.searchParams.set("page", "1");
+            currentURLmeeting.searchParams.set("per_page", per_page.value);
+        }
+        window.location.href = currentURLmeeting.toString();
+    });
+
+    // SORT
+    let sortSelect = document.getElementById('select-event-sort');
+    sortSelect.addEventListener('insSelect', (e) => {
+        let sort = e.detail.option
+        let currentURLsort = new URL(window.location.href);
+        currentURLsort.searchParams.set("sort", sort);
+        
+        // CHECK PARAMS OF PAGE AND PER PAGE
+        const params = new URLSearchParams(currentURLsort.search);
+        if(params.has("page") || params.has("per_page")){
+            currentURLsort.searchParams.set("page", "1");
+            currentURLsort.searchParams.set("per_page", per_page.value);
+        }
+        window.location.href = currentURLsort.toString();
+    });
+
+    // PAGINATION
+    // insBaseTable is declared at the partial - table
+    var insBaseTable = document.getElementById('insBaseTable');
+
+    insBaseTable.pageSizeOptions = [6,12,18];
+    insBaseTable.totalCount = total_entries.value;
+    insBaseTable.pageNumber = page_num.value;
+    insBaseTable.pageSize = per_page.value;
+
+    if(insBaseTable){
+        setTimeout(() => {
+            insBaseTable.querySelector(".ibt-table-wrap__pagination>span").innerHTML='Items per page';
+        },600);            
+    }
+
+    insBaseTable.addEventListener('insPaginationChange', tablePaginationHandler);
+
+    function processTableData(){
+
+        // Get the current URL
+        const currentUrl = window.location.href;
+
+        // Remove any existing `page` and `per_page` query parameters
+        const newUrl = currentUrl.replace(/[?&]page=\d+/, '').replace(/[?&]per_page=\d+/, '').replace(/events&/, "events?");
+        
+        // Set the new `page` and `per_page` values
+        const newPage = pageNumber;
+        const newPerPage = pageSize;
+
+        if (newUrl.includes("category")) {
+            var updatedUrl = `${newUrl}&page=${newPage}&per_page=${newPerPage}`;
+        } else if(newUrl.includes("location")) {
+            var updatedUrl = `${newUrl}&page=${newPage}&per_page=${newPerPage}`;
+        } else if(newUrl.includes("meeting")){
+            var updatedUrl = `${newUrl}&page=${newPage}&per_page=${newPerPage}`;
+        } else if(newUrl.includes("sort")){
+            var updatedUrl = `${newUrl}&page=${newPage}&per_page=${newPerPage}`;
+        } else {
+            var updatedUrl = `${newUrl}?page=${newPage}&per_page=${newPerPage}`;
+        }
+
+        // Navigate to the updated URL
+        window.location.href = updatedUrl;
+    }
+
+    function tablePaginationHandler(event){
+        pageSize = event.detail.pageSize;
+        pageNumber = event.detail.pageNumber;
+        processTableData()
+    }
+</script>
+{% comment %} END JAVASCRIPT {% endcomment %}

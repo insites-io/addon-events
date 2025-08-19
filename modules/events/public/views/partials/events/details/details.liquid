@@ -4,6 +4,8 @@ metadata: {
 }
 ---
 
+{% assign event_url = "/purchase-ticket?event=" | append: event.uuid %}
+
 <section class="width-1296 event-details wrapper">
 
      {% comment %} Back {% endcomment %}
@@ -75,7 +77,7 @@ metadata: {
           {% comment %} Second Column {% endcomment %}
           <div class="large-5 medium-5 small-0 col-2">
                {% if context.params.slug == 'upcoming-events' %}
-                    {% include 'modules/events/events/get_tickets_card' %}
+                    {% include 'modules/events/events/get_tickets_card', event_url: event_url %}
                {% endif %}
           </div>
      </div>

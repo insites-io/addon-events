@@ -1,0 +1,113 @@
+query get_event_by_uuid(
+    $page: Int = 1, 
+    $size: Int = 1,
+    $uuid: String
+) {
+    items: records(
+        page: $page
+        per_page: $size
+        filter: {
+            table: { value: "modules/insites_events/event" }
+            deleted_at: { exists: false }
+            properties: [
+               { name: "uuid", value: $uuid }
+            ]
+        }
+        sort: [
+            { 
+              created_at: {order: DESC}
+            }
+        ]
+    ) {
+        total_entries
+        total_pages
+        per_page
+        current_page
+        results {
+            id
+	        created_at
+            uuid: property(name: "uuid")
+            event_name: property(name: "event_name")
+            start_date_time: property(name: "start_date_time")
+            end_date_time: property(name: "end_date_time")
+            event_time_zone: property(name: "event_time_zone")
+            event_type: property(name: "event_type")
+            slug: property(name: "slug")
+            system_fields_uuids: property(name: "system_field_uuids")
+            reference_number: property(name: "reference_number")
+
+            long_description: property(name: "long_description")
+            gallery_1: property(name: "gallery_1")
+            gallery_2: property(name: "gallery_2")
+     
+            # Venue Details
+            venue_uuid:property(name: "venue_uuid")
+            venue_details: related_record(
+                table: "modules/insites_events/venue"
+                foreign_property: "uuid"
+                join_on_property: "venue_uuid"
+            ) {
+                id
+                venue_name:property(name: "venue_name")
+                venue_type:property(name: "venue_type")
+                venue_name:property(name: "venue_name")
+                venue_type:property(name: "venue_type")
+                address_1:property(name: "address_1")
+                address_2:property(name: "address_2")
+                address_3:property(name: "address_3")
+                state:property(name: "state")
+                suburb:property(name: "suburb")
+                city:property(name: "city")
+                postcode:property(name: "postcode")
+                country:property(name: "country")
+            }
+            
+            # System Fields
+            system_fields: related_records(
+              table: "modules/insites_events/event_system_field",
+              foreign_property: "uuid",
+              join_on_property: "system_field_uuids"
+            ) {
+              uuid:property(name:"uuid")
+              value:property(name:"value")
+              system_field:property(name:"system_field")
+            }
+
+            # Event Category
+            event_category: related_record(
+                table: "modules/insites_events/event_system_field"
+                foreign_property: "uuid"
+                join_on_property: "category_uuid"
+            ) {
+                uuid:property(name:"uuid")
+                value:property(name:"value")
+                system_field:property(name:"system_field")
+            }
+
+            # Custom Fields
+            custom_fields: related_records(
+              table: "modules/ins_events/event_custom_field",
+              foreign_property: "event_uuid",
+              join_on_property: "uuid"
+            ) {
+                daylight_savings_time:property(name:"daylight_savings_time")
+                calendar_invitation: property_upload(name: "calendar_invitation") {
+                    url
+                    file_name
+                    extension
+                    versions
+                }
+                event_region:property(name:"event_region")
+            }
+            
+
+            ## Images
+            event_image: property_upload(name: "event_image") {
+                url
+                file_name
+                extension
+                versions
+            }
+        }
+    }
+}

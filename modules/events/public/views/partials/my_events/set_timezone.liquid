@@ -1,0 +1,39 @@
+{% comment %} ? Get event details {% endcomment %}
+{% assign event_uuid = context.params.event %}
+
+{%- graphql event = 'modules/website/events/get_event_by_uuid', uuid: event_uuid | dig: "items", "results" | first -%}
+
+{% comment %} Check if AEDT {% endcomment %}
+
+{% assign event_custom_field = event.custom_fields | first %}
+{% assign is_AEDT = event_custom_field.daylight_savings_time %}
+
+{% comment %} CONVERT TIMEZONE ABBR {% endcomment %}
+{% assign time_zone = event.event_time_zone | split: "@" %}
+{% assign time_zone = time_zone | first %}
+{% if time_zone == "+0800" %}
+    {% assign time_zone_abbr = "AWST" %}
+{% elsif time_zone == "+0930" %}
+    {% assign time_zone_abbr = "ACST" %}
+{% elsif time_zone == "+1000" %}
+    {% assign time_zone_abbr = "AEST" %}
+{% elsif time_zone == "+1030" %}
+    {% assign time_zone_abbr = "ACDT" %}
+{% elsif time_zone == "+1100" %}
+    {% assign time_zone_abbr = "AEDT" %}  
+{% elsif time_zone == "+0100" %}
+    {% assign time_zone_abbr = "BST" %}
+{% elsif time_zone == "+0000" %}
+    {% assign time_zone_abbr = "GMT" %} 
+{% else %}
+    {% if event.event_time_zone != nil %}
+        {% assign time_zone_abbr = "UTC" | append: time_zone %}
+    {% endif %}
+{% endif %}
+
+
+{% if is_AEDT == 'true' %}
+    {% assign time_zone_abbr = "AEDT" %}
+{% endif %}
+
+{% return time_zone_abbr %}

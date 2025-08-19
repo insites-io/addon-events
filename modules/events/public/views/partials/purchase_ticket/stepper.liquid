@@ -1,0 +1,17 @@
+
+{%- liquid
+    if context.flash.notice != blank
+        assign statusPersonal = "complete"
+        assign statusCompany = "complete"
+    endif
+-%}
+
+<div class="form-groups-tab step-scrollbar">        
+    <ins-steps id="ticket-purchase-stepper">
+        <ins-step id="stepper-purchase-stepper" description="Purchase"></ins-step>
+        <ins-step id="stepper-purchase-stepper" description="Billing"></ins-step>
+        <ins-step id="stepper-purchase-stepper" description="Payment"></ins-step>
+        <ins-step id="stepper-purchase-stepper" description="Allocate"></ins-step>
+        <ins-step id="stepper-purchase-stepper" description="Confirmation"></ins-step>
+    </ins-steps>
+</div>

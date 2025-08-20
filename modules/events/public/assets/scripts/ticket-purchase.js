@@ -90,6 +90,7 @@ let TicketScript = (function () {
                 if(formId == 'submit-purchase' || formId == 'submit-billing-info'){
                     //Validation for Sign Up Form
                     let isValid = await this.validationForm(groupElem)
+                    console.log(groupElem)
                     if (formId == 'submit-purchase' || formId == 'submit-billing-info') {
                         return isValid
                     }

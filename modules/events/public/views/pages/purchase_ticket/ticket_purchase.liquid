@@ -27,8 +27,9 @@ metadata: {
     <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner"></div>
     </div>
+
     {% comment %} Stepper {% endcomment %}
-    <div class="purchase-ticket-wrapper">
+    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
         <div class="wrapper">
             <div class="grid-container">
                 <div class="grid-x ticket-stepper-container">
@@ -36,6 +37,11 @@ metadata: {
                 </div>
             </div>
         </div>
+    </div>
+
+    {% comment %} Stepper {% endcomment %} 
+    <div id="purchase-ticket-confirmation-message" class="hide">
+        {%- include 'modules/events/purchase_ticket/success_message_section' -%} 
     </div>
   {% comment %} Purchase ticket form {% endcomment %}
     <div class="purchase-ticket-form">
@@ -376,391 +382,478 @@ metadata: {
   window.Session = Session;
 
 
-  // Stepper
-    const ticketPurchaseStepper = document.getElementById("ticket-purchase-stepper");
-    const step1 = document.getElementById("submit-purchase")
-    const step2 = document.getElementById("submit-billing-info")
-    const step3 = document.getElementById("checkout-ticket-submit-btn")
+// Stepper Elements
+const ticketPurchaseStepper = document.getElementById("ticket-purchase-stepper");
+const ticketPurchaseStepperContainer = document.getElementById("purchase-ticket-stepper-wrapper");
+const ticketPurchaseStepperMessage = document.getElementById("purchase-ticket-confirmation-message");
 
-    const step1Container = document.getElementById("ticket-selection-step")
-    const step1HeaderContainer = document.getElementById("ticket-purchase-header-container");
-    const step1Header = document.getElementById("ticket-purchase-header");
-    const step2Container = document.getElementById("ticket-billing-step")
-    const step3Container = document.getElementById("ticket-payment-step")
+const step1 = document.getElementById("submit-purchase");
+const step2 = document.getElementById("submit-billing-info");
+const step3 = document.getElementById("checkout-ticket-submit-btn");
+const step4 = document.getElementById("submit-ticket-allocation");
+const step5 = document.getElementById("submit-ticket-confirmation");
 
-    const step1button = document.getElementById("purchase-ticket-button-step-1");
-    const step2button = document.getElementById("purchase-ticket-button-step-2");
-    const step3button = document.getElementById("purchase-ticket-button-step-3");
+const step1Container = document.getElementById("ticket-selection-step");
+const step1Header = document.getElementById("ticket-purchase-header");
+const step2Container = document.getElementById("ticket-billing-step");
+const step3Container = document.getElementById("ticket-payment-step");
+const step4Container = document.getElementById("ticket-allocation-step");
+const step5Container = document.getElementById("ticket-confirmation-step");
 
-    const checkbox = document.getElementById("billing-same-with-contact");
-    const billingInputs = document.querySelector("#billing-contact-inputs");
-    const contactPhoneEl = document.getElementById("contact-phone")
-    const userUUID = document.getElementById("user_uuid")
-    let isChecked = false
+const step1button = document.getElementById("purchase-ticket-button-step-1");
+const step2button = document.getElementById("purchase-ticket-button-step-2");
+const step3button = document.getElementById("purchase-ticket-button-step-3");
+const step4button = document.getElementById("purchase-ticket-button-step-4");
+const step5button = document.getElementById("purchase-ticket-button-step-5");
 
-    function showLoading() {
-        document.getElementById("loadingOverlay").classList.add("active");
+const checkbox = document.getElementById("billing-same-with-contact");
+const billingInputs = document.querySelector("#billing-contact-inputs");
+let isChecked = false;
+
+// Step Map
+const stepMap = {
+    selection: { index: 1, container: step1Container, button: step1button, header: "Ticket Selection", urlParam: "selection" },
+    billing: { index: 2, container: step2Container, button: step2button, header: "Contact & Billing", urlParam: "billing" },
+    payment: { index: 3, container: step3Container, button: step3button, header: "Payment", urlParam: "payment" },
+    allocation: { index: 4, container: step4Container, button: step4button, header: "Ticket Allocation", urlParam: "allocation" },
+    confirmation: { index: 5, container: step5Container, button: step5button, header: "", urlParam: "confirmation" }
+};
+
+// Helpers
+function showLoading() {
+    document.getElementById("loadingOverlay").classList.add("active");
+}
+function hideLoading() {
+    document.getElementById("loadingOverlay").classList.remove("active");
+}
+function scrollToTop() {
+    const container = document.getElementById("purchase-ticket-container");
+    if (container && container.scrollHeight > container.clientHeight) {
+        container.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    function hideLoading() {
-        document.getElementById("loadingOverlay").classList.remove("active");
+}
+function redirectWithParams(params) {
+    showLoading();
+    const url = new URL(window.location.href);
+    Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+    window.history.pushState({}, "", url);
+    if (params.payment) {
+        showStep("payment");
     }
+    hideLoading();
+}
+function removeQueryParam(param) {
+    const url = new URL(window.location);
+    url.searchParams.delete(param);
+    window.history.replaceState({}, document.title, url.toString());
+}
+function addQueryParam(key, value) {
+    const url = new URL(window.location);
+    url.searchParams.set(key, value);
+    window.history.replaceState({}, document.title, url.toString());
+}
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
 
-    function scrollToTop() {
-        const container = document.getElementById("purchase-ticket-container");
+function showStep(stepKey) {
+    Object.keys(stepMap).forEach(key => {
+        const { container, button, header } = stepMap[key];
 
-        if (container && container.scrollHeight > container.clientHeight) {
-            // scroll inside container if it’s scrollable
-            container.scrollTo({ top: 0, behavior: "smooth" });
+        if (stepKey == 'confirmation') {
+            ticketPurchaseStepperContainer.classList.add("hide");
+            ticketPurchaseStepperMessage.classList.remove("hide")
+        }
+
+        if (key === stepKey) {
+            if (container) container.classList.remove("hide");
+            if (button) button.classList.remove("hide");
+            if (header) {
+                step1Header.innerText = header;
+                step1Header.classList.remove("hide");
+            } else {
+                step1Header.classList.add("hide");
+            }
         } else {
-            // fallback: scroll page itself
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            if (container) container.classList.add("hide");
+            if (button) button.classList.add("hide");
         }
-    }
+    });
+}
 
-    function redirectWithParams(params) {
-        const url = new URL(window.location.href);
+//  Helper to get field value safely
+function getFieldValue(obj, key) {
+    return obj?.[key] || "";
+}
 
-        // Add or update params
-        for (const key in params) {
-            url.searchParams.set(key, params[key]);
+
+
+ function restoreStepFromParams() {
+    showLoading();
+    const paramStep = Object.keys(stepMap).find(
+        key => getQueryParam(stepMap[key].urlParam)
+    );
+
+    const stepToShow = paramStep || "selection";
+    showStep(stepToShow);
+
+    // --- update stepper UI ---
+    setTimeout(async () =>  {
+        if (typeof ticketPurchaseStepper !== "undefined") {
+            const steps = await ticketPurchaseStepper.getAllSteps();
+            if (!steps || steps.length === 0) return;
+
+            const stepIndex = stepMap[stepToShow]?.index || 1;
+
+            // mark all previous steps as complete
+            steps.forEach((step, idx) => {
+                if (idx < stepIndex - 1) {
+                    step.setAttribute("complete", true);
+                }
+            });
+
+            // set current step
+            ticketPurchaseStepper.setStep(stepIndex);
+            hideLoading();
+            scrollToTop();
         }
+    },200)
 
-        // Redirect to the updated URL
-        window.location.href = url.toString();
-    }
 
-    checkbox.addEventListener("insCheck", function() {
-        const fields = billingInputs.querySelectorAll("[validate]");
+    return stepToShow;
+}
+let currentStep = restoreStepFromParams();
 
-        if (this.checked) {
-        isChecked = true
+// Billing Checkbox Sync
+checkbox.addEventListener("insCheck", function () {
+    const fields = billingInputs.querySelectorAll("[validate]");
+    if (this.checked) {
+        isChecked = true;
         billingInputs.classList.add("hide");
-
         fields.forEach(field => {
             field.removeAttribute("validate");
             field.classList.remove("has-error");
         });
-        } else {
-        isChecked = false
+    } else {
+        isChecked = false;
         billingInputs.classList.remove("hide");
-
         fields.forEach(field => {
             field.setAttribute("validate", "true");
         });
+    }
+});
+
+async function saveContact(billing_payload) {
+    let result = null;
+    try {
+        if (billing_payload.uuid) {
+            // Update existing contact
+            const response = await contactServices.updateContact(billing_payload);
+            result = response.data;
+        } else {
+            // Add new contact
+            const response = await contactServices.addContact(billing_payload);
+            result = response.data;
         }
-    });
 
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const atPaymentPage = urlParams.get('paymentPage');
-
-
-    if (atPaymentPage) {
-        showLoading();
-        setTimeout( async () => {
-            hideLoading();
-            scrollToTop();
-    
-            App.events.notyf("success", "Billing address successfully added");
-            step1Header.innerText = "Payment"
-            steps = await ticketPurchaseStepper.getAllSteps()
-            firstStep = steps[0];
-            secondStep = steps[1];
-            thirdStep = steps[2];
-            firstStep.setAttribute('complete',true)
-            secondStep.setAttribute('complete',true)
-            ticketPurchaseStepper.setStep(3)
-
-            firstStep.hasError = false;
-            secondStep.hasError = false;
-
-            step1Container.classList.add('hide');
-            step1button.classList.add('hide');
-            step2Container.classList.add('hide');
-            step2button.classList.add('hide');
-            step3Container.classList.remove('hide');
-            step3button.classList.remove('hide');
-        },200)
-    }else {
-        step1Container.classList.remove('hide');
-    }
-
-
-    if(step1) {
-        step1.addEventListener('insClick', async function(event) {
-            showLoading();
-            steps = await ticketPurchaseStepper.getAllSteps()
-            firstStep = steps[0];
-            secondStep = steps[1];
-
-            const isValid = await TicketScript.methods.validateForm(event, step1Container); 
-            if(isValid) {
-                setTimeout(() => {
-                    // Keep accordion close after submission
-                    let accordion_card = document.querySelectorAll("#discount-accordion .ins-accordion-item");
-                    let accordion_card_height = document.querySelectorAll("#discount-accordion .ins-accordion-item .ins-accordion-item_content.will-show");
-                    if(accordion_card[0].classList.value.includes('open')){
-                    accordion_card[0].classList.remove('open');
-                    accordion_card[0].classList.add('closed');
-                    accordion_card_height[0].setAttribute("style", "");
-                    }
-                    hideLoading();
-                    step1Container.classList.add('hide');
-                    step1Header.innerText = "Contact & Billing"
-                    step1button.classList.add('hide');
-                    firstStep.hasError = false;
-                    ticketPurchaseStepper.next();
-                    step2Container.classList.remove('hide');
-                    step2button.classList.remove('hide');
-                    scrollToTop();
-                },500)
-            }else {
-                hideLoading();
-                firstStep.hasError = true;
-                firstStep.setAttribute("has-error", true);
+        if (result) {
+            // Update profile label if available
+            const fullName = `${result.first_name || ""} ${result.last_name || ""}`.trim();
+            const profileDiv = document.querySelector(".profileNav");
+            if (profileDiv) {
+                profileDiv.setAttribute("label", fullName);
             }
-        })
+
+            // Persist to localStorage
+            const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
+            storedData.company_uuid = result.company?.uuid || "";
+            storedData.user_uuid = result.uuid || "";
+            localStorage.setItem("billingData", JSON.stringify(storedData));
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Contact API error:", error);
+        return false;
     }
+}
 
-    if (step2) {
-        step2.addEventListener('insClick', async function(event) {
-            showLoading();
-            steps = await ticketPurchaseStepper.getAllSteps()
-            secondStep = steps[1];
-            thirdStep = steps[2];
-            step2.loading = true;
+// Save order data to API
+async function saveOrder(orderPayload) {
+    try {
+        const response = await orderServices.addOrder(orderPayload);
+        if (response.data) {
+            localStorage.setItem("orderData", JSON.stringify(response.data));
+            return true;
+        }
+    } catch (error) {
+        console.error("Order API error:", error);
+    }
+    return false;
+}
 
-            const isValid = await TicketScript.methods.validateForm(event, step2Container); 
+// STEP 1
+if (step1) {
+    step1.addEventListener("insClick", async function (event) {
+        showLoading();
+        const steps = await ticketPurchaseStepper.getAllSteps();
+        const firstStep = steps[0];
+        const isValid = await TicketScript.methods.validateForm(event, step1Container);
 
         if (isValid) {
-            const getFieldValue = (obj, key) => obj?.[key] || "";
-
-            const orderContactFields = document.querySelectorAll(
-                "#account-details ins-input, #account-details input, #account-details ins-input-tel"
-            );
-            const orderContactData = {};
-            orderContactFields.forEach(field => {
-                const key = (field.name || field.id || "").replace(/-/g, "_");
-                const value = field.value || field.getAttribute("value") || "";
-                orderContactData[key] = value;
-            });
-
-            const billingFields = document.querySelectorAll(
-            "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
-            );
-
-            const billingData = {};
-            billingFields.forEach(field => {
-                const key = field.id.replace(/-/g, "_"); 
-                const value = field.value || field.getAttribute("value") || "";
-                billingData[key] = value;
-            });
-
-            if (isChecked) {
-                Object.keys(orderContactData).forEach(key => {
-                    const billingKey = key.replace(/^contact_/, "billing_"); 
-                    billingData[billingKey] = orderContactData[key];
-                });
-
-                const contactPhoneEl = document.getElementById("contact-phone");
-                if (contactPhoneEl) {
-                    const contactPhoneCountryData = await contactPhoneEl.getCountryData();
-                    const contactPhoneFullValue = await contactPhoneEl.getValue();
-                    const contact_country_code = "+" + contactPhoneCountryData.dialCode;
-                    const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
-
-                    billingData.mobile_phone_country_code = contact_country_code.replace("+", "");
-                    billingData.mobile_phone_number = contact_phone_number;
-                }
-            }
-
-
-            const contactPhoneEl = document.getElementById("contact-phone");
-            const contactPhoneCountryData = await contactPhoneEl.getCountryData();
-            const contactPhoneFullValue = await contactPhoneEl.getValue();
-            const contact_country_code = "+" + contactPhoneCountryData.dialCode;
-            const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
-
-            const sourceData = isChecked ? orderContactData : billingData;
-            billingData.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || ""     
-            //Save to local storage
-            localStorage.setItem("billingData", JSON.stringify(billingData));
-
-
-            const billing_payload = {
-                prefix: getFieldValue(sourceData, "prefix") || "",
-                first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || getFieldValue(billingData, "billing_first_name"),
-                last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || getFieldValue(billingData, "billing_last_name"),
-                email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || getFieldValue(billingData, "billing_email"),
-                company_name: getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || "",                
-                mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
-                mobile_phone_number: contact_phone_number || "",
-                uuid: getFieldValue(sourceData, "user_uuid") || ""
-            };
-            let no_error = false
-            if(billing_payload.uuid) {
-                try {
-                    const response = await contactServices.updateContact(billing_payload);
-                    const firstName = response.data.first_name
-                    const lastName = response.data.last_name
-                    const fullName = firstName + " " + lastName
-                    const profileDiv = document.querySelector(".profileNav");
-                    if (profileDiv) {
-                        profileDiv.setAttribute("label", fullName);
-                    }
-
-                    if(response.data) {
-                        no_error = true
-                        const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
-                        storedData.company_uuid = response.data.company.uuid;
-                        storedData.user_uuid = response.data.uuid
-                        localStorage.setItem("billingData", JSON.stringify(storedData));
-                    }
-                } catch (error) {
-                    console.error('An error occured, Please try again.', error);
-                }
-            }else {
-                try {
-                    const response = await contactServices.addContact(billing_payload)
-                    if(response.data) {
-                        no_error = true
-                        const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
-                        storedData.company_uuid = response.data.company.uuid;
-                        storedData.user_uuid = response.data.uuid
-                        localStorage.setItem("billingData", JSON.stringify(storedData));
-                    }
-                } catch (error) {
-                    console.error('An error occured, Please try again.', error);
-                }
-            }
-
-            if(no_error) {
-                secondStep.hasError = false;
-                step2.loading = true;
-                ticketPurchaseStepper.next();
-                step1Header.innerText = "Payment";
-                step3Container.classList.remove('hide');
-                step2Container.classList.add('hide');
-                step2button.classList.add('hide');
-                redirectWithParams({ paymentPage: 'true'})
-            }else {
-                console.error('An error occured, Please try again.');
-            }
-
+        setTimeout(() => {
+            hideLoading();
+            firstStep.hasError = false;
+            ticketPurchaseStepper.next();
+            showStep("billing");
+            addQueryParam("billing", "true");
+            scrollToTop();
+        }, 500);
         } else {
-            step2.loading = false;
-            secondStep.hasError = true;
-            secondStep.setAttribute("has-error", true);
+            hideLoading();
+            firstStep.hasError = true;
+            firstStep.setAttribute("has-error", true);
         }
     });
-    }
+}
+
+// STEP 2
+if (step2) {
+    step2.addEventListener("insClick", async function (event) {
+        showLoading();
+        const steps = await ticketPurchaseStepper.getAllSteps();
+        const secondStep = steps[1];
+        secondStep.loading = true;
+
+        const isValid = await TicketScript.methods.validateForm(event, step2Container);
+        console.log(isValid)
+
+        if (!isValid) {
+            secondStep.loading = false;
+            secondStep.hasError = true;
+            secondStep.setAttribute("has-error", true);
+            hideLoading();
+            return;
+        }
 
 
-    
+        //Save to API
+        const orderContactFields = document.querySelectorAll(
+            "#account-details ins-input, #account-details input, #account-details ins-input-tel"
+        );
+        const orderContactData = {};
+        orderContactFields.forEach(field => {
+            const key = (field.name || field.id || "").replace(/-/g, "_");
+            const value = field.value || field.getAttribute("value") || "";
+            orderContactData[key] = value;
+        });
 
-    if(step3) {
-        step3.addEventListener('insClick', async function(event) {
-            showLoading();
-            step3.loading = true
-            steps = await ticketPurchaseStepper.getAllSteps()
-            secondStep = steps[1];
-            fourthStep = steps[3];
+        const billingFields = document.querySelectorAll(
+        "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
+        );
 
+        const billingData = {};
+        billingFields.forEach(field => {
+            const key = field.id.replace(/-/g, "_"); 
+            const value = field.value || field.getAttribute("value") || "";
+            billingData[key] = value;
+        });
 
-            const storedBillingData = JSON.parse(localStorage.getItem("billingData"));
+        if (isChecked) {
+            Object.keys(orderContactData).forEach(key => {
+                const billingKey = key.replace(/^contact_/, "billing_"); 
+                billingData[billingKey] = orderContactData[key];
+            });
 
-            const getFieldValue = (obj, key) => obj?.[key] || "";
+            const contactPhoneEl = document.getElementById("contact-phone");
+            if (contactPhoneEl) {
+                const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+                const contactPhoneFullValue = await contactPhoneEl.getValue();
+                const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+                const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-            const orderPayload = {
-                order_number: "ORD-20251027-001",
-                billing_address_1: getFieldValue(storedBillingData, "billing_address_1"),
-                billing_city: getFieldValue(storedBillingData, "billing_suburb"),
-                billing_postcode: getFieldValue(storedBillingData, "billing_postcode"),
-
-                "billing_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
-                billing_company_name: getFieldValue(storedBillingData, "company_name") || "",
-                billing_company_email: getFieldValue(storedBillingData, "company_email") || "",
-
-                "billing_contact.uuid":  getFieldValue(storedBillingData, "user_uuid") || "",
-                billing_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
-                billing_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
-                billing_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
-                billing_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
-                billing_contact_phone_number:  getFieldValue(storedBillingData, "mobile_phone_number") || "",
-                order_reference: "PO-CLIENT-007",
-                order_status: "placed",
-                order_payment_status: "paid",
-
-                "order_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
-                order_company_name: getFieldValue(storedBillingData, "company_name") || "",
-                order_company_email: getFieldValue(storedBillingData, "company_email") || "",
-
-                "order_contact.uuid": getFieldValue(storedBillingData, "user_uuid") || "",
-                order_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
-                order_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
-                order_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
-                order_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
-                order_contact_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
-    
-                date_time: new Date().toISOString(),
-                currency: "AUD",
-                subtotal_amount: 10,
-                total_tax_amount: 2,
-                total_discount_amount: 1,
-                total_amount: 10,
-                total_amount_paid: 10,
-                mobile_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
-                mobile_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || ""
-            };
-
-            let no_error = false
-            try {
-                const response = await orderServices.addOrder(orderPayload);
-                if(response.data) {
-                    hideLoading();
-                    scrollToTop();
-                    step3.loading = false
-                    no_error = true
-
-                    localStorage.setItem("orderData", JSON.stringify(response.data));
-
-                }
-            } catch (error) {
-                hideLoading();
-                let no_error = false
-                step3.loading = false
-                console.error('An error occured, Please try again.', error);
+                billingData.mobile_phone_country_code = contact_country_code.replace("+", "");
+                billingData.mobile_phone_number = contact_phone_number;
             }
+        }
+
+        const contactPhoneEl = document.getElementById("contact-phone");
+        const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+        const contactPhoneFullValue = await contactPhoneEl.getValue();
+        const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+        const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
+
+        const sourceData = isChecked ? orderContactData : billingData;
+        billingData.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || ""     
+        //Save to local storage
+        localStorage.setItem("billingData", JSON.stringify(billingData));
 
 
+        const billing_payload = {
+            temp_billing_address_id: getFieldValue(sourceData, "billing_address_id") || "",
+            prefix: getFieldValue(sourceData, "prefix") || "",
+            first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || getFieldValue(billingData, "billing_first_name"),
+            last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || getFieldValue(billingData, "billing_last_name"),
+            email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || getFieldValue(billingData, "billing_email"),
+            company_name: getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || "",                
+            mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
+            mobile_phone_number: contact_phone_number || "",
+            uuid: getFieldValue(sourceData, "user_uuid") || ""
+        };
 
-            // steps = await ticketPurchaseStepper.getAllSteps()
-            // secondStep = steps[1];
-            // thirdStep = steps[2];
-            // step3.loading = true
+        const no_error = await saveContact(billing_payload);
 
-            
-            // let subTotal = subTotalFormEl.getAttribute('value')
-            // let grandTotal = totalFormEl.getAttribute('value')
+        if (no_error) {
+            secondStep.hasError = false;
+            ticketPurchaseStepper.next();
+            removeQueryParam("billing");
+            // redirectWithParams({ payment: "true" }); // redirect to payment
+        } else {
+            console.error("An error occurred, Please try again.");
+        }
+        hideLoading();
+    });
+}
 
-            // if (subTotal == 0 && grandTotal == 0 ) {
-            //     stripeField.setAttribute('value','')
-            // }
+    // STEP 3
+if (step3) {
+    step3.addEventListener("insClick", async function () {
+        showLoading();
+        step3.loading = true;
+        const steps = await ticketPurchaseStepper.getAllSteps();
+        const thirdStep = steps[2];
 
-            // const isValid = await TicketScript.methods.validateForm(event, step2Container); 
-            
-            // if(isValid) {
-            //     secondStep.hasError = false;
-            //     step2.loading = true
-            // }else {
-            //     step2.loading = false
-            //     secondStep.hasError = true;
-            //     secondStep.setAttribute("has-error", true);
-            // }
-        })
+        //Save to API
+        const storedBillingData = JSON.parse(localStorage.getItem("billingData"));
+
+        const orderPayload = {
+            order_number: "ORD-20251027-001",
+            billing_address_1: getFieldValue(storedBillingData, "billing_address_1"),
+            billing_city: getFieldValue(storedBillingData, "billing_suburb"),
+            billing_postcode: getFieldValue(storedBillingData, "billing_postcode"),
+
+            "billing_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
+            billing_company_name: getFieldValue(storedBillingData, "company_name") || "",
+            billing_company_email: getFieldValue(storedBillingData, "company_email") || "",
+
+            "billing_contact.uuid":  getFieldValue(storedBillingData, "user_uuid") || "",
+            billing_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
+            billing_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
+            billing_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
+            billing_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
+            billing_contact_phone_number:  getFieldValue(storedBillingData, "mobile_phone_number") || "",
+            order_reference: "PO-CLIENT-007",
+            order_status: "placed",
+            order_payment_status: "paid",
+
+            "order_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
+            order_company_name: getFieldValue(storedBillingData, "company_name") || "",
+            order_company_email: getFieldValue(storedBillingData, "company_email") || "",
+
+            "order_contact.uuid": getFieldValue(storedBillingData, "user_uuid") || "",
+            order_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
+            order_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
+            order_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
+            order_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
+            order_contact_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
+
+            date_time: new Date().toISOString(),
+            currency: "AUD",
+            subtotal_amount: 10,
+            total_tax_amount: 2,
+            total_discount_amount: 1,
+            total_amount: 10,
+            total_amount_paid: 10,
+            mobile_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
+            mobile_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || ""
+        };
+
+        const no_error = await saveOrder(orderPayload);
+
+        if (no_error) {
+            hideLoading();
+            scrollToTop();
+            thirdStep.hasError = false;
+            ticketPurchaseStepper.next();
+            showStep("allocation");
+            removeQueryParam("payment");
+            addQueryParam("allocation", "true");
+        } else {
+            step3.loading = false;
+            thirdStep.hasError = true;
+            thirdStep.setAttribute("has-error", true);
+        }
+    });
+}
+
+if (step4) {
+    step4.addEventListener("insClick", async function () {
+        ticketPurchaseStepperContainer.classList.add("hide");
+        ticketPurchaseStepperMessage.classList.remove("hide")
+        showLoading();
+        hideLoading();
+        scrollToTop();
+        ticketPurchaseStepper.next();
+        showStep("confirmation");
+        step1Header.classList.add("hide");
+        addQueryParam("confirmation", "true");
+
+
+    });
+}
+</script>
+
+
+<script>
+const items = document.querySelectorAll(".item");
+
+items.forEach((item) => {
+  const title = item.querySelector(".title");
+  const content = item.querySelector(".content");
+
+  title.addEventListener("click", () => {
+    const isOpen = item.classList.contains("open");
+
+    if (isOpen) {
+      // Closing
+      const contentHeight = content.scrollHeight;
+
+      content.style.height = contentHeight + "px"; // set current height to trigger transition
+      content.offsetHeight; // force reflow
+      content.style.height = "0";
+
+      item.classList.remove("open");
+    } else {
+      // Opening
+      content.style.display = "block"; // make sure visible to measure
+      const contentHeight = content.scrollHeight;
+
+      content.style.height = "0"; // reset before expanding
+      content.offsetHeight; // force reflow
+      content.style.height = contentHeight + "px";
+
+      item.classList.add("open");
     }
+  });
 
+  // INITIAL STATE: fix default open to avoid cut off
+  if (item.classList.contains("open")) {
+    content.style.display = "block";
+    content.style.height = "auto";  // <-- use auto height for open by default
+  } else {
+    content.style.height = "0";
+    content.style.display = "none";
+  }
 
-
-
+  content.addEventListener("transitionend", () => {
+    if (item.classList.contains("open")) {
+      content.style.height = "auto";  // allow content to resize naturally after expand
+    } else {
+      content.style.display = "none"; // hide after collapse
+    }
+  });
+});
 </script>

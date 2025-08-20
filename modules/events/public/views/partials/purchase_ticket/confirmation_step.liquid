@@ -1,0 +1,69 @@
+<div id="ticket-confirmation-step" class="hide">
+    <h2 class="heading-2-xsmall">Order details</h2>
+    <div class="spacer x-large"></div>
+    <div class="grid-x" id="order-details-container">
+        <div class="large-6 medium-6 small-12">
+            <div class="order-contact-conirmation">
+                <h5 class="heading-5-small">Order contact</h5>
+                <div class="spacer small"></div>
+                <p id="order-contact-name">--</p>
+                <p id="order-contact-email">--</p>
+                <p id="order-contact-mobile-number">--</p>
+            </div>
+
+            <div class="spacer x-large"></div>
+            <div class="billing-conirmation">
+                <h5 class="heading-5-small">Billing details</h5>
+                <div class="spacer small"></div>
+                <p id="billing-contact-name">--</p>
+                <p id="billing-contact-email">--</p>
+                <p id="billing-contact-mobile-number">--</p>
+                <p id="billing-contact-address">--</p>
+            </div>
+        </div>
+
+        <div class="large-6 medium-6 small-12">
+            <div class="wrap">
+                <h5 class="heading-5-small">Payment details</h5>                    
+                <div class="spacer small"></div>
+                <p class="font-cabin">{{ order.payment.card_brand | upcase }} **** **** **** {{ order.payment.card_last_four_digits }}</p>
+                {%- assign month = order.payment.card_expiry_month -%}
+                {%- if order.payment.card_expiry_month.size < 2 -%}
+                    {%- assign month = "0" | append: order.payment.card_expiry_month -%}
+                {%- endif -%}
+                <p class="font-cabin" id="payment-month">{{ month }} / {{ order.payment.card_expiry_year }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="spacer x-large"></div>
+    <h2 class="heading-2-xsmall">Create an account</h2>
+    <div class="spacer x-large"></div>
+    <div class="grid-x grid-padding-x grid-padding-y" id="create-account-confirmation">
+        <div class="large-6 medium-6 small-12 cell">
+            <ins-input   
+                id="confirmation-email-input"
+                class="label-input" 
+                label="Email Address*"
+                placeholder="Email Address" 
+                field="text" 
+                validate
+                readonly >
+             </ins-input>
+        </div>
+
+        <div class="large-6 medium-6 small-12 cell">
+            <ins-input   
+                id="confirmation-email-password"
+                class="label-input" 
+                label="Password*"
+                placeholder="Password" 
+                required
+                validate
+                field="password" 
+                >
+             </ins-input>
+        </div>
+    </div>
+</div>
+<div class="spacer"></div>

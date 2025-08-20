@@ -1,10 +1,10 @@
 <div id="ticket-billing-step" class="hide">
-
+    {% function has_profile = "modules/website/layout/check_if_user_has_profile" %}
     {% assign fields = form.fields %}
     {% assign prop = fields.properties %}
     {% assign profiles_prop = fields.profiles['modules/insites_core/crm_contact'].properties %}
 
-    {% if context.current_user %}
+    {% if has_profile %}
     {%  liquid
         assign first_name = context.current_user.first_name
         assign last_name = context.current_user.last_name
@@ -15,6 +15,7 @@
         assign contact_phone_country_code = crm_contact.mobile_phone_country_code
         assign contact_phone_number = crm_contact.mobile_phone_number
         assign user_uuid = context.current_user.external_id
+        assign company_uuid = crm_contact.company_uuid
     %} 
     {% else %}
     {%  liquid      
@@ -135,7 +136,7 @@
 
     {% comment %} Billing contact {% endcomment %}
 <div id="billing-details" class="insites-form">
-
+        
   <div class="grid-x">
 
     <div class="cell">
@@ -149,7 +150,7 @@
             name="{{ prop.billing_same_with_shipping.name }}"
             value="true"
             id="billing-same-with-contact" 
-            label="My billing details are the same as my shipping details.">
+            label="My billing contact is the same as my order contact.">
         </ins-checkbox>
     </div>
 
@@ -230,82 +231,174 @@
  <div class="hide-for-small-only spacer large"></div>
     <div class="show-for-small-only spacer small"></div>
 
-    {% comment %} Search address {% endcomment %}
-    <div id="billing-address-fields" class="address-fields" >
-      <div class="grid-x">        
-        <h4>Billing address</h4>
-      </div>
-      <div class="hide-for-small-only spacer x-large"></div>
-      <div class="show-for-small-only spacer"></div>
-      <div class="grid-x grid-padding-x grid-padding-y">
-        <div class="large-12 medium-12 small-12 cell">
-          <ins-input address-lookup label="Search Address" 
-            id="billing-address-search" name="billing"
-            placeholder="Search Address" icon="icon-map-pin">
-          </ins-input>            
+    {% if has_profile %}
+        {% include "modules/events/purchase_ticket/billing_form_address", company_uuid: company_uuid %}    
+    {% else %}
+        {% comment %} Search address {% endcomment %}
+        <div id="billing-address-fields" class="address-fields" >
+        <div class="grid-x">        
+            <h4>Billing address</h4>
         </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input required validate 
-            label="Address 1*" 
-            id="billing_address_1"
-            placeholder="Address 1" 
-            name="{{ prop.address_1.name }}"
-            value="{{ context.session.billing_address_1 }}"
-            error-message="Address 1 is required.">
-          </ins-input>
+        <div class="hide-for-small-only spacer x-large"></div>
+        <div class="show-for-small-only spacer"></div>
+        <div class="grid-x grid-padding-x grid-padding-y">
+            <div class="large-12 medium-12 small-12 cell">
+            <ins-input address-lookup label="Search Address" 
+                id="billing-address-search" name="billing"
+                placeholder="Search Address" icon="icon-map-pin">
+            </ins-input>            
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate 
+                label="Address 1*" 
+                id="billing_address_1"
+                placeholder="Address 1" 
+                name="{{ prop.address_1.name }}"
+                value="{{ context.session.billing_address_1 }}"
+                error-message="Address 1 is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  
+                label="Address 2" 
+                id="billing_address_2" 
+                placeholder="Address 2"
+                name="{{ prop.address_2.name }}"
+                value="{{ context.session.billing_address_2 }}">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate
+                label="Suburb*" 
+                id="billing_suburb" 
+                placeholder="Suburb"
+                name="{{ prop.suburb.name }}"
+                value="{{ context.session.billing_suburb }}"
+                error-message="Suburb is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate 
+                label="State*" 
+                id="billing_state" 
+                placeholder="State"
+                name="{{ prop.state.name }}"
+                value="{{ context.session.billing_state }}"
+                error-message="State is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  required validate 
+                label="Postcode*" 
+                id="billing_postcode"
+                placeholder="Postcode" 
+                name="{{ prop.postcode.name }}"
+                value="{{ context.session.billing_postcode }}"
+                error-message="Postcode is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  required validate 
+                label="Country*" 
+                id="billing_country"
+                placeholder="Country" 
+                name="{{ prop.country.name }}"
+                value="{{ context.session.billing_country }}"
+                error-message="Country is required.">
+            </ins-input>
+            </div>
         </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input  
-            label="Address 2" 
-            id="billing_address_2" 
-            placeholder="Address 2"
-            name="{{ prop.address_2.name }}"
-            value="{{ context.session.billing_address_2 }}">
-          </ins-input>
         </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input required validate
-            label="Suburb*" 
-            id="billing_suburb" 
-            placeholder="Suburb"
-            name="{{ prop.suburb.name }}"
-            value="{{ context.session.billing_suburb }}"
-            error-message="Suburb is required.">
-          </ins-input>
-        </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input required validate 
-            label="State*" 
-            id="billing_state" 
-            placeholder="State"
-            name="{{ prop.state.name }}"
-            value="{{ context.session.billing_state }}"
-            error-message="State is required.">
-          </ins-input>
-        </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input  required validate 
-            label="Postcode*" 
-            id="billing_postcode"
-            placeholder="Postcode" 
-            name="{{ prop.postcode.name }}"
-            value="{{ context.session.billing_postcode }}"
-            error-message="Postcode is required.">
-          </ins-input>
-        </div>
-        <div class="large-6 medium-6 small-12 cell">
-          <ins-input  required validate 
-            label="Country*" 
-            id="billing_country"
-            placeholder="Country" 
-            name="{{ prop.country.name }}"
-            value="{{ context.session.billing_country }}"
-            error-message="Country is required.">
-          </ins-input>
-        </div>
-      </div>
-    </div>
+    {% endif %}
+
+
     
     <div class="spacer xxx-large"></div>       
 
 </div>
+
+<ins-modal id="address-form-modal" with-backdrop no-button >
+    <div class="inviteUserModalBodyContainer">
+        <h5 class="heading-3">Add new address</h5>
+        <div class="spacer"></div> 
+
+        <div class="address-fields" >
+
+            <ins-input address-lookup 
+                label="Search Addresss" name="modal" id="modal_search"              
+                placeholder="Search Addresss" icon="icon-map-pin">
+            </ins-input>  
+
+            <input type="hidden" id="modal_latitude" value="">
+            <input type="hidden" id="modal_longitude" value="">    
+                        
+            <ins-input required validate 
+                label="Address 1*" 
+                id="modal_address_1"
+                placeholder="Address 1" 
+                value=""
+                error-message="Address 1 is required.">
+            </ins-input>
+
+            <ins-input  
+                label="Address 2" 
+                id="modal_address_2" 
+                placeholder="Address 2"
+                value=""
+                error-message="">
+            </ins-input>
+
+            <ins-input validate
+                label="Suburb*" 
+                id="modal_suburb" 
+                placeholder="Suburb"
+                value="" 
+                error-message="Suburb is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="State*" 
+                id="modal_state" 
+                placeholder="State"
+                value=""
+                error-message="State is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="Postcode*" 
+                id="modal_postcode"
+                placeholder="Postcode" 
+                value=""
+                error-message="Postcode is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="Country*" 
+                id="modal_country"
+                placeholder="Country" 
+                value=""
+                error-message="Country is required.">
+            </ins-input>
+
+            <div class="modal-button">
+                <ins-button
+                    id="address-cancel-btn"
+                    type="button"
+                    class="card-form-cancel"
+                    label="Cancel"
+                    outlined
+                    icon="icon-close-1">
+                </ins-button>
+
+                <ins-button
+                    type="button"
+                    id="address-submit-btn"
+                    label="Add address"
+                    solid
+                    icon="icon-check-2">
+                </ins-button>
+            </div>
+
+        </div>
+    </div>
+</ins-modal>

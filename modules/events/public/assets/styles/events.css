@@ -2594,3 +2594,8 @@ ins-modal .ins-card-wrap {
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
+
+.icon-number-of-checks {
+    font-size: 4rem;
+    color: var(--success);
+}

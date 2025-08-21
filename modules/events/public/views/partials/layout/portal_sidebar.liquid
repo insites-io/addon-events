@@ -1,0 +1,16 @@
+{% if context.params.slug == "my-upcoming-events" or context.params.slug == "my-previous-events" %}
+    {% assign active = true %}
+{% endif %}
+
+{% if context.params.slug == "my-upcoming-events" %}
+    {% assign active_link_up = true %}
+{% endif %}
+
+{% if context.params.slug == "my-previous-events" %}
+    {% assign active_link_prev = true %}
+{% endif %}
+
+<ins-accordion-item {% if active %} active {% endif %} id="my-events-accordion" class="" heading="My events"  open-icon="icon-plus" close-icon="icon-minus" link-target="_self">
+    <ins-accordion-link {% if active_link_up %} class="active-link" {% endif %} label="Upcoming events" link="/my-upcoming-events" link-target="_self"></ins-accordion-link>
+    <ins-accordion-link {% if active_link_prev %} class="active-link" {% endif %} label="Previous events" link="/my-previous-events" link-target="_self"></ins-accordion-link>
+</ins-accordion-item>

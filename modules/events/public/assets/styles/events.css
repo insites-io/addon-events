@@ -2599,3 +2599,32 @@ ins-modal .ins-card-wrap {
     font-size: 4rem;
     color: var(--success);
 }
+
+
+/* Portal */
+#my-events-accordion .inner-head {
+    border: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--font-color-head);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    background: none;
+}
+
+#my-events-accordion .ins-accordion-item {
+    background: none;
+}
+
+#my-events-accordion .ins-accordion-item.open>.ins-accordion-item_header>.inner-head {
+    background: var(--color-main-hover-light);
+    color: var(--color-main);
+    font-weight: 700;
+}
+
+#my-events-accordion .active-link .ins-accordion-link>.ins-accordion-link_link {
+    color: var(--color-main);
+    font-weight: 700;
+}

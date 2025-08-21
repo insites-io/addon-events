@@ -502,8 +502,6 @@ ins-button.event-card-btn .btn__icon {
 #galleries-modal ins-button button.blue.outlined {
     border-color: var(--color-ui-01);
     border-radius: 50% !important;
-    height: 40px;
-    width: 40px !important;
     padding: 0px 0px !important;
 }
 #galleries-modal .icon-close-1,
@@ -520,16 +518,24 @@ ins-button.event-card-btn .btn__icon {
 #galleries-modal .ins-modal-head.no-heading {
     margin-bottom: -32px;
 }
-#galleries-modal .ins-carousel_body {
+/* #galleries-modal .ins-carousel_body {
     height: 100vh;
     display: flex;
     align-items: center;
+} */
+
+.carousel-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
+
 #galleries-modal .carousel-wrapper .ins-carousel img{
     width: auto;
     height: calc(80vh);
     max-height: 564px;
     object-fit: contain;
+    min-width: 300px;
 }
 #galleries-modal .carousel-wrapper .ins-carousel .img-wrap {
     text-align: center;

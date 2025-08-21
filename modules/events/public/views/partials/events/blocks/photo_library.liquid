@@ -104,22 +104,25 @@ metadata: {
                     </div>
                </div>
           </div>
-          <div class="carousel-wrapper">
-               <ins-carousel 
-                    no-pagination
-                    id="galleries-carousel"                
-                    bind-to="galleries-carousel-img">
-                    <div id="galleries-carousel-img">                         
-                         {% for item in galleries %}
-                              {% if item.file.url %}
-                                   <div class="img-wrap">
-                                        <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" decoding="async" alt="img-{{ item.id}}" >
-                                   </div>
-                              {% endif %}
-                         {% endfor %}  
-                    </div>   
-               </ins-carousel>    
+          <div class="carousel-container">
+               <div class="carousel-wrapper">
+                    <ins-carousel 
+                         no-pagination
+                         id="galleries-carousel"                
+                         bind-to="galleries-carousel-img">
+                         <div id="galleries-carousel-img">                         
+                              {% for item in galleries %}
+                                   {% if item.file.url %}
+                                        <div class="img-wrap">
+                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" decoding="async" alt="img-{{ item.id}}" >
+                                        </div>
+                                   {% endif %}
+                              {% endfor %}  
+                         </div>   
+                    </ins-carousel>    
+               </div>
           </div>
+ 
      </div>
 
 

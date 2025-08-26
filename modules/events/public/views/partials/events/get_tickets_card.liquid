@@ -3,15 +3,70 @@ metadata: {
     partial_name: 'Events | Tickets Card'
 }
 ---
+{% graphql venue_prices = 'modules/events/events/get_divisions', event_uuid: event.uuid | dig: 'items','results' %}
 
-{%   liquid
-     ##assign is_sold_out = true
-     assign label = 'Get tickets'
-     if is_sold_out == true
-          assign label = 'Sold out'
-          assign disabled = 'disabled'
-     endif
-%}
+{% assign lowest_price = nil %}
+{% assign tickets_left = 0 %}
+
+{% if venue_prices == blank %}
+  {% assign formatted_price = "N/A" %}
+  {% liquid
+    assign label = 'N/A'
+    assign disabled = 'disabled'
+  %}
+{% else %}
+  {% for area in venue_prices %}
+    {% assign indiv_left = area.area_individual_tickets_remaining | default: 0 %}
+    {% assign group_left = area.area_group_tickets_remaining | default: 0 %}
+    {% assign tickets_left = tickets_left | plus: indiv_left | plus: group_left %}
+
+    {% for tier in area.tiers %}
+      {% if tier.capacity_type == 'individual' %}
+        {% if lowest_price == nil or tier.price < lowest_price %}
+          {% assign lowest_price = tier.price %}
+        {% endif %}
+      {% elsif tier.capacity_type == 'group' %}
+        {% if lowest_price == nil or tier.price < lowest_price %}
+          {% assign lowest_price = tier.price %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  {% assign is_sold_out = false %}
+  {% assign formatted_price = "N/A" %}
+
+  {%- if lowest_price -%}
+    {%- assign cents = lowest_price | times: 100 | round -%}
+    {%- assign dollars = cents | divided_by: 100.0 -%}
+    {%- assign formatted_price = dollars | append: "" -%}
+
+    {%- if formatted_price contains "." -%}
+      {%- assign parts = formatted_price | split: "." -%}
+      {%- assign decimal = parts[1] -%}
+      {%- if decimal.size == 1 -%}
+        {%- assign formatted_price = formatted_price | append: "0" -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- assign formatted_price = formatted_price | append: ".00" -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if tickets_left == 0 -%}
+    {% assign is_sold_out = true %}
+  {%- endif -%}
+
+  {% liquid
+    assign label = 'Get tickets'
+    if is_sold_out == true
+      assign label = 'Sold out'
+      assign disabled = 'disabled'
+    endif
+  %}
+{% endif %}
+
+
+
 <section id="get-tickets-card">
      <div class="hide-for-small-only">
           <div class="spacer x-large"></div>
@@ -20,9 +75,11 @@ metadata: {
                <div class="spacer small"></div>
                <hr>
                <div class="spacer x-large"></div>
-               <p class="body-large ">Price starting from</p>
+               
+               <p class="body-large">Price starting from</p>
                <div class="spacer xx-small"></div>
-               <p class="body-xxlarge-bold font-color-head">$100.00</p>
+               <p class="body-xxlarge-bold font-color-head">${{ formatted_price }}</p>
+               
                <div class="spacer x-large"></div>
                <a href="{{ event_url }}">
                <ins-button label="{{label}}" {{disabled}} solid class="btn-full"></ins-button>

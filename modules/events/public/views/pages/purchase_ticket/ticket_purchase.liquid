@@ -26,6 +26,10 @@ metadata: {
 <div id="purchase-ticket">
     <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner"></div>
+    <div id="loadingMessage" class="loading-message">
+      Checking ticket availability... <br>
+      Hang tight, and please do not leave this screen.
+    </div>
     </div>
 
     {% comment %} Stepper {% endcomment %}
@@ -64,6 +68,7 @@ metadata: {
     <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/client/scripts/user-profile.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
 {%- else -%}
@@ -72,6 +77,7 @@ metadata: {
     <script src="{{ 'modules/ecommerce/scripts/pay-bills.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/user-profile.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase.min.js' | asset_url }}"></script>
@@ -410,6 +416,8 @@ const checkbox = document.getElementById("billing-same-with-contact");
 const billingInputs = document.querySelector("#billing-contact-inputs");
 let isChecked = false;
 
+let ticketsData = [];
+
 // Step Map
 const stepMap = {
     selection: { index: 1, container: step1Container, button: step1button, header: "Ticket Selection", urlParam: "selection" },
@@ -420,8 +428,17 @@ const stepMap = {
 };
 
 // Helpers
-function showLoading() {
-    document.getElementById("loadingOverlay").classList.add("active");
+function showLoading(step) {
+  const overlay = document.getElementById('loadingOverlay');
+  const message = document.getElementById('loadingMessage');
+ 
+  if (step === 1) {
+    message.style.display = 'block';
+  } else {
+    message.style.display = 'none'; 
+  }
+  overlay.classList.add("active");
+
 }
 function hideLoading() {
     document.getElementById("loadingOverlay").classList.remove("active");
@@ -458,6 +475,21 @@ function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
 }
+
+// Back navigation logic
+document.getElementById('back-step-2').addEventListener('click', () => {
+  addQueryParam("selection", "true");
+  removeQueryParam('billing')
+  restoreStepFromParams();
+});
+
+document.getElementById('back-step-3').addEventListener('click', () => {
+  addQueryParam("billing", "true");
+  removeQueryParam('payment')
+  restoreStepFromParams();
+});
+
+
 
 function showStep(stepKey) {
     Object.keys(stepMap).forEach(key => {
@@ -525,6 +557,7 @@ function getFieldValue(obj, key) {
 
     return stepToShow;
 }
+
 let currentStep = restoreStepFromParams();
 
 // Billing Checkbox Sync
@@ -595,25 +628,64 @@ async function saveOrder(orderPayload) {
     return false;
 }
 
+async function checkAvailableTickets(ticketData) {
+  console.log(ticketData)
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventParam = urlParams.get("event");
+  const queryString = encodeURIComponent(JSON.stringify(ticketData));
+
+  try {
+    const response = await ticketServices.checkTicketAvailability(eventParam,queryString)
+    return response
+  } catch (error) {
+     console.error("Ticket availability error:", error);
+    return false
+  }
+
+
+}
+
 // STEP 1
 if (step1) {
     step1.addEventListener("insClick", async function (event) {
-        showLoading();
+        showLoading(1);
         const steps = await ticketPurchaseStepper.getAllSteps();
         const firstStep = steps[0];
-        const isValid = await TicketScript.methods.validateForm(event, step1Container);
+        let isValid = true
+        console.log(ticketsData)
+        if (!ticketsData || ticketsData.length === 0) {
+          isValid = false
+        } 
 
         if (isValid) {
-        setTimeout(() => {
-            hideLoading();
-            firstStep.hasError = false;
-            ticketPurchaseStepper.next();
-            showStep("billing");
-            addQueryParam("billing", "true");
-            scrollToTop();
-        }, 500);
+        setTimeout (async() => {
+          let ticketAvailabaility = await checkAvailableTickets(ticketsData)
+          if(ticketAvailabaility.data.has_error ) {
+              firstStep.hasError = true;
+              firstStep.setAttribute("has-error", true);
+              hideLoading();
+              scrollToTop();
+              App.events.notyf('error', "Your selected tickets are either sold out or no longer available. Please choose another option to proceed.");  
+          }else {
+            setTimeout(() => {
+              hideLoading();
+              firstStep.hasError = false;
+              ticketPurchaseStepper.next();
+              showStep("billing");
+              removeQueryParam("selection");
+              addQueryParam("billing", "true");
+              scrollToTop();
+            }, 500);
+          }
+        },1000)
+       
+
+
         } else {
+            showLoading();
             hideLoading();
+            scrollToTop();
+            App.events.notyf('error', "Please select a ticket in order to proceed.");  
             firstStep.hasError = true;
             firstStep.setAttribute("has-error", true);
         }
@@ -629,8 +701,6 @@ if (step2) {
         secondStep.loading = true;
 
         const isValid = await TicketScript.methods.validateForm(event, step2Container);
-        console.log(isValid)
-
         if (!isValid) {
             secondStep.loading = false;
             secondStep.hasError = true;
@@ -710,7 +780,7 @@ if (step2) {
             secondStep.hasError = false;
             ticketPurchaseStepper.next();
             removeQueryParam("billing");
-            // redirectWithParams({ payment: "true" }); // redirect to payment
+            redirectWithParams({ payment: "true" }); // redirect to payment
         } else {
             console.error("An error occurred, Please try again.");
         }
@@ -800,14 +870,14 @@ if (step4) {
         showStep("confirmation");
         step1Header.classList.add("hide");
         addQueryParam("confirmation", "true");
-
-
     });
 }
-</script>
 
 
-<script>
+
+
+
+// Accordion script
 const items = document.querySelectorAll(".item");
 
 items.forEach((item) => {
@@ -856,4 +926,136 @@ items.forEach((item) => {
     }
   });
 });
+
+
+
+
+/** Purchase ticket stepper script  **/
+const steppers = document.querySelectorAll('ins-input-stepper');
+
+// Unique ticket ID generator
+let ticketCounter = 0;
+
+steppers.forEach(stepper => {
+  let previousCount = 0; // Track previous value for this stepper
+
+  stepper.addEventListener('insValueChange', event => {
+    const currentCount = event.detail; // Current stepper value
+    let data = stepper.getAttribute('data');
+
+    try {
+      data = JSON.parse(data); 
+    } catch (error) {
+      console.error('Invalid JSON in data attribute:', data);
+      return;
+    }
+
+    if (currentCount > previousCount) {
+      // User clicked "+"
+      const ticket = { ...data, ticketId: ++ticketCounter }; 
+      ticketsData.push(ticket);
+    } else if (currentCount < previousCount) {
+      // User clicked "-"
+      // Find and remove the LAST matching ticket for this stepper
+      for (let i = ticketsData.length - 1; i >= 0; i--) {
+        if (ticketsData[i].id === data.id) { // match by some field in your data
+          ticketsData.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    previousCount = currentCount; // Update for next change
+    console.log(ticketsData);
+    renderPaymentBreakdown(ticketsData);
+  });
+});
+
+
+
+/**
+ * Renders payment breakdown based on current ticketsData
+ */
+function renderPaymentBreakdown(ticketsData) {
+  const breakdownContainer = document.getElementById('payment-breakdown');
+  const subtotalElem = document.getElementById('subtotal-price');
+  const taxElem = document.getElementById('tax-price'); 
+  const processingElem = document.getElementById('proccessing-price');
+  const totalElem = document.getElementById('total-price');
+
+  breakdownContainer.innerHTML = '';
+
+  if (!ticketsData.length) {
+    breakdownContainer.style.display = 'none';
+    subtotalElem.textContent = '$0.00';
+    taxElem.textContent = '$0.00';
+    processingElem.textContent = '$0.00';
+    totalElem.textContent = '$0.00';
+    return;
+  }
+
+  // Group tickets by venue
+  const venueMap = {};
+  ticketsData.forEach(ticket => {
+    const venue = ticket.ticket_venue_name || 'No Venue';
+    if (!venueMap[venue]) venueMap[venue] = [];
+    venueMap[venue].push(ticket);
+  });
+
+  let orderSummaryEl = '';
+  let subtotal = 0;
+  let totalTax = 0;
+
+  for (const [venue, tickets] of Object.entries(venueMap)) {
+    orderSummaryEl += `<div class="payment-break-downs"><p class="payment-breakdown-venue-name">${venue}</p><div>`;
+    
+    // Group duplicates by ticket name
+    const ticketCount = {};
+    tickets.forEach(ticket => {
+      const key = ticket.name;
+      if (!ticketCount[key]) {
+        ticketCount[key] = { ...ticket, quantity: 0 };
+      }
+      ticketCount[key].quantity++;
+    });
+
+    for (const [name, info] of Object.entries(ticketCount)) {
+      const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
+      const formattedPrice = parseFloat(info.price).toFixed(2);
+      const totalPrice = info.quantity * parseFloat(info.price);
+      subtotal += totalPrice;
+
+      // Calculate tax per ticket
+      let taxAmount = 0;
+      if (info.tax_type === 'percentage') {
+        taxAmount = (totalPrice * parseFloat(info.tax)) / 100;
+      } else {
+        taxAmount = parseFloat(info.tax) * info.quantity;
+      }
+      totalTax += taxAmount;
+
+      orderSummaryEl += `<div class="payment-break-down-tier-container">
+        <div class="payment-break-down-tier-name">${capacityType} - ${info.name}</div>
+        <div class="payment-break-down-tier-price"><p>${info.quantity} x </p> $${formattedPrice}</div>
+      </div>`;
+    }
+    orderSummaryEl += `</div></div>`;
+  }
+
+  // Processing Fee (1.7% of subtotal)
+  const processingFee = subtotal * 0.017;
+  const total = subtotal + totalTax + processingFee;
+
+  // Update breakdown and totals
+  breakdownContainer.innerHTML = orderSummaryEl;
+  breakdownContainer.style.display = 'flex';
+  subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+  taxElem.textContent = `$${totalTax.toFixed(2)}`;
+  processingElem.textContent = `$${processingFee.toFixed(2)}`;
+  totalElem.textContent = `$${total.toFixed(2)}`;
+}
+
 </script>
+
+
+

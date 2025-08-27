@@ -1,0 +1,93 @@
+---
+slug: api/check-ticket-availability
+format: json
+method: get
+searchable: false
+---
+
+{%- assign payload = context.params | parse_json -%}
+{%- assign status = 400 -%}
+{%- assign ticketData = payload.ticketData | parse_json -%}
+{%- assign event_uuid = payload.eventuuid -%}
+
+{%- graphql divisions = 'modules/events/events/get_divisions', event_uuid: event_uuid | dig: 'items','results' -%}
+
+{%- comment %}
+  1. Build a string-based map of counts (key:value pairs) because Liquid cannot mutate objects/arrays.
+{%- endcomment -%}
+{%- assign counts = '' -%}
+
+{% for ticket in ticketData %}
+  {%- assign key = ticket.event_venue_area_uuid | append: '_' | append: ticket.capacity_type -%}
+  {%- assign search = key | append: ':' -%}
+  {%- assign currentCount = 0 -%}
+
+  {%- if counts contains search -%}
+    {%- assign parts = counts | split: ',' -%}
+    {%- for p in parts -%}
+      {%- if p contains search -%}
+        {%- assign currentCount = p | split: ':' | last | plus: 0 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+
+  {%- assign newCount = currentCount | plus: 1 -%}
+
+  {%- comment %} Remove old entry if it exists {% endcomment -%}
+  {%- assign newCounts = '' -%}
+  {%- assign parts = counts | split: ',' -%}
+  {%- for p in parts -%}
+    {%- unless p contains search -%}
+      {%- assign newCounts = newCounts | append: p | append: ',' -%}
+    {%- endunless -%}
+  {%- endfor -%}
+
+  {%- assign counts = newCounts | append: key | append: ':' | append: newCount | append: ',' -%}
+{% endfor %}
+
+{%- comment %}
+  2. Check against availability
+{%- endcomment -%}
+{% assign errors = '' %}
+{% assign types = "individual,group" | split: "," %}
+
+{% for area in divisions %}
+  {% assign individual_remaining = area.area_individual_tickets_remaining | default: 0 %}
+  {% assign group_remaining = area.area_group_tickets_remaining | default: 0 %}
+
+  {% for type in types %}
+    {% assign lookup_key = area.uuid | append: '_' | append: type %}
+    {% assign search = lookup_key | append: ':' -%}
+    {% assign ticket_count = 0 -%}
+
+    {% if counts contains search %}
+      {% assign parts = counts | split: ',' %}
+      {% for p in parts %}
+        {% if p contains search %}
+          {% assign ticket_count = p | split: ':' | last | plus: 0 %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if type == "individual" and ticket_count > individual_remaining %}
+      {% assign errors = errors | append: "Not enough individual tickets in " | append: area.name | append: ". " %}
+    {% elsif type == "group" and ticket_count > group_remaining %}
+      {% assign errors = errors | append: "Not enough group tickets in " | append: area.name | append: ". " %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+{%- if errors != '' -%}
+{
+  "has_error": true,
+  "message": "{{ errors | strip }}"
+}
+{%- else -%}
+{%- assign status = 200 -%}
+{
+  "has_error": false,
+  "message": "All tickets are available ok"
+}
+{%- endif -%}
+
+{%- response_status status -%}

@@ -1,13 +1,14 @@
 <div class="ticket-payment-summary-container">
     <h2 class="heading-2-xsmall">Order Summary</h2>
     <div class="spacer x-large"></div>
-    <div class="payment-breakdown">
-        <span id="ticket-type"></span>
+    <div id="payment-breakdown">
+        <span id="ticket-types"></span>
         <span id="ticket-quantity"></span>
         <span id="ticket-price-summary"></span>
+        <div class="spacer medium"></div>
+        <hr>
     </div>
-    <div class="spacer medium"></div>
-    <hr>
+
     <div class="spacer medium"></div>
 
     <div class="subtotal-container">
@@ -17,12 +18,12 @@
     <div class="spacer x-small"></div>
     <div class="subtotal-container">
         <p class="subtotal-container-title">Tax</p>
-        <p id="subtotal-price">$0.00</p>
+        <p id="tax-price">$0.00</p>
     </div>
     <div class="spacer x-small"></div>
     <div class="subtotal-container">
         <p class="subtotal-container-title">Processing Fee (1.7%)</p>
-        <p id="proccessing-container">$0.00</p>
+        <p id="proccessing-price">$0.00</p>
     </div>
 
     {% comment %} ? DISCOUNT SUMMARY - HIDDEN ON DEFAULT {% endcomment %}

@@ -103,6 +103,9 @@ query get_divisions (
                 price_includes_tax: property_boolean(name: "price_includes_tax")
                 tax_type: property(name: "tax_type")
                 tax: property_float(name: "tax")
+                availability_start_date: property(name: "availability_start_date")
+                availability_end_date: property(name: "availability_end_date")
+                properties
             }
         }
     }

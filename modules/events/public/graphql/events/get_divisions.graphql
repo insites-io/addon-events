@@ -1,0 +1,109 @@
+query get_divisions (
+    $page: Int = 1,
+    $size: Int = 10,
+    $event_uuid: String
+) {
+    items: records(
+        page: $page,
+        per_page: $size,
+        filter: {
+            table:{ value: "modules/insites_events/event_venue_area" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "event_uuid", value: $event_uuid }
+            ]
+        }
+        sort: [
+            {
+                properties: [
+                    { name: "name", order: ASC }
+                ]
+            }
+        ]
+    ) {
+        total_pages
+        total_entries
+        per_page
+        current_page
+        results {
+            id
+            created_at
+            updated_at
+            uuid: property(name: "uuid")
+            event_uuid: property(name: "event_uuid")
+            name: property(name: "name")
+            venue_uuid: property(name: "venue_uuid")
+            venue_area_uuid: property(name: "venue_area_uuid")
+            area_name: property(name: "area_name")
+            capacity: property_int(name: "capacity")
+            capacity_per_group: property_int(name: "capacity_per_group")
+            number_of_groups: property_int(name: "number_of_groups")
+            total_capacity: property_int(name: "total_capacity")
+            area_individual_tickets_remaining: property_int(name: "area_individual_tickets_remaining")
+            area_group_tickets_remaining: property_int(name: "area_group_tickets_remaining")
+            status: property(name: "status")
+            notes: property(name: "notes")
+
+            venue: related_record(
+                table: "modules/insites_events/venue"
+                foreign_property: "uuid"
+                join_on_property: "venue_uuid"
+            ) {
+                venue_name: property(name: "venue_name")
+            }
+            
+            individual_tickets: related_records(
+                table: "modules/insites_events/event_ticket"
+                join_on_property: "uuid"
+                foreign_property: "event_venue_area_uuid",
+                filter: {
+                    properties: [
+                        { name: "event_uuid", value: $event_uuid },
+                        { name: "ticket_type", value: "individual" }
+                    ]
+                }
+            ) {
+                id
+            }
+
+            group_tickets: related_records(
+                table: "modules/insites_events/event_ticket"
+                join_on_property: "uuid"
+                foreign_property: "event_venue_area_uuid"
+                filter: {
+                    properties: [
+                        { name: "event_uuid", value: $event_uuid },
+                        { name: "ticket_type", value: "group" }
+                    ]
+                }
+            ) {
+                id
+            }
+
+            tiers: related_records(
+                table: "modules/insites_events/event_pricing_tier"
+                join_on_property: "uuid"
+                foreign_property: "event_venue_area_uuid"
+                sort: [
+                    {
+                        properties: [
+                            { name: "price", order: ASC }
+                        ]
+                    }
+                ]
+            ) {
+                id
+                created_at
+                updated_at
+                uuid: property(name: "uuid")
+                event_venue_area_uuid: property(name: "event_venue_area_uuid")
+                capacity_type: property(name: "capacity_type")
+                name: property(name: "name")
+                price: property_float(name: "price")
+                price_includes_tax: property_boolean(name: "price_includes_tax")
+                tax_type: property(name: "tax_type")
+                tax: property_float(name: "tax")
+            }
+        }
+    }
+}

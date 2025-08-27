@@ -385,10 +385,14 @@ ins-button.event-card-btn .btn__icon {
     object-fit: contain;
 }
 @media screen and (max-width: 1023px) {
-    .event-speakers img,
-    .event-speakers .placeholder-img {
+    .event-speakers img {
         height: auto !important;   
     }        
+}
+.event-speakers .placeholder-img .icon-panorame::before {
+    content: "\e939" !important;
+    font-size: 80px;
+    color: #CCCED3;
 }
 .event-sponsors .img-wrap {
     border: 1px solid var(--color-ui-04);
@@ -406,6 +410,9 @@ ins-button.event-card-btn .btn__icon {
 .event-sponsors img:hover,
 .event-sponsors .placeholder-img:hover {
     opacity: 0.7;
+}
+.event-sponsors .placeholder-img {
+    background: var(--color-ui-01);
 }
 .event-sponsors .cell {
     cursor: pointer;

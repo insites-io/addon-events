@@ -19,10 +19,14 @@ if (speakersDataEl) {
                const oldSubHeading = document.querySelector('#speaker-modal .sub-heading');
                if (oldSubHeading) oldSubHeading.remove();
 
+               const jobTitleText = speaker.company_name
+               ? `${speaker.job_title} at ${speaker.company_name}`
+               : speaker.job_title;
+
                const subHeadingHtml = `
-               <div class="sub-heading">
+                    <div class="sub-heading">
                     <div class="spacer x-small"></div>
-                    <p id="speaker-job-title">${speaker.job_title}</p>
+                    <p id="speaker-job-title">${jobTitleText}</p>
                     <div class="spacer small"></div>
                     <div class="event-card-wrap">
                          <div class="grid-x">
@@ -32,8 +36,8 @@ if (speakersDataEl) {
                     </div>
                     <div class="spacer"></div>
                     <hr>
-               </div>
-               `;
+                    </div>
+                    `;
 
                document.querySelector('#speaker-modal .icon-close-1').insertAdjacentHTML('afterend', subHeadingHtml);
                speakerModal.open();

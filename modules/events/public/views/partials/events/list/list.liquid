@@ -4,6 +4,14 @@ metadata: {
 }
 ---
 
+{% comment %} 
+     This partial is being used by pages:
+     - /upcoming-events
+     - /previous-events
+     - /itinerary-upcoming
+     - /itinerary-previous
+{% endcomment %}
+
 {%  liquid      
      ## Query Strings
      assign page_num = context.params.page | default: 1 | plus: 0

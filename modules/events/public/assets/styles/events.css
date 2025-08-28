@@ -329,6 +329,10 @@ ins-button.event-card-btn .btn__icon {
 .event-pagination-table .ibt-table-wrap .pagination-wrap {
     padding: 0px 20px;
 }
+.portal-wrapper .wrapper {
+    padding-left: 0px;
+    padding-right: 0px;
+}
 
 /* Event Details */
 .back-events button {

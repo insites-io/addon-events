@@ -28,6 +28,9 @@ dynamic_cache:
     {{context.current_user.id}}
 ---
 
+{% graphql user_event_uuids = "modules/events/event_tickets/get_user_event_tickets", 
+     contact_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
+
 {% if context.params.slug2 %}
     {% comment %} Details view {% endcomment %}
 
@@ -42,7 +45,7 @@ dynamic_cache:
     <div class="spacer xxx-large"></div>
 
     <div class="portal-wrapper">
-     {% include 'modules/events/events/list/list', page: 'upcoming-events' %}
+     {% include 'modules/events/events/list/list', page: 'itinerary-upcoming', user_event_uuids: user_event_uuids %}
     </div>
 
 {% endif  %}

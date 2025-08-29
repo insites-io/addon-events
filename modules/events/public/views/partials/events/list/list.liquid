@@ -77,10 +77,14 @@ metadata: {
      "size": {{ per_page }},
      "keyword": "{{ keyword }}",
      {% comment %} Upcoming || Previous list {% endcomment %}
-     {% if page == 'upcoming-events' %}
+     {% if page == 'upcoming-events' or page == 'itinerary-upcoming' %}
           "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
-     {% elsif page == 'previous-events' %}
+     {% elsif page == 'previous-events' or page == 'itinerary-previous' %}
           "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+     {% endif %}
+     {% comment %} Itinerary Upcoming || Previous list {% endcomment %}
+     {% if page == 'itinerary-upcoming' or page == 'itinerary-previous' %}
+          "uuids": {{ user_event_uuids }},
      {% endif %}
      {% comment %} Category {% endcomment %}
      {% if selected_category_uuid and selected_category_uuid != '' %}

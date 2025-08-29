@@ -1,6 +1,7 @@
 query get_events (
   $page: Int=1
   $size: Int=20
+  $uuids: [String!]
   $event_name: String
   $event_type: String
   $gt_date_now: String
@@ -23,6 +24,7 @@ query get_events (
         {
           properties: [
             { name: "status", contains: "enabled" }
+            { name: "uuid", value_in: $uuids }
             { name: "event_name", contains: $event_name, exists: true }
             { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }

@@ -84,7 +84,7 @@ metadata: {
      {% endif %}
      {% comment %} Itinerary Upcoming || Previous list {% endcomment %}
      {% if page == 'itinerary-upcoming' or page == 'itinerary-previous' %}
-          "uuids": {{ user_event_uuids }},
+          "uuids": {{ user_event_uuids |  default: '[]' }},
      {% endif %}
      {% comment %} Category {% endcomment %}
      {% if selected_category_uuid and selected_category_uuid != '' %}

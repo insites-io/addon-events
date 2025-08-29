@@ -36,6 +36,7 @@ query get_events (
         {
           properties: [
             { name: "status", contains: "enabled" }
+            { name: "uuid", value_in: $uuids }
             { name: "event_name", value: $event_name, exists: true }
             { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }

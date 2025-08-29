@@ -1,163 +1,201 @@
-
 {% graphql venues = 'modules/events/events/get_divisions', event_uuid: event.uuid | dig: 'items','results' %}
 {% assign now = "now" | date: "%s" %}
 <div class="accordion">
 {% for venue in venues %}
-    {% comment %} Identify ticket lowest price and category types {% endcomment %}
-    {% assign indiv_left = venue.area_individual_tickets_remaining | default: 0 %}
-    {% assign group_left = venue.area_group_tickets_remaining | default: 0 %}
-    {% assign tickets_left = tickets_left | plus: indiv_left | plus: group_left %}
+  {% assign venue_individual_remaining = venue.area_individual_tickets_remaining | default: 0 %}
+  {% assign venue_group_remaining = venue.area_group_tickets_remaining | default: 0 %}
 
-    {% for tier in venue.tiers %}
-      {% if tier.capacity_type == 'individual' %}
-        {% if lowest_price == nil or tier.price < lowest_price %}
-          {% assign lowest_price = tier.price %}
-        {% endif %}
-      {% elsif tier.capacity_type == 'group' %}
-        {% if lowest_price == nil or tier.price < lowest_price %}
-          {% assign lowest_price = tier.price %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
+  {% assign lowest_price = nil %}
+  {% for tier in venue.tiers %}
+    {% if lowest_price == nil or tier.price < lowest_price %}
+      {% assign lowest_price = tier.price %}
+    {% endif %}
+  {% endfor %}
 
-    {%- if lowest_price -%}
-      {%- assign cents = lowest_price | times: 100 | round -%}
-      {%- assign dollars = cents | divided_by: 100.0 -%}
-      {%- assign formatted_price = dollars | append: "" -%}
-
-      {%- if formatted_price contains "." -%}
-        {%- assign parts = formatted_price | split: "." -%}
-        {%- assign decimal = parts[1] -%}
-        {%- if decimal.size == 1 -%}
-          {%- assign formatted_price = formatted_price | append: "0" -%}
-        {%- endif -%}
-      {%- else -%}
-        {%- assign formatted_price = formatted_price | append: ".00" -%}
+  {%- if lowest_price -%}
+    {%- assign cents = lowest_price | times: 100 | round -%}
+    {%- assign dollars = cents | divided_by: 100.0 -%}
+    {%- assign formatted_price = dollars | append: "" -%}
+    {%- if formatted_price contains "." -%}
+      {%- assign parts = formatted_price | split: "." -%}
+      {%- assign decimal = parts[1] -%}
+      {%- if decimal.size == 1 -%}
+        {%- assign formatted_price = formatted_price | append: "0" -%}
       {%- endif -%}
+    {%- else -%}
+      {%- assign formatted_price = formatted_price | append: ".00" -%}
     {%- endif -%}
-    
-{% comment %} Load database items to accordion {% endcomment %}
+  {%- endif -%}
+
   <div class="item open">
     <div class="title">
-        <div class="event-ticket-venue-detail">
-            <h3>{{ venue.name }}</h3>
-            <div class="spacer x-small"></div>
-            <p class="ticket-venue-sub-place">{{ venue.venue.venue_name }} - {{ venue.area_name }} </p>
-            <div class="spacer x-small"></div>
-              {% assign ticket_cat = "" %}
-
-              {% for tier in venue.tiers %}
-                {% unless ticket_cat contains tier.capacity_type %}
-                  {% if ticket_cat == "" %}
-                    {% assign ticket_cat = tier.capacity_type %}
-                  {% else %}
-                    {% assign ticket_cat = ticket_cat | append: "," | append: tier.capacity_type %}
-                  {% endif %}
-                {% endunless %}
-              {% endfor %}
-
-              {% assign ticket_category = ticket_cat | split: "," %}
-           
-            <p class="ticket-venue-categories"> {{ ticket_category.size }} Ticket Categories - Tickets starting from ${{ formatted_price }}</p>
-        </div>
-        <span class="icon"><i class="icon-angle-up"></i></span>
+      <div class="event-ticket-venue-detail">
+        <h3>{{ venue.name }}</h3>
+        <div class="spacer x-small"></div>
+        <p class="ticket-venue-sub-place">{{ venue.venue.venue_name }} - {{ venue.area_name }}</p>
+        <div class="spacer x-small"></div>
+        {% assign ticket_cat = "" %}
+        {% for tier in venue.tiers %}
+          {% unless ticket_cat contains tier.capacity_type %}
+            {% if ticket_cat == "" %}
+              {% assign ticket_cat = tier.capacity_type %}
+            {% else %}
+              {% assign ticket_cat = ticket_cat | append: "," | append: tier.capacity_type %}
+            {% endif %}
+          {% endunless %}
+        {% endfor %}
+        {% assign ticket_category = ticket_cat | split: "," %}
+        <p class="ticket-venue-categories">
+          {{ ticket_category.size }} Ticket Categories - Tickets starting from ${{ formatted_price }}
+        </p>
+      </div>
+      <span class="icon"><i class="icon-angle-up"></i></span>
     </div>
-    {% comment %} Get ticket venue tier {% endcomment %}
-    {% assign grouped_tiers = venue.tiers | group_by: "capacity_type" %}      
-        <div class="content">
-          <div class="content-inner">
-              {% for ticket_tier_category in grouped_tiers %}
-                {% if ticket_tier_category[0] == "individual" %}
-                  {% assign ticket_icon = "icon-user" %}
-                  {% assign ticket_category_name = "Individual Tickets" %}
-                  {% assign ticket_type = "individual" %}
-                {% else %}
-                  {% assign ticket_icon = "icon-users" %}
-                  {% assign ticket_category_name = "Group tickets" %}
-                  {% assign ticket_type = "group" %}
+
+    {% assign grouped_tiers = venue.tiers | group_by: "capacity_type" %}
+    <div class="content">
+      <div class="content-inner">
+        {% for ticket_tier_category in grouped_tiers %}
+          {% if ticket_tier_category[0] == "individual" %}
+            {% assign ticket_icon = "icon-user" %}
+            {% assign ticket_category_name = "Individual Tickets" %}
+            {% assign ticket_type = "individual" %}
+            {% assign venue_remaining = venue_individual_remaining %}
+          {% else %}
+            {% assign ticket_icon = "icon-users" %}
+            {% assign ticket_category_name = "Group Tickets" %}
+            {% assign ticket_type = "group" %}
+            {% assign venue_remaining = venue_group_remaining %}
+          {% endif %}
+
+          <div class="ticket-category-container"
+            data-venue-uuid="{{ venue.uuid }}" 
+            data-total-capacity="{{ venue.total_capacity }}"
+            data-individual-remaining="{{ venue.area_individual_tickets_remaining }}"
+            data-group-remaining="{{ venue.area_group_tickets_remaining }}"
+            data-capacity-per-group="{{ venue.capacity_per_group }}"
+          >
+            <div class="ticket-category">
+              <i class="{{ ticket_icon }}"></i>
+              <p>{{ ticket_category_name }}</p>
+            </div>
+            <div class="spacer small"></div>
+            <hr>
+            <div class="spacer small"></div>
+
+            {% for ticket_tier_list in ticket_tier_category offset: 1 %}
+              {% for ticket_tier in ticket_tier_list %}
+                {% assign ticket_data = '{}' | parse_json %}
+                {% assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type %}
+                {% assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price %}
+                {% assign ticket_data = ticket_data | add_hash_key: "event_venue_area_uuid", ticket_tier.event_venue_area_uuid %}
+                {% assign ticket_data = ticket_data | add_hash_key: "name", ticket_tier.name %}
+                {% assign ticket_data = ticket_data | add_hash_key: "tax", ticket_tier.tax %}
+                {% assign ticket_data = ticket_data | add_hash_key: "tax_type", ticket_tier.tax_type %}
+                {% assign ticket_data = ticket_data | add_hash_key: "ticket_venue_name", venue.name %}
+                {% assign ticket_data = ticket_data | add_hash_key: "event_pricing_tier.uuid", ticket_tier.uuid %}
+                {% assign ticket_data = ticket_data | add_hash_key: "capacity_max", venue_remaining %}
+                {% assign ticket_data = ticket_data | add_hash_key: "tier_id", ticket_tier.uuid %}
+
+                {% assign start_date = ticket_tier.availability_start_date | date: "%s" %}
+                {% assign end_date = ticket_tier.availability_end_date | date: "%s" %}
+
+                {% assign max_tickets = venue_remaining %}
+                {% if ticket_type == "individual" and ticket_tier.capacity and ticket_tier.capacity < max_tickets %}
+                  {% assign max_tickets = ticket_tier.capacity %}
+                {% elsif ticket_type == "group" and ticket_tier.number_of_groups and ticket_tier.number_of_groups < max_tickets %}
+                  {% assign max_tickets = ticket_tier.number_of_groups %}
                 {% endif %}
-                <div class="ticket-category-container">
-                    <div class="ticket-category">
-                        <i class="{{ ticket_icon }}"></i>
-                        <p>{{ ticket_category_name }}</p>
+
+                <div class="ticket-purchaser">
+                  <span class="ticket-tier-name">{{ ticket_tier.name }}</span>
+
+                  {% if venue_remaining == 0 %}
+                    <div class="ticket-purchaser-counter">
+                      ${{ ticket_tier.price }}
+                      <div class="ticket-unavailable">Sold out</div>
                     </div>
-                    <div class="spacer small"></div>
-                    <hr>
-                    <div class="spacer small"></div>     
-                    {% for ticket_tier_list in ticket_tier_category offset: 1 %}
-                      {% for ticket_tier in ticket_tier_list  %}
-                        {% comment %} Ticket Object {% endcomment %}
-                        {% assign ticket_data = '{}' | parse_json %}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "tax", ticket_tier.tax -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "event_venue_area_uuid", ticket_tier.event_venue_area_uuid -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "name", ticket_tier.name -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "tax", ticket_tier.tax -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "tax_type", ticket_tier.tax_type -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "event_pricing_tier.uuid", ticket_tier.uuid -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "ticket_venue_name", venue.name -%}
-                        {%- assign ticket_data = ticket_data | add_hash_key: "event_pricing_tier.uuid", ticket_tier.uuid -%}
-                        
-                        {% comment %} Get start and end dates {% endcomment %}
-                        {% assign start_date = ticket_tier.availability_start_date | date: "%s" %}
-                        {% assign end_date = ticket_tier.availability_end_date | date: "%s" %}
-                        <div class="ticket-purchaser">
-                          <span class="ticket-tier-name">{{ ticket_tier.name }}</span>
-
-                          {% assign tickets_left = 0 %}
-                          {% if ticket_type == "individual" %}
-                            {% assign tickets_left = venue.area_individual_tickets_remaining | default: 0 %}
-                          {% elsif ticket_type == "group" %}
-                            {% assign tickets_left = venue.area_group_tickets_remaining | default: 0 %}
-                          {% endif %}
-
-                          {% if tickets_left == 0 %}
-                            <div class="ticket-purchaser-counter">
-                              ${{ ticket_tier.price }}
-                              <div class="ticket-unavailable">
-                                Sold out
-                              </div>
-                            </div>
-                          {% elsif ticket_tier.availability_start_date != blank and start_date > now %}
-                            <div class="ticket-purchaser-counter">
-                              ${{ ticket_tier.price }}
-                              <div class="ticket-unavailable">
-                                Not available
-                              </div>
-                            </div>
-                          {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
-                            <div class="ticket-purchaser-counter">
-                              ${{ ticket_tier.price }}
-                              <div class="ticket-unavailable">
-                                Not available
-                              </div>
-                            </div>
-                          {% else %}
-                            <div class="ticket-purchaser-counter">
-                              ${{ ticket_tier.price }}
-                              <ins-input-stepper
-                                data='{{ ticket_data | json }}'
-                                min="0"
-                                max="100">
-                              </ins-input-stepper>
-                            </div>
-                          {% endif %}
-                        </div>
-                      {% endfor %}
-                    {% endfor %}   
+                  {% elsif ticket_tier.availability_start_date != blank and start_date > now %}
+                    <div class="ticket-purchaser-counter">
+                      ${{ ticket_tier.price }}
+                      <div class="ticket-unavailable">Not available</div>
+                    </div>
+                  {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
+                    <div class="ticket-purchaser-counter">
+                      ${{ ticket_tier.price }}
+                      <div class="ticket-unavailable">Not available</div>
+                    </div>
+                  {% else %}
+                    <div class="ticket-purchaser-counter">
+                      ${{ ticket_tier.price }}
+                      {% comment %} <ins-input-stepper
+                        data='{{ ticket_data | json }}'
+                        min="0"
+                        max="{{ max_tickets }}">
+                      </ins-input-stepper> {% endcomment %}
+                       <div class="number-input">
+                        <button onclick="changeValue(-1)">-</button>
+                        <input type="number" class="input-stepper" id="quantity" value="1" min="0" max="100">
+                        <button onclick="changeValue(1)">+</button>
+                      </div>
+                    </div>
+                  {% endif %}
                 </div>
               {% endfor %}
+            {% endfor %}
           </div>
+        {% endfor %}
       </div>
-  
+    </div>
   </div>
 {% endfor %}
-
 </div>
 
 
 <style>
+  .number-input {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-direction: row;
+    height: 40px;
+  }
+
+    .number-input button {
+      background-color: #f0f0f0;
+      border: none;
+      width: 30px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .number-input input {
+      text-align: center;
+      border: none;
+      width: 50px;
+      /* height: 100%; */
+      font-size: 16px;
+      outline: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .number-input button:active {
+      background-color: #ddd;
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
 .item {
     border-radius: 4px;
     border: 1px solid var(--color-ui-04, #DFDFDF);

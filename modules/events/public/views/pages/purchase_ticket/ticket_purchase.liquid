@@ -476,6 +476,14 @@ function getQueryParam(param) {
     return urlParams.get(param);
 }
 
+function toKebabCase(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphen
+    .replace(/(^-|-$)/g, '');    // Remove leading/trailing hyphens
+}
+
+
 // Back navigation logic
 document.getElementById('back-step-2').addEventListener('click', () => {
   addQueryParam("selection", "true");
@@ -930,49 +938,158 @@ items.forEach((item) => {
 
 
 
-/** Purchase ticket stepper script  **/
-const steppers = document.querySelectorAll('ins-input-stepper');
+const venueCapacityState = {}; // Stores venue-level capacities
 
-// Unique ticket ID generator
-let ticketCounter = 0;
+/** Initialize venue states from DOM **/
+const containers = document.querySelectorAll('.ticket-category-container');
+
+containers.forEach(container => {
+  const venueState = {
+    uuid: container.dataset.venueUuid,
+    total_capacity: parseInt(container.dataset.totalCapacity),
+    individual_remaining: parseInt(container.dataset.individualRemaining),
+    group_remaining: parseInt(container.dataset.groupRemaining),
+    capacity_per_group: parseInt(container.dataset.capacityPerGroup)
+  };
+
+  venueCapacityState[venueState.uuid] = venueState;
+});
+
+/** Initialize steppers **/
+const steppers = document.querySelectorAll('ins-input-stepper');
+let ticketCounter = 0; // Unique ticket ID
 
 steppers.forEach(stepper => {
-  let previousCount = 0; // Track previous value for this stepper
+  let previousCount = 0;
 
   stepper.addEventListener('insValueChange', event => {
-    const currentCount = event.detail; // Current stepper value
+    const currentCount = event.detail;
     let data = stepper.getAttribute('data');
 
     try {
-      data = JSON.parse(data); 
+      data = JSON.parse(data);
     } catch (error) {
       console.error('Invalid JSON in data attribute:', data);
       return;
     }
 
-    if (currentCount > previousCount) {
-      // User clicked "+"
-      const ticket = { ...data, ticketId: ++ticketCounter }; 
-      ticketsData.push(ticket);
-    } else if (currentCount < previousCount) {
-      // User clicked "-"
-      // Find and remove the LAST matching ticket for this stepper
-      for (let i = ticketsData.length - 1; i >= 0; i--) {
-        if (ticketsData[i].id === data.id) { // match by some field in your data
-          ticketsData.splice(i, 1);
-          break;
-        }
+    const venueState = venueCapacityState[data.event_venue_area_uuid];
+    if (!venueState) return;
+
+    // Calculate ticket difference
+    let ticketChange = 0;
+    if (data.capacity_type === "group") {
+      const groupSize = data.capacity_per_group || 1;
+      ticketChange = (currentCount - previousCount) * groupSize;
+    } else {
+      ticketChange = currentCount - previousCount;
+    }
+
+    // Check tier capacity
+    let remaining = data.capacity_type === "group"
+      ? venueState.group_remaining
+      : venueState.individual_remaining;
+
+    if (ticketChange > remaining) {
+      stepper.querySelectorAll('input')[0].value = previousCount; // revert
+
+      setTimeout(async() => {
+      let confirm = await App.events.swal(
+          'warning',
+          'Ticket Limit Reached',
+          'You’ve selected the maximum number of tickets available for this tier. Please reduce your quantity or choose a different tier.',
+          'Got it',
+          false,
+          'icon-check-2',
+          '');
+      if (confirm) {
+        //do nothing
+      }
+      },100)
+
+      return;
+    }
+
+    // Update ticketsData
+    const uniqueKey = `${toKebabCase(data.ticket_venue_name)}-${toKebabCase(data.name)}-${toKebabCase(data.capacity_type)}`;
+
+    if (ticketChange > 0) {
+      for (let i = 0; i < ticketChange; i++) {
+        const ticket = { ...data, ticketId: ++ticketCounter, uniqueKey };
+        ticketsData.push(ticket);
+      }
+    } else if (ticketChange < 0) {
+      for (let i = 0; i < Math.abs(ticketChange); i++) {
+        const index = ticketsData.findIndex(ticket => ticket.uniqueKey === uniqueKey);
+        if (index !== -1) ticketsData.splice(index, 1);
       }
     }
 
-    previousCount = currentCount; // Update for next change
-    console.log(ticketsData);
-    renderPaymentBreakdown(ticketsData);
+    // Update venue remaining
+    if (data.capacity_type === "group") {
+      venueState.group_remaining -= ticketChange;
+    } else {
+      venueState.individual_remaining -= ticketChange;
+    }
+
+    previousCount = currentCount;
+    renderPaymentBreakdown(ticketsData); 
+
+    enforceVenueCapacityLimit(data.event_venue_area_uuid);
   });
 });
 
+/**
+ * Disable/enable steppers when venue reaches full capacity
+ */
+function enforceVenueCapacityLimit(venueUuid) {
+  const venue = venueCapacityState[venueUuid];
+  if (!venue) return;
+
+  // Calculate selected per type
+  const selectedIndividual = countSelected(venueUuid, "individual");
+  const selectedGroup = countSelected(venueUuid, "group");
+
+  // Compute maxes independently
+  const maxIndividual = venue.individual_remaining + selectedIndividual;
+  const maxGroup = venue.group_remaining + selectedGroup;
 
 
+
+  steppers.forEach(stepper => {
+    const stepperData = JSON.parse(stepper.getAttribute('data'));
+    if (stepperData.event_venue_area_uuid === venueUuid) {
+      const type = stepperData.capacity_type;
+      const uniqueKey = `${toKebabCase(stepperData.ticket_venue_name)}-${toKebabCase(stepperData.name)}-${toKebabCase(stepperData.capacity_type)}`;
+      const hasSelectedTickets = ticketsData.some(ticket => ticket.uniqueKey === uniqueKey);
+
+      let isTypeFull = false;
+
+      if (type === "group") {
+        isTypeFull = selectedGroup >= maxGroup;
+      } else {
+        isTypeFull = selectedIndividual >= maxIndividual;
+      }
+
+      if (isTypeFull && !hasSelectedTickets) {
+        stepper.setAttribute("disabled", true);
+      } else {
+        stepper.removeAttribute("disabled");
+      }
+    }
+  });
+}
+/**
+ * Helper to count selected tickets per type
+ */
+function countSelected(venueUuid, type) {
+  return ticketsData.reduce((sum, ticket) => {
+    if (ticket.event_venue_area_uuid === venueUuid && ticket.capacity_type === type) {
+      return sum + (type === "group" ? (ticket.capacity_per_group || 1) : 1);
+    }
+    return sum;
+  }, 0);
+}
 /**
  * Renders payment breakdown based on current ticketsData
  */

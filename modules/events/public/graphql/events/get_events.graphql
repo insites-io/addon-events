@@ -38,7 +38,6 @@ query get_events (
             { name: "status", contains: "enabled" }
             { name: "uuid", value_in: $uuids }
             { name: "event_name", value: $event_name, exists: true }
-            { name: "event_type", value: $event_type }
             { name: "start_date_time", exists: true }
             { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
             { name: "category_uuid", value: $category_uuid }

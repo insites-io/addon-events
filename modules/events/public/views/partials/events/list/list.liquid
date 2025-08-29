@@ -91,7 +91,7 @@ metadata: {
           "category_uuid": "{{ selected_category_uuid }}",
      {% endif %}
      {% comment %} Event Type || Location {% endcomment %}
-     {% if selected_location == 'Web' %}
+     {% if selected_location == 'WEB' %}
           "event_type": "online_event",
      {% elsif selected_location != '' %}
           "venue_state": "{{ selected_location }}",

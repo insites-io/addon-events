@@ -1407,7 +1407,14 @@ ins-tag.preorder-tag span.ins-tag {
 }
 
 
-/* Client Portal */
+/* Portal - My Events */
+.portal.event-details img, 
+.portal.event-details .placeholder-img {
+    width: 100%;
+    height: 415px;
+    border-radius: 20px;
+    object-fit: cover;
+}
 
 /* Overview */
 ins-card.overview a {

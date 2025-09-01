@@ -4,6 +4,14 @@ metadata: {
 }
 ---
 
+{% comment %} 
+     This banner is being used in:
+     - /upcoming-events
+     - /previous-events
+     - portal/upcoming
+     - portal/previous
+{% endcomment %}
+
 <div class="wrap event-details" >
      <div class="img-wrap">
           {% if event.event_image.url %}
@@ -13,5 +21,9 @@ metadata: {
           {% endif %}
      </div>
 </div>
-<div class="spacer xxxx-large hide-for-small-only"></div>
+{% if context.params.slug == 'upcoming-events' %}
+     <div class="spacer xxxx-large hide-for-small-only"></div>
+{% else %}
+     <div class="spacer xxx-large hide-for-small-only"></div>
+{% endif %}
 <div class="spacer xxx-large show-for-small-only"></div>

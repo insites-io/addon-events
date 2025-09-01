@@ -1,0 +1,40 @@
+query get_filter_category_location (
+  $page: Int=1
+  $size: Int=300
+  $gt_date_now: String
+  $lt_date_now: String
+  $uuids: [String!]
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_events/event" }
+      properties: [
+        { name: "status", contains: "enabled" }
+        { name: "uuid", value_in: $uuids }
+        { name: "event_name", exists: true }
+        { name: "start_date_time", exists: true }
+        { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
+      ]
+    } 
+  ) {
+    total_entries    
+    results {
+      id
+      uuid: property(name: "uuid")
+      event_name: property(name: "event_name")
+      event_type: property(name: "event_type")
+      venue_state: property(name: "venue_state")      
+      category: related_record(
+        table: "modules/insites_events/event_system_field"
+        join_on_property: "category_uuid"
+        foreign_property: "uuid"
+      ){
+        value: property(name: "value")
+      }
+			#properties
+    }
+  }
+}

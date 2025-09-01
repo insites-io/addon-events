@@ -40,30 +40,65 @@ metadata: {
 
 
 {% comment %} Filter: Categories {% endcomment %}
-{% parse_json category_payload %}
-{
-     "query_string": "system_field=event_category&page=1&size=50"
-}
-{% endparse_json %}
-{%- graphql categories = 'modules/website/trigger_api_call', 
-     name: 'modules/events/get_system_fields', 
-     data: category_payload
-     | dig: 'items','response','body' | parse_json
-     | dig: 'results' -%}  
+{% if page == 'itinerary-upcoming' or page == 'itinerary-previous' %}
 
-{% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
-{% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
+     {% parse_json filters %}
+     {
+          {% comment %} Upcoming || Previous list {% endcomment %}
+          {% if page == 'itinerary-upcoming' %}
+               "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+          {% elsif page == 'itinerary-previous' %}
+               "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+          {% endif %}
+          "uuids": {{ user_event_uuids |  default: '[]' }}
+     }
+     {% endparse_json %}
+     {% graphql category_location = 'modules/events/events/get_filter_category_location', args: filters | dig: 'items','results' -%}
+     {% liquid 
+          assign category_options = 'All' | split: ','
+          for category in category_location
+               assign category_options = category_options | array_add: category.category.value
+          endfor
+          assign category_options = category_options | array_uniq | array_compact
+     %}
 
-{% capture category_options %}  
-     {{ categories_name | array_prepend: 'All' }}
-{% endcapture %}
+{% else %}
+     {% parse_json category_payload %}
+     {
+          "query_string": "system_field=event_category&page=1&size=50"
+     }
+     {% endparse_json %}
+     {%- graphql categories = 'modules/website/trigger_api_call', 
+          name: 'modules/events/get_system_fields', 
+          data: category_payload
+          | dig: 'items','response','body' | parse_json
+          | dig: 'results' -%}  
+
+     {% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
+     {% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
+
+     {% capture category_options %}  
+          {{ categories_name | array_prepend: 'All' }}
+     {% endcapture %}
+{% endif %}
 
      
 {% comment %} Filter: Locations {% endcomment %}
-{% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
-{% capture location_options %}  
-     {{ locations | map: 'state' | array_uniq | array_prepend: 'WEB' | array_prepend: 'All'  }}
-{% endcapture %}
+{% if page == 'itinerary-upcoming' or page == 'itinerary-previous' %}     
+     {% liquid 
+          assign location_options = category_location | map: 'venue_state' | array_uniq | array_compact
+          assign has_online_event = category_location | map: 'event_type' | array_uniq | array_any: 'online_event'
+          if has_online_event
+               assign location_options = location_options | array_prepend: 'WEB'
+          endif
+          assign location_options = location_options | array_prepend: 'All'
+     %}
+{% else %}
+     {% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
+     {% capture location_options %}  
+          {{ locations | map: 'state' | array_uniq | array_prepend: 'WEB' | array_prepend: 'All'  }}
+     {% endcapture %}
+{% endif %}
 
 
 {% comment %} 

@@ -956,15 +956,39 @@ containers.forEach(container => {
 });
 
 /** Initialize steppers **/
-const steppers = document.querySelectorAll('ins-input-stepper');
+const steppers = document.querySelectorAll('.number-input');
 let ticketCounter = 0; // Unique ticket ID
 
 steppers.forEach(stepper => {
+  const input = stepper.querySelector('.input-stepper');
+  const decrementBtn = stepper.querySelector('.decrement');
+  const incrementBtn = stepper.querySelector('.increment');
+
+  incrementBtn.addEventListener('click', () => {
+    let value = parseInt(input.value) || 0;
+    const max = parseInt(input.max);
+    if (value < max) {
+      input.value = value + 1;
+      input.dispatchEvent(new Event('input'));
+    }
+  });
+
+  // Handle decrement
+  decrementBtn.addEventListener('click', () => {
+    let value = parseInt(input.value) || 0;
+    const min = parseInt(input.min);
+    if (value > min) {
+      input.value = value - 1;
+      input.dispatchEvent(new Event('input'));
+    }
+  });
+
   let previousCount = 0;
 
-  stepper.addEventListener('insValueChange', event => {
-    const currentCount = event.detail;
-    let data = stepper.getAttribute('data');
+  input.addEventListener('input', event => {
+    console.log(input.value)
+    const currentCount = input.value;
+    let data = input.getAttribute('data');
 
     try {
       data = JSON.parse(data);
@@ -1057,7 +1081,11 @@ function enforceVenueCapacityLimit(venueUuid) {
 
 
   steppers.forEach(stepper => {
-    const stepperData = JSON.parse(stepper.getAttribute('data'));
+    const input = stepper.querySelector('.input-stepper');
+    const decrementBtn = stepper.querySelector('.decrement');
+    const incrementBtn = stepper.querySelector('.increment');
+
+    const stepperData = JSON.parse(input.getAttribute('data'));
     if (stepperData.event_venue_area_uuid === venueUuid) {
       const type = stepperData.capacity_type;
       const uniqueKey = `${toKebabCase(stepperData.ticket_venue_name)}-${toKebabCase(stepperData.name)}-${toKebabCase(stepperData.capacity_type)}`;
@@ -1072,9 +1100,13 @@ function enforceVenueCapacityLimit(venueUuid) {
       }
 
       if (isTypeFull && !hasSelectedTickets) {
-        stepper.setAttribute("disabled", true);
+        input.setAttribute("disabled", true);
+        decrementBtn.setAttribute("disabled", true)
+        incrementBtn.setAttribute("disabled", true)
       } else {
-        stepper.removeAttribute("disabled");
+        input.removeAttribute("disabled");
+        decrementBtn.removeAttribute("disabled")
+        incrementBtn.removeAttribute("disabled")
       }
     }
   });

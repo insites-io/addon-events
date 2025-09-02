@@ -1415,6 +1415,9 @@ ins-tag.preorder-tag span.ins-tag {
     border-radius: 20px;
     object-fit: cover;
 }
+.portal.event-details .col-1 {
+    width: 100%;
+}
 .portal.event-details ins-tab .ins-tab {
     border: none;
     box-shadow: none;

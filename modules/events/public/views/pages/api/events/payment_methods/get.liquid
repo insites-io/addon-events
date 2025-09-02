@@ -1,0 +1,9 @@
+---
+slug: api/payment-methods
+format: json
+method: get
+searchable: false
+---
+{% assign contact_uuid = context.params.contact_uuid %}
+{%- graphql cards = "modules/ecommerce/payment_method/get_payment_method", contact_uuid: contact_uuid size: 50 | dig: 'items', 'results' -%}
+{{ cards }}

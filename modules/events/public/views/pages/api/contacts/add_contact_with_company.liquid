@@ -8,43 +8,65 @@ searchable: false
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
 
-{% comment %} Use Insites V2 API {% endcomment %}
-{%- graphql add_contact = 'modules/website/trigger_api_call', 
-     name: 'modules/portal/add_contact', 
-     data: payload 
-     | dig: 'items','response','body' | parse_json -%}      
-     
-{% parse_json company_details %}
-    {
-      "company_name": "{{ payload.company_name }}"
-    }
-{% endparse_json %}   
+{% comment %} Check if guest already existing {% endcomment %}
+{%- graphql guest_email = "modules/portal/account/get_user_by_email" 
+    email: payload.email 
+    | dig: "items" | dig: "results" | first -%}
 
-{% graphql add_company = 'modules/website/trigger_api_call',
-    name: 'modules/portal/add_company', 
-    data: company_details 
-    | dig: 'items','response','body' | parse_json %}
-{% log add_contact %}
-{% parse_json update_contact_data %}
-{
-    "uuid": "{{ add_contact.uuid }}",
-    "email": "{{ add_contact.email }}",
-    "company.uuid": "{{ add_company.uuid }}"
-}
-{% endparse_json %}
+   
+{% if guest_email != nil %}
+  {% assign payload = payload | add_hash_key: 'uuid', guest_email.uuid %}
+  {% graphql update_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/update_contact', 
+      data: payload 
+      | dig: 'items','response','body' | parse_json %}
 
-{% graphql update_contact = 'modules/website/trigger_api_call', 
-    name: 'modules/portal/update_contact', 
-    data: update_contact_data 
-    | dig: 'items','response','body' | parse_json %}
+    {%- liquid
+      if update_contact.id 
+            assign status = 200
+      endif    
+    -%}
+{% else %}
+  {% comment %} Use Insites V2 API {% endcomment %}
+  {%- graphql add_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/add_contact', 
+      data: payload 
+      | dig: 'items','response','body' | parse_json -%}      
+      
+  {% parse_json company_details %}
+      {
+        "company_name": "{{ payload.company_name }}"
+      }
+  {% endparse_json %}   
+
+  {% graphql add_company = 'modules/website/trigger_api_call',
+      name: 'modules/portal/add_company', 
+      data: company_details 
+      | dig: 'items','response','body' | parse_json %}
+
+  {% parse_json update_contact_data %}
+  {
+      "uuid": "{{ add_contact.uuid }}",
+      "email": "{{ add_contact.email }}",
+      "company.uuid": "{{ add_company.uuid }}"
+  }
+  {% endparse_json %}
+
+  {% graphql update_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/update_contact', 
+      data: update_contact_data 
+      | dig: 'items','response','body' | parse_json %}
 
 
-{% comment %} Set Status {% endcomment %}
-{%- liquid
-     if add_contact.id 
-          assign status = 200
-     endif
--%}
+  {% comment %} Set Status {% endcomment %}
+  {%- liquid
+      if add_contact.id 
+            assign status = 200
+      endif
+  -%}
+{% endif %}
+
+
 
 
 
@@ -78,6 +100,7 @@ searchable: false
 
 {%- session guest_uuid = add_contact.uuid  -%}
 {%- session contact_email = add_contact.email -%}
+{% assign update_contact = update_contact | add_hash_key: 'guest', 'true' %}
 
 {{ update_contact  }}
 {%- response_status status -%}

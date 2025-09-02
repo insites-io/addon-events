@@ -37,7 +37,7 @@ dynamic_cache:
 {% if context.params.slug2 %}
     {% comment %} Details view {% endcomment %}
     
-    {% include 'modules/events/events/details/previous' %}
+    {% include 'modules/events/events/details/details_portal', user_event_uuids: user_event_uuids %}
 
 {% else %}
     {% comment %} List view {% endcomment %}

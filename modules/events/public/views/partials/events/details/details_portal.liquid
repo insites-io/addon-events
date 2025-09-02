@@ -1,0 +1,81 @@
+---
+metadata: {
+    partial_name: 'Portal | My Events | Details'
+}
+---
+
+{% parse_json args %}
+{
+     "slug": "{{ context.params.slug2 }}",
+     "uuids": {{ user_event_uuids |  default: '[]' }}
+}
+{% endparse_json %}
+{% graphql event = 'modules/events/events/get_event', args: args | dig: 'items','results' | first %}
+
+{% if event.id == null %}
+     {% redirect_to '/404' %}
+{% endif %}
+
+<div class="portal-wrapper">
+     <section class="width-1296 event-details portal wrapper">
+
+          {% comment %} Back {% endcomment %}
+          <a href="/{{context.params.slug}}">
+               <ins-button label="Back to events" icon="icon-arrow-back" class="back-events"></ins-button> 
+          </a>
+          <div class="spacer x-large hide-for-small-only"></div>
+          <div class="spacer show-for-small-only"></div>
+
+          <div class="grid-x">
+               <div class="grid-y col-1">
+                    {% comment %} Category {% endcomment %}
+                    <div class="event-card-wrap">
+                         <div class="grid-x">
+                              <i class="icon-bookmark-1"></i>
+                              <span>{{ event.category.value }}</span>
+                         </div>
+                    </div>
+                    <div class="spacer small"></div>
+
+                    {% comment %} Event Name {% endcomment %}
+                    <h1 class="heading-1-small">{{ event.event_name }}</h1>
+                    <div class="spacer xxx-large"></div>
+
+                    {% comment %} Banner {% endcomment %}
+                    {% include 'modules/events/events/details/banner', event: event %}
+                    
+                    <ins-tab>
+                         <ins-tab-item 
+                         active 
+                         label="Event details">
+                         {% include 'modules/events/events/details/tab_event_details', event: event %}
+                         </ins-tab-item>
+
+                         <ins-tab-item
+                         label="Ticket & attendee details">
+                         </ins-tab-item>
+                    </ins-tab>     
+
+                    
+               </div>
+          </div>
+          
+     </section>
+</div>
+
+{% comment %} Google Maps {% endcomment %}
+{% if event.event_type != 'online_event' %}
+     {% include 'modules/website/layout/googlemaps' %}
+     <script id="map-data" type="application/json">
+     {
+          "lng": {{ event.venue_geojson.coordinates[0] | default: 0 }},
+          "lat": {{ event.venue_geojson.coordinates[1] | default: 0 }},
+          "location_name": "{{ event.venue_name }}"
+     }
+     </script>
+     {% if context.environment == "staging" %}
+          <script src="{{ 'modules/events/scripts/event-map.js' | asset_url }}" defer></script>
+     {% else %}
+          <script src="{{ 'modules/events/scripts/event-map.min.js' | asset_url }}" defer></script>
+     {% endif %}
+{% endif %}

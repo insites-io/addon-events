@@ -2,6 +2,7 @@ query get_event (
   $page: Int=1
   $size: Int=1
   $slug: String!  
+  $uuids: [String!]
 ) {
   items: records(
     page: $page
@@ -11,7 +12,8 @@ query get_event (
       table: { value: "modules/insites_events/event" }
      properties: [
         { name: "status", contains: "enabled" }
-        { name: "slug", value: $slug }            
+        { name: "slug", value: $slug }        
+        { name: "uuid", value_in: $uuids }    
       ]             
     } 
   ) {

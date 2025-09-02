@@ -51,6 +51,8 @@
 
 
 {% comment %} FAQ {% endcomment %}
-{% if event.is_faqs_displayed == true %}
-     {% include 'modules/events/events/blocks/faq', event: event %}
-{% endif %}   
+{% if context.params.slug == 'itinerary-upcoming'  %}
+     {% if event.is_faqs_displayed == true %}
+          {% include 'modules/events/events/blocks/faq', event: event %}
+     {% endif %}   
+{% endif %}

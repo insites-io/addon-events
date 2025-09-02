@@ -142,6 +142,9 @@ metadata: {
      
 
      {% comment %} Filters | Search {% endcomment %}
+     {% if events.total_entries == 0 and context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
+          {% comment %} Dont show filters when no events are found in itinerary-upcoming and itinerary-previous {% endcomment %}
+     {% else %}
      <div class="wrapper width-1440">
         <div class="grid-container">
             <div class="grid-x gutter-medium grid-padding-x grid-padding-y">
@@ -181,13 +184,18 @@ metadata: {
      </div>
      <div class="spacer large hide-for-small-only"></div>
      <div class="spacer xxx-large show-for-small-only"></div>
+     {% endif %}
 
 {% if events.total_entries == 0 %}
 
      <div class="wrapper width-1440">
-          <div class="grid-x align-center">
+          <div class="text-center">
                {% if context.params.search != blank %}
                     <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>
+               {% elsif context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
+                    <div class="empty-box">
+                         <p class="body-large-bold">You have no upcoming events</p>
+                    </div>
                {% else %}
                     <p class="subHeading">No results found</p>    
                {% endif %}

@@ -1,6 +1,6 @@
 query get_venue_states (
   $page: Int=1
-  $size: Int=50
+  $size: Int=500
   $sort_by: [RecordsSortInput!] = {
       properties: [
           { name: "state", order: ASC }

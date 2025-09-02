@@ -193,8 +193,14 @@ metadata: {
                {% if context.params.search != blank %}
                     <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>
                {% elsif context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
+                    {% liquid 
+                         assign text = 'upcoming'
+                         if context.params.slug == 'itinerary-previous'
+                              assign text = 'previous'
+                         endif
+                    %}
                     <div class="empty-box">
-                         <p class="body-large-bold">You have no upcoming events</p>
+                         <p class="body-large-bold">You have no {{text}} events</p>
                     </div>
                {% else %}
                     <p class="subHeading">No results found</p>    

@@ -2648,6 +2648,35 @@ ins-modal .ins-card-wrap {
     width: 100%;
 }
 
+
+.discount-summary-details {
+    border-radius:  8px;
+    border: 1px solid #DFDFDF;
+    background:  #F9FAFB;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.discount-summary-details p{ 
+    font-size: 16px !important;
+    color: #575757;
+}
+
+.discount-summary-details:last-of-type { 
+    margin-bottom: 20px;
+}
+
+.remove-discount {
+    cursor: pointer;
+}
+
+
+
+
+
 /* Portal */
 #my-events-accordion .inner-head {
     border: none;

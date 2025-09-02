@@ -59,6 +59,9 @@ metadata: {
     </div>
 </div>
 
+{% comment %} ? EVENT UUID {% endcomment %}
+<input hidden id="event_uuid_hidden" type="text" value="{{ context.params.event }}">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}
     {% comment %} <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> {% endcomment %}
@@ -84,21 +87,45 @@ metadata: {
 {%- endif -%} 
 
 <script>
-  // SELECT TICKET TYPE AND QUANTITY
-  let ticketSelEL = document.getElementById('select-ticket');
-  let ticketPriceEL = document.getElementById('ticket-price')
-  let ticketQtyEl = document.getElementById('select-ticket-quantity')
-  let ticketQtyGroupEl = document.getElementById('select-ticket-quantity_group')
-  let ticketQtyAmtEl = document.getElementById('ticket-quantity-value')
-
-  // ORDER SUMMARY
-  let ticketSTypeEl = document.getElementById('ticket-type')
-  let ticketSQuantityEL = document.getElementById('ticket-quantity')
-  let ticketSPriceEL = document.getElementById('ticket-price-summary')
-  let ticketSSubtotal = document.getElementById('subtotal-price')
-  let ticketProcFeeEl = document.getElementById('proccessing-container')
-  let ticketSTotal = document.getElementById('total-price')
   
+// Stepper Elements
+const ticketPurchaseStepper = document.getElementById("ticket-purchase-stepper");
+const ticketPurchaseStepperContainer = document.getElementById("purchase-ticket-stepper-wrapper");
+const ticketPurchaseStepperMessage = document.getElementById("purchase-ticket-confirmation-message");
+
+const step1 = document.getElementById("submit-purchase");
+const step2 = document.getElementById("submit-billing-info");
+const step3 = document.getElementById("checkout-ticket-submit-btn");
+const step4 = document.getElementById("submit-ticket-allocation");
+const step5 = document.getElementById("submit-ticket-confirmation");
+
+const step1Container = document.getElementById("ticket-selection-step");
+const step1Header = document.getElementById("ticket-purchase-header");
+const step2Container = document.getElementById("ticket-billing-step");
+const step3Container = document.getElementById("ticket-payment-step");
+const step4Container = document.getElementById("ticket-allocation-step");
+const step5Container = document.getElementById("ticket-confirmation-step");
+
+const step1button = document.getElementById("purchase-ticket-button-step-1");
+const step2button = document.getElementById("purchase-ticket-button-step-2");
+const step3button = document.getElementById("purchase-ticket-button-step-3");
+const step4button = document.getElementById("purchase-ticket-button-step-4");
+const step5button = document.getElementById("purchase-ticket-button-step-5");
+
+const checkbox = document.getElementById("billing-same-with-contact");
+const billingInputs = document.querySelector("#billing-contact-inputs");
+let isChecked = false;
+
+//Ticket Summary
+const breakdownContainer = document.getElementById('payment-breakdown');
+const subtotalElem = document.getElementById('subtotal-price');
+const taxElem = document.getElementById('tax-price'); 
+const processingElem = document.getElementById('proccessing-price');
+const totalElem = document.getElementById('total-price');
+
+let ticketsData = [];
+
+
   // AMOUNT DETAILS
   let subTotalFormEl = document.getElementById('bill-order-value')
   let taxFormEl = document.getElementById('tax-amount')
@@ -122,6 +149,10 @@ metadata: {
 
   let remove_discount_code = document.getElementById("remove-discount");
   let discount_code_error_message = document.getElementById("discount-code-error-message");
+  const summaryContainer = document.querySelector('.discount-summary');
+  const cardContainer = document.querySelector('.discount-summary-card');
+  let appliedDiscounts = []; // store multiple discount objects
+
 
   // DISPLAY
   let display_discount_name = document.getElementById("display-discount-name");
@@ -136,11 +167,11 @@ metadata: {
   let discount_usage_count = document.getElementById("discount-usage-count");
 
   let priceWithoutDiscount = '';
-  let priceWithDiscountFixed = '';
-  let priceWithDiscountPercent = '';
-  let totalDiscountPercent = '';
-  let totalDiscountFixed = '';
-  let is_discount_code_applied = false;
+  // let priceWithDiscountFixed = '';
+  // let priceWithDiscountPercent = '';
+  // let totalDiscountPercent = '';
+  // let totalDiscountFixed = '';
+  // let is_discount_code_applied = false;
 
 
 
@@ -151,46 +182,62 @@ metadata: {
   apply_discount_code.addEventListener('insClick', async (event) => {
     apply_discount_code.loading = true;
 
-    if(is_discount_code_applied == true){
-      discount_code_error_message.classList.remove("is_not_visible");
+    // --- Check if there are selected tickets ---
+    if (!ticketsData || ticketsData.length === 0) {
+      setTimeout(() => {
+        App.events.notyf('error', "Please select ticket first, before applying discount code.");  
+      }, 100); 
       apply_discount_code.loading = false;
-    }else{
-      discount_code_error_message.classList.add("is_not_visible");
-      // CHECK FIRST IF THERE ARE SELECTED TICKETS
-      if(ticketQty == 0){
-        setTimeout(() => {
-            App.events.notyf('error', "Please select ticket first, before applying discount code.");  
-        }, 100); 
-        apply_discount_code.loading = false;
-      }else{
-        // CHECK IF DISCOUNT CODE INPUT IS EMPTY
-        if(discount_code_value.value == ""){
-          setTimeout(() => {
-              App.events.notyf('error', "Please enter discount code.");  
-          }, 100); 
-          apply_discount_code.loading = false;
-        }else{
-          let response = await getDiscountCodeDetails();
-          checkIfCodeIsValid();
-        }
-      }
+      return;
     }
-  });   
 
-  remove_discount_code.addEventListener('click', async (event) => {
-    discount_code_error_message.classList.add("is_not_visible");
-    hideDiscountDetails();
-    ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount);
-    totalFormEl.setAttribute('value', priceWithoutDiscount);
-    setTimeout(() => {
-        App.events.notyf('success', "Discount code removed.");
-    }, 200); 
-    apply_discount_code.loading = false;
+    // --- Check if discount code input is empty ---
+    const code = discount_code_value.value.trim();
+    if (!code) {
+      setTimeout(() => {
+        App.events.notyf('error', "Please enter discount code.");  
+      }, 100); 
+      apply_discount_code.loading = false;
+      return;
+    }
+
+    // --- Check for duplicates ---
+    const isDuplicate = appliedDiscounts.some(d => d.code.toLowerCase() === code.toLowerCase());
+    if (isDuplicate) {
+      setTimeout(() => {
+        App.events.notyf('error', "This discount code is already applied.");  
+      }, 100); 
+      apply_discount_code.loading = false;
+      return;
+    }
+
+    // --- Validate the code from the server ---
+    checkIfCodeIsValid();
   });
 
+cardContainer.addEventListener('click', (e) => {
+  const removeBtn = e.target.closest('.remove-discount');
+  if (!removeBtn) return; // Click wasn't on a remove button
+
+  const codeToRemove = removeBtn.dataset.code;
+
+  // Remove the discount from appliedDiscounts array
+  appliedDiscounts = appliedDiscounts.filter(d => d.code !== codeToRemove);
+
+  // Re-render the discount cards
+  renderDiscountsUI();
+
+  // Recalculate totals
+  renderPaymentBreakdown(ticketsData);
+
+  // Notify user
+  App.events.notyf('success', `Discount code "${codeToRemove}" removed.`);
+});
+
   async function getDiscountCodeDetails(){
-    let url = '/get_discount_code?'+ 'discount_code='+ discount_code_value.value;
+    let url = '/get-discount-code?'+ 'discountCode='+ discount_code_value.value;
     let response = await apiServices.processRequest('get', url);
+    console.log(response)
     return response
   }
 
@@ -221,13 +268,15 @@ metadata: {
 
   async function checkIfApplicableToAllEvents(){
     let response = await getDiscountCodeDetails();
-    if(response.data.is_applicable_to_all_events == "true"){
-      checkAllocations();
+    if(response.data.is_applicable_to_all_events == "true" || response.data.is_applicable_to_all_events == null){
+      // checkAllocations();
+       discountCodeApplied();
       
     }else{
       // CHECK DISCOUNT CODE IF APPLICABLE TO SELECTED EVENT
       if(response.data.event_uuids.includes(event_uuid_hidden.value)){
-        checkAllocations();
+        // checkAllocations();
+         discountCodeApplied();
       }else{
         errorDiscountCode();
         
@@ -235,85 +284,118 @@ metadata: {
     }
   }
 
-  async function checkAllocations(){
-    let response = await getDiscountCodeDetails();
+  // async function checkAllocations(){
+  //   let response = await getDiscountCodeDetails();
 
-    let allocation = '';
+  //   let allocation = '';
 
-    if(ticketType == "Individual Ticket") { 
-      allocation = "individuals"
-    }else{
-      allocation = "groups"
-    }
+  //   if(ticketType == "Individual Ticket") { 
+  //     allocation = "individuals"
+  //   }else{
+  //     allocation = "groups"
+  //   }
 
-    if(response.data.allocations.includes(allocation)){
-      discountCodeApplied();
-    }else{
-      errorDiscountCode();
+  //   if(response.data.allocations.includes(allocation)){
+  //     discountCodeApplied();
+  //   }else{
+  //     errorDiscountCode();
       
+  //   }
+  // }
+
+  async function discountCodeApplied() {
+    let response = await getDiscountCodeDetails();
+    let discount = response.data;
+
+    // Check if already applied
+    if (appliedDiscounts.some(d => d.code === discount.discount_code)) {
+      setTimeout(() => {
+        App.events.notyf('error', "This discount code is already applied.");
+      }, 100);
+      apply_discount_code.loading = false;
+      return;
     }
+
+    // Build discount object
+    let discountObj = {
+      id: discount.id,
+      code: discount.discount_code,
+      name: discount.discount_name,
+      type: discount.discount_type,
+      value: parseFloat(discount.discount_value)
+    };
+
+    // Add to applied discounts
+    appliedDiscounts.push(discountObj);
+
+    // Update UI
+    renderDiscountsUI();
+
+    setTimeout(() => {
+      App.events.notyf('success', "Discount code applied.");
+      renderPaymentBreakdown(ticketsData);
+      apply_discount_code.loading = false;
+      discount_code_value.value = ""
+    }, 200);
   }
 
-  async function discountCodeApplied(){
-    let response = await getDiscountCodeDetails();
-
-    // SET THE DISCOUNT ID, NAME and USAGE COUNT
-    discount_id.setAttribute('value', response.data.id);
-    discount_name.setAttribute('value', response.data.discount_name);
-    if(response.data.usage_count == null){
-      discount_usage_count.setAttribute('value', 0);
-    }else{
-      discount_usage_count.setAttribute('value', response.data.usage_count);
+  function renderDiscountsUI() {
+    // Show sections if there are discounts
+    if (appliedDiscounts.length > 0) {
+      summaryContainer.classList.remove('is_not_visible');
+      cardContainer.classList.remove('is_not_visible');
+    } else {
+      summaryContainer.classList.add('is_not_visible');
+      cardContainer.classList.add('is_not_visible');
+      return;
     }
 
-    
-    // GET THE VALUE OF DISCOUNT CODE
-    display_discount_name.textContent = response.data.discount_name;
-    display_discount_code.textContent = response.data.discount_code;
+    // Update discount summary value
+    let totalDiscount = 0;
+    let subtotal = calculateSubtotal(ticketsData);
 
-    // CHECK IF PERCENTAGE OR FIXED AMOUNT
-    if(response.data.discount_type == "percentage"){
-        
-        display_discount_value.textContent = parseInt(response.data.discount_value)+"% Off";
+    let discountedSubtotal = subtotal;
+    appliedDiscounts.forEach(d => {
+      if (d.type === "percentage") {
+        totalDiscount += (discountedSubtotal * d.value) / 100;
+        discountedSubtotal -= (discountedSubtotal * d.value) / 100;
+      } else {
+        totalDiscount += d.value;
+        discountedSubtotal -= d.value;
+      }
+    });
 
-        totalDiscountPercent = priceWithoutDiscount * (response.data.discount_value) / 100;
-        display_discount_value_summary.innerText = "-$"+pricify(parseFloat(totalDiscountPercent));
+    document.getElementById('display-discount-value-summary').textContent =
+      "-$" + totalDiscount.toFixed(2);
 
-        priceWithDiscountPercent = priceWithoutDiscount - totalDiscountPercent;
+    // Render all discount cards
+    cardContainer.innerHTML = '';
+    appliedDiscounts.forEach(d => {
+      let card = document.createElement('div');
+      card.classList.add('discount-summary-details');
+      card.innerHTML = `
+        <div>
+          <p class="body-x-small-bold">
+            ${d.type === "percentage" ? d.value + "% Off" : "$" + d.value + " Off"}
+          </p>
+          <p class="body-x-small">${d.name}</p>
+        </div>
+        <div>
+          <button type="button" class="remove-discount" data-code="${d.code}">
+            <i class="icon-close-1"></i>
+          </button>
+        </div>
+      `;
+      cardContainer.appendChild(card);
+    });
 
-        if(priceWithDiscountPercent < 0){
-          ticketSTotal.innerText = "$"+pricify(0);
-          totalDiscountFormEl.setAttribute('value', totalDiscountPercent);
-          taxFormEl.setAttribute('value', (price * 0.10))
-        }else{
-          ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount - totalDiscountPercent);
-          totalDiscountFormEl.setAttribute('value', totalDiscountPercent);
-        }
-
-        
-
-    }else{
-        display_discount_value.textContent = "$"+parseInt(response.data.discount_value)+ " Off";
-
-        totalDiscountFixed = response.data.discount_value;
-        display_discount_value_summary.innerText = "-$"+pricify(parseFloat(totalDiscountFixed));
-       
-        priceWithDiscountFixed = priceWithoutDiscount - totalDiscountFixed;
-
-        if(priceWithDiscountFixed < 0){
-          ticketSTotal.innerText = "$"+pricify(0);
-          totalDiscountFormEl.setAttribute('value', totalDiscountFixed);
-        }else{
-          ticketSTotal.innerText = "$"+pricify(priceWithoutDiscount - totalDiscountFixed);
-          totalDiscountFormEl.setAttribute('value', totalDiscountFixed);
-        }
-    }
-    setTimeout(() => {
-      App.events.notyf('success', "Discount code applied.");   
-      showDiscountDetails();
-      is_discount_code_applied = true;
-      apply_discount_code.loading = false;
-    }, 200); 
+    // Attach remove handlers
+    document.querySelectorAll('.remove-discount').forEach(btn => {
+      btn.addEventListener('click', e => {
+        let code = e.target.closest('button').dataset.code;
+        removeDiscountCode(code);
+      });
+    });
   }
 
   function showDiscountDetails(){
@@ -350,10 +432,8 @@ metadata: {
     ticketSPriceEL.innerText = "$0";
     ticketSSubtotal.innerText =  "$0";
     ticketProcFeeEl.innerText = "$0";
-    ticketSTotal.innerText = "$0";
+    totalElem.innerText = "$0";
 
-    ticketQtyEl.setAttribute('has-error',false);
-    ticketQtyGroupEl.setAttribute('has-error',false);
 
     //Set form value
     subTotalFormEl.setAttribute('value', "")
@@ -370,53 +450,6 @@ metadata: {
 
 
 
-
-
-  let purchaseTicketForm = document.getElementById("purchase-ticket-form")
-  let Session = (function () {
-    return {
-        events: {
-
-            async purchaseHandler(event) { 
-                if(purchaseTicketForm){
-                    event ? event.preventDefault(): ''; 
-                }
-            }
-        }
-    }
-  })();
-  window.Session = Session;
-
-
-// Stepper Elements
-const ticketPurchaseStepper = document.getElementById("ticket-purchase-stepper");
-const ticketPurchaseStepperContainer = document.getElementById("purchase-ticket-stepper-wrapper");
-const ticketPurchaseStepperMessage = document.getElementById("purchase-ticket-confirmation-message");
-
-const step1 = document.getElementById("submit-purchase");
-const step2 = document.getElementById("submit-billing-info");
-const step3 = document.getElementById("checkout-ticket-submit-btn");
-const step4 = document.getElementById("submit-ticket-allocation");
-const step5 = document.getElementById("submit-ticket-confirmation");
-
-const step1Container = document.getElementById("ticket-selection-step");
-const step1Header = document.getElementById("ticket-purchase-header");
-const step2Container = document.getElementById("ticket-billing-step");
-const step3Container = document.getElementById("ticket-payment-step");
-const step4Container = document.getElementById("ticket-allocation-step");
-const step5Container = document.getElementById("ticket-confirmation-step");
-
-const step1button = document.getElementById("purchase-ticket-button-step-1");
-const step2button = document.getElementById("purchase-ticket-button-step-2");
-const step3button = document.getElementById("purchase-ticket-button-step-3");
-const step4button = document.getElementById("purchase-ticket-button-step-4");
-const step5button = document.getElementById("purchase-ticket-button-step-5");
-
-const checkbox = document.getElementById("billing-same-with-contact");
-const billingInputs = document.querySelector("#billing-contact-inputs");
-let isChecked = false;
-
-let ticketsData = [];
 
 // Step Map
 const stepMap = {
@@ -1126,12 +1159,6 @@ function countSelected(venueUuid, type) {
  * Renders payment breakdown based on current ticketsData
  */
 function renderPaymentBreakdown(ticketsData) {
-  const breakdownContainer = document.getElementById('payment-breakdown');
-  const subtotalElem = document.getElementById('subtotal-price');
-  const taxElem = document.getElementById('tax-price'); 
-  const processingElem = document.getElementById('proccessing-price');
-  const totalElem = document.getElementById('total-price');
-
   breakdownContainer.innerHTML = '';
 
   if (!ticketsData.length) {
@@ -1143,7 +1170,7 @@ function renderPaymentBreakdown(ticketsData) {
     return;
   }
 
-  // Group tickets by venue
+  // --- Group tickets by venue ---
   const venueMap = {};
   ticketsData.forEach(ticket => {
     const venue = ticket.ticket_venue_name || 'No Venue';
@@ -1151,49 +1178,97 @@ function renderPaymentBreakdown(ticketsData) {
     venueMap[venue].push(ticket);
   });
 
+  // --- Build global ticket count across all venues ---
+  let ticketCount = {};
+  ticketsData.forEach(ticket => {
+    const key = `${ticket.ticket_venue_name || 'No Venue'}-${ticket.name}`;
+    if (!ticketCount[key]) {
+      ticketCount[key] = { ...ticket, quantity: 0 };
+    }
+    ticketCount[key].quantity++;
+  });
+
+  // --- Render venue breakdown ---
   let orderSummaryEl = '';
   let subtotal = 0;
-  let totalTax = 0;
 
   for (const [venue, tickets] of Object.entries(venueMap)) {
     orderSummaryEl += `<div class="payment-break-downs"><p class="payment-breakdown-venue-name">${venue}</p><div>`;
-    
-    // Group duplicates by ticket name
-    const ticketCount = {};
+
+    // Count tickets per venue for display
+    let venueCount = {};
     tickets.forEach(ticket => {
       const key = ticket.name;
-      if (!ticketCount[key]) {
-        ticketCount[key] = { ...ticket, quantity: 0 };
+      if (!venueCount[key]) {
+        venueCount[key] = { ...ticket, quantity: 0 };
       }
-      ticketCount[key].quantity++;
+      venueCount[key].quantity++;
     });
 
-    for (const [name, info] of Object.entries(ticketCount)) {
+    for (const [name, info] of Object.entries(venueCount)) {
       const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
       const formattedPrice = parseFloat(info.price).toFixed(2);
       const totalPrice = info.quantity * parseFloat(info.price);
       subtotal += totalPrice;
-
-      // Calculate tax per ticket
-      let taxAmount = 0;
-      if (info.tax_type === 'percentage') {
-        taxAmount = (totalPrice * parseFloat(info.tax)) / 100;
-      } else {
-        taxAmount = parseFloat(info.tax) * info.quantity;
-      }
-      totalTax += taxAmount;
 
       orderSummaryEl += `<div class="payment-break-down-tier-container">
         <div class="payment-break-down-tier-name">${capacityType} - ${info.name}</div>
         <div class="payment-break-down-tier-price"><p>${info.quantity} x </p> $${formattedPrice}</div>
       </div>`;
     }
+
     orderSummaryEl += `</div></div>`;
   }
 
-  // Processing Fee (1.7% of subtotal)
-  const processingFee = subtotal * 0.017;
-  const total = subtotal + totalTax + processingFee;
+  // Save base subtotal before discounts
+  priceWithoutDiscount = subtotal;
+
+  // --- APPLY MULTIPLE DISCOUNTS ---
+  let discountAmount = 0;
+  let discountedSubtotal = subtotal;
+
+  appliedDiscounts.forEach(d => {
+    if (d.type === "percentage") {
+      const discountValue = (discountedSubtotal * d.value) / 100;
+      discountAmount += discountValue;
+      discountedSubtotal -= discountValue;
+    } else {
+      const discountValue = d.value;
+      discountAmount += discountValue;
+      discountedSubtotal -= discountValue;
+    }
+  });
+
+  discountedSubtotal = Math.max(discountedSubtotal, 0);
+
+  // Update discount summary if there are discounts
+  if (appliedDiscounts.length > 0) {
+    display_discount_value_summary.innerText = "-$" + pricify(discountAmount);
+  } else {
+    display_discount_value_summary.innerText = "-$0.00";
+  }
+
+  // --- TAX (on discounted subtotal) ---
+  let totalTax = 0;
+  for (const [key, info] of Object.entries(ticketCount)) {
+    const itemSubtotal = info.price * info.quantity;
+
+    // Distribute total discount proportionally
+    const itemDiscount = subtotal > 0 ? (discountAmount * itemSubtotal) / subtotal : 0;
+    const itemDiscountedSubtotal = Math.max(itemSubtotal - itemDiscount, 0);
+
+    if (info.tax_type === 'percentage') {
+      totalTax += (itemDiscountedSubtotal * parseFloat(info.tax)) / 100;
+    } else {
+      totalTax += parseFloat(info.tax) * info.quantity;
+    }
+  }
+
+  // --- PROCESSING FEE (1.7% of discounted subtotal) ---
+  const processingFee = discountedSubtotal * 0.017;
+
+  // --- TOTAL ---
+  const total = discountedSubtotal + totalTax + processingFee;
 
   // Update breakdown and totals
   breakdownContainer.innerHTML = orderSummaryEl;
@@ -1204,6 +1279,9 @@ function renderPaymentBreakdown(ticketsData) {
   totalElem.textContent = `$${total.toFixed(2)}`;
 }
 
+function calculateSubtotal(ticketsData) {
+  return ticketsData.reduce((sum, ticket) => sum + ticket.price * ticket.quantity, 0);
+}
 </script>
 
 

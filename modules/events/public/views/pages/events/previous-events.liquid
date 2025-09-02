@@ -22,7 +22,8 @@ dynamic_cache:
       "modules/insites_events/event",
       "modules/insites_events/venue",      
       "modules/insites_events/event_speaker",
-      "modules/insites_events/event_sponsor"
+      "modules/insites_events/event_sponsor",
+      "modules/insites_events/event_system_field"
     ]
     {%- endparse_json -%}
     {%- include "modules/website/cache/generate_cache_key", models: models -%}

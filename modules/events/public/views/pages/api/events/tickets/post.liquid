@@ -1,0 +1,51 @@
+---
+slug: api/create-tickets
+format: json
+method: post
+searchable: false
+---
+
+{%- assign payload = context.params | parse_json -%}
+{%- assign status = 400 -%}
+{% assign errors = "" %}
+
+
+{%- assign ticketData = payload.ticketData | parse_json -%}
+{%- assign event_uuid = payload.eventuuid -%}
+{% assign ticketPayload = '{}' | parse_json %}
+{% assign data = '{}' | parse_json %}
+{% assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid %}
+{% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
+
+
+{%- graphql add_tickets = 'modules/website/trigger_api_call', 
+     name: 'modules/events/add_tickets', 
+     data: ticketPayload 
+     | dig: 'items','response','body' | parse_json -%}     
+
+     {% log add_tickets %}
+
+
+
+{% if add_tickets.errors  %}
+    {% log 'test' %}
+    {% assign errors = add_tickets %}
+{% endif %}     
+
+
+
+{% log errors %}
+{%- if errors != "" -%}
+    {% assign data = data | add_hash_key: "has_error", true %}
+    {% assign data = data | add_hash_key: "message", errors %}
+{%- else -%}
+    {% assign data = data | add_hash_key: "has_error", false %}
+    {% assign data = data | add_hash_key: "message", "Ticket(s) successfully created" %}
+    {% assign data = data | add_hash_key: "data", add_tickets %}
+    {%- assign status = 200 -%}
+{%- endif -%}
+
+{{ data }}
+
+{% comment %} {{ add_order  }} {% endcomment %}
+{%- response_status status -%}

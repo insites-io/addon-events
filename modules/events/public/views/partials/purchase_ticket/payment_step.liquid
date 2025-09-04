@@ -66,7 +66,7 @@
     </div>
 
     <div class="spacer"></div>
-    <div class="grid-x grid-padding-x">
+    <div class="grid-x grid-padding-x" id="payment-navigation-button">
       <div class="large-12 medium-12 small-12 cell">
         <div class="grid-x grid-padding-x">
           <div class="large-6 medium-6 small-12 cell">
@@ -85,7 +85,7 @@
 <ins-modal id="stripe-modal" no-button with-backdrop height="255px" width="520px" heading="Add new card">
   <form id="modal-card-form">
     <div class="form-row">
-      <div id="card-element"><!-- Stripe element mounts here --></div>
+      <div id="card-element-2"><!-- Stripe element mounts here --></div>
       <div id="card-errors" class="error-message"></div>
     </div>
     <div class="spacer x-large"></div>
@@ -110,11 +110,11 @@
 
 {%- if context.environment == "staging" -%}
     <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/events/scripts/stripe/stripe-element.js' | asset_url }}"></script> 
     <script src="{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}"></script> 
 {%- else -%}
     <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.min.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/events/scripts/stripe/stripe-element.min.js' | asset_url }}"></script> 
     <script src="{{ 'modules/portal/scripts/stripe/stripe-model.min.js' | asset_url }}"></script> 
 {%- endif -%}
 

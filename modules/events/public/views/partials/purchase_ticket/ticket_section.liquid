@@ -85,6 +85,7 @@
 
             {% for ticket_tier_list in ticket_tier_category offset: 1 %}
               {% for ticket_tier in ticket_tier_list %}
+                {{ ticket_tier.uuid }}
                 {% assign ticket_data = '{}' | parse_json %}
                 {% assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type %}
                 {% assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price %}
@@ -96,6 +97,7 @@
                 {% assign ticket_data = ticket_data | add_hash_key: "event_pricing_tier.uuid", ticket_tier.uuid %}
                 {% assign ticket_data = ticket_data | add_hash_key: "capacity_max", venue_remaining %}
                 {% assign ticket_data = ticket_data | add_hash_key: "tier_id", ticket_tier.uuid %}
+                {% assign ticket_data = ticket_data | add_hash_key: "venue_uuid", venue.venue_uuid %}
 
                 {% assign start_date = ticket_tier.availability_start_date | date: "%s" %}
                 {% assign end_date = ticket_tier.availability_end_date | date: "%s" %}

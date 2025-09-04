@@ -87,15 +87,14 @@ let TicketScript = (function () {
                 // Check what form is being validated...
                 //Validation for other forms
 
-                if(formId == 'submit-purchase' || formId == 'submit-billing-info'){
+                if(formId == 'submit-purchase' || formId == 'submit-billing-info' || formId == 'checkout-ticket-submit-btn' ){
                     //Validation for Sign Up Form
                     let isValid = await this.validationForm(groupElem)
-                    console.log(groupElem)
                     if (formId == 'submit-purchase' || formId == 'submit-billing-info') {
                         return isValid
                     }
                     let checkCC = false
-                    if (formId == 'submit-purchase-ticket') {
+                    if (formId == 'checkout-ticket-submit-btn') {
                            
                     let subTotal = subTotalFormEl.getAttribute('value')
                     let grandTotal = totalFormEl.getAttribute('value')
@@ -103,13 +102,13 @@ let TicketScript = (function () {
                         checkCC = true
                         isValid = true
                     }else {
-                        checkCC = await App.validation.validateForm(formElem)
-                        TicketScript.methods.validateCreditCard(formElem)
+                        checkCC = await this.validationForm(groupElem)                    
+                        TicketScript.methods.validateCreditCard(groupElem)
                     }  
                     }
                     
                     if (isValid && checkCC) {
-                        formElem.submit();
+                        // formElem.submit();
                         return true
                     }
                     
@@ -121,7 +120,8 @@ let TicketScript = (function () {
                 }
                
                 
-            }
+            },
+            
 
         }
     }

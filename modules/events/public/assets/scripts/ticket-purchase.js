@@ -40,6 +40,62 @@ const processingElem = document.getElementById('proccessing-price');
 const totalElem = document.getElementById('total-price');
 
 let ticketsData = [];
+let ticketPurchaseData = {
+    // Step 1: Ticket Selection
+    tickets: [],
+    
+    // Step 2: Billing Information
+    billing: {},
+    contact: {},
+    
+    // Step 3: Payment Information
+    payment: {},
+    orderTotals: {},
+    
+    // Step 4: Order & Ticket Creation
+    order: {},
+    createdTickets: []
+};
+
+// Function to update ticket data (Step 1)
+function updateTicketData() {
+    ticketPurchaseData.tickets = [...ticketsData];
+}
+
+// Function to update billing data (Step 2)
+function updateBillingData() {
+    const billingFields = document.querySelectorAll(
+        "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
+    );
+    
+    ticketPurchaseData.billing = {};
+    billingFields.forEach(field => {
+        const key = field.id.replace(/-/g, "_"); 
+        const value = field.value || field.getAttribute("value") || "";
+        ticketPurchaseData.billing[key] = value;
+    });
+}
+
+// Function to update contact data (Step 2)
+function updateContactData() {
+    const orderContactFields = document.querySelectorAll(
+        "#account-details ins-input, #account-details input, #account-details ins-input-tel"
+    );
+    
+    ticketPurchaseData.contact = {};
+    orderContactFields.forEach(field => {
+        const key = (field.name || field.id || "").replace(/-/g, "_");
+        const value = field.value || field.getAttribute("value") || "";
+        ticketPurchaseData.contact[key] = value;
+    });
+}
+
+// Function to update payment data (Step 3)
+function updatePaymentData() {
+    ticketPurchaseData.payment = {
+        orderTotals: window.orderTotals || {}
+    };
+}
 
 // AMOUNT DETAILS
 let subTotalFormEl = document.getElementById('bill-order-value')
@@ -365,32 +421,8 @@ function scrollToTop() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 }
-function redirectWithParams(params) {
-    showLoading();
-    const url = new URL(window.location.href);
-    Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
-    window.history.pushState({}, "", url);
-    if (params.payment) {
-        showStep("payment");
-    }
-    setTimeout(() => {
-        hideLoading();
-    }, 100);
-}
-function removeQueryParam(param) {
-    const url = new URL(window.location);
-    url.searchParams.delete(param);
-    window.history.replaceState({}, document.title, url.toString());
-}
-function addQueryParam(key, value) {
-    const url = new URL(window.location);
-    url.searchParams.set(key, value);
-    window.history.replaceState({}, document.title, url.toString());
-}
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
+
+
 
 function toKebabCase(str) {
   return str
@@ -406,17 +438,19 @@ const backStep3 = document.getElementById('back-step-3');
 
 if (backStep2) {
   backStep2.addEventListener('click', () => {
-    addQueryParam("selection", "true");
-    removeQueryParam('billing')
-    restoreStepFromParams();
+    showStep("selection");
+    if (ticketPurchaseStepper) {
+      ticketPurchaseStepper.setStep(1);
+    }
   });
 }
 
 if (backStep3) {
   backStep3.addEventListener('click', () => {
-    addQueryParam("billing", "true");
-    removeQueryParam('payment')
-    restoreStepFromParams();
+    showStep("billing");
+    if (ticketPurchaseStepper) {
+      ticketPurchaseStepper.setStep(2);
+    }
   });
 }
 
@@ -454,42 +488,25 @@ function getFieldValue(obj, key) {
 
 
 
-function restoreStepFromParams() {
+function initializeStep() {
   showLoading();
-  const paramStep = Object.keys(stepMap).find(
-      key => getQueryParam(stepMap[key].urlParam)
-  );
-
-  const stepToShow = paramStep || "selection";
-  showStep(stepToShow);
-
-  // --- update stepper UI ---
-  setTimeout(async () =>  {
+  showStep("selection");
+  
+  // Initialize stepper UI
+  setTimeout(async () => {
       if (typeof ticketPurchaseStepper !== "undefined") {
           const steps = await ticketPurchaseStepper.getAllSteps();
           if (!steps || steps.length === 0) return;
-
-          const stepIndex = stepMap[stepToShow]?.index || 1;
-
-          // mark all previous steps as complete
-          steps.forEach((step, idx) => {
-              if (idx < stepIndex - 1) {
-                  step.setAttribute("complete", true);
-              }
-          });
-
-          // set current step
-          ticketPurchaseStepper.setStep(stepIndex);
+          
+          // Set to first step
+          ticketPurchaseStepper.setStep(1);
           hideLoading();
           scrollToTop();
       }
-  },200)
-
-
-  return stepToShow;
+  }, 200);
 }
 
-let currentStep = restoreStepFromParams();
+let currentStep = initializeStep();
 
 // Billing Checkbox Sync
 if (checkbox && billingInputs) {
@@ -532,12 +549,6 @@ async function saveContact(billing_payload) {
             if (profileDiv) {
                 profileDiv.setAttribute("label", fullName);
             }
-
-            // Persist to localStorage
-            const storedData = JSON.parse(localStorage.getItem("billingData")) || {};
-            storedData.company_uuid = result.company?.uuid || "";
-            storedData.user_uuid = result.uuid || "";
-            localStorage.setItem("billingData", JSON.stringify(storedData));
         }
 
         return result;
@@ -552,8 +563,7 @@ async function saveOrder(orderPayload) {
     try {
         const response = await orderServices.addOrder(orderPayload);
         if (response.data) {
-            localStorage.setItem("orderData", JSON.stringify(response.data));
-            return true;
+            return response;
         }
     } catch (error) {
         console.error("Order API error:", error);
@@ -561,8 +571,68 @@ async function saveOrder(orderPayload) {
     return false;
 }
 
+// Transform ticket data into correct payload format
+function transformTicketData(ticketsData, orderNumber) {
+    const ticketPayload = [];
+    const groupTickets = {}; // Track group tickets by tier
+    
+    ticketsData.forEach(ticket => {
+        const baseTicket = {
+            ticket_type: ticket.capacity_type,
+            venue_area_name: ticket.ticket_venue_name,
+            "venue.uuid": ticket.venue_uuid,
+            "event_venue_area.uuid": ticket.event_venue_area_uuid,
+            "event_pricing_tier.uuid": ticket["event_pricing_tier.uuid"],
+            price: parseFloat(ticket.price),
+            tax: ticket.tax || null,
+            tax_type: ticket.tax_type || null,
+            venue_name: ticket.venue_name || null,
+            "purchased_by.uuid": ticketPurchaseData.billing.user_uuid || null,
+            order_number: parseInt(orderNumber)
+        };
+
+        if (ticket.capacity_type === "group") {
+            // Create group ID for tickets with same tier
+            const tierKey = `${ticket.event_venue_area_uuid}-${ticket["event_pricing_tier.uuid"]}`;
+            
+            if (!groupTickets[tierKey]) {
+                groupTickets[tierKey] = {
+                    groupId: `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    referenceCode: `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+                };
+            }
+            
+            baseTicket.group_id = groupTickets[tierKey].groupId;
+            baseTicket.reference_code = groupTickets[tierKey].referenceCode;
+            baseTicket.allocation = null;
+            baseTicket.price_includes_tax = null;
+        }
+
+        ticketPayload.push(baseTicket);
+    });
+
+    return ticketPayload;
+}
+
+// Create ticket
+async function createTickets(ticketPayload) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventParam = urlParams.get("event");
+    const queryString = encodeURIComponent(JSON.stringify(ticketPayload));
+
+    try {
+        // Use the appropriate API endpoint for creating tickets
+        const response = await ticketServices.createTickets(eventParam,queryString);
+        if (response.data) {
+            return response;
+        }
+    } catch (error) {
+        console.error("Ticket creation error:", error);
+    }
+    return false;
+}
+
 async function checkAvailableTickets(ticketData) {
-  console.log(ticketData)
   const urlParams = new URLSearchParams(window.location.search);
   const eventParam = urlParams.get("event");
   const queryString = encodeURIComponent(JSON.stringify(ticketData));
@@ -603,10 +673,9 @@ if (step1) {
             setTimeout(() => {
               hideLoading();
               firstStep.hasError = false;
+              updateTicketData(); // Store ticket data
               ticketPurchaseStepper.next();
               showStep("billing");
-              removeQueryParam("selection");
-              addQueryParam("billing", "true");
               scrollToTop();
             }, 500);
           }
@@ -644,31 +713,17 @@ if (step2) {
 
 
         //Save to API
-        const orderContactFields = document.querySelectorAll(
-            "#account-details ins-input, #account-details input, #account-details ins-input-tel"
-        );
-        const orderContactData = {};
-        orderContactFields.forEach(field => {
-            const key = (field.name || field.id || "").replace(/-/g, "_");
-            const value = field.value || field.getAttribute("value") || "";
-            orderContactData[key] = value;
-        });
-
-        const billingFields = document.querySelectorAll(
-        "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
-        );
-
-        const billingData = {};
-        billingFields.forEach(field => {
-            const key = field.id.replace(/-/g, "_"); 
-            const value = field.value || field.getAttribute("value") || "";
-            billingData[key] = value;
-        });
+        // Update global data
+        updateContactData();
+        updateBillingData();
+        
+        // Get contact data for API call
+        const orderContactData = ticketPurchaseData.contact;
 
         if (isChecked) {
             Object.keys(orderContactData).forEach(key => {
                 const billingKey = key.replace(/^contact_/, "billing_"); 
-                billingData[billingKey] = orderContactData[key];
+                ticketPurchaseData.billing[billingKey] = orderContactData[key];
             });
 
             const contactPhoneEl = document.getElementById("contact-phone");
@@ -678,8 +733,8 @@ if (step2) {
                 const contact_country_code = "+" + contactPhoneCountryData.dialCode;
                 const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-                billingData.mobile_phone_country_code = contact_country_code.replace("+", "");
-                billingData.mobile_phone_number = contact_phone_number;
+                ticketPurchaseData.billing.mobile_phone_country_code = contact_country_code.replace("+", "");
+                ticketPurchaseData.billing.mobile_phone_number = contact_phone_number;
             }
         }
 
@@ -689,10 +744,8 @@ if (step2) {
         const contact_country_code = "+" + contactPhoneCountryData.dialCode;
         const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-        const sourceData = isChecked ? orderContactData : billingData;
-        billingData.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || ""     
-        //Save to local storage
-        localStorage.setItem("billingData", JSON.stringify(billingData));
+        const sourceData = isChecked ? orderContactData : ticketPurchaseData.billing;
+        ticketPurchaseData.billing.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || ticketPurchaseData.billing.billing_company_name || "";
 
 
         const billing_payload = {
@@ -712,9 +765,7 @@ if (step2) {
         if (data.uuid) {
             secondStep.hasError = false;
             ticketPurchaseStepper.next();
-            removeQueryParam("billing");
             showStep("payment");
-            addQueryParam("payment", "true");
             contact_payment_uuid.value = data.uuid
             emailpayment_field.value = data.email
             if(data.guest) {
@@ -734,57 +785,66 @@ if (step2) {
 
     // STEP 3
 if (step3) {
-    step3.addEventListener("insClick", async function () {
+    step3.addEventListener("insClick", async function (event) {
         showLoading();
         step3.loading = true;
         const steps = await ticketPurchaseStepper.getAllSteps();
         const thirdStep = steps[2];
 
-        //Save to API
-        const storedBillingData = JSON.parse(localStorage.getItem("billingData"));
-
-        let totals = window.orderTotals;
-        if (!totals) {
-        const stored = localStorage.getItem("orderTotals");
-        totals = stored ? JSON.parse(stored) : {};
+        const isValid = await TicketScript.methods.validateForm(event, step3Container);
+        if (!isValid) {
+            thirdStep.loading = false;
+            thirdStep.hasError = true;
+            thirdStep.setAttribute("has-error", true);
+            hideLoading();
+            return;
         }
+
+        //Save to API
+        let totals = window.orderTotals || {};
 
         const subtotal = totals.subtotalWithDiscount || 0;
         const subtotalWithoutDiscount = totals.subtotalWithoutDiscount || subtotal;
         const tax = totals.tax || 0;
         const total = totals.total || subtotal;
         const discount = totals.discount || (subtotalWithoutDiscount - subtotal);
+        const stripe_credit_card = stripeField.value
+
+        // Update payment data and use global ticketPurchaseData
+        updatePaymentData();
+        
+        console.log(ticketPurchaseData)
 
         const orderPayload = {
             order_number: crypto.randomUUID(),
-            billing_address_1: getFieldValue(storedBillingData, "billing_address_1"),
-            billing_city: getFieldValue(storedBillingData, "billing_suburb"),
-            billing_postcode: getFieldValue(storedBillingData, "billing_postcode"),
+            billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1"),
+            billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb"),
+            billing_postcode: getFieldValue(ticketPurchaseData.billing, "billing_postcode"),
 
-            "billing_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
-            billing_company_name: getFieldValue(storedBillingData, "company_name") || "",
-            billing_company_email: getFieldValue(storedBillingData, "company_email") || "",
+            "billing_company.uuid": getFieldValue(ticketPurchaseData.billing, "company_uuid") || "",
+            billing_company_name: getFieldValue(ticketPurchaseData.billing, "company_name") || "",
+            billing_company_email: getFieldValue(ticketPurchaseData.billing, "company_email") || "",
 
-            "billing_contact.uuid":  getFieldValue(storedBillingData, "user_uuid") || "",
-            billing_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
-            billing_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
-            billing_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
-            billing_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
-            billing_contact_phone_number:  getFieldValue(storedBillingData, "mobile_phone_number") || "",
+            "billing_contact.uuid":  getFieldValue(ticketPurchaseData.billing, "user_uuid") || "",
+            billing_contact_first_name: getFieldValue(ticketPurchaseData.billing, "billing_first_name") || "",
+            billing_contact_last_name: getFieldValue(ticketPurchaseData.billing, "billing_last_name") || "",
+            billing_contact_email: getFieldValue(ticketPurchaseData.billing, "billing_email") || "",
+            billing_contact_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
+            billing_contact_phone_number:  getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
             order_reference: crypto.randomUUID(),
             order_status: "placed",
-            order_payment_status: "paid",
+            order_payment_status: "unpaid",
 
-            "order_company.uuid": getFieldValue(storedBillingData, "company_uuid") || "",
-            order_company_name: getFieldValue(storedBillingData, "company_name") || "",
-            order_company_email: getFieldValue(storedBillingData, "company_email") || "",
+            "order_company.uuid": getFieldValue(ticketPurchaseData.billing, "company_uuid") || "",
+            order_company_name: getFieldValue(ticketPurchaseData.billing, "company_name") || "",
+            order_company_email: getFieldValue(ticketPurchaseData.billing, "company_email") || "",
 
-            "order_contact.uuid": getFieldValue(storedBillingData, "user_uuid") || "",
-            order_contact_first_name: getFieldValue(storedBillingData, "billing_first_name") || "",
-            order_contact_last_name: getFieldValue(storedBillingData, "billing_last_name") || "",
-            order_contact_email: getFieldValue(storedBillingData, "billing_email") || "",
-            order_contact_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || "",
-            order_contact_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
+            "order_contact.uuid": getFieldValue(ticketPurchaseData.billing, "user_uuid") || "",
+            order_contact_first_name: getFieldValue(ticketPurchaseData.billing, "billing_first_name") || "",
+            order_contact_last_name: getFieldValue(ticketPurchaseData.billing, "billing_last_name") || "",
+            order_contact_email: getFieldValue(ticketPurchaseData.billing, "billing_email") || "",
+            order_contact_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
+            order_contact_phone_number: getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
 
             date_time: new Date().toISOString(),
             currency: "AUD",
@@ -796,28 +856,49 @@ if (step3) {
             total_amount: total,
             total_amount_paid: total,
 
-            mobile_phone_number: getFieldValue(storedBillingData, "mobile_phone_number") || "",
-            mobile_phone_country_code: getFieldValue(storedBillingData, "mobile_phone_country_code") || ""
+            mobile_phone_number: getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
+            mobile_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
+            stripe_credit_card: stripe_credit_card || ""
         };
 
-        const no_error = await saveOrder(orderPayload);
-
-        if (no_error) {
-            setTimeout(() => {
-                hideLoading();
-                scrollToTop();
+        const orderResponse = await saveOrder(orderPayload);
+        if (!orderResponse.data.has_error) {
+            // Store order data
+            ticketPurchaseData.order = orderResponse.data;
+            
+            setTimeout( async () => {
                 thirdStep.hasError = false;
                 ticketPurchaseStepper.next();
-                showStep("allocation");
-                removeQueryParam("payment");
-                addQueryParam("allocation", "true");
+                
+                // Only create tickets if order was successful
+                const ticketPayload = transformTicketData(ticketPurchaseData.tickets, orderResponse.data.data.id);
+                const ticketResponse = await createTickets(ticketPayload);
+
+                if (!ticketResponse.data.has_error) {
+                    // Store created tickets data
+                    ticketPurchaseData.createdTickets = ticketResponse.data;
+                    scrollToTop();
+                    hideLoading();
+                    App.events.notyf('success', "Thank you! We’ve received your payment and your order is complete.");
+                    setTimeout(() => {
+                        showStep("allocation");
+                    },300)
+                } else {
+                    App.events.notyf('error', "Failed to create tickets. Please try again.");
+                    thirdStep.hasError = true;
+                    thirdStep.setAttribute("has-error", true);
+                }
             }, 500);
 
         } else {
+            App.events.notyf('error', "Your payment failed. Please check the details and try again.");  
             step3.loading = false;
             thirdStep.hasError = true;
             thirdStep.setAttribute("has-error", true);
+            scrollToTop();
+            hideLoading();
         }
+
     });
 }
 
@@ -831,7 +912,6 @@ if (step4) {
         ticketPurchaseStepper.next();
         showStep("confirmation");
         step1Header.classList.add("hide");
-        addQueryParam("confirmation", "true");
     });
 }
 
@@ -948,7 +1028,6 @@ if (steppers.length > 0) {
   let previousCount = 0;
 
   input.addEventListener('input', event => {
-    console.log(input.value)
     const currentCount = input.value;
     let data = input.getAttribute('data');
 
@@ -1100,7 +1179,7 @@ function renderPaymentBreakdown(ticketsData) {
     return;
   }
 
-  // --- Group tickets by venue ---
+  // --- Group tickets by venue and tier ---
   const venueMap = {};
   ticketsData.forEach(ticket => {
     const venue = ticket.ticket_venue_name || 'No Venue';
@@ -1108,10 +1187,11 @@ function renderPaymentBreakdown(ticketsData) {
     venueMap[venue].push(ticket);
   });
 
-  // --- Build global ticket count across all venues ---
+  // --- Build global ticket count across all venues and tiers ---
   let ticketCount = {};
   ticketsData.forEach(ticket => {
-    const key = `${ticket.ticket_venue_name || 'No Venue'}-${ticket.name}`;
+    // Create unique key that includes venue, tier name, and capacity type
+    const key = `${ticket.ticket_venue_name || 'No Venue'}-${ticket.name}-${ticket.capacity_type}`;
     if (!ticketCount[key]) {
       ticketCount[key] = { ...ticket, quantity: 0 };
     }
@@ -1125,17 +1205,18 @@ function renderPaymentBreakdown(ticketsData) {
   for (const [venue, tickets] of Object.entries(venueMap)) {
     orderSummaryEl += `<div class="payment-break-downs"><p class="payment-breakdown-venue-name">${venue}</p><div>`;
 
-    // Count tickets per venue for display
+    // Count tickets per venue and tier for display
     let venueCount = {};
     tickets.forEach(ticket => {
-      const key = ticket.name;
+      // Create unique key that includes tier name and capacity type
+      const key = `${ticket.name}-${ticket.capacity_type}`;
       if (!venueCount[key]) {
         venueCount[key] = { ...ticket, quantity: 0 };
       }
       venueCount[key].quantity++;
     });
 
-    for (const [name, info] of Object.entries(venueCount)) {
+    for (const [key, info] of Object.entries(venueCount)) {
       const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
       const formattedPrice = parseFloat(info.price).toFixed(2);
       const totalPrice = info.quantity * parseFloat(info.price);
@@ -1217,8 +1298,8 @@ function renderPaymentBreakdown(ticketsData) {
     discount: discountAmount   
     };
 
-    window.orderTotals = totals; 
-    localStorage.setItem("orderTotals", JSON.stringify(totals)); 
+    window.orderTotals = totals;
+    ticketPurchaseData.orderTotals = totals; 
 }
 
 function calculateSubtotal(ticketsData) {

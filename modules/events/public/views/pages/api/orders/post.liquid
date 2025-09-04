@@ -7,6 +7,8 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
+{% assign errors = "" %}
+
 
 {% comment %} Use Insites V2 API {% endcomment %}
 {%- graphql add_order = 'modules/website/trigger_api_call', 
@@ -14,14 +16,30 @@ searchable: false
      data: payload 
      | dig: 'items','response','body' | parse_json -%}            
 
-{% comment %} Set Status {% endcomment %}
-{%- liquid
-     if add_order.id 
-          assign status = 200
-     endif
--%}
+ {% if add_order.id %}
+     {%- include 'modules/events/orders/callback_init', 
+          payload: payload,
+          order_data: add_order -%}   
+     {% assign errors = context.session.paybill_error %}
+{% else %}
+     {% assign errors = add_order %}
+ {% endif %}
+ 
+
+{%- if errors != nil -%}
+{
+  "has_error": true,
+  "message": {{ errors }}
+}
+{%- else -%}
+{
+  "has_error": false,
+  "message": "Order successfully created",
+  "data": {{ add_order  }}
+}
+{%- assign status = 200 -%}
+{%- endif -%}
 
 
-
-{{ add_order  }}
+{% comment %} {{ add_order  }} {% endcomment %}
 {%- response_status status -%}

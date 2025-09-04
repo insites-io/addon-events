@@ -5,9 +5,25 @@ const noCardBox = document.getElementById("no-card");
 const addCardBtnHolder = document.getElementById("add-credit-card-button-holder");
 const checkoutBtn = document.getElementById("checkout-ticket-submit-btn");
 const stripeModal = document.getElementById("stripe-modal");
+const paymentNavigationButton = document.getElementById("payment-navigation-button")
+
+let isGuestUser = false
 
 // Layout for ins-credit-card
 const cardLayouts = "large-4 medium-12 small-12";
+// When add-card is clicked:
+document.addEventListener("click", (e) => {
+    if (e.target.closest(".add-card-btn")) {
+        if (!isGuestUser) {
+            stripeModal.setAttribute("open", "");
+        } else {
+            guestAddCardForm.classList.remove('hide');
+            noCardBox?.classList.add('hide');
+        }
+
+        // Mount the Stripe Element into the correct container
+    }
+});
 
 // Handle Add Card button clicks
 document.addEventListener("click", (e) => {
@@ -28,6 +44,14 @@ document.addEventListener("click", (e) => {
  * @param {string} guestUuid - optional UUID for guest to fetch saved cards
  */
 async function loadCards(isGuest = false, guestUuid = null) {
+    if(isGuest) {
+        isGuestUser = true
+        paymentNavigationButton.classList.add('hide')
+    }
+
+    // Mount the Stripe Element into the correct container
+    StripeElement.init.stripeElements(isGuestUser);
+
     cardList.innerHTML = "";
 
     const hiddenField = document.getElementById("stripe-card");
@@ -46,6 +70,7 @@ async function loadCards(isGuest = false, guestUuid = null) {
             // Guests can only have 1 card
             if (isGuest) {
                 addCardBtnHolder?.classList.add("hide");
+                paymentNavigationButton.classList.remove('hide')
             } else {
                 addCardBtnHolder?.classList.remove("hide");
             }
@@ -75,7 +100,6 @@ function renderCards(cards) {
     cards.forEach((card, idx) => {
         const divEl = document.createElement("div");
         divEl.className = `${cardLayouts} cell card-options`;
-
         const insCardEl = document.createElement("ins-credit-card");
         insCardEl.setAttribute("full-year", "");
         insCardEl.setAttribute("brand", card.card_brand);
@@ -83,7 +107,14 @@ function renderCards(cards) {
         insCardEl.setAttribute("expiry-month", card.card_expiry_month);
         insCardEl.setAttribute("expiry-year", card.card_expiry_year);
         insCardEl.setAttribute("compact", "");
+        insCardEl.setAttribute("data-id", card.id);
         insCardEl.value = card.payment_method_token;
+        insCardEl.addEventListener('insClick', () => {
+            StripeElement.events.selectCard(insCardEl);
+        });
+        insCardEl.addEventListener('insClose', () => {
+            StripeElement.events.removeCard(insCardEl);
+        });
 
         // Select the first card as active
         if (idx === 0 && hiddenField) {
@@ -104,4 +135,3 @@ function renderCards(cards) {
         cardList.appendChild(divEl);
     });
 }
-loadCards()

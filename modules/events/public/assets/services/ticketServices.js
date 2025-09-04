@@ -40,6 +40,10 @@ var ticketServices = (function () {
         checkTicketAvailability: async function (uuid,$payload) {
             let url = "/check-ticket-availability?eventuuid=" + uuid + "&ticketData=" + $payload
             return await processRequest('get', url);
+        },
+        createTickets: async function (uuid,$payload) {
+            let url = "/create-tickets?eventuuid=" + uuid + "&ticketData=" + $payload
+            return await processRequest('post', url);
         }
     }
 })();

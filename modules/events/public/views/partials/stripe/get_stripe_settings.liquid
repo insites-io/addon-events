@@ -1,0 +1,46 @@
+---
+metadata: {
+    partial_name: 'Portal | Stripe | Get stripe settings'
+}
+---
+
+{%  liquid
+    graphql get_stripe_settings = 'modules/website/trigger_api_call', name: 'modules/portal/get_stripe_settings' 
+
+    assign response = get_stripe_settings.items.response.body | parse_json 
+
+    # Insites SK Key must be added via Constants - For Stipe Connect
+    if response.livemode
+        assign pk_key = response.pk_live_key
+        assign sk_key = response.sk_live_key
+        assign sk_key_insites = context.constants.insites_stripe_sk_live_key
+    else
+        assign pk_key = response.pk_test_key
+        assign sk_key = response.sk_test_key
+        assign sk_key_insites = context.constants.insites_stripe_sk_test_key
+    endif      
+%}
+
+{% comment %} ? Done this, as the instance is problematic, had to hardcode stripe details {% endcomment %}
+{% if context.location.host == 'insites-client-portal-v130.staging.oregon.platform-os.com' %}
+    {% parse_json data %}
+    {
+        "account_id": "acct_1JgiQgDKXN2B4Z9Y",
+        "pk_key": "pk_test_51JgiQgDKXN2B4Z9YLtz61lb7PDgjIPH2GtKJ6FTN8cYkwOUazMt80sQUH56Wp7ba6UwCCsOg7yTqiNZnD2psb8Oq00gTkdRuh9",
+        "sk_key": "sk_test_51JgiQgDKXN2B4Z9YSwmpDpWT1RZLnJJJZHgRxwzGgh0zSGH33DBqvQl6n2O0tIFlmZfuCO2mSM7pl0bbsoEfa3ku00vV0KrVU9",
+        "sk_key_insites": "sk_test_51JgiQgDKXN2B4Z9YSwmpDpWT1RZLnJJJZHgRxwzGgh0zSGH33DBqvQl6n2O0tIFlmZfuCO2mSM7pl0bbsoEfa3ku00vV0KrVU9"
+    }
+    {% endparse_json %}
+{% else %}
+    {% parse_json data %}
+    {
+        "account_id": "{{response.account_id}}",
+        "pk_key": "{{pk_key}}",
+        "sk_key": "{{sk_key}}",
+        "sk_key_insites": "{{sk_key_insites}}"
+    }
+    {% endparse_json %}
+{% endif %}
+  
+{% export data, namespace: 'stripe' %}
+{% return data %}

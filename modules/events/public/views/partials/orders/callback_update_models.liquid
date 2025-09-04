@@ -1,0 +1,238 @@
+---
+metadata: {
+    partial_name: 'Portal | Paybills | Callback update models'
+}
+---
+
+{% comment %} 
+  Steps:
+    1. Create Payment record on POS
+    2. Update Order record
+    3. Create Event Stream
+{% endcomment %}
+
+
+{% comment %} Set status based on Stripe Charge (Create Payment) response {% endcomment %}
+{%  liquid
+    assign paybill_error = '{}' | parse_json 
+    session paybill_error = ""
+    if status == "succeeded"
+        assign status = "success"
+        assign order_payment_status = "Paid"
+        assign order_status = "Completed"
+    else
+        assign status = "failed"
+        assign order_payment_status = "Failed"
+        assign order_status = "Open"
+    endif
+%}
+
+{% comment %} Compute amounts {% endcomment %}
+{% liquid
+
+    function computed = "modules/portal/pay_bills/compute_amounts", total_amount: order_data.total_amount, total_tax_amount: order_data.total_tax_amount, total_shipping_amount: 0, subtotal_amount: order_data.subtotal_amount
+
+    if status == 'success'
+        assign amount_due = 0.0
+    else
+        assign amount_due = computed.total_amount
+    endif
+%}
+
+{% comment %} Stripe Charge (Create Payment) response {% endcomment %}
+{% assign stripe_payment_response = context.exports.payment_response %}
+
+{% parse_json card %}
+{
+    "last4": "{{ stripe_payment_response.source.last4 }}",
+    "brand": "{{ stripe_payment_response.source.brand }}",
+    "exp_month": "{{ stripe_payment_response.source.exp_month }}",
+    "exp_year": "{{ stripe_payment_response.source.exp_year }}"
+}
+{% endparse_json %}
+
+{% comment %} User info {% endcomment %}
+{% liquid
+    if context.current_user
+        assign user_id = context.current_user.id
+        assign email = context.current_user.email
+        assign first_name = context.current_user.first_name
+        assign last_name = context.current_user.last_name
+        assign contact_uuid = context.current_user.external_id
+    else 
+        assign user_id = null
+        assign email = payload.billing_contact_email
+        assign first_name = payload.order_contact_first_name
+        assign last_name = payload.order_contact_last_name
+        ##assign phone_number = payload.billing_contact_last_name 
+    endif
+%}
+
+{% comment %} Step 1: Create Payment record on POS {% endcomment %}
+{% parse_json data %}
+{
+    "order_id": "{{ order_id }}",
+    "payment_source": "Payment Gateway",
+    "status": "{{ order_payment_status | downcase }}",
+    "payment_gateway_name": "{{ settings.gateway_name }}",
+    "date_time": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}",
+    "last_updated_by_id": "{{ context.current_user.id }}",
+    "is_enabled": true,
+    "card_last_four_digits": "{{ card.last4 }}",
+    "card_brand": "{{ card.brand }}",
+    "card_expiry_month": "{{ card.exp_month }}",
+    "card_expiry_year": "{{ card.exp_year }}",
+    "currency": "{{ settings.currency }}",
+    "order_value": {{ payload.total_amount }},
+    "amount": {{ payload.total_amount | times: 1.0 }},
+    "amount_due": {{ payload.total_amount }},
+    "notes": "{{ form.properties.notes | default: "No notes available" }}"
+}
+{% endparse_json %}
+
+{% assign data = data | add_hash_key: "payment_gateway_details", stripe_payment_response %}
+{% assign data = data | add_hash_key: "order.uuid", order_data.uuid %}
+{% assign data = data | add_hash_key: "computed", computed %}
+{%- capture payment_gateway_details -%}
+    {{ stripe_payment_response }}
+{%- endcapture -%}
+{% assign payment_gateway_details = payment_gateway_details | json %}
+{% assign data = data | add_hash_key: "payment_gateway_details", payment_gateway_details %}
+{% if data.payment_gateway_name == "Stripe" %}
+    {% assign source = "credit_card" %}
+    {% assign data = data | add_hash_key: "source", source %}
+{% endif %}
+
+{%  graphql add_payment = 'modules/website/trigger_api_call', 
+    name: "modules/portal/add_payment",
+    data: data
+    | dig: 'items','response','body'
+    | parse_json %}   
+
+{%- liquid
+    session paybill_payment_id = add_payment.items.id
+    session paybill_status = status
+-%}
+
+{% if status == 'failed' %}
+  {% assign paybill_error = paybill_error | add_hash_key: "stripe", stripe_payment_response %}
+  {% session paybill_error = paybill_error %}
+{% endif %}
+
+{% comment %} Step 2: Update Order record {% endcomment %}
+{% parse_json order_data %}
+{
+    "uuid": "{{ order_data.uuid }}", 
+    "order_reference": "{{ order_data.order_reference | default: "" }}",
+    "order_contact.uuid": "{{ contact_uuid }}",
+    "order_contact_email": "{{ email | default: "" }}",
+    "order_contact_first_name": "{{ first_name | default: "" }}",
+    "order_contact_last_name": "{{ last_name | default: ""  }}",
+    "order_contact_phone_number": "{{ phone_number | default: "" }}",
+    "order_status": "{{ order_status | default: "" }}",
+    "order_payment_status" : "{{ order_payment_status | default: "" }}",
+    "total_amount" : {{ order_data.total_amount |  times: 1.0 | default: 0.0   }},
+    "total_tax_amount": {{ order_data.total_tax_amount | times: 1.0 | default: 0.0   }},
+    "date_time": "{{ order_data.date_time | default: "" }}",
+    "currency": "{{ order_data.currency | default: "" }}",
+    "subtotal_amount": {{ order_data.subtotal_amount| times: 1.0  | default: 0.0 }},
+    "total_amount_paid": {{ order_data.total_amount | times: 1.0  | default: 0.0 }},
+    "total_discount_amount": {{ order_data.total_discount_amount | times: 1.0 | default: 0.0 }}
+
+}
+{% endparse_json %}
+
+{% graphql update_order = 'modules/website/trigger_api_call', 
+    name: "modules/portal/update_order",
+    data: order_data
+    | dig: 'items','response','body'
+    | parse_json %}
+
+{% liquid
+    session paybill_order_id = update_order.id
+    session paybill_order_reference = update_order.order_reference
+    session order_uuid = update_order.uuid
+%}
+
+{% if add_payment.id == nil %}
+  {% assign paybill_error = paybill_error | add_hash_key: "add_payment", add_payment %}
+  {% session paybill_error = paybill_error %}
+{% endif %}
+
+{% if update_order.id == nil %}
+  {% assign paybill_error = paybill_error | add_hash_key: "update_order", update_order %}
+  {% session paybill_error = paybill_error %}
+{% endif %}
+
+
+{% export update_order %}
+
+{% comment %} ? UNCOMMENT ON WORKING INSTANCE {% endcomment %}
+{% comment %} Step 3. Create Event Stream {% endcomment %}
+    {%- graphql user = "modules/portal/account/get_user_by_email" 
+        email: context.current_user.email 
+        | dig: "items" | dig: "results" | first -%}
+    {%- assign crm_contact = user.crm_contact | first -%}
+    {%- assign current_user_name = user.first_name | append: ' ' | append: user.last_name | default: user.email -%}
+    {%- capture description -%}
+      <a target="_blank" href="/admin/insites/#/crm/contacts/{{ user.id }}">{{ current_user_name | default: user.email }}</a> 
+      from 
+      <a target="_blank" href="/admin/insites#/crm/companies/{{ crm_contact.company_uuid }}">{{ crm_contact.company.company_name }}</a> 
+      completed a payment for 
+      <a target="_blank" href="/admin/insites#/ecommerce/orders/{{ order_datas.uuid }}">{{ order_data.order_reference }}</a>
+    {%- endcapture -%}
+
+    {%- assign payload = '{}' | parse_json -%}
+    {%- assign payload = payload | add_hash_key: "description", description -%}
+    {%- assign payload = payload | add_hash_key: "font_icon", "icon-settings-1" -%}
+    {%- assign payload = payload | add_hash_key: "font_icon_color", "#6B45FF" -%}
+    {%- assign payload = payload | add_hash_key: "administrator_uuid", user.uuid  -%}
+
+    {%- assign datetime = 'now' | date: "%s" -%}
+
+    {% capture log_info %}
+    {
+        "action": "pay_bills",
+        "data": {
+            "items": { 
+                "user": {
+                        "id": "{{ user_id }}",
+                        "email": "{{ email }}",
+                        "first_name": "{{ first_name }}",
+                        "last_name": "{{ last_name }}"
+                    },
+                    "order": {
+                        "id": "{{ form.id }}",
+                        "order_reference": "{{order_data.order_reference }}",
+                        "order_status": "{{ order_status }}",
+                        "order_payment_status" : "{{ order_payment_status }}",
+                        "amount_due" : "{{ amount_due }}",
+                        "total_amount" : "{{ order_data.total_amount }}",
+                        "total_shipping_amount": "0",
+                        "total_tax_amount": "{{ order_data.total_tax_amount }}",
+                        "order_value" : "{{ computed.total_amount }}"
+                    },
+                    "payment": {
+                        "order_id": "{{order_id}}",
+                        "payment_source": "Payment Gateway",
+                        "payment_status": "{{order_payment_status}}",
+                        "payment_gateway_name": "{{settings.gateway_name}}",
+                        "date_time": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}",
+                        "card_last4": "{{card.last4}}",
+                        "card_brand": "{{card.brand}}",
+                        "card_exp_month": "{{card.exp_month}}",
+                        "card_exp_year": "{{card.exp_year}}",
+                        "currency": "{{settings.currency}}",
+                        "order_value": "{{computed.total_amount}}",
+                        "amount": "{{computed.total_amount}}",
+                        "amount_due": "{{amount_due}}"
+                    }
+            }
+        }
+        
+    }
+    {% endcapture %}
+    {%- assign log_info_json = log_info | parse_json -%}
+    {%- assign info = payload | add_hash_key: "log", log_info_json -%}
+
+    {% include 'modules/portal/events/log_event', info %}

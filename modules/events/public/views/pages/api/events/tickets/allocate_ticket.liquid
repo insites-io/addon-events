@@ -1,7 +1,7 @@
 ---
-slug: api/create-tickets
+slug: api/allocate-ticket
 format: json
-method: post
+method: put
 searchable: false
 ---
 
@@ -11,26 +11,23 @@ searchable: false
 
 
 {%- assign ticketData = payload.ticketData | parse_json -%}
-{%- assign event_uuid = payload.eventuuid -%}
+{%- assign event_uuid = payload.eventUUID -%}
+{%- assign ticket_uuid = payload.ticketUUID -%}
+
 {% assign ticketPayload = '{}' | parse_json %}
 {% assign data = '{}' | parse_json %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid %}
+{% assign ticketPayload = ticketPayload | add_hash_key: "event_uuid", event_uuid %}
+{% assign ticketPayload = ticketPayload | add_hash_key: "ticket_uuid", ticket_uuid %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
-{% log ticketPayload %}
 
-{%- graphql add_tickets = 'modules/website/trigger_api_call', 
-     name: 'modules/events/add_tickets', 
+{%- graphql allocate_ticket = 'modules/website/trigger_api_call', 
+     name: 'modules/events/update_ticket', 
      data: ticketPayload 
-     | dig: 'items','response','body' | parse_json -%}  
-    
-{% log add_tickets, type: 'test' %}
-
-
-{% if add_tickets.errors  %}
-    {% log 'test' %}
-    {% assign errors = add_tickets %}
+     | dig: 'items','response','body' | parse_json -%}   
+     
+{% if allocate_ticket.errors  %}
+    {% assign errors = allocate_ticket %}
 {% endif %}     
-
 
 
 {% log errors %}
@@ -39,8 +36,8 @@ searchable: false
     {% assign data = data | add_hash_key: "message", errors %}
 {%- else -%}
     {% assign data = data | add_hash_key: "has_error", false %}
-    {% assign data = data | add_hash_key: "message", "Ticket(s) successfully created" %}
-    {% assign data = data | add_hash_key: "data", add_tickets %}
+    {% assign data = data | add_hash_key: "message", "Ticket(s) successfully allocated" %}
+    {% assign data = data | add_hash_key: "data", allocate_ticket %}
     {%- assign status = 200 -%}
 {%- endif -%}
 

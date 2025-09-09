@@ -121,6 +121,11 @@ body .checkout > .wrapper,
     font-size: 40px;
 }
 
+.heading-1-tiny {
+    font-size: 24px;
+}
+
+
 .heading-2-small {
     font-family: var(--font-family-01);
     font-size: 32px;
@@ -2327,10 +2332,10 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 /* Modal */
-ins-modal .ins-card-wrap {
+/* ins-modal .ins-card-wrap {
     max-width: calc(100% - 24px) !important;
     margin: 30px auto 1.75rem !important;
-}
+} */
 
 /* Grid */
 .grid-container:not(.full) .grid-padding-y {
@@ -2704,3 +2709,106 @@ ins-modal .ins-card-wrap {
     color: var(--color-main);
     font-weight: 700;
 }
+
+/* Ticket allocation */
+
+.ticket-card-container {
+  border-radius: 4px;
+  border: 1px solid var(--UI---color-ui-04, #DFDFDF);
+  background: var(--UI---color-ui-01, #FFF);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.ticket-position {
+  display: flex;
+  align-items: center;
+}
+
+.ticket-position span {
+  padding: 16px 26px;
+  border-radius: 100px;
+  background:  #F3F4F4;
+}
+
+.ticket-number-container {
+  width: 50%;
+}
+
+.ticket-alloation-modal-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  cursor:pointer;
+  border-radius: 100px;
+}
+.ticket-alloation-modal-button:hover {
+  background: rgba(48, 68, 255, 0.06);
+
+}
+
+
+.ticket-alloation-modal-button span {
+  color:  #3044FF;
+  font-family: "DM Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 100%;
+}
+
+.ticket-allocation-icon {
+  color:  #3044FF !important;
+  text-align: center;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px; 
+}
+
+.allocationModal ins-card {
+    width: 495px!important;
+}
+
+.allocationModal .ins-modal-wrap.show-modal ins-card {
+    top: 5%;
+    z-index: 9999999!important;
+    overflow-y: scroll!important;
+}
+
+.allocationModal .allocationModalName,
+.add-member-details-div {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    justify-content: space-evenly;
+}
+
+.allocationName {
+  flex: 1 0 0;
+}
+
+.allocation-modal-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.allocationModalButton {
+  display: flex;
+  gap: 16px;
+}
+
+.txt-red {
+  color: #B30000;
+}
+
+#ticket-allocated-details {
+  display: flex;
+  justify-content: space-between;
+}
+ 

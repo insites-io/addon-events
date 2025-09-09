@@ -1,0 +1,144 @@
+query get_tickets (
+    $page: Int = 1,
+    $size: Int = 1000,
+    $event_uuid: String,
+  	$order_contact_uuid: String,
+  	$event_venue_area_uuid:String,
+  	$event_pricing_tier_uuid:String,
+    $sort: RecordsSortInput = { created_at: { order: ASC }}
+) {
+    items: records(
+        page: $page,
+        per_page: $size,
+        filter: {
+            table:{ value: "modules/insites_events/event_ticket" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "event_uuid", value: $event_uuid },
+              	{ name: "purchased_by_uuid", value: $order_contact_uuid },
+                { name: "event_venue_area_uuid", value: $event_venue_area_uuid },
+                { name: "event_pricing_tier_uuid", value: $event_pricing_tier_uuid },
+            ]
+        },
+        sort: [ $sort ]
+    ) {
+        total_pages
+        total_entries
+        per_page
+        current_page
+        results {
+            id
+            created_at
+            updated_at
+            uuid: property(name: "uuid")
+            group_id: property(name: "group_id")
+            venue_name: property(name: "venue_name")
+            venue_area_name: property(name: "venue_area_name")
+            venue_uuid: property(name: "venue_uuid")
+            allocation: property(name: "allocation")
+            ticket_type: property(name: "ticket_type")
+            allocation_status: property(name: "allocation_status")
+            event_pricing_tier_uuid: property(name: "event_pricing_tier_uuid")
+            contact_first_name: property(name: "contact_first_name")
+            contact_last_name: property(name: "contact_last_name")
+            contact_email: property(name: "contact_email")
+
+            venue_area: related_record(
+                table: "modules/insites_events/event_venue_area"
+                foreign_property: "uuid"
+                join_on_property: "event_venue_area_uuid"
+            ) { 
+                capacity_per_group: property(name: "capacity_per_group")
+                area_name: property(name: "area_name")
+			}
+
+            tier: related_record(
+                table: "modules/insites_events/event_pricing_tier"
+                    foreign_property: "uuid"
+                    join_on_property: "event_pricing_tier_uuid"
+                ) {
+                name: property(name: "name")
+            }
+            contact_details: related_user(
+                foreign_property: "external_id"
+                join_on_property: "contact_uuid"
+            ) {
+                id
+                email
+                name
+                first_name
+                last_name
+                uuid: external_id
+                contact: profiles(
+                    profile_type: "modules/insites_core/crm_contact"
+                ) {
+                    job_title: property(name: "job_title")
+                    work_phone_country_code: property(name: "work_phone_country_code")
+                    work_phone_number: property(name: "work_phone_number")
+                    company: related_record(
+                        table: "modules/insites_core/crm_company"
+                        foreign_property: "uuid"
+                        join_on_property: "company_uuid"
+                    ) {
+                        uuid: property(name: "uuid")
+                        company_name: property(name: "company_name")
+                    }
+                    type: related_record(
+                        table: "modules/insites_core/crm_system_field"
+                        foreign_property: "uuid"
+                        join_on_property: "type_uuid"
+                        filter: {
+                            properties: [
+                            { name: "system_field", value: "contact_type" }
+                            ]
+                        }
+                    ) {
+                        id
+                        value: property(name: "value")
+                    }
+                }
+            }
+
+            company: related_record(
+                table: "modules/insites_core/crm_company"
+                foreign_property: "uuid"
+                join_on_property: "contact_company_uuid"
+            ) {
+                id
+                uuid: property(name: "uuid")
+                company_name: property(name: "company_name")
+                website: property(name: "website")
+                company_avatar: property_upload(name: "company_avatar") {
+                    file_name
+                    extension
+                    url
+                }
+                email_1: property(name: "email_1")
+                phone_1_country_code: property(name: "phone_1_country_code")
+                phone_1_number: property(name: "phone_1_number")
+            }
+
+            purchased_by: related_user(
+                foreign_property: "external_id"
+                join_on_property: "purchased_by_uuid"
+            ) {
+                id
+                email
+                name
+                first_name
+                last_name
+                uuid: external_id
+            }
+
+            purchased_by_company: related_record(
+                table: "modules/insites_core/crm_company"
+                foreign_property: "uuid"
+                join_on_property: "purchased_by_company_uuid"
+            ) {
+                id
+                uuid: property(name: "uuid")
+                company_name: property(name: "company_name")
+            }
+        }
+    }
+}

@@ -44,6 +44,10 @@ var ticketServices = (function () {
         createTickets: async function (uuid,$payload) {
             let url = "/create-tickets?eventuuid=" + uuid + "&ticketData=" + $payload
             return await processRequest('post', url);
+        },
+        allocateTicket: async function (event_uuid,ticket_uuid,$payload) {
+            let url = "/allocate-ticket?eventUUID=" + event_uuid+ "&ticketUUID=" + ticket_uuid + "&ticketData=" + $payload
+            return await processRequest('put', url);
         }
     }
 })();

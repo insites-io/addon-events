@@ -1,6 +1,8 @@
 {% graphql venues = 'modules/events/events/get_divisions', event_uuid: event.uuid | dig: 'items','results' %}
 {% assign now = "now" | date: "%s" %}
 <div class="accordion">
+
+
 {% for venue in venues %}
   {% assign venue_individual_remaining = venue.area_individual_tickets_remaining | default: 0 %}
   {% assign venue_group_remaining = venue.area_group_tickets_remaining | default: 0 %}
@@ -63,11 +65,10 @@
             {% assign venue_remaining = venue_individual_remaining %}
           {% else %}
             {% assign ticket_icon = "icon-users" %}
-            {% assign ticket_category_name = "Group Tickets" %}
+            {% assign ticket_category_name = "Group of " | append: venue.capacity_per_group |  append: ' Tickets' %}
             {% assign ticket_type = "group" %}
             {% assign venue_remaining = venue_group_remaining %}
           {% endif %}
-
           <div class="ticket-category-container"
             data-venue-uuid="{{ venue.uuid }}" 
             data-total-capacity="{{ venue.total_capacity }}"
@@ -85,7 +86,6 @@
 
             {% for ticket_tier_list in ticket_tier_category offset: 1 %}
               {% for ticket_tier in ticket_tier_list %}
-                {{ ticket_tier.uuid }}
                 {% assign ticket_data = '{}' | parse_json %}
                 {% assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type %}
                 {% assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price %}
@@ -98,6 +98,10 @@
                 {% assign ticket_data = ticket_data | add_hash_key: "capacity_max", venue_remaining %}
                 {% assign ticket_data = ticket_data | add_hash_key: "tier_id", ticket_tier.uuid %}
                 {% assign ticket_data = ticket_data | add_hash_key: "venue_uuid", venue.venue_uuid %}
+                {% assign ticket_data = ticket_data | add_hash_key: "venue_name", venue.venue.venue_name %}
+                {% if ticket_type == 'group' %}
+                    {% assign ticket_data = ticket_data | add_hash_key: "capacity_per_group", venue.capacity_per_group %}
+                {% endif %}
 
                 {% assign start_date = ticket_tier.availability_start_date | date: "%s" %}
                 {% assign end_date = ticket_tier.availability_end_date | date: "%s" %}

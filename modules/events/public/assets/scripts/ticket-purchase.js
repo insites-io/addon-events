@@ -588,7 +588,9 @@ function transformTicketData(ticketsData, orderNumber) {
             tax_type: ticket.tax_type || null,
             venue_name: ticket.venue_name || null,
             "purchased_by.uuid": ticketPurchaseData.billing.user_uuid || null,
-            order_number: parseInt(orderNumber)
+            order_number: parseInt(orderNumber),
+            allocation_status: "unallocated",
+            reference_code: `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}` 
         };
 
         if (ticket.capacity_type === "group") {
@@ -597,14 +599,13 @@ function transformTicketData(ticketsData, orderNumber) {
             
             if (!groupTickets[tierKey]) {
                 groupTickets[tierKey] = {
-                    groupId: `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                    referenceCode: `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+                    groupId: `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
                 };
             }
             
             baseTicket.group_id = groupTickets[tierKey].groupId;
-            baseTicket.reference_code = groupTickets[tierKey].referenceCode;
-            baseTicket.allocation = null;
+            baseTicket.allocation = "unallocated";
+            baseTicket.reference_code = `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}` 
             baseTicket.price_includes_tax = null;
         }
 
@@ -881,7 +882,11 @@ if (step3) {
                     hideLoading();
                     App.events.notyf('success', "Thank you! We’ve received your payment and your order is complete.");
                     setTimeout(() => {
-                        showStep("allocation");
+                        // showStep("allocation");
+                      const urlParams = new URLSearchParams(window.location.search);
+                      const eventParam = urlParams.get("event");
+                      window.location.href = "/allocate-ticket?event=" + eventParam ;
+                      saveOrderSummary();
                     },300)
                 } else {
                     App.events.notyf('error', "Failed to create tickets. Please try again.");
@@ -1218,13 +1223,21 @@ function renderPaymentBreakdown(ticketsData) {
 
     for (const [key, info] of Object.entries(venueCount)) {
       const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
+
+      let displayQty = info.quantity;
+
+      // If group ticket, convert seats → sets using capacity_per_group
+      if (info.capacity_type === "group" && info.capacity_per_group) {
+        displayQty = Math.ceil(info.quantity / info.capacity_per_group);
+      }
+
       const formattedPrice = parseFloat(info.price).toFixed(2);
-      const totalPrice = info.quantity * parseFloat(info.price);
+      const totalPrice = displayQty * parseFloat(info.price);
       subtotal += totalPrice;
 
       orderSummaryEl += `<div class="payment-break-down-tier-container">
         <div class="payment-break-down-tier-name">${capacityType} - ${info.name}</div>
-        <div class="payment-break-down-tier-price"><p>${info.quantity} x </p> $${formattedPrice}</div>
+        <div class="payment-break-down-tier-price"><p>${displayQty} x </p> $${formattedPrice}</div>
       </div>`;
     }
 
@@ -1305,4 +1318,21 @@ function renderPaymentBreakdown(ticketsData) {
 function calculateSubtotal(ticketsData) {
   return ticketsData.reduce((sum, ticket) => sum + parseFloat(ticket.price), 0);
 }
+
+function saveOrderSummary() {
+  const summaryData = {
+    breakdown: document.getElementById("payment-breakdown").innerHTML,
+    subtotal: document.getElementById("subtotal-price").textContent,
+    discount: document.getElementById("display-discount-value-summary").textContent,
+    discountName: document.getElementById("display-discount-name").textContent,
+    discountCode: document.getElementById("display-discount-code").textContent,
+    discountValue: document.getElementById("display-discount-value").textContent,
+    tax: document.getElementById("tax-price").textContent,
+    processing: document.getElementById("proccessing-price").textContent,
+    total: document.getElementById("total-price").textContent
+  };
+
+  localStorage.setItem("orderSummary", JSON.stringify(summaryData));
+}
+
 

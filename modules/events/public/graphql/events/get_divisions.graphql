@@ -105,7 +105,6 @@ query get_divisions (
                 tax: property_float(name: "tax")
                 availability_start_date: property(name: "availability_start_date")
                 availability_end_date: property(name: "availability_end_date")
-                properties
             }
         }
     }

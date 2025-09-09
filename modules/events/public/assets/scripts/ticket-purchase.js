@@ -574,7 +574,6 @@ async function saveOrder(orderPayload) {
 // Transform ticket data into correct payload format
 function transformTicketData(ticketsData, orderNumber) {
     const ticketPayload = [];
-    const groupTickets = {}; // Track group tickets by tier
     
     ticketsData.forEach(ticket => {
         const baseTicket = {
@@ -589,23 +588,13 @@ function transformTicketData(ticketsData, orderNumber) {
             venue_name: ticket.venue_name || null,
             "purchased_by.uuid": ticketPurchaseData.billing.user_uuid || null,
             order_number: parseInt(orderNumber),
-            allocation_status: "unallocated",
-            reference_code: `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}` 
+            allocation_status: "unallocated"
         };
 
         if (ticket.capacity_type === "group") {
-            // Create group ID for tickets with same tier
-            const tierKey = `${ticket.event_venue_area_uuid}-${ticket["event_pricing_tier.uuid"]}`;
-            
-            if (!groupTickets[tierKey]) {
-                groupTickets[tierKey] = {
-                    groupId: `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-                };
-            }
-            
-            baseTicket.group_id = groupTickets[tierKey].groupId;
+            // Always create a new unique group_id for each group ticket
+            baseTicket.group_id = `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             baseTicket.allocation = "unallocated";
-            baseTicket.reference_code = `REF-${Date.now()}-${Math.random().toString(36).substr(2, 6)}` 
             baseTicket.price_includes_tax = null;
         }
 
@@ -986,19 +975,35 @@ const venueCapacityState = {}; // Stores venue-level capacities
 
 /** Initialize venue states from DOM **/
 const containers = document.querySelectorAll('.ticket-category-container');
-
+/* ---------- Venue states initialization (unchanged except store original number_of_group) ---------- */
 if (containers.length > 0) {
   containers.forEach(container => {
-  const venueState = {
-    uuid: container.dataset.venueUuid,
-    total_capacity: parseInt(container.dataset.totalCapacity),
-    individual_remaining: parseInt(container.dataset.individualRemaining),
-    group_remaining: parseInt(container.dataset.groupRemaining),
-    capacity_per_group: parseInt(container.dataset.capacityPerGroup)
-  };
+    const venueState = {
+      uuid: container.dataset.venueUuid,
+      total_capacity: parseInt(container.dataset.totalCapacity),
+      individual_remaining: parseInt(container.dataset.individualRemaining),
+      group_remaining: parseInt(container.dataset.groupRemaining),
+      capacity_per_group: parseInt(container.dataset.capacityPerGroup),
+      number_of_group: parseInt(container.dataset.numberOfGroup) // fixed total sets (DO NOT MUTATE)
+    };
 
-  venueCapacityState[venueState.uuid] = venueState;
+    venueCapacityState[venueState.uuid] = venueState;
   });
+}
+
+/* ---------- Helper: count selected items ---------- */
+/* - For 'group' we count SETS (each ticketsData entry for a group = 1 set).
+   - For 'individual' we count individual ticket entries. */
+function countSelected(venueUuid, type) {
+  return ticketsData.reduce((sum, ticket) => {
+    if (ticket.event_venue_area_uuid !== venueUuid) return sum;
+    if (type === "group") {
+      // Each pushed group "ticket" represents 1 set
+      return sum + (ticket.capacity_type === "group" ? 1 : 0);
+    } else {
+      return sum + (ticket.capacity_type === "individual" ? 1 : 0);
+    }
+  }, 0);
 }
 
 /** Initialize steppers **/
@@ -1007,172 +1012,202 @@ let ticketCounter = 0; // Unique ticket ID
 
 if (steppers.length > 0) {
   steppers.forEach(stepper => {
-  const input = stepper.querySelector('.input-stepper');
-  const decrementBtn = stepper.querySelector('.decrement');
-  const incrementBtn = stepper.querySelector('.increment');
+    const input = stepper.querySelector('.input-stepper');
+    const decrementBtn = stepper.querySelector('.decrement');
+    const incrementBtn = stepper.querySelector('.increment');
 
-  incrementBtn.addEventListener('click', () => {
-    let value = parseInt(input.value) || 0;
-    const max = parseInt(input.max);
-    if (value < max) {
-      input.value = value + 1;
-      input.dispatchEvent(new Event('input'));
-    }
-  });
+    // Ensure previousCount is numeric string
+    input.dataset.previousCount = String(parseInt(input.value) || 0);
 
-  // Handle decrement
-  decrementBtn.addEventListener('click', () => {
-    let value = parseInt(input.value) || 0;
-    const min = parseInt(input.min);
-    if (value > min) {
-      input.value = value - 1;
-      input.dispatchEvent(new Event('input'));
-    }
-  });
+    /* ---------- Increment: attempt to increase but clamp by allowed sets/tickets ---------- */
+    incrementBtn.addEventListener('click', () => {
+      let value = parseInt(input.value) || 0;
+      const max = parseInt(input.max) || Infinity;
 
-  let previousCount = 0;
+      // Parse stepper data
+      let data;
+      try { data = JSON.parse(input.getAttribute('data')); } catch (e) { console.error('Invalid JSON data on stepper:', e); data = null; }
 
-  input.addEventListener('input', event => {
-    const currentCount = input.value;
-    let data = input.getAttribute('data');
+      // If group type, compute allowed max for THIS stepper based on shared sets
+      if (data && data.capacity_type === "group") {
+        const venue = venueCapacityState[data.event_venue_area_uuid];
+        if (!venue) return;
 
-    try {
-      data = JSON.parse(data);
-    } catch (error) {
-      console.error('Invalid JSON in data attribute:', data);
-      return;
-    }
+        const previous = parseInt(input.dataset.previousCount) || 0;
+        const selectedSets = countSelected(venue.uuid, "group"); // current total sets in ticketsData (including this stepper's previous)
+        const allowedMaxForThisInput = venue.number_of_group - (selectedSets - previous);
 
-    const venueState = venueCapacityState[data.event_venue_area_uuid];
-    if (!venueState) return;
-
-    // Calculate ticket difference
-    let ticketChange = 0;
-    if (data.capacity_type === "group") {
-      const groupSize = data.capacity_per_group || 1;
-      ticketChange = (currentCount - previousCount) * groupSize;
-    } else {
-      ticketChange = currentCount - previousCount;
-    }
-
-    // Check tier capacity
-    let remaining = data.capacity_type === "group"
-      ? venueState.group_remaining
-      : venueState.individual_remaining;
-
-    if (ticketChange > remaining) {
-      stepper.querySelectorAll('input')[0].value = previousCount; // revert
-
-      setTimeout(async() => {
-      let confirm = await App.events.swal(
-          'warning',
-          'Ticket Limit Reached',
-          'You’ve selected the maximum number of tickets available for this tier. Please reduce your quantity or choose a different tier.',
-          'Got it',
-          false,
-          'icon-check-2',
-          '');
-      if (confirm) {
-        //do nothing
+        // Attempt to increment within bounds
+        const newValue = Math.min(value + 1, max, allowedMaxForThisInput);
+        if (newValue === value) {
+          // nothing to do; optionally show a message
+          App.events.notyf('error', 'You have reached the maximum available group sets for this venue.');
+          return;
+        }
+        input.value = String(newValue);
+        input.dispatchEvent(new Event('input'));
+      } else {
+        // Non-group (individual) logic - standard
+        if (value < max) {
+          input.value = value + 1;
+          input.dispatchEvent(new Event('input'));
+        }
       }
-      },100)
+    });
 
-      return;
-    }
-
-    // Update ticketsData
-    const uniqueKey = `${toKebabCase(data.ticket_venue_name)}-${toKebabCase(data.name)}-${toKebabCase(data.capacity_type)}`;
-
-    if (ticketChange > 0) {
-      for (let i = 0; i < ticketChange; i++) {
-        const ticket = { ...data, ticketId: ++ticketCounter, uniqueKey };
-        ticketsData.push(ticket);
+    /* ---------- Decrement ---------- */
+    decrementBtn.addEventListener('click', () => {
+      let value = parseInt(input.value) || 0;
+      const min = parseInt(input.min) || 0;
+      if (value > min) {
+        input.value = value - 1;
+        input.dispatchEvent(new Event('input'));
       }
-    } else if (ticketChange < 0) {
-      for (let i = 0; i < Math.abs(ticketChange); i++) {
-        const index = ticketsData.findIndex(ticket => ticket.uniqueKey === uniqueKey);
-        if (index !== -1) ticketsData.splice(index, 1);
+    });
+
+    /* ---------- Input handler (clamp BEFORE pushing to ticketsData) ---------- */
+    input.addEventListener('input', async () => {
+      const previousCount = parseInt(input.dataset.previousCount) || 0;
+      const currentCount = parseInt(input.value) || 0;
+
+      let data;
+      try {
+        data = JSON.parse(input.getAttribute('data'));
+      } catch (error) {
+        console.error('Invalid JSON in data attribute:', data);
+        // revert to previous to be safe
+        input.value = previousCount;
+        return;
       }
-    }
 
-    // Update venue remaining
-    if (data.capacity_type === "group") {
-      venueState.group_remaining -= ticketChange;
-    } else {
-      venueState.individual_remaining -= ticketChange;
-    }
+      const venueState = venueCapacityState[data.event_venue_area_uuid];
+      if (!venueState) {
+        input.value = previousCount;
+        return;
+      }
 
-    previousCount = currentCount;
-    renderPaymentBreakdown(ticketsData); 
+      // difference (positive means add sets/tickets, negative means remove)
+      let ticketChange = currentCount - previousCount;
 
-    enforceVenueCapacityLimit(data.event_venue_area_uuid);
-  });
+      /* ---------- GROUP: clamp against shared pool BEFORE mutating ticketsData ---------- */
+      if (data.capacity_type === "group") {
+        const maxSets = venueState.number_of_group; // fixed total sets
+        const selectedSets = countSelected(data.event_venue_area_uuid, "group"); // includes this stepper's previousCount currently
+        const otherSets = selectedSets - previousCount; // sets selected by other steppers
+        const allowedMaxForThisInput = maxSets - otherSets; // the most this input can be
+
+        if (currentCount > allowedMaxForThisInput) {
+          // clamp back immediately — do not allow overshoot
+          input.value = previousCount;
+          // optional friendly notice
+          App.events.notyf('error', 'Not enough group sets left for this venue.');
+          return;
+        }
+      } else {
+        /* ---------- INDIVIDUAL: ensure we don't take more than individual_remaining ---------- */
+        const remainingIndividuals = venueState.individual_remaining;
+        if (ticketChange > remainingIndividuals) {
+          input.value = previousCount;
+          App.events.notyf('error', 'Not enough individual tickets remaining for this tier.');
+          return;
+        }
+      }
+
+      /* ---------- SAFE: update ticketsData now ---------- */
+      const uniqueKey = `${toKebabCase(data.ticket_venue_name)}-${toKebabCase(data.name)}-${toKebabCase(data.capacity_type)}`;
+
+      if (ticketChange > 0) {
+        // Add sets/tickets
+        for (let i = 0; i < ticketChange; i++) {
+          const ticket = { ...data, ticketId: ++ticketCounter, uniqueKey };
+          ticketsData.push(ticket);
+        }
+      } else if (ticketChange < 0) {
+        // Remove sets/tickets
+        for (let i = 0; i < Math.abs(ticketChange); i++) {
+          const index = ticketsData.findIndex(ticket => ticket.uniqueKey === uniqueKey);
+          if (index !== -1) ticketsData.splice(index, 1);
+        }
+      }
+
+      /* ---------- Update remaining counts (do NOT mutate number_of_group) ---------- */
+      if (data.capacity_type === "group") {
+        // update group_remaining in units of INDIVIDUAL TICKETS (if you rely on group_remaining elsewhere)
+        if (typeof venueState.capacity_per_group === 'number') {
+          venueState.group_remaining = Math.max(0, venueState.group_remaining - (ticketChange * venueState.capacity_per_group));
+        }
+      } else {
+        venueState.individual_remaining = Math.max(0, venueState.individual_remaining - ticketChange);
+      }
+
+      // persist this input's previous count
+      input.dataset.previousCount = String(currentCount);
+
+      // Recompute UI / totals
+      renderPaymentBreakdown(ticketsData);
+      enforceVenueCapacityLimit(data.event_venue_area_uuid);
+    });
   });
 }
 
-/**
- * Disable/enable steppers when venue reaches full capacity
- */
+/* ---------- Disable/enable steppers when venue reaches full capacity ---------- */
 function enforceVenueCapacityLimit(venueUuid) {
   const venue = venueCapacityState[venueUuid];
   if (!venue) return;
 
-  // Calculate selected per type
+  // selected counts (SETS for group, ITEMS for individual)
   const selectedIndividual = countSelected(venueUuid, "individual");
-  const selectedGroup = countSelected(venueUuid, "group");
+  const selectedGroupSets = countSelected(venueUuid, "group");
 
-  // Compute maxes independently
-  const maxIndividual = venue.individual_remaining + selectedIndividual;
-  const maxGroup = venue.group_remaining + selectedGroup;
+  // maximums
+  const maxIndividual = venue.individual_remaining + selectedIndividual; // current available + selected by user in-memory
+  const maxGroupSets = venue.number_of_group; // fixed total sets
 
-
+  console.log("Venue state:", venue);
+  console.log("Group sets available (total allowed):", maxGroupSets, " | Selected sets:", selectedGroupSets);
 
   steppers.forEach(stepper => {
     const input = stepper.querySelector('.input-stepper');
     const decrementBtn = stepper.querySelector('.decrement');
     const incrementBtn = stepper.querySelector('.increment');
 
-    const stepperData = JSON.parse(input.getAttribute('data'));
-    if (stepperData.event_venue_area_uuid === venueUuid) {
-      const type = stepperData.capacity_type;
-      const uniqueKey = `${toKebabCase(stepperData.ticket_venue_name)}-${toKebabCase(stepperData.name)}-${toKebabCase(stepperData.capacity_type)}`;
-      const hasSelectedTickets = ticketsData.some(ticket => ticket.uniqueKey === uniqueKey);
+    let stepperData;
+    try { stepperData = JSON.parse(input.getAttribute('data')); } catch (e) { stepperData = null; }
 
-      let isTypeFull = false;
+    if (!stepperData || stepperData.event_venue_area_uuid !== venueUuid) return;
 
-      if (type === "group") {
-        isTypeFull = selectedGroup >= maxGroup;
-      } else {
-        isTypeFull = selectedIndividual >= maxIndividual;
-      }
+    const type = stepperData.capacity_type;
+    const uniqueKey = `${toKebabCase(stepperData.ticket_venue_name)}-${toKebabCase(stepperData.name)}-${toKebabCase(stepperData.capacity_type)}`;
+    const hasSelectedTickets = ticketsData.some(ticket => ticket.uniqueKey === uniqueKey);
 
-      if (isTypeFull && !hasSelectedTickets) {
-        input.setAttribute("disabled", true);
-        decrementBtn.setAttribute("disabled", true)
-        incrementBtn.setAttribute("disabled", true)
-      } else {
-        input.removeAttribute("disabled");
-        decrementBtn.removeAttribute("disabled")
-        incrementBtn.removeAttribute("disabled")
-      }
+    let isTypeFull = false;
+    if (type === "group") {
+      isTypeFull = selectedGroupSets >= maxGroupSets;
+    } else {
+      isTypeFull = selectedIndividual >= maxIndividual;
+    }
+
+    if (isTypeFull && !hasSelectedTickets) {
+      input.setAttribute("disabled", true);
+      decrementBtn.setAttribute("disabled", true);
+      incrementBtn.setAttribute("disabled", true);
+    } else {
+      input.removeAttribute("disabled");
+      decrementBtn.removeAttribute("disabled");
+      incrementBtn.removeAttribute("disabled");
     }
   });
 }
-/**
- * Helper to count selected tickets per type
- */
-function countSelected(venueUuid, type) {
-  return ticketsData.reduce((sum, ticket) => {
-    if (ticket.event_venue_area_uuid === venueUuid && ticket.capacity_type === type) {
-      return sum + (type === "group" ? (ticket.capacity_per_group || 1) : 1);
-    }
-    return sum;
-  }, 0);
-}
-/**
+ /*
  * Renders payment breakdown based on current ticketsData
  */
 function renderPaymentBreakdown(ticketsData) {
+  const breakdownContainer = document.getElementById("payment-breakdown");
+  const subtotalElem = document.getElementById("subtotal-price");
+  const taxElem = document.getElementById("tax-price");
+  const processingElem = document.getElementById("proccessing-price");
+  const totalElem = document.getElementById("total-price");
+
   breakdownContainer.innerHTML = '';
 
   if (!ticketsData.length) {
@@ -1184,7 +1219,7 @@ function renderPaymentBreakdown(ticketsData) {
     return;
   }
 
-  // --- Group tickets by venue and tier ---
+  // --- Group tickets by venue ---
   const venueMap = {};
   ticketsData.forEach(ticket => {
     const venue = ticket.ticket_venue_name || 'No Venue';
@@ -1192,10 +1227,9 @@ function renderPaymentBreakdown(ticketsData) {
     venueMap[venue].push(ticket);
   });
 
-  // --- Build global ticket count across all venues and tiers ---
+  // --- Aggregate tickets ---
   let ticketCount = {};
   ticketsData.forEach(ticket => {
-    // Create unique key that includes venue, tier name, and capacity type
     const key = `${ticket.ticket_venue_name || 'No Venue'}-${ticket.name}-${ticket.capacity_type}`;
     if (!ticketCount[key]) {
       ticketCount[key] = { ...ticket, quantity: 0 };
@@ -1210,10 +1244,8 @@ function renderPaymentBreakdown(ticketsData) {
   for (const [venue, tickets] of Object.entries(venueMap)) {
     orderSummaryEl += `<div class="payment-break-downs"><p class="payment-breakdown-venue-name">${venue}</p><div>`;
 
-    // Count tickets per venue and tier for display
     let venueCount = {};
     tickets.forEach(ticket => {
-      // Create unique key that includes tier name and capacity type
       const key = `${ticket.name}-${ticket.capacity_type}`;
       if (!venueCount[key]) {
         venueCount[key] = { ...ticket, quantity: 0 };
@@ -1224,12 +1256,10 @@ function renderPaymentBreakdown(ticketsData) {
     for (const [key, info] of Object.entries(venueCount)) {
       const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
 
-      let displayQty = info.quantity;
-
-      // If group ticket, convert seats → sets using capacity_per_group
-      if (info.capacity_type === "group" && info.capacity_per_group) {
-        displayQty = Math.ceil(info.quantity / info.capacity_per_group);
-      }
+      // Group tickets: 1 object = 1 group set
+      const displayQty = info.capacity_type === "group"
+        ? info.quantity
+        : info.quantity;
 
       const formattedPrice = parseFloat(info.price).toFixed(2);
       const totalPrice = displayQty * parseFloat(info.price);
@@ -1277,7 +1307,6 @@ function renderPaymentBreakdown(ticketsData) {
   for (const [key, info] of Object.entries(ticketCount)) {
     const itemSubtotal = info.price * info.quantity;
 
-    // Distribute total discount proportionally
     const itemDiscount = subtotal > 0 ? (discountAmount * itemSubtotal) / subtotal : 0;
     const itemDiscountedSubtotal = Math.max(itemSubtotal - itemDiscount, 0);
 
@@ -1294,7 +1323,7 @@ function renderPaymentBreakdown(ticketsData) {
   // --- TOTAL ---
   const total = discountedSubtotal + totalTax + processingFee;
 
-  // Update breakdown and totals
+  // --- Update DOM ---
   breakdownContainer.innerHTML = orderSummaryEl;
   breakdownContainer.style.display = 'flex';
   subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
@@ -1302,17 +1331,18 @@ function renderPaymentBreakdown(ticketsData) {
   processingElem.textContent = `$${processingFee.toFixed(2)}`;
   totalElem.textContent = `$${total.toFixed(2)}`;
 
-    const totals = {
-    subtotalWithoutDiscount: priceWithoutDiscount, // before discount
-    subtotalWithDiscount: discountedSubtotal,      // after discount
+  // Save totals
+  const totals = {
+    subtotalWithoutDiscount: priceWithoutDiscount,
+    subtotalWithDiscount: discountedSubtotal,
     tax: totalTax,
     processing: processingFee,
     total: total,
-    discount: discountAmount   
-    };
+    discount: discountAmount
+  };
 
-    window.orderTotals = totals;
-    ticketPurchaseData.orderTotals = totals; 
+  window.orderTotals = totals;
+  ticketPurchaseData.orderTotals = totals;
 }
 
 function calculateSubtotal(ticketsData) {

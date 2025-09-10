@@ -132,12 +132,6 @@
                     {% comment %} Step 3 {% endcomment %}
                     {% include "modules/events/purchase_ticket/payment_step", is_disabled: is_disabled, is_visible: is_visible  %}    
 
-                    {% comment %} Step 4 {% endcomment %}
-                    {% include "modules/events/purchase_ticket/ticket_allocation_step", is_disabled: is_disabled, is_visible: is_visible  %}
-
-                    {% comment %} Step 5 {% endcomment %}
-                    {% include "modules/events/purchase_ticket/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
-
                 </div> 
                 <div  class="large-4 large-offset-1 medium-12 small-12 cell">
                     {% include "modules/events/purchase_ticket/payment_summary" %}
@@ -178,20 +172,6 @@
             </div>
             
             {% comment %} ? BUTTONS - Step 3 (already has buttons from ecommerce module) {% endcomment %}
-
-            {% comment %} ? BUTTONS - Step 4 {% endcomment %}
-            <div id="purchase-ticket-button-step-4" class="grid-x grid-padding-x hide">
-              <div class="large-7 medium-12 small-12 cell">
-                <div class="grid-x">
-                  <div class="cell large-6 medium-6 small-0"> 
-                  </div>
-                  <div class="cell large-6 medium-6 small-12 text-right">
-                    <ins-button type="button" id="submit-ticket-allocation" class="submit-btn" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
-                  </div> 
-                </div>                 
-              </div> 
-              <div class="large-4 large-offset-1 medium-12 small-12 cell"></div>
-            </div>
 
             {% comment %} ? BUTTONS - Step 5 {% endcomment %}
             <div id="purchase-ticket-button-step-5" class="grid-x grid-padding-x hide">

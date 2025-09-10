@@ -65,9 +65,9 @@ metadata: {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {% include 'modules/website/layout/googlemaps' %}
 {%- if context.environment == "staging" -%}
-    <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
-    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/ecommerce/scripts/pay-bills.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
+    <script src="{{ 'modules/events/scripts/checkout/checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/pay-bills.js' | asset_url }}"></script>
 
     <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
@@ -78,9 +78,9 @@ metadata: {
     <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/event-payment.js' | asset_url }}"></script>
 {%- else -%}
-    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout-steps.min.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/ecommerce/scripts/pay-bills.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/checkout/checkout-steps.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/pay-bills.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>

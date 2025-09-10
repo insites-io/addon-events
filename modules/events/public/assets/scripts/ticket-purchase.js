@@ -63,7 +63,7 @@ function updateTicketData() {
 }
 
 // Function to update billing data (Step 2)
-function updateBillingData() {
+async function updateBillingData() {
     const billingFields = document.querySelectorAll(
         "#billing-details ins-input, #billing-details input, #billing-details ins-input-tel, #billing-address-fields ins-input"
     );
@@ -74,10 +74,19 @@ function updateBillingData() {
         const value = field.value || field.getAttribute("value") || "";
         ticketPurchaseData.billing[key] = value;
     });
+
+    const contactPhoneEl = document.getElementById("billing-phone");
+    const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+    const contactPhoneFullValue = await contactPhoneEl.getValue();
+    const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+    const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
+
+    ticketPurchaseData.billing.mobile_phone_country_code = contact_country_code.replace("+", "");
+    ticketPurchaseData.billing.mobile_phone_number = contact_phone_number;
 }
 
 // Function to update contact data (Step 2)
-function updateContactData() {
+async function updateContactData() {
     const orderContactFields = document.querySelectorAll(
         "#account-details ins-input, #account-details input, #account-details ins-input-tel"
     );
@@ -88,6 +97,14 @@ function updateContactData() {
         const value = field.value || field.getAttribute("value") || "";
         ticketPurchaseData.contact[key] = value;
     });
+    const contactPhoneEl = document.getElementById("contact-phone");
+    const contactPhoneCountryData = await contactPhoneEl.getCountryData();
+    const contactPhoneFullValue = await contactPhoneEl.getValue();
+    const contact_country_code = "+" + contactPhoneCountryData.dialCode;
+    const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
+
+    ticketPurchaseData.contact.mobile_phone_country_code = contact_country_code.replace("+", "");
+    ticketPurchaseData.contact.mobile_phone_number = contact_phone_number;
 }
 
 // Function to update payment data (Step 3)
@@ -586,7 +603,7 @@ function transformTicketData(ticketsData, orderNumber) {
             tax: ticket.tax || null,
             tax_type: ticket.tax_type || null,
             venue_name: ticket.venue_name || null,
-            "purchased_by.uuid": ticketPurchaseData.billing.user_uuid || null,
+            "purchased_by.uuid": ticketPurchaseData.contact.user_uuid || null,
             order_number: parseInt(orderNumber),
             allocation_status: "unallocated"
         };
@@ -737,25 +754,42 @@ if (step2) {
         const sourceData = isChecked ? orderContactData : ticketPurchaseData.billing;
         ticketPurchaseData.billing.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || ticketPurchaseData.billing.billing_company_name || "";
 
-
         const billing_payload = {
             temp_billing_address_id: getFieldValue(sourceData, "billing_address_id") || "",
             prefix: getFieldValue(sourceData, "prefix") || "",
-            first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || getFieldValue(billingData, "billing_first_name"),
-            last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || getFieldValue(billingData, "billing_last_name"),
-            email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || getFieldValue(billingData, "billing_email"),
-            company_name: getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || billingData.billing_company_name || "",                
+            first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || ticketPurchaseData.billing.billing_first_name || "",
+            last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || ticketPurchaseData.billing.billing_last_name || "",
+            email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || ticketPurchaseData.billing.billing_email || "",
+            company_name: getFieldValue(
+                sourceData,
+                isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name"
+            ) || ticketPurchaseData.billing.billing_company_name || "",                
             mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
             mobile_phone_number: contact_phone_number || "",
-            uuid: getFieldValue(sourceData, "user_uuid") || ""
+            uuid: getFieldValue(sourceData, "user_uuid") || "",
+
+            billing_address_1: getFieldValue(sourceData, "billing_address_1") || ticketPurchaseData.billing.billing_address_1 || selectedAddress?.address_1 || "",
+            billing_address_2: getFieldValue(sourceData, "billing_address_2") || ticketPurchaseData.billing.billing_address_2 || selectedAddress?.address_2 || "",
+            billing_suburb: getFieldValue(sourceData, "billing_suburb") || ticketPurchaseData.billing.billing_suburb || selectedAddress?.suburb || "",
+            billing_state: getFieldValue(sourceData, "billing_state") || ticketPurchaseData.billing.billing_state || selectedAddress?.state || "",
+            billing_postcode: getFieldValue(sourceData, "billing_postcode") || ticketPurchaseData.billing.billing_postcode || selectedAddress?.postcode || "",
+            billing_country: getFieldValue(sourceData, "billing_country") || ticketPurchaseData.billing.billing_country || selectedAddress?.country || ""
         };
 
+       
+      
         const data = await saveContact(billing_payload);
 
+        if (!ticketPurchaseData.contact.user_uuid) {
+          ticketPurchaseData.contact.user_uuid = data.uuid
+          console.log(ticketPurchaseData)
+        }
+    
         if (data.uuid) {
             secondStep.hasError = false;
             ticketPurchaseStepper.next();
             showStep("payment");
+            scrollToTop();
             contact_payment_uuid.value = data.uuid
             emailpayment_field.value = data.email
             if(data.guest) {
@@ -803,13 +837,16 @@ if (step3) {
         // Update payment data and use global ticketPurchaseData
         updatePaymentData();
         
-        console.log(ticketPurchaseData)
-
+        //from checkout.js
+        let addressCard = selectedAddress
         const orderPayload = {
             order_number: crypto.randomUUID(),
-            billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1"),
-            billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb"),
-            billing_postcode: getFieldValue(ticketPurchaseData.billing, "billing_postcode"),
+
+            billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
+            billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb") || addressCard?.suburb || "",
+            billing_postcode: getFieldValue(ticketPurchaseData.billing, "billing_postcode") || addressCard?.postcode || "",
+            billing_state: getFieldValue(ticketPurchaseData.billing, "billing_state") || addressCard?.state || "",
+            billing_country: getFieldValue(ticketPurchaseData.billing, "billing_country") || addressCard?.country || "",
 
             "billing_company.uuid": getFieldValue(ticketPurchaseData.billing, "company_uuid") || "",
             billing_company_name: getFieldValue(ticketPurchaseData.billing, "company_name") || "",
@@ -825,16 +862,16 @@ if (step3) {
             order_status: "placed",
             order_payment_status: "unpaid",
 
-            "order_company.uuid": getFieldValue(ticketPurchaseData.billing, "company_uuid") || "",
-            order_company_name: getFieldValue(ticketPurchaseData.billing, "company_name") || "",
-            order_company_email: getFieldValue(ticketPurchaseData.billing, "company_email") || "",
+            "order_company.uuid": getFieldValue(ticketPurchaseData.contact, "company_uuid") || "",
+            order_company_name: getFieldValue(ticketPurchaseData.contact, "company_name") || "",
+            order_company_email: getFieldValue(ticketPurchaseData.contact, "company_email") || "",
 
-            "order_contact.uuid": getFieldValue(ticketPurchaseData.billing, "user_uuid") || "",
-            order_contact_first_name: getFieldValue(ticketPurchaseData.billing, "billing_first_name") || "",
-            order_contact_last_name: getFieldValue(ticketPurchaseData.billing, "billing_last_name") || "",
-            order_contact_email: getFieldValue(ticketPurchaseData.billing, "billing_email") || "",
-            order_contact_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
-            order_contact_phone_number: getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
+            "order_contact.uuid": getFieldValue(ticketPurchaseData.contact, "user_uuid") || "",
+            order_contact_first_name: getFieldValue(ticketPurchaseData.contact, "contact_first_name") || "",
+            order_contact_last_name: getFieldValue(ticketPurchaseData.contact, "contact_last_name") || "",
+            order_contact_email: getFieldValue(ticketPurchaseData.contact, "contact_email") || "",
+            order_contact_phone_country_code: getFieldValue(ticketPurchaseData.contact, "mobile_phone_country_code") || "",
+            order_contact_phone_number: getFieldValue(ticketPurchaseData.contact, "mobile_phone_number") || "",
 
             date_time: new Date().toISOString(),
             currency: "AUD",
@@ -1162,9 +1199,6 @@ function enforceVenueCapacityLimit(venueUuid) {
   // maximums
   const maxIndividual = venue.individual_remaining + selectedIndividual; // current available + selected by user in-memory
   const maxGroupSets = venue.number_of_group; // fixed total sets
-
-  console.log("Venue state:", venue);
-  console.log("Group sets available (total allowed):", maxGroupSets, " | Selected sets:", selectedGroupSets);
 
   steppers.forEach(stepper => {
     const input = stepper.querySelector('.input-stepper');

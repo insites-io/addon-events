@@ -44,6 +44,10 @@ var contactServices = (function () {
         updateContact: async function ($payload) {
             let url = "/update-contact"
             return await processRequest('put', url, $payload);
+        },
+        addProfile: async function ($payload) {
+            let url = "/add-profile"
+            return await processRequest('put', url, $payload);
         }
     }
 })();

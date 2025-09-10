@@ -1,0 +1,50 @@
+---
+slug: api/add-profile
+format: json
+method: put
+searchable: false
+---
+
+{%- assign payload = context.params | parse_json -%}
+{%- assign status = 400 -%}
+{% assign errors = "" %}
+
+{% assign password = payload.password | base64_url_safe_decode %}
+
+{% graphql temporary_token = 'modules/events/account/generate_user_temporary_token', email: payload.email | dig: 'items', 'results' | first %}
+
+{% if temporary_token.id %}
+    {% graphql create_user_profile = 'modules/events/account/create_user_profile', id: temporary_token.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true, password: password %}
+    {% else %}
+        {% log 'test' %}
+    {% assign errors = "Failed to create temporary token" %}
+{% endif %}
+
+{% if create_user_profile.user_update.id %}
+    {% assign errors = "" %}
+{% else %}
+    {% assign errors = "Failed to create temporary token" %}   
+{% endif %}
+
+{% log create_user_profile %}
+
+{%- if errors != "" -%}
+{% parse_json data %}
+{
+  "has_error": true,
+  "message":  "{{ errors }}" 
+}
+{% endparse_json %}
+{%- else -%}
+{% parse_json data %}
+{
+  "has_error": false,
+  "message": "Account successfully created"
+}
+{% endparse_json %}
+{%- assign status = 200 -%}
+{%- endif -%}
+
+{{ data }}
+{% comment %} {{ add_order  }} {% endcomment %}
+{%- response_status status -%}

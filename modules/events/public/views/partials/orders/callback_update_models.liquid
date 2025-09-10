@@ -64,7 +64,7 @@ metadata: {
         assign email = payload.billing_contact_email
         assign first_name = payload.order_contact_first_name
         assign last_name = payload.order_contact_last_name
-        ##assign phone_number = payload.billing_contact_last_name 
+        assign contact_uuid = payload["order_contact.uuid"]
     endif
 %}
 
@@ -128,7 +128,6 @@ metadata: {
     "order_contact_email": "{{ email | default: "" }}",
     "order_contact_first_name": "{{ first_name | default: "" }}",
     "order_contact_last_name": "{{ last_name | default: ""  }}",
-    "order_contact_phone_number": "{{ phone_number | default: "" }}",
     "order_status": "{{ order_status | default: "" }}",
     "order_payment_status" : "{{ order_payment_status | default: "" }}",
     "total_amount" : {{ order_data.total_amount |  times: 1.0 | default: 0.0   }},

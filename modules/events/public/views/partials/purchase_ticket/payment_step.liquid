@@ -1,0 +1,123 @@
+<div id="ticket-payment-step" class="hide">
+  <script src="https://js.stripe.com/v3/"></script>
+
+  {% function stripe_settings = "modules/portal/stripe/get_stripe_settings" %}
+  <input type="hidden" id="contact_uuid" value="{{ context.current_user.external_id }}">
+  <input type="hidden" id="contact_email" value="{{ context.current_user.email }}">
+  <input type="hidden" id="stripe_pk_key" value="{{ stripe_settings.pk_key }}">
+  <input type="hidden" id="stripe_account_id" value="{{ stripe_settings.account_id }}">
+
+  <div id="payment-details" class="aa">
+    <div class="grid-x grid-padding-x">
+      <div class="large-6 medium-6 small-12 cell">
+        <h4>Credit card</h4>
+      </div>
+      <div class="large-6 medium-6 small-12 cell text-right">
+        <div id="add-credit-card-button-holder" class="hide">
+          <ins-button type="button" class="add-card-btn" icon="icon-plus" label="Add credit card"></ins-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="validate-credit-card">
+      <div id="credit-card-fields" class="card-fields">
+        <div class="spacer large"></div>
+        <p class="error-message hide">Credit Card is required.</p>
+        <div class="grid-container">
+          <div id="card-options-list" class="grid-x grid-padding-x grid-padding-y"></div>
+        </div>
+
+        <ins-input required validate
+          field="hidden"
+          id="stripe-card"
+          class="hide"
+          name="stripe_credit_card"
+          value="">
+        </ins-input>
+      </div>
+
+        <!-- For members: if no card -->
+        <div id="no-card" class="empty-box hide">
+            <p class="body-large bold">No card added.</p>
+            <div class="spacer"></div>
+            <ins-button solid type="button" class="add-card-btn" icon="icon-plus" label="Add credit card"></ins-button>
+        </div>
+
+        <!-- Guest checkout form -->
+        <div id="guest-add-card-form" class="temp hide">
+        <form id="card-form">
+            <div class="form-row">
+            <div id="card-element"><!-- Stripe element mounts here --></div>
+            <div id="card-errors" class="error-message"></div>
+            </div>
+            <div class="spacer x-large"></div>
+            <div class="grid-x block-btn-container">
+            <div class="large-6 medium-6 small-12 cell">
+                
+            <ins-button id="back-step-3-billing" type="button" outlined label="Back" icon="icon-arrow-back"></ins-button>
+           
+            </div>
+            <div class="large-6 medium-6 small-12 cell text-right">
+                <ins-button type="button" solid class="card-form-submit" label="Add" icon="icon-task-completed"></ins-button>
+            </div>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="grid-x grid-padding-x" id="payment-navigation-button">
+      <div class="large-12 medium-12 small-12 cell">
+        <div class="grid-x grid-padding-x">
+          <div class="large-6 medium-6 small-12 cell">
+            <ins-button id="back-step-3" type="button" label="Back" outlined icon="icon-arrow-back"></ins-button>
+          </div>
+          <div class="large-6 medium-6 small-12 cell text-right">
+            <ins-button solid type="submit" icon="icon-task-completed" id="checkout-ticket-submit-btn" class="w-100 checkout-btn hide" label="Pay now"></ins-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ins-modal for adding new card -->
+<ins-modal id="stripe-modal" no-button with-backdrop height="255px" width="520px" heading="Add new card">
+  <form id="modal-card-form">
+    <div class="form-row">
+      <div id="card-element-2"><!-- Stripe element mounts here --></div>
+      <div id="card-errors" class="error-message"></div>
+    </div>
+    <div class="spacer x-large"></div>
+    <div class="grid-x modal-btn-container align-right">
+      <ins-button type="button" outlined class="card-form-cancel" label="Cancel" icon="icon-x"></ins-button>
+      <ins-button type="button" solid class="card-form-submit" label="Add" icon="icon-task-completed"></ins-button>
+    </div>
+  </form>
+</ins-modal>
+<input type="hidden" id="stripe_pk_key" value="{{ stripe_settings.pk_key }}">
+<input type="hidden" id="card_email" value="{{ context.current_user.email | default: '' }}">
+<input type="hidden" id="card_first_name" value="{{ context.current_user.first_name | default: '' }}">
+<input type="hidden" id="card_last_name" value="{{ context.current_user.last_name | default: '' }}">
+<script>
+    let stripe = Stripe('{{ stripe_settings.pk_key }}');
+    const emailField = document.getElementById("card_email");
+    const stripeFirstName = document.getElementById("card_first_name");
+    const stripeLastName = document.getElementById("card_last_name");
+    const payByCardField = document.getElementById("stripe-card");
+
+</script>
+
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/stripe/stripe-element.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}"></script> 
+{%- else -%}
+    <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/stripe/stripe-element.min.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.min.js' | asset_url }}"></script> 
+{%- endif -%}
+
+
+
+

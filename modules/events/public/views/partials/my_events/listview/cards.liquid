@@ -1,0 +1,98 @@
+{% assign date_now_cards = data_date_now_cards %}
+{% assign data_item = item %}
+
+{% assign custom_field = item.custom_fields |  first %}
+{% assign is_AEDT = custom_field.daylight_savings_time %}
+
+<div class="large-4 medium-12 small-12 cell" data-test="our-team-list-card">
+    <a href="/my-events/{{ item.slug }}">
+        <div class="events-card-smaller card"> 
+            {% if item.event_image.url == nil %}
+                <img loading="lazy" src="{{ 'modules/website/images/default-event-banner.webp' | asset_url }}" alt="{{ item.event_name }}">
+            {% else %}
+                <img loading="lazy" alt="image" src="{{ item.event_image.url }}">
+            {% endif %}
+
+            <div class="event-details-container-smaller portal">
+                <div class="state-status">
+                    <div class="state">
+                        {% for system_fields in item.system_fields %}
+                            {% if system_fields.system_field == get_state_uuid %}
+                                {{ system_fields.value }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="status">
+                        {% assign end_date = item.end_date_time | date: '%s' %}
+                        
+                        {% if end_date < date_now_cards %}
+                            <span class="previous"> Previous Events</span>
+                        {% else %}
+                            <span class="upcoming"> Upcoming Events</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="spacer small"></div>
+                <hr>
+                <div class="spacer small"></div>
+                <h4 class="heading-4">{{ item.event_name }}</h4>
+                <div class="spacer small"></div>
+                
+                {% comment %} ? Comparing Start Date and End Date {% endcomment %}
+                {% assign start_date_comparison = item.start_date_time | date: "%b %d, %y" %}
+                {% assign end_date_comparison =  item.end_date_time | date: "%b %d, %y"  %}
+                
+                {% comment %} ? IF Start and End are Same Date {% endcomment %}
+                {% if start_date_comparison == end_date_comparison %}
+                    <div class="paragraph-body-title-case">
+                        <i class="icon-custom icon-calendar"></i>
+                        <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
+                    </div>
+
+                    <div class="spacer xx-small"></div>
+
+                    {% comment %} ? TIME AND TIMEZONE {% endcomment %}
+                    {% include 'modules/website/content/events/event_time_and_time_zone', data_item: item, start_date_comparison: start_date_comparison, end_date_comparison: end_date_comparison, is_AEDT: is_AEDT  %}   
+                {% else %}
+                
+                    {% comment %} ? TIME AND TIMEZONE {% endcomment %}
+                    {% include 'modules/website/content/events/event_time_and_time_zone', data_item: item, start_date_comparison: start_date_comparison, end_date_comparison: end_date_comparison, is_AEDT: is_AEDT  %}   
+                {% endif %}
+
+                <div class="spacer xx-small"></div>
+
+                <span class="paragraph-body-title-case">
+                    <i class="icon-custom icon-map-pin"></i>
+                    {% if item.event_type == 'venue' %}
+                        {% assign venue = item.venue_details.venue_name %} 
+                    {% else %}
+                        {% if item.event_type == "online_event" %}
+                            {% assign venue = "Online Event" %}
+                        {% else %}
+                            {% assign venue = "To be Announced" %}
+                        {% endif %}   
+                    {% endif %}
+
+                    {{ venue }}
+                </span>
+
+                <div class="spacer xx-small"></div>
+
+                {% if item.event_category.value %}
+                    <span class="paragraph-body-title-case">
+                        <i class="icon-custom icon-bookmark-1"></i>
+                        {{ item.event_category.value }}
+                    </span>
+                {% endif %}
+
+                <div class="spacer xx-small"></div>
+                <div class="div-bottom">
+                    <span class="button-default">
+                        View Event
+                    </span>
+                    <i class="event-icon icon-arrow-forward"></i>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>

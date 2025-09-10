@@ -1,0 +1,404 @@
+<div id="ticket-billing-step" class="hide">
+    {% function has_profile = "modules/website/layout/check_if_user_has_profile" %}
+    {% assign fields = form.fields %}
+    {% assign prop = fields.properties %}
+    {% assign profiles_prop = fields.profiles['modules/insites_core/crm_contact'].properties %}
+
+    {% if has_profile %}
+    {%  liquid
+        assign first_name = context.current_user.first_name
+        assign last_name = context.current_user.last_name
+        assign email = context.current_user.email
+        graphql user_details = "modules/portal/account/get_user_by_email" email: context.current_user.email | dig: "items" | dig: "results" | first
+        assign crm_contact = user_details.crm_contact | first
+        assign company_name = crm_contact.company.company_name
+        assign contact_phone_country_code = crm_contact.mobile_phone_country_code
+        assign contact_phone_number = crm_contact.mobile_phone_number
+        assign user_uuid = context.current_user.external_id
+        assign company_uuid = crm_contact.company_uuid
+    %} 
+    {% else %}
+    {%  liquid      
+        assign first_name = context.session.contact_first_name
+        assign last_name = context.session.contact_last_name
+        assign email = context.session.contact_email
+    %} 
+    {% endif %}
+
+    
+
+    <div id="account-details">
+    <h2 class="heading-2-xsmall">Order contact</h2>
+    <div class="spacer x-large hide-for-small-only"></div>
+    <div class="spacer show-for-small-only"></div>
+    <div class="grid-container">
+        <input id="user_uuid" type="hidden"  value="{{ user_uuid |  default: "" }}" >
+        <div class="grid-x grid-padding-x grid-padding-y account-details">      
+
+            <div class="large-12 medium-12 small-12 cell">
+            {% if context.current_user %}
+                
+                <ins-input   
+                id="contact-company-name"
+                class="label-input" 
+                label="Company Name"
+                placeholder="Company Name" 
+                field="text" 
+                value="{{ company_name }}"
+                name="temp_company_name"
+                readonly >
+                </ins-input>
+
+                <input type="hidden" name="{{ fields.company_name.name }}" value="{{ company_name }}" >
+
+            {% else %} 
+
+                <ins-input   
+                id="contact-company-name"
+                class="label-input" 
+                label="Company Name"
+                placeholder="Company Name" 
+                field="text" 
+                value="{{ company_name }}"
+                name="company_name">
+                </ins-input>
+
+            {% endif %}        
+            </div>
+
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate  
+                id="contact-first-name"
+                class="label-input"
+                label="First Name*"
+                placeholder="First Name" 
+                value="{{ first_name }}"
+                name="{{ fields.first_name.name }}" 
+                {% if form.errors['first_name'] %} has-error {% endif %}
+                error-message="{{ fields.first_name.validation.rules.presence.message }}">
+            </ins-input>
+            </div>
+
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate  
+                id="contact-last-name"
+                class="label-input"
+                label="Last Name*"
+                placeholder="Last Name" 
+                value="{{ last_name }}"
+                name="{{ fields.last_name.name }}" 
+                {% if form.errors['last_name'] %} has-error {% endif %}
+                error-message="{{ fields.last_name.validation.rules.presence.message }}">
+            </ins-input>
+            </div>
+
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate 
+                id="contact-email"
+                class="label-input"
+                {% if context.current_user and context.current_user.email %} readonly {% endif %} 
+                label="Email*"
+                placeholder="Email" 
+                field="email" 
+                value="{{ email }}"
+                name="{{ fields.email.name }}" 
+                {% if form.errors['email'] %} has-error {% endif %}
+                error-message="{{ fields.email.validation.rules.presence.message }}">
+            </ins-input>
+            </div>
+
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input-tel  
+                class="label-input" 
+                id="contact-phone"
+                label="Phone"
+                country-code="{{ contact_phone_country_code | default: '61' }}"  
+                phonenum-value="{{ contact_phone_number }}"
+                phonenum-placeholder="Phone" 
+                no-areacode>
+            </ins-input-tel>
+
+            <input type="hidden" 
+                id="phone-number"
+                name="{{ profiles_prop.mobile_phone_number.name | default: 'mobile_phone_number'}}"
+                value="{{ contact_phone_number }}" >
+
+            <input type="hidden" 
+                id="phone-country-code"
+                name="{{ profiles_prop.mobile_phone_country_code.name | default: 'mobile_phone_country_code'}}"
+                value="{{ contact_phone_country_code }}" >
+            </div>
+
+        </div>
+    </div>
+    </div>      
+
+
+    {% comment %} Billing contact {% endcomment %}
+<div id="billing-details" class="insites-form">
+        
+  <div class="grid-x">
+
+    <div class="cell">
+      <div class="spacer x-large hide-for-small-only"></div>
+      <div class="spacer show-for-small-only"></div>
+      <h4>Billing contact</h4>
+      <div class="spacer x-large hide-for-small-only"></div>
+      <div class="spacer show-for-small-only"></div>
+        <ins-checkbox class="inline" 
+            {% if context.session.billing_same_with_shipping == true %} checked {% endif %}
+            name="{{ prop.billing_same_with_shipping.name }}"
+            value="true"
+            id="billing-same-with-contact" 
+            label="My billing contact is the same as my order contact.">
+        </ins-checkbox>
+    </div>
+
+  </div>
+
+  <div id="billing-contact-inputs" class="grid-x grid-padding-x grid-padding-y  billing-contact {% if context.session.billing_same_with_shipping == true %} hide {% endif %}">
+
+    <div class="large-12 medium-12 small-12 cell">
+      <ins-input  
+        class="label-input" 
+        label="Company Name" 
+        placeholder="Company Name"
+        field="text" 
+        id="billing-company-name" 
+        value="{{ context.session.billing_company_name }}"
+        name="{{ prop.billing_company_name.name }}">
+      </ins-input>
+    </div>
+    <div class="large-6 medium-6 small-12 cell">
+      <ins-input required validate 
+        label="First Name*" 
+        placeholder="First Name"
+        name="{{ prop.billing_contact_first_name.name }}" 
+        id="billing-first-name" 
+        value="{{ context.session.billing_contact_first_name | default: ''}}"
+        error-message="First name is required.">
+      </ins-input>
+    </div>
+    <div class="large-6 medium-6 small-12 cell">
+      <ins-input required validate 
+        label="Last Name*" 
+        placeholder="Last Name"
+        name="{{ prop.billing_contact_last_name.name }}" 
+        id="billing-last-name" 
+        value="{{ context.session.billing_contact_last_name | default: ''}}"
+        error-message="Last name is required.">
+      </ins-input>
+    </div>
+    <div class="large-6 medium-6 small-12 cell">
+      <ins-input required validate 
+        label="Email*" 
+        placeholder="Email*" 
+        field="email"
+        name="{{ prop.billing_contact_email.name }}" 
+        id="billing-email" 
+        value="{{ context.session.billing_contact_email | default: ''}}"
+        error-message="Email is required.">
+      </ins-input>
+    </div>
+    <div class="large-6 medium-6 small-12 cell">
+      <ins-input-tel 
+        class="label-input" 
+        id="billing-phone" 
+        label="Phone"
+        country-code="{{ context.session.billing_contact_phone_country_code | default: '61'}}"
+        phonenum-value="{{ context.session.billing_contact_phone_number | default: ''}}"
+        phonenum-placeholder="Phone" no-areacode>
+      </ins-input-tel>
+
+      <input type="hidden" 
+        id="phone-number"
+        name="{{ prop.billing_contact_phone_number.name }}"
+        value="{{ context.session.billing_contact_phone_number }}" > 
+
+      <input type="hidden" 
+        id="phone-country-code"
+        name="{{ prop.billing_contact_phone_country_code.name }}"
+        value="{{ context.session.billing_contact_phone_country_code }}" >
+    </div>
+  </div>
+
+</div>
+
+<script>
+    var billingSamewithShippingFlag = {{ context.session.billing_same_with_shipping | default: false }};
+</script>
+
+ <div class="hide-for-small-only spacer large"></div>
+    <div class="show-for-small-only spacer small"></div>
+
+    {% if has_profile %}
+        {% include "modules/events/purchase_ticket/billing_form_address", company_uuid: company_uuid %}    
+    {% else %}
+        {% comment %} Search address {% endcomment %}
+        <div id="billing-address-fields" class="address-fields" >
+        <div class="grid-x">        
+            <h4>Billing address</h4>
+        </div>
+        <div class="hide-for-small-only spacer x-large"></div>
+        <div class="show-for-small-only spacer"></div>
+        <div class="grid-x grid-padding-x grid-padding-y">
+            <div class="large-12 medium-12 small-12 cell">
+            <ins-input address-lookup label="Search Address" 
+                id="billing-address-search" name="billing"
+                placeholder="Search Address" icon="icon-map-pin">
+            </ins-input>            
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate 
+                label="Address 1*" 
+                id="billing_address_1"
+                placeholder="Address 1" 
+                name="{{ prop.address_1.name }}"
+                value="{{ context.session.billing_address_1 }}"
+                error-message="Address 1 is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  
+                label="Address 2" 
+                id="billing_address_2" 
+                placeholder="Address 2"
+                name="{{ prop.address_2.name }}"
+                value="{{ context.session.billing_address_2 }}">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate
+                label="Suburb*" 
+                id="billing_suburb" 
+                placeholder="Suburb"
+                name="{{ prop.suburb.name }}"
+                value="{{ context.session.billing_suburb }}"
+                error-message="Suburb is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input required validate 
+                label="State*" 
+                id="billing_state" 
+                placeholder="State"
+                name="{{ prop.state.name }}"
+                value="{{ context.session.billing_state }}"
+                error-message="State is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  required validate 
+                label="Postcode*" 
+                id="billing_postcode"
+                placeholder="Postcode" 
+                name="{{ prop.postcode.name }}"
+                value="{{ context.session.billing_postcode }}"
+                error-message="Postcode is required.">
+            </ins-input>
+            </div>
+            <div class="large-6 medium-6 small-12 cell">
+            <ins-input  required validate 
+                label="Country*" 
+                id="billing_country"
+                placeholder="Country" 
+                name="{{ prop.country.name }}"
+                value="{{ context.session.billing_country }}"
+                error-message="Country is required.">
+            </ins-input>
+            </div>
+        </div>
+        </div>
+    {% endif %}
+
+
+    
+    <div class="spacer xxx-large"></div>       
+
+</div>
+
+<ins-modal id="address-form-modal" with-backdrop no-button >
+    <div class="inviteUserModalBodyContainer">
+        <h5 class="heading-3">Add new address</h5>
+        <div class="spacer"></div> 
+
+        <div class="address-fields" >
+
+            <ins-input address-lookup 
+                label="Search Addresss" name="modal" id="modal_search"              
+                placeholder="Search Addresss" icon="icon-map-pin">
+            </ins-input>  
+
+            <input type="hidden" id="modal_latitude" value="">
+            <input type="hidden" id="modal_longitude" value="">    
+                        
+            <ins-input required validate 
+                label="Address 1*" 
+                id="modal_address_1"
+                placeholder="Address 1" 
+                value=""
+                error-message="Address 1 is required.">
+            </ins-input>
+
+            <ins-input  
+                label="Address 2" 
+                id="modal_address_2" 
+                placeholder="Address 2"
+                value=""
+                error-message="">
+            </ins-input>
+
+            <ins-input validate
+                label="Suburb*" 
+                id="modal_suburb" 
+                placeholder="Suburb"
+                value="" 
+                error-message="Suburb is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="State*" 
+                id="modal_state" 
+                placeholder="State"
+                value=""
+                error-message="State is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="Postcode*" 
+                id="modal_postcode"
+                placeholder="Postcode" 
+                value=""
+                error-message="Postcode is required.">
+            </ins-input>
+
+            <ins-input validate 
+                label="Country*" 
+                id="modal_country"
+                placeholder="Country" 
+                value=""
+                error-message="Country is required.">
+            </ins-input>
+
+            <div class="modal-button">
+                <ins-button
+                    id="address-cancel-btn"
+                    type="button"
+                    class="card-form-cancel"
+                    label="Cancel"
+                    outlined
+                    icon="icon-close-1">
+                </ins-button>
+
+                <ins-button
+                    type="button"
+                    id="address-submit-btn"
+                    label="Add address"
+                    solid
+                    icon="icon-check-2">
+                </ins-button>
+            </div>
+
+        </div>
+    </div>
+</ins-modal>

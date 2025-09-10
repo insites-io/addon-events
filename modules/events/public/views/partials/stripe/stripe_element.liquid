@@ -1,0 +1,90 @@
+---
+metadata: {
+    partial_name: 'Portal | Stripe | Stripe element'
+}
+---
+
+<ins-modal id="stripe-modal" class="stripe-modal"
+    no-button 
+    with-backdrop
+    height="221px" 
+    width="520px"
+    heading="Add new card">
+    <form id="card-form">
+      <script src="https://js.stripe.com/v3/" ></script>
+        <div class="form-row">
+            <div id="card-element">
+              <!-- A Stripe Element will be inserted here. -->
+        </div>
+            <div id="card-errors" class="error-message">
+            </div>
+        </div>
+        <div class="spacer"></div>
+
+    <div class="grid-x hide-for-small-only">
+          <div class="large-12 medium-12 small-12 cell text-right btn-container">
+              <ins-button type="button" 
+                    outlined 
+                  class="card-form-cancel"
+                  label="Cancel"
+                  icon="icon-close">
+              </ins-button>
+              <ins-button type="button" solid 
+                  id="add-cc-button"
+                  class="card-form-submit"
+                  label="Add"
+                  icon="icon-check">
+              </ins-button>
+          </div>
+        </div>
+        <div class="grid-x grid-padding-x show-for-small-only">
+          <div class="small-12 cell btn-container">
+              <ins-button type="button" solid 
+                  class="card-form-submit"
+                  label="Add"
+                  icon="icon-check">
+              </ins-button>
+              <ins-button type="button" outlined 
+                  class="card-form-cancel"
+                  label="Cancel"
+                  icon="icon-close">
+              </ins-button>
+          </div>
+        </div>
+    </form>
+</ins-modal>
+
+<input type="hidden" id="email" value="{{ context.current_user.email }}" >
+
+<input
+  type="hidden"
+  id="stripe-first-name"
+  value="{{ context.current_user.first_name }}">  
+
+<input
+  type="hidden"
+  id="stripe-last-name"
+  value="{{ context.current_user.last_name }}"> 
+
+{% comment %} Get stripe key via get_stripe_settings function {% endcomment %}
+{% assign pk_key_value = get_stripe_settings.pk_key %}
+<input type="hidden" id="pk_key" value="{{ pk_key_value }}" >
+
+<script>
+    let payByCardField = document.getElementById('{{ cc_field_id }}');
+    let emailField = document.getElementById('{{ email_field_id }}');
+    let stripeFirstName = document.getElementById('stripe-first-name');
+    let stripeLastName = document.getElementById('stripe-last-name');
+    // Create a Stripe client.
+
+    let pk_key_value = document.getElementById("pk_key");
+    let stripe = Stripe(pk_key_value.value);
+</script>
+
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}"></script> 
+{%- else -%}
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.min.js' | asset_url }}"></script> 
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.min.js' | asset_url }}"></script> 
+{%- endif -%}

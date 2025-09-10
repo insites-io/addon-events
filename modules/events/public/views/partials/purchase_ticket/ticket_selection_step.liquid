@@ -1,0 +1,14 @@
+{% assign custom_field = event.custom_fields |  first %}
+{% assign is_AEDT = custom_field.daylight_savings_time %}
+<div id="ticket-selection-step" class="hide">
+    {% include 'modules/events/purchase_ticket/event_details_card' %}
+    <div class="spacer xxx-large"></div>
+    <h2 class="heading-2-xsmall">Ticket details</h2>
+    <div class="spacer x-large"></div>
+
+    {% include 'modules/events/purchase_ticket/ticket_section' %}
+    <div class="spacer xxx-large"></div>
+</div>
+
+
+

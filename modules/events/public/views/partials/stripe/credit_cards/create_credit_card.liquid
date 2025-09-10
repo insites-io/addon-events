@@ -1,0 +1,77 @@
+---
+metadata: {
+    partial_name: 'Portal | Stripe | Credit cards | Create credit card'
+}
+---
+
+{% graphql stripe_create_card = 'modules/website/trigger_api_call', name: "modules/portal/create_card",
+    data: stripe_card | dig: 'items' | dig: 'response' %}
+
+    {%- assign stripe_response = stripe_create_card.body | parse_json -%}
+    {% parse_json credit_card %}
+    {
+        "uuid": "{{ '' | uuid }}",
+        "currency": "",
+        "bank_name": "",
+        "card_brand":  "{{ stripe_response.brand }}",
+        "company_uuid": "",
+        "contact_uuid": "{{ stripe_card.contact_uuid }}",
+        "bank_account_bsb": "",
+        "card_expiry_year": "{{ stripe_response.exp_year }}",
+        "bank_account_name": "",
+        "card_expiry_month": " {{ stripe_response.exp_month }}",
+        "payment_method_name": "Stripe",
+        "payment_method_token":  "{{ stripe_response.id }}",
+        "card_last_four_digits": "{{ stripe_response.last4 }}",
+        "bank_account_last_four_digits": ""
+    }
+    {% endparse_json %}
+
+    {% comment %} Create pOS credit card model {% endcomment %}
+    {% graphql card_model = "modules/portal/credit_cards/create_credit_card" args: credit_card  %}
+
+    {% comment %} Create Event Stream {% endcomment %}
+    {%- graphql user = "modules/portal/account/get_user_by_email" 
+    email: context.current_user.email 
+    | dig: "items" | dig: "results" | first -%}
+    {%- assign crm_contact = user.crm_contact | first -%}
+    {%- assign current_user_name = user.first_name | append: ' ' | append: user.last_name | default: user.email -%}
+    {%- capture description -%}
+        <a target="_blank" href="/admin/insites/#/crm/contacts/{{ user.id }}">{{ current_user_name | default: user.email }}</a> 
+        from 
+        <a target="_blank" href="/admin/insites#/crm/companies/{{ crm_contact.company_uuid }}">{{ crm_contact.company.company_name }}</a> 
+        added a new payment method
+    {%- endcapture -%}
+
+    {%- assign payload = '{}' | parse_json -%}
+    {%- assign payload = payload | add_hash_key: "description", description -%}
+    {%- assign payload = payload | add_hash_key: "font_icon", "icon-credit-card" -%}
+    {%- assign payload = payload | add_hash_key: "font_icon_color", "#2ACD1C" -%}
+    {%- assign payload = payload | add_hash_key: "administrator_uuid", user.uuid  -%}
+
+    {% capture log_info -%}
+    {
+        "action": "add_credit_card",
+        "data": {
+            "items": { 
+                "user": {
+                "id": "{{ user.id }}",
+                "email": "{{ user.email }}",
+                "first_name": "{{ user.first_name }}",
+                "last_name": "{{ user.last_name }}"
+                },
+                "card": {
+                "brand": "{{ stripe_response.brand }}" 
+                },
+                "contact_uuid": "{{ user.uuid }}"
+            }
+        }
+    }
+    {%- endcapture %}
+
+    {%- assign log_info_json = log_info | parse_json -%}
+    {%- assign info = payload | add_hash_key: "log", log_info_json -%}
+    {% include 'modules/portal/events/log_event', info %}
+
+{%- comment -%}Return Stripe Card ID{%- endcomment -%}
+{% export stripe_response %}

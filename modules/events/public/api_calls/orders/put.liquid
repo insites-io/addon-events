@@ -1,0 +1,12 @@
+---
+name: update_order
+to: 'https://{{context.location.host}}/ecommerce/api/v2/orders/{{ data.uuid }}'
+format: http
+request_type: PUT
+callback: >
+  {% assign response_hash = response.body | parse_json %}
+request_headers: >
+    {% include 'modules/portal/api_headers' %}
+---
+
+{{ data }}

@@ -1,0 +1,232 @@
+{% assign now = "now" | date: "%s" %} 
+{% assign user_uuid = context.current_user.external_id %}
+{% graphql tickets = 'modules/events/events/tickets/get_tickets', event_uuid: event.uuid, purchased_by_uuid: user_uuid  | dig: 'items','results' %}
+  {% assign grouped_tiers = tickets | group_by: "venue_area_name" %}
+
+{% assign grouped_by_venue = tickets | group_by: "venue_area_name" %}
+<ins-input id="event-uuid" hidden type="hidden" value="{{ context.params.event }}"></ins-input>
+
+{% for venue_group in grouped_by_venue %}
+  {% assign venue_name = venue_group[0] %}
+  {% assign venue_tickets = venue_group[1] %}
+  {% assign first_ticket = venue_tickets[0] %}
+
+  <div class="event-ticket-venue-detail">
+    <h3>{{ venue_name }}</h3>
+    <div class="spacer x-small"></div>
+    <p class="ticket-venue-sub-place">{{ first_ticket.venue_name }} - {{ first_ticket.venue_area.area_name }}</p>
+    <div class="spacer x-small"></div>
+  </div>
+
+  {% assign grouped_by_type = venue_tickets | group_by: "ticket_type" %}
+
+  {% for type_group in grouped_by_type %}
+    {% assign type_name = type_group[0] %}
+    {% assign type_tickets = type_group[1] %}
+
+    {%- comment -%}
+      Collect unique tier names manually
+    {%- endcomment -%}
+    {% assign tier_names = "" %}
+    {% for t in type_tickets %}
+      {% assign tier_names = tier_names | append: t.tier.name | append: "," %}
+    {% endfor %}
+    {% assign tier_names = tier_names | split: "," | uniq %}
+
+    {% for tier_name in tier_names %}
+      {% if tier_name != "" %}
+        {%- assign count = 0 -%}
+        {% for ticket in type_tickets %}
+          {% if ticket.tier.name == tier_name %}
+            {% assign count = count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+
+        {%- comment -%}
+          Handle capacity for group tickets
+        {%- endcomment -%}
+        {% if type_name == "group" %}
+          {% assign capacity = type_tickets[0].venue_area.capacity_per_group | plus: 0 %}
+          {% if capacity > 0 %}
+            {% assign full_groups = count | divided_by: capacity %}
+            {% assign remainder = count | modulo: capacity %}
+
+            {% if remainder > 0 %}
+              {% assign groups = full_groups | plus: 1 %}
+            {% else %}
+              {% assign groups = full_groups %}
+            {% endif %}
+
+            <p>{{ groups }}x group of {{ capacity }} - {{ tier_name }}</p>
+          {% else %}
+            <p>{{ count }}x group - {{ tier_name }}</p>
+          {% endif %}
+        {% else %}
+          <p>{{ count }}x individual - {{ tier_name }}</p>
+        {% endif %}
+        <div class="spacer small"></div>
+        {% assign ticket_index = 0 %}
+        {% for ticket in type_tickets %}
+          {% if ticket.tier.name == tier_name %}
+            {% assign ticket_index = ticket_index | plus: 1 %}
+            <div class="ticket-bought-container">
+              <div class="ticket-card-container">
+                <div class="ticket-position">
+                  <span>{{ ticket_index }}</span>
+                </div>
+
+                <div class="ticket-number-container">
+                  <div class="ticket-number"><strong>Ticket number: {{ ticket.id }}</strong></div>
+                  <div class="ticket-allocation" id="ticket-allocated-details">
+                  {% if ticket.contact_email == null %}
+                    <p>No attendee assigned</p>
+                  {% else %}
+                    <p>{{ ticket.contact_first_name }} {{ ticket.contact_last_name }}</p> <p> {{ ticket.contact_email }}</p>
+                  {% endif %}
+                  </div>
+                </div>
+               
+                <div class="ticket-alloation-modal-button"  
+                  data-ticket-id="{{ ticket.id }}"
+                  data-tier="{{ ticket.tier.name }}"
+                  data-uuid="{{ ticket.uuid }}"
+                  >
+                  <span>Allocate ticket</span>
+                  <i class="icon-arrow-forward ticket-allocation-icon"></i>
+                </div>
+        
+
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+{% endfor %}
+{% comment %} ? ALLOCATE MODAL {% endcomment %}
+<ins-modal id="allocationModal"
+    data=""
+    with-backdrop
+    no-button
+    class="allocationModal" >
+
+    <div class="allocationModalBodyContainer">
+        <div class="allocationModalDetails">
+            <h1 class="heading-1-tiny">Allocate Ticket</h1>
+            <div class="spacer small"></div>
+            <p class="p-body">
+              Assign tickets to your attendees. Please review all information carefully before submitting.
+            </p>
+            <div class="spacer"></div>
+
+            {% comment %} ? TICKET NUMBER {% endcomment %}
+            <ins-input 
+                id="allocate-ticket"
+                disabled
+                label="Ticket Number"
+                name="" 
+                value="">
+            </ins-input>
+            <ins-input 
+                id="allocate-ticket-uuid"
+                hidden
+                type="hidden"
+                value="">
+            </ins-input>
+            <div class="spacer"></div>
+
+            {% comment %} ? NAME {% endcomment %}
+            <div class="allocationModalName">
+                <div class="allocationName">
+                    {% comment %} ? FIRST NAME {% endcomment %}
+                    <ins-input 
+                        id="allocate-first-name"
+                        label="First Name*"
+                        name="" 
+                        value=""
+                        placeholder="First Name">
+                    </ins-input>
+                    <span id="firstNameRequired" class="txt-red body-x-small is_not_visible">Required</span>
+                </div>
+                <div class="allocationName">
+                    {% comment %} ? Last NAME {% endcomment %}
+                    <ins-input 
+                        id="allocate-last-name"
+                        label="Last Name*"
+                        name="" 
+                        value="" 
+                        placeholder="Last Name">
+                    </ins-input>
+                    <ins-input hidden id="allocate-external-id" disabled></ins-input>
+                    <span id="lastNameRequired" class="txt-red body-x-small is_not_visible">Required</span>
+                </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            {% comment %} ? EMAIL ADDRESS {% endcomment %}
+            <div class="allocationModalEmailAddress">
+                <div class="allocationName">
+                    <ins-input
+                        id="allocate-email"
+                        label="Email Address*"
+                        name=""
+                        value="" placeholder="Email">
+                    </ins-input>
+                </div>
+            </div>
+
+            <span id="emailRequired" class="txt-red body-x-small is_not_visible">Required</span>
+            <div class="spacer"></div>
+
+            <ins-input-tel 
+              class="label-input" 
+              id="allocate-phone" 
+              label="Phone"
+              country-code="{{ context.session.billing_contact_phone_country_code | default: '61'}}"
+              phonenum-value="{{ context.session.billing_contact_phone_number | default: ''}}"
+              phonenum-placeholder="Phone Number" no-areacode>
+            </ins-input-tel>
+
+        </div>
+
+        <div class="spacer"></div>
+        <div class="allocation-modal-button-container">
+          <div class="allocationModalButton">
+              <div class="cancelModalButton">
+                  <ins-button 
+                      id="cancel"
+                      type="button" 
+                      class="card-form-cancel"
+                      label="Cancel"
+                      icon="icon-close-1"
+                      outlined>
+                  </ins-button>
+              </div>
+              <div class="allocateModalButton">
+                  <ins-button 
+                      type="submit" 
+                      id="submit-btn" 
+                      label="Allocate" 
+                      solid 
+                      icon="icon-check-2"
+                      >
+                  </ins-button>
+              </div>
+          </div>
+        </div>
+    </div>
+</ins-modal>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+  <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+  <script src="{{ 'modules/events/scripts/ticket-allocation.js' | asset_url }}"></script>
+  <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+{% else %}
+  <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+  <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+  <script src="{{ 'modules/events/scripts/ticket-allocation.js' | asset_url }}"></script>
+{% endif %}
+

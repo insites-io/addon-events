@@ -1,0 +1,45 @@
+---
+metadata: {
+    partial_name: 'Events | Payment | Callback init'
+}
+---
+
+{% comment %} 
+  Steps:
+    1. Gateway / Create Payment
+    2. Update models/records (Payment, Order)
+    3. Email Notification
+{% endcomment %}
+{% comment %} Get Gateway Settings from Ecommerce settings {% endcomment %}
+{% function settings = "modules/portal/pay_bills/get_settings" %}
+{% assign gateway = settings.gateway_name | downcase %}
+
+{% comment %} Step 1: Gateway / Create Payment {% endcomment %}
+{% case gateway %}
+    {% when 'stripe' %}
+        {% comment %}Step 1-A: Stripe payment process{% endcomment %}
+        {% include 'modules/events/stripe/payment/checkout_payment', 
+            data: payload,
+            order_data: order_data %}
+        {% comment %}
+        If new / other payment gateways are supported, insert process here:
+        {% endcomment %}
+
+        {% assign payment_response = context.exports.payment_response %}
+    {% else %}
+        {% log "ERROR: Payment gateway invalid / not set. Please check INS Ecommerce settings." %}
+{% endcase %}
+
+{% assign status = payment_response.status | downcase %}
+{% assign order_id = order_data.id | downcase %}
+{%- assign order_uuid = order_data.uuid | downcase -%}
+
+
+{% comment %} Step 2. Update models/records {% endcomment %}
+ {% include 'modules/events/orders/callback_update_models'
+    status: status,
+    order_id: order_id,
+    order_uuid: order_uuid,
+    payload: payload,
+    order_data: order_data,
+    settings: settings %}

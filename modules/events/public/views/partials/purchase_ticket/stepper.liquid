@@ -1,0 +1,28 @@
+
+{%- liquid
+    if context.flash.notice != blank
+        assign statusPersonal = "complete"
+        assign statusCompany = "complete"
+    endif
+
+    if context.params.slug == 'allocate-ticket'
+        assign status = 'complete'
+        assign allocateTicket = 'active'
+    endif
+
+    if context.params.slug == 'purchase-ticket-thank-you'
+        assign status = 'complete'
+        assign allocateTicket = 'complete'
+    endif
+
+-%}
+
+<div class="form-groups-tab step-scrollbar">        
+    <ins-steps id="ticket-purchase-stepper">
+        <ins-step id="stepper-purchase-stepper" {{ status }} description="Purchase"></ins-step>
+        <ins-step id="stepper-purchase-stepper"  {{ status }} description="Billing"></ins-step>
+        <ins-step id="stepper-purchase-stepper"  {{ status }} description="Payment"></ins-step>
+        <ins-step id="stepper-purchase-stepper" {{ allocateTicket }}  description="Allocate"></ins-step>
+        <ins-step id="stepper-purchase-stepper"   description="Confirmation"></ins-step>
+    </ins-steps>
+</div>

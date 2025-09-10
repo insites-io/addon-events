@@ -3,11 +3,11 @@ metadata: {
     partial_name: 'Ecommerce | Stripe | Checkout Payment'
 }
 ---
-{% assign prop = form.properties %}
+{% assign prop = data %}
 
 {%- liquid
     assign stripe_customer_id = blank
-    assign customer_name = prop.order_contact_first_name | append: ' ' | append: prop.order_contact_last_name
+    assign customer_name = prop.order_contact_first_name | append: ' ' | append: prop.order_contact_first_name
     assign charge_to_this_card = false
 -%}
 
@@ -17,7 +17,7 @@ metadata: {
     if has_profile
         assign customer_email = context.current_user.email
     else
-        assign customer_email = context.session.contact_email
+        assign customer_email = prop.order_contact_email
     endif
 -%}
 
@@ -47,18 +47,18 @@ metadata: {
         "stripe_account_id": "{{ stripe_settings.account_id }}",
         "sk_key_insites": "{{ stripe_settings.sk_key }}",
         "idempotency_key": "{{ '' | uuid }}",
-        "currency": "{{ currency }}",
+        "currency": "AUD",
         "amount": "{{ stripe_amount | advanced_format: '%.0f' }}",
         "customer": "{{ stripe_customer_id }}",
         {%- if charge_to_this_card -%}
             "source": "{{ charge_to_this_card }}",
         {%- endif -%}
-        "description": "Insites Order ID: {{ form.id }} (Insites Customer UUID: {{ user_uuid }})",
+        "description": "Insites Order ID: {{ order_data.id }} (Insites Customer UUID: {{ user_uuid }})",
         "metadata": {
-            "Insites Order ID": "{{ form.id }}",
+            "Insites Order ID": "{{ order_data.id }}",
             "Insites Customer UUID": "{{ user_uuid }}",
-            "Insites Company Name": "{{ prop.billing_company_name }}",
-            "Insites Order": "https://{{ context.location.host }}/admin/insites#/ecommerce/orders/{{ prop.uuid }}"
+            "Insites Company Name": "{{ prop.billing_company_name |  default: "" }}",
+            "Insites Order": "https://{{ context.location.host }}/admin/insites#/ecommerce/orders/{{ order_data.uuid }}"
         },
         "billing_details": {
             "name": "{{ customer_name }}",
@@ -79,6 +79,7 @@ metadata: {
         | dig: "items" | dig: "response" %}
         
     {%- assign payment_response = stripe_create_charge.body | parse_json -%}
+    {% log  payment_response %}
 
     {% log "=== END PROCESS: STRIPE PAYMENT ===" %} 
 

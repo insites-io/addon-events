@@ -1,0 +1,106 @@
+---
+slug: api/create-contact-company
+format: json
+method: post
+searchable: false
+---
+
+{%- assign payload = context.params | parse_json -%}
+{%- assign status = 400 -%}
+
+{% comment %} Check if guest already existing {% endcomment %}
+{%- graphql guest_email = "modules/portal/account/get_user_by_email" 
+    email: payload.email 
+    | dig: "items" | dig: "results" | first -%}
+
+   
+{% if guest_email != nil %}
+  {% assign payload = payload | add_hash_key: 'uuid', guest_email.uuid %}
+  {% graphql update_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/update_contact', 
+      data: payload 
+      | dig: 'items','response','body' | parse_json %}
+
+    {%- liquid
+      if update_contact.id 
+            assign status = 200
+      endif    
+    -%}
+{% else %}
+  {% comment %} Use Insites V2 API {% endcomment %}
+  {%- graphql add_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/add_contact', 
+      data: payload 
+      | dig: 'items','response','body' | parse_json -%}      
+      
+  {% parse_json company_details %}
+      {
+        "company_name": "{{ payload.company_name }}"
+      }
+  {% endparse_json %}   
+
+  {% graphql add_company = 'modules/website/trigger_api_call',
+      name: 'modules/portal/add_company', 
+      data: company_details 
+      | dig: 'items','response','body' | parse_json %}
+
+  {% parse_json update_contact_data %}
+  {
+      "uuid": "{{ add_contact.uuid }}",
+      "email": "{{ add_contact.email }}",
+      "company.uuid": "{{ add_company.uuid }}"
+  }
+  {% endparse_json %}
+
+  {% graphql update_contact = 'modules/website/trigger_api_call', 
+      name: 'modules/portal/update_contact', 
+      data: update_contact_data 
+      | dig: 'items','response','body' | parse_json %}
+
+
+  {% comment %} Set Status {% endcomment %}
+  {%- liquid
+      if add_contact.id 
+            assign status = 200
+      endif
+  -%}
+{% endif %}
+
+
+
+
+
+{% comment %} Add event {% endcomment %}
+{% parse_json event_data %}
+{
+  "font_icon_color": "#048801",
+  "log": {
+    "data": {
+      "created_at": "{{ add_contact.created_at }}",
+      "id": "{{ add_contact.id }}",
+      "updated_at": "{{ add_contact.updated_at }}",
+      "properties": {{ add_contact |  default: '[]'}}
+    },
+    "action": "add_contact",
+    "contact_uuid": "{{ add_contact.uuid }}"
+  },
+  "datetime": "{{ 'now' | date: '%s' }}",
+  "font_icon": "icon-check-2",
+  "module_feature": "crm_contact",
+  "module_source": "insites_core",
+  "administrator_uuid": "",
+  "uuid": "{{ '' | uuid }}",
+  "details": "",
+  "description": "New user <a target='_blank' href='/admin/insites/#/crm/contacts/{{add_contact.id}}'>{{add_contact.first_name}} {{add_contact.last_name}}</a> from <a href='/admin/insites#/crm/companies/{{ add_company.company_uuid }}'>{{ add_company.company_name  }}</a> has been added via ticket purchase."
+}
+{% endparse_json %}
+{%- graphql add_event = 'modules/website/trigger_api_call', 
+     name: "modules/portal/add_events", data: event_data 
+     | dig: 'items','response','body' | parse_json -%}
+
+{%- session guest_uuid = add_contact.uuid  -%}
+{%- session contact_email = add_contact.email -%}
+{% assign update_contact = update_contact | add_hash_key: 'guest', 'true' %}
+
+{{ update_contact  }}
+{%- response_status status -%}

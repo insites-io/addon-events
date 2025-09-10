@@ -1,0 +1,96 @@
+---
+slug: purchase-ticket
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Purchase ticket",
+    page_name: "Purchase Ticket",
+    meta_title: "Purchase Ticket",
+    page_title: "Purchase Ticket",
+    sitemap_order: "1",
+    sitemap_enabled: "true",
+    meta_description: "Purchase Event Tickets",
+    open_graph:title: "Purchase Ticket",
+    open_graph_image: "{ \"uuid\": \"bbf29636-a1d0-4884-90d9-6edc2af0a08f\", \"name\": \"og-banner (3).jpg\", \"size\": 59514, \"type\": \"image/jpeg\", \"url\": \"https://uploads.prod01.sydney.platformos.com/instances/612/property_uploads/modules/insites_core/attachment/file/bbf29636-a1d0-4884-90d9-6edc2af0a08f/og-banner %283%29.jpg\" }",
+    open_graph_title: "Purchase Ticket ",
+    sitemap_priority: "1.0",
+    sitemap_changefreq: "monthly",
+    open_graph:description: "Purchase Ticket",
+    open_graph_description: "Purchase Event Tickets",
+    sitemap_change_frequency: "always",
+}
+--- 
+
+<div id="purchase-ticket">
+    <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div id="loadingMessage" class="loading-message">
+      Checking ticket availability... <br>
+      Hang tight, and please do not leave this screen.
+    </div>
+    </div>
+
+    {% comment %} Stepper {% endcomment %}
+    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/purchase_ticket/stepper' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} Stepper {% endcomment %} 
+    <div id="purchase-ticket-confirmation-message" class="hide">
+        {%- include 'modules/events/purchase_ticket/success_message_section' -%} 
+    </div>
+  {% comment %} Purchase ticket form {% endcomment %}
+    <div class="purchase-ticket-form">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/purchase_ticket/ticket_purchase_form' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} ? EVENT UUID {% endcomment %}
+<input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{% include 'modules/website/layout/googlemaps' %}
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
+    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/pay-bills.js' | asset_url }}"></script>
+
+    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/client/scripts/user-profile.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/event-payment.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/ecommerce/scripts/checkout/checkout-steps.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/ecommerce/scripts/pay-bills.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/user-profile.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+{%- endif -%} 
+
+
+
+
+

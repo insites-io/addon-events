@@ -1,0 +1,55 @@
+query get_venue_area(
+    $page: Int = 1, 
+    $size: Int = 1,
+    $venue_uuid: String,
+    $event_uuid: String
+) {
+    items: records(
+        page: $page
+        per_page: $size
+        filter: {
+            table: { value: "modules/insites_events/event_venue_area" }
+            deleted_at: { exists: false }
+            properties: [
+               { name: "venue_uuid", value: $venue_uuid }
+               { name: "event_uuid", value: $event_uuid }
+            ]
+        }
+    ) {
+        total_entries
+        total_pages
+        per_page
+        current_page
+        results {
+            id
+            created_at
+            uuid:property(name: "uuid")
+            event_uuid:property(name: "event_uuid")
+            venue_uuid:property(name: "venue_uuid")
+            area_name:property(name: "area_name")
+            notes:property(name: "notes")
+            status:property(name: "status")
+
+            total_capacity:property(name: "total_capacity")
+
+            #Individual
+            capacity:property(name: "capacity")
+            individual_ticket_price: property(name: "individual_ticket_price")
+          	individual_ticket_price_2: property(name: "individual_ticket_price_2")
+          	individual_ticket_price_3: property(name: "individual_ticket_price_3")         	
+            is_individual_ticket_enabled: property(name: "is_individual_ticket_enabled")
+          	#Remaining
+          	area_individual_tickets_remaining:property(name: "area_individual_tickets_remaining")
+
+            #Group
+            number_of_groups:property(name: "number_of_groups")
+            capacity_per_group:property(name: "capacity_per_group")
+            group_ticket_price: property(name: "group_ticket_price")
+          	group_ticket_price_2: property(name: "group_ticket_price_2")
+          	group_ticket_price_3: property(name: "group_ticket_price_3")
+            is_group_ticket_enabled: property(name: "is_group_ticket_enabled")
+            #Remaining
+          	area_group_tickets_remaining:property(name: "area_group_tickets_remaining")
+        }
+    }
+}

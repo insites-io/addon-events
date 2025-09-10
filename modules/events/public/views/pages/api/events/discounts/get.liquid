@@ -1,0 +1,10 @@
+---
+slug: api/get-discount-code
+format: json
+method: get
+searchable: false
+---
+{% assign discount_code = context.params.discountCode %}
+{%- graphql get_discount_code = "modules/events/events/discounts/get_discount_code", discount_code: discount_code | dig: "items", "results" | first -%}
+
+{{ get_discount_code }}

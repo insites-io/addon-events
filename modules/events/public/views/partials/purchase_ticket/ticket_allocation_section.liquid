@@ -1,7 +1,16 @@
 {% assign now = "now" | date: "%s" %} 
-{% assign user_uuid = context.current_user.external_id %}
+{% if context.session.last_purchased_user_uuid == nil %}
+  {% assign user_uuid = context.current_user.external_id %}
+{% else %}
+  {% assign user_uuid = context.session.last_purchased_user_uuid %}
+{% endif %}
+
 {% graphql tickets = 'modules/events/events/tickets/get_tickets', event_uuid: event.uuid, purchased_by_uuid: user_uuid  | dig: 'items','results' %}
-  {% assign grouped_tiers = tickets | group_by: "venue_area_name" %}
+{% assign grouped_tiers = tickets | group_by: "venue_area_name" %}
+
+{% if tickets.size < 1 %}
+  <strong>No tickets purchase yet for this event</strong>
+{% endif %}
 
 {% assign grouped_by_venue = tickets | group_by: "venue_area_name" %}
 <ins-input id="event-uuid" hidden type="hidden" value="{{ context.params.event }}"></ins-input>

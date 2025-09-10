@@ -2,7 +2,7 @@ query get_tickets (
     $page: Int = 1,
     $size: Int = 1000,
     $event_uuid: String,
-  	$order_contact_uuid: String,
+  	$purchased_by_uuid: String,
   	$event_venue_area_uuid:String,
   	$event_pricing_tier_uuid:String,
     $sort: RecordsSortInput = { created_at: { order: ASC }}
@@ -15,7 +15,7 @@ query get_tickets (
             deleted_at: { exists: false }
             properties: [
                 { name: "event_uuid", value: $event_uuid },
-              	{ name: "purchased_by_uuid", value: $order_contact_uuid },
+              	{ name: "purchased_by_uuid", value: $purchased_by_uuid },
                 { name: "event_venue_area_uuid", value: $event_venue_area_uuid },
                 { name: "event_pricing_tier_uuid", value: $event_pricing_tier_uuid },
             ]

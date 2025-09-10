@@ -9,7 +9,7 @@ searchable: false
 {%- assign status = 400 -%}
 {% assign errors = "" %}
 
-
+{% log payload, type: "orderpayload"%}
 {% comment %} Use Insites V2 API {% endcomment %}
 {%- graphql add_order = 'modules/website/trigger_api_call', 
      name: 'modules/events/add_order', 
@@ -25,6 +25,7 @@ searchable: false
      {% assign errors = add_order %}
  {% endif %}
  
+ {% log add_order %}
 
 {%- if errors != nil -%}
 {
@@ -37,6 +38,8 @@ searchable: false
   "message": "Order successfully created",
   "data": {{ add_order  }}
 }
+{% session order_uuid = add_order.uuid %}
+{% session last_purchased_user_uuid = add_order.order_contact.uuid %}
 {%- assign status = 200 -%}
 {%- endif -%}
 

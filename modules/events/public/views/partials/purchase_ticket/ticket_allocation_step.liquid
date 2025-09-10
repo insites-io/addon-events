@@ -9,5 +9,20 @@
     <div class="spacer x-large"></div>
 
     {% include 'modules/events/purchase_ticket/ticket_allocation_section' %}
+    {% comment %} ? BUTTONS - Step 4 {% endcomment %}
+    <div id="purchase-ticket-button-step-4" class="grid-x grid-padding-x ">
+        <div class="cell large-6 medium-6 small-0"> 
+        </div>
+        <div class="cell large-6 medium-6 small-12 text-right">
+        <ins-button type="button" id="submit-ticket-allocation" class="submit-btn" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
+        </div> 
+    </div>
     <div class="spacer xxx-large"></div>
 </div>
+
+<script>
+    const submitTicketAllocation = document.getElementById("submit-ticket-allocation")
+    submitTicketAllocation.addEventListener("insClick", () => {
+        window.location.href = "/purchase-ticket-confirmation";
+    })
+</script>

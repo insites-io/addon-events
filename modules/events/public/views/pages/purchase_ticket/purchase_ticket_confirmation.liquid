@@ -1,0 +1,87 @@
+---
+slug: purchase-ticket-confirmation
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Thank you | Purchase ticket",
+    page_name: "Thank you | Purchase Ticket",
+    meta_title: "Thank you | Purchase Ticket",
+    page_title: "Thank you | Purchase Ticket",
+    sitemap_order: "1",
+    sitemap_enabled: "true",
+    meta_description: "Purchase Event Tickets",
+    open_graph:title: "Purchase Ticket",
+    open_graph_image: "{ \"uuid\": \"bbf29636-a1d0-4884-90d9-6edc2af0a08f\", \"name\": \"og-banner (3).jpg\", \"size\": 59514, \"type\": \"image/jpeg\", \"url\": \"https://uploads.prod01.sydney.platformos.com/instances/612/property_uploads/modules/insites_core/attachment/file/bbf29636-a1d0-4884-90d9-6edc2af0a08f/og-banner %283%29.jpg\" }",
+    open_graph_title: "Thank you | Purchase Ticket ",
+    sitemap_priority: "1.0",
+    sitemap_changefreq: "monthly",
+    open_graph:description: "Thank you | Purchase Ticket",
+    open_graph_description: "Thank you | Purchase Event Tickets",
+    sitemap_change_frequency: "always",
+}
+--- 
+{% graphql order_details = "modules/events/orders/get_order_via_uuid",
+    uuid: context.session.order_uuid | dig: 'items' | dig: 'results' | first %}
+<div class="spacer section"></div>
+<div class="thank-you">
+    <div class="grid-x grid-padding-x  align-center">
+        <div class="large-6 medium-6 small-12 cell text-center">
+            <div class="thank-you-img spacer">
+                <i class="icon-number-of-checks"></i>
+            </div>
+            <h3 class="heading-3">We've received your order</h3>
+            <div class="spacer small"></div>
+            <p class="p-body p-dark">Your order has been received with order number <strong>{{ order_details.order_reference }}</strong>. You will receive an email confirmation shortly.</p> 
+            <div class='spacer x-large'></div>
+
+        </div>
+    </div>
+</div>
+<div class="spacer xxxx-large"></div>
+<div class="wrapper">
+<div class="grid-container">
+<div class="grid-x grid-padding-x invoice-details form-group" active>
+    <div  class="large-7 medium-12 small-12 cell">
+        {% include "modules/events/purchase_ticket/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
+    </div>
+
+    <div  class="large-4 large-offset-1 medium-12 small-12 cell">
+        {% include "modules/events/purchase_ticket/payment_summary" %}
+    </div>
+</div>
+</div>
+
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (window.location.pathname.includes("/allocate-ticket") || window.location.pathname.includes("/purchase-ticket-confirmation")) {
+            const saved = localStorage.getItem("orderSummary");
+            if (saved) {
+            const data = JSON.parse(saved);
+
+            // Restore breakdown HTML
+            const breakdownEl = document.getElementById("payment-breakdown");
+            breakdownEl.innerHTML = data.breakdown;
+            breakdownEl.style.display = "block"; // force display
+
+            // Restore totals
+            document.getElementById("subtotal-price").textContent = data.subtotal;
+            document.getElementById("tax-price").textContent = data.tax;
+            document.getElementById("proccessing-price").textContent = data.processing;
+            document.getElementById("total-price").textContent = data.total;
+
+            // 🔒 Always hide discount section
+            document.querySelector(".discount-summary").classList.add("is_not_visible");
+            document.querySelector(".discount-summary-card").classList.add("is_not_visible");
+            }
+        }
+});
+</script>
+
+
+
+

@@ -148,6 +148,7 @@ let Checkout = (function () {
                 return cardHtml;
             },
             checkSelectedCard(){
+                console.log('test1')
                 const cards = document.querySelectorAll('ins-checkbox-card');
         
                 cards.forEach(card => {
@@ -459,6 +460,7 @@ let Checkout = (function () {
                 }
             },
             selectAddressCard(addressCard) {
+                console.log('test')
                 let name = addressCard.getAttribute('name');
       
                 // Remove State of address field cards

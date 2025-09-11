@@ -30,8 +30,8 @@ dynamic_cache:
     {{context.current_user.id}}
 ---
 
-{% graphql user_event_uuids = "modules/events/event_tickets/get_user_event_tickets", 
-     contact_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
+{% graphql user_event_uuids = "modules/events/event_tickets/get_user_purchased_tickets", 
+    purchased_by_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
 
 
 {% if context.params.slug2 %}

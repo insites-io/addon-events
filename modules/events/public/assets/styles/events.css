@@ -1524,9 +1524,22 @@ ins-tag.preorder-tag span.ins-tag {
 .portal.event-details .col-1 {
     width: 100%;
 }
+.portal.event-details ins-tab-item>div {
+    padding: 56px 0px 0px;
+}
 .portal.event-details ins-tab .ins-tab {
     border: none;
     box-shadow: none;
+}
+.portal.event-details ins-tab li{
+    margin-bottom: 0px;
+}
+/* Portal - Ticket Allocation */
+.portal.event-details .ticket-alloation-modal-button {
+    min-width: 180px;
+}
+.portal.event-details .download-wrapper {
+    min-width: 188px;
 }
 
 /* Overview */
@@ -2747,6 +2760,32 @@ ins-button.add-credit-card button.ins-button>div,
   justify-content: space-between;
   padding: 24px;
   margin-bottom: 24px;
+  gap: 24px;
+}
+@media screen and (max-width: 1023px) {
+    .portal.event-details .ticket-card-container {
+        flex-direction: column;
+    }
+    .portal.event-details .ticket-card-container .ticket-allocation {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .portal.event-details .ticket-card-container .ticket-number {
+        margin-bottom: 16px;
+    }
+    .portal.event-details .col-1 .ticket-card-container p {
+        margin-bottom: 0px;
+    }
+    .portal.event-details .ticket-alloation-modal-button {
+        justify-content: center;
+    }
+    .portal.event-details .download-wrapper button {
+        width: 100%;
+        margin-top: -8px;
+    }
+    .portal.event-details .ticket-card-container .itinerary-previous {
+        display: none;
+    }
 }
 
 .ticket-position {
@@ -2832,9 +2871,10 @@ ins-button.add-credit-card button.ins-button>div,
   color: #B30000;
 }
 
-#ticket-allocated-details {
+.ticket-card-container .ticket-allocation {
   display: flex;
   justify-content: space-between;
+  gap: 24px;
 }
  
 /* Ticket selection */

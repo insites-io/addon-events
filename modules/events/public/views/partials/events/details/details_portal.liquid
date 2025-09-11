@@ -48,12 +48,12 @@ metadata: {
                          <ins-tab-item 
                          active 
                          label="Event details">
-                         {% include 'modules/events/events/details/tab_event_details', event: event %}
+                              {% include 'modules/events/events/details/tab_event_details', event: event %}
                          </ins-tab-item>
 
                          <ins-tab-item
                          label="Ticket & attendee details">
-                         </ins-tab-item>
+                              {% include 'modules/events/purchase_ticket/ticket_allocation_step', event_uuid: event.uuid, is_disabled: is_disabled, is_visible: is_visible %}
                     </ins-tab>     
 
                     

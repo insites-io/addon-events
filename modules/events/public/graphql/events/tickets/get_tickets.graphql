@@ -5,6 +5,7 @@ query get_tickets (
   	$purchased_by_uuid: String,
   	$event_venue_area_uuid:String,
   	$event_pricing_tier_uuid:String,
+    $expires_in_seconds: Int,
     $sort: RecordsSortInput = { created_at: { order: ASC }}
 ) {
     items: records(
@@ -42,6 +43,10 @@ query get_tickets (
             contact_first_name: property(name: "contact_first_name")
             contact_last_name: property(name: "contact_last_name")
             contact_email: property(name: "contact_email")
+
+            ticket_pdf: property_upload(name: "ticket_pdf", expires_in: expires_in_seconds) {
+          	  url
+          	}
 
             venue_area: related_record(
                 table: "modules/insites_events/event_venue_area"

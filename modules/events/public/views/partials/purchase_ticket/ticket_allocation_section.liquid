@@ -5,15 +5,40 @@
   {% assign user_uuid = context.session.last_purchased_user_uuid %}
 {% endif %}
 
-{% graphql tickets = 'modules/events/events/tickets/get_tickets', event_uuid: event.uuid, purchased_by_uuid: user_uuid  | dig: 'items','results' %}
+{% liquid 
+    if context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous'
+      assign event_uuid = event.uuid
+      assign is_portal_page = true
+    else 
+      assign event_uuid = context.params.event
+      assign is_portal_page = false
+    endif
+%}
+
+{% comment %} 
+  ticket_pdf must be accessible only for page /itinerary-upcoming 
+  604800 (one week) is the max value for graphql expires_in
+{% endcomment %}
+{% parse_json args %}
+{
+  {% if context.params.slug == 'itinerary-upcoming' %}
+  "expires_in_seconds": 604800,
+  {% endif %}
+  "event_uuid": "{{ event_uuid }}",
+  "purchased_by_uuid": "{{ user_uuid }}"
+}
+{% endparse_json %}
+
+{% graphql tickets = 'modules/events/events/tickets/get_tickets', args: args  | dig: 'items','results' %}
 {% assign grouped_tiers = tickets | group_by: "venue_area_name" %}
+
 
 {% if tickets.size < 1 %}
   <strong>No tickets purchase yet for this event</strong>
 {% endif %}
 
 {% assign grouped_by_venue = tickets | group_by: "venue_area_name" %}
-<ins-input id="event-uuid" hidden type="hidden" value="{{ context.params.event }}"></ins-input>
+<ins-input id="event-uuid" hidden type="hidden" value="{{ event_uuid }}"></ins-input>
 
 {% for venue_group in grouped_by_venue %}
   {% assign venue_name = venue_group[0] %}
@@ -95,14 +120,27 @@
                   </div>
                 </div>
                
-                <div class="ticket-alloation-modal-button"  
-                  data-ticket-id="{{ ticket.id }}"
-                  data-tier="{{ ticket.tier.name }}"
-                  data-uuid="{{ ticket.uuid }}"
-                  >
-                  <span>Allocate ticket</span>
-                  <i class="icon-arrow-forward ticket-allocation-icon"></i>
-                </div>
+                {% if context.params.slug == 'itinerary-previous' %}
+                  {% comment %} Keep this empty div for the design spacing {% endcomment %}
+                  <div class="flex-child-auto itinerary-previous"></div>
+                {% else %}
+                  <div class="ticket-alloation-modal-button"  
+                    data-ticket-id="{{ ticket.id }}"
+                    data-tier="{{ ticket.tier.name }}"
+                    data-uuid="{{ ticket.uuid }}"
+                    >
+                    <span>Allocate ticket</span>
+                    <i class="icon-arrow-forward ticket-allocation-icon"></i>
+                  </div>
+                {% endif %}
+
+                {% if context.params.slug == 'itinerary-upcoming' %}
+                  <div class="align-center-middle download-wrapper">
+                    <a href="{{ ticket.ticket_pdf.url }}" target="_blank">
+                      <ins-button type="button" id="download" label="Download ticket" icon="icon-download" outlined ></ins-button>
+                    </a>
+                  </div>
+                {% endif %}
         
 
               </div>

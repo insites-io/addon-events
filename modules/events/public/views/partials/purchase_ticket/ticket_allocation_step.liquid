@@ -1,23 +1,45 @@
+{% liquid 
+    if context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous'
+        assign show_element = false
+        graphql event = 'modules/events/events/get_event_by_uuid', uuid: event_uuid | dig: "items", "results" | first
+    else
+        assign show_element = true
+        ## variable 'event' is passed from the parent
+    endif
+%}
+
 {% assign custom_field = event.custom_fields |  first %}
 {% assign is_AEDT = custom_field.daylight_savings_time %}
+
 <div id="ticket-allocation-step">
-    {% include 'modules/events/purchase_ticket/event_details_card' %}
-    <div class="spacer xxx-large"></div>
+
+    {% if show_element %}
+        {% include 'modules/events/purchase_ticket/event_details_card' %}
+        <div class="spacer xxx-large"></div>
+    {% endif %}
+    
     <h2 class="heading-2-xsmall">Attendee details</h2>
-    <div class="spacer small"></div>
-    <p>Know who's coming? Allocate now to personalise your tickets. You can change your allocations in the portal at any time before the event.</p>
+
+    {% if show_element %}
+        <div class="spacer small"></div>
+        <p>Know who's coming? Allocate now to personalise your tickets. You can change your allocations in the portal at any time before the event.</p>
+    {% endif %}
+
     <div class="spacer x-large"></div>
 
-    {% include 'modules/events/purchase_ticket/ticket_allocation_section' %}
+    {% include 'modules/events/purchase_ticket/ticket_allocation_section', event: event %}
+
     {% comment %} ? BUTTONS - Step 4 {% endcomment %}
-    <div id="purchase-ticket-button-step-4" class="grid-x grid-padding-x ">
-        <div class="cell large-6 medium-6 small-0"> 
+    {% if show_element %}
+        <div id="purchase-ticket-button-step-4" class="grid-x grid-padding-x ">
+            <div class="cell large-6 medium-6 small-0"> 
+            </div>
+            <div class="cell large-6 medium-6 small-12 text-right">
+            <ins-button type="button" id="submit-ticket-allocation" class="submit-btn" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
+            </div> 
         </div>
-        <div class="cell large-6 medium-6 small-12 text-right">
-        <ins-button type="button" id="submit-ticket-allocation" class="submit-btn" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
-        </div> 
-    </div>
-    <div class="spacer xxx-large"></div>
+        <div class="spacer xxx-large"></div>
+    {% endif %}
 </div>
 
 <script>

@@ -10,29 +10,11 @@ metadata: {
     "page_title": "Upcoming Events | Insites",
     "meta_title": "Upcoming Events | Insites" 
 }
-dynamic_cache:
-  layout: true
-  key: |-
-    {%- parse_json models -%}
-    [
-      "modules/insites_cms/global",
-      "modules/insites_core/localisation",
-      "modules/website/menu",
-      "modules/website/features",
-      "modules/insites_events/event",
-      "modules/insites_events/venue",      
-      "modules/insites_events/event_speaker",
-      "modules/insites_events/event_sponsor",
-      "modules/insites_events/event_faq",
-      "modules/insites_events/event_ticket"
-    ]
-    {%- endparse_json -%}
-    {%- include "modules/website/cache/generate_cache_key", models: models -%}
-    {{context.current_user.id}}
+#do not add dynamic_cache here, the download need to refresh to be
 ---
 
-{% graphql user_event_uuids = "modules/events/event_tickets/get_user_event_tickets", 
-     contact_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
+{% graphql user_event_uuids = "modules/events/event_tickets/get_user_purchased_tickets", 
+    purchased_by_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
 
 {% if context.params.slug2 %}
     {% comment %} Details view {% endcomment %}

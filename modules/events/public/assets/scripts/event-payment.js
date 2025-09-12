@@ -38,11 +38,7 @@ document.addEventListener("click", (e) => {
     }
 });
 
-/**
- * Load saved cards
- * @param {boolean} isGuest - true if this is a guest checkout
- * @param {string} guestUuid - optional UUID for guest to fetch saved cards
- */
+
 async function loadCards(isGuest = false, guestUuid = null) {
     if(isGuest) {
         isGuestUser = true

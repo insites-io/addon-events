@@ -5,20 +5,20 @@ max_deep_level: 1
 authorization_policies:
 metadata: {
     status: "published",
-    heading: "Thank you | Purchase ticket",
-    page_name: "Thank you | Purchase Ticket",
-    meta_title: "Thank you | Purchase Ticket",
-    page_title: "Thank you | Purchase Ticket",
+    heading: "Purchase Ticket Confirmation",
+    page_name: "Purchase Ticket Confirmation",
+    meta_title: "Purchase Ticket Confirmation",
+    page_title: "Purchase Ticket Confirmation",
     sitemap_order: "1",
     sitemap_enabled: "true",
     meta_description: "Purchase Event Tickets",
     open_graph:title: "Purchase Ticket",
     open_graph_image: "{ \"uuid\": \"bbf29636-a1d0-4884-90d9-6edc2af0a08f\", \"name\": \"og-banner (3).jpg\", \"size\": 59514, \"type\": \"image/jpeg\", \"url\": \"https://uploads.prod01.sydney.platformos.com/instances/612/property_uploads/modules/insites_core/attachment/file/bbf29636-a1d0-4884-90d9-6edc2af0a08f/og-banner %283%29.jpg\" }",
-    open_graph_title: "Thank you | Purchase Ticket ",
+    open_graph_title: "Purchase Ticket Confirmation ",
     sitemap_priority: "1.0",
     sitemap_changefreq: "monthly",
-    open_graph:description: "Thank you | Purchase Ticket",
-    open_graph_description: "Thank you | Purchase Event Tickets",
+    open_graph:description: "Purchase Ticket Confirmation",
+    open_graph_description: "Purchase Ticket Confirmation",
     sitemap_change_frequency: "always",
 }
 --- 
@@ -42,7 +42,7 @@ metadata: {
 <div class="spacer xxxx-large"></div>
 <div class="wrapper">
 <div class="grid-container">
-<div class="grid-x grid-padding-x invoice-details form-group" active>
+<div class="grid-x grid-padding-x invoice-details form-group">
     <div  class="large-7 medium-12 small-12 cell">
         {% include "modules/events/purchase_ticket/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
     </div>
@@ -79,6 +79,9 @@ metadata: {
             document.querySelector(".discount-summary-card").classList.add("is_not_visible");
             }
         }
+
+        const summaryContainer = document.getElementById("ticket-payment-summary-container")
+        summaryContainer.style.display = 'block'
 });
 </script>
 

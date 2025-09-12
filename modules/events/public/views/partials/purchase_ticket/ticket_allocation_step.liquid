@@ -1,3 +1,9 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Allocation Step'
+}
+---
+    
 {% liquid 
     if context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous'
         assign show_element = false
@@ -35,7 +41,7 @@
             <div class="cell large-6 medium-6 small-0"> 
             </div>
             <div class="cell large-6 medium-6 small-12 text-right">
-            <ins-button type="button" id="submit-ticket-allocation" class="submit-btn" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
+            <ins-button type="button" id="submit-ticket-allocation" class="submit-btn ticket-buttons" label="Confirm" icon-right="icon-arrow-forward" solid ></ins-button>
             </div> 
         </div>
         <div class="spacer xxx-large"></div>

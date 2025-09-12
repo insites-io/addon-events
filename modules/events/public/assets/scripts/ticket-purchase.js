@@ -221,7 +221,6 @@ if (cardContainer) {
 async function getDiscountCodeDetails(){
   let url = '/get-discount-code?'+ 'discountCode='+ discount_code_value.value;
   let response = await apiServices.processRequest('get', url);
-  console.log(response)
   return response
 }
 
@@ -452,6 +451,8 @@ function toKebabCase(str) {
 // Back navigation logic
 const backStep2 = document.getElementById('back-step-2');
 const backStep3 = document.getElementById('back-step-3');
+const backStep31 = document.getElementById('back-step-3-1');
+const backStep3Billing = document.getElementById('back-step-3-billing');
 
 if (backStep2) {
   backStep2.addEventListener('click', () => {
@@ -464,6 +465,24 @@ if (backStep2) {
 
 if (backStep3) {
   backStep3.addEventListener('click', () => {
+    showStep("billing");
+    if (ticketPurchaseStepper) {
+      ticketPurchaseStepper.setStep(2);
+    }
+  });
+}
+
+if (backStep31) {
+  backStep31.addEventListener('click', () => {
+    showStep("billing");
+    if (ticketPurchaseStepper) {
+      ticketPurchaseStepper.setStep(2);
+    }
+  });
+}
+
+if (backStep3Billing) {
+  backStep3Billing.addEventListener('click', () => {
     showStep("billing");
     if (ticketPurchaseStepper) {
       ticketPurchaseStepper.setStep(2);
@@ -520,10 +539,13 @@ function initializeStep() {
           hideLoading();
           scrollToTop();
       }
-  }, 200);
+  }, 500);
 }
 
-let currentStep = initializeStep();
+window.addEventListener("load", () => {
+  initializeStep();
+});
+
 
 // Billing Checkbox Sync
 if (checkbox && billingInputs) {
@@ -662,7 +684,6 @@ if (step1) {
         const steps = await ticketPurchaseStepper.getAllSteps();
         const firstStep = steps[0];
         let isValid = true
-        console.log(ticketsData)
         if (!ticketsData || ticketsData.length === 0) {
           isValid = false
         } 
@@ -782,8 +803,9 @@ if (step2) {
 
         if (!ticketPurchaseData.contact.user_uuid) {
           ticketPurchaseData.contact.user_uuid = data.uuid
-          console.log(ticketPurchaseData)
         }
+
+    
     
         if (data.uuid) {
             secondStep.hasError = false;
@@ -798,8 +820,6 @@ if (step2) {
             }else {
                 loadCards(false);
             }
-        
-            
         } else {
             console.error("An error occurred, Please try again.");
         }
@@ -1400,3 +1420,39 @@ function saveOrderSummary() {
 }
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.location.pathname !== "/purchase-ticket") return;
+
+  const stepper = document.getElementById("ticket-purchase-stepper");
+  if (!stepper || typeof stepper.getAllSteps !== "function") return;
+
+  stepper.getAllSteps().then(allSteps => {
+    allSteps.forEach((step, index) => {
+      step.style.cursor = "pointer";
+
+      step.addEventListener("click", async () => {
+        const stepsNow = await stepper.getAllSteps();
+
+        // Find current active step index by checking inner .ins-step.active
+        let currentIndex = -1;
+        stepsNow.forEach((s, i) => {
+          const inner = s.querySelector(".ins-step");
+          if (inner && inner.classList.contains("active")) {
+            currentIndex = i;
+          }
+        });
+
+        // ✅ Only allow going backwards (completed steps)
+        if (index < currentIndex) {
+          stepper.setStep(index + 1);
+
+          switch (index) {
+            case 0: showStep("selection"); break;
+            case 1: showStep("billing"); break;
+            case 2: showStep("payment"); break;
+          }
+        }
+      });
+    });
+  });
+});

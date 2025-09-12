@@ -1,3 +1,9 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Selection Step'
+}
+---
+
 {% assign custom_field = event.custom_fields |  first %}
 {% assign is_AEDT = custom_field.daylight_savings_time %}
 <div id="ticket-selection-step" class="hide">

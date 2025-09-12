@@ -1,3 +1,8 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Payment Step'
+}
+---
 <div id="ticket-payment-step" class="hide">
   <script src="https://js.stripe.com/v3/"></script>
 
@@ -40,7 +45,18 @@
         <div id="no-card" class="empty-box hide">
             <p class="body-large bold">No card added.</p>
             <div class="spacer"></div>
-            <ins-button solid type="button" class="add-card-btn" icon="icon-plus" label="Add credit card"></ins-button>
+            <div class="grid-x grid-padding-x" id="payment-navigation-button">
+              <div class="large-12 medium-12 small-12 cell">
+                <div class="grid-x grid-padding-x grid-padding-y">
+                  <div class="large-6 medium-6 small-12 cell">
+                    <ins-button id="back-step-3-1" type="button" label="Back"  class="ticket-buttons" outlined icon="icon-arrow-back"></ins-button>
+                  </div>
+                  <div class="large-6 medium-6 small-12 cell text-right">
+                    <ins-button solid type="button" class="add-card-btn icket-buttons" icon="icon-plus" label="Add credit card"></ins-button>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
 
         <!-- Guest checkout form -->
@@ -51,14 +67,12 @@
             <div id="card-errors" class="error-message"></div>
             </div>
             <div class="spacer x-large"></div>
-            <div class="grid-x block-btn-container">
+            <div class="grid-x grid-padding-y block-btn-container">
             <div class="large-6 medium-6 small-12 cell">
-                
-            <ins-button id="back-step-3-billing" type="button" outlined label="Back" icon="icon-arrow-back"></ins-button>
-           
+              <ins-button id="back-step-3-billing" type="button" outlined label="Back" icon="icon-arrow-back" class="ticket-buttons"></ins-button>
             </div>
             <div class="large-6 medium-6 small-12 cell text-right">
-                <ins-button type="button" solid class="card-form-submit" label="Add" icon="icon-task-completed"></ins-button>
+                <ins-button type="button" solid class="card-form-submit ticket-buttons" label="Add" icon="icon-task-completed"></ins-button>
             </div>
             </div>
         </form>
@@ -68,12 +82,12 @@
     <div class="spacer"></div>
     <div class="grid-x grid-padding-x" id="payment-navigation-button">
       <div class="large-12 medium-12 small-12 cell">
-        <div class="grid-x grid-padding-x">
+        <div class="grid-x grid-padding-x grid-padding-y">
           <div class="large-6 medium-6 small-12 cell">
-            <ins-button id="back-step-3" type="button" label="Back" outlined icon="icon-arrow-back"></ins-button>
+            <ins-button id="back-step-3" type="button" label="Back"  class="ticket-buttons" outlined icon="icon-arrow-back"></ins-button>
           </div>
           <div class="large-6 medium-6 small-12 cell text-right">
-            <ins-button solid type="submit" icon="icon-task-completed" id="checkout-ticket-submit-btn" class="w-100 checkout-btn hide" label="Pay now"></ins-button>
+            <ins-button solid type="submit" icon="icon-task-completed" id="checkout-ticket-submit-btn" class="w-100 checkout-btn hide ticket-buttons" label="Pay now"></ins-button>
           </div>
         </div>
       </div>

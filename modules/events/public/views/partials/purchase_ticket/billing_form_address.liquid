@@ -1,3 +1,10 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Billing Step | Billing Form Address'
+}
+---
+
+
 {% comment %} Get user's and company's addresses {% endcomment %}
 {% assign related_uuid = '' |  split: ',' %}
 {% assign related_uuid = related_uuid | array_add: context.current_user.external_id %}

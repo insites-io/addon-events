@@ -2432,6 +2432,11 @@ ins-button.add-credit-card button.ins-button>div,
     width: 50%;
 }
 
+.event-details-card-img  img{
+    height: 100%;
+    object-fit: cover;
+}
+
 .event-details-card-details {
     width: 45%;
     display: flex;
@@ -2448,6 +2453,11 @@ ins-button.add-credit-card button.ins-button>div,
     gap: 8px;
     display: flex;
     align-items: center;
+}
+
+.event-details-card-details .paragraph-body-title-case i,
+.event-details-card-location-details i { 
+    color:  #3044FF;
 }
 
 .event-ticket-venue-detail h3 {
@@ -2730,13 +2740,21 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .ticket-position span {
-  padding: 16px 26px;
-  border-radius: 100px;
-  background:  #F3F4F4;
+    padding: 16px 26px;
+    border-radius: 100px;
+    background: #F3F4F4;
+    font-size: 24px;
+    color: #05051D;
+    font-weight: 700;
+    font-family: 'DM Sans';
 }
 
 .ticket-number-container {
-  width: 50%;
+    width: 50%;
+}
+
+.ticket-number { 
+    color: #05051D;
 }
 
 .ticket-alloation-modal-button {
@@ -2746,7 +2764,9 @@ ins-button.add-credit-card button.ins-button>div,
   padding: 11px 24px;
   cursor:pointer;
   border-radius: 100px;
+    justify-content: center;
 }
+
 .ticket-alloation-modal-button:hover {
   background: rgba(48, 68, 255, 0.06);
 
@@ -2930,4 +2950,91 @@ ins-button.add-credit-card button.ins-button>div,
   border-radius: 4px;
   color: #636368;
   font-weight: 700;
+}
+
+.icon-map-pin {
+    align-self: flex-start;
+    margin-top: 4px;
+}
+
+.purchase-page {
+    overflow: hidden;
+}
+
+@media screen and (max-width: 1023px) { 
+    .ticket-stepper-container {
+        overflow-x: scroll;
+    }
+    .ticket-stepper-container .step-scrollbar {
+        width: 100%;
+    } 
+}
+
+@media screen and (max-width: 639px) {  
+
+ 
+    #event-details-card {
+        justify-content: space-between;
+        flex-direction: column;
+        gap: 24px
+    }
+
+    .event-details-card-details {
+        width: 100%;
+    }
+
+     .event-details-card-img {
+        width: 100%;
+     }
+
+    .event-details-card-img img { 
+        object-fit: cover;
+        min-height: 200px;
+        width: 100%;
+    }
+
+    .ticket-purchaser {
+        flex-direction: column;
+        gap: 16px;
+        justify-content: normal;
+        align-items: normal;
+    }
+
+    .ticket-purchaser-counter { 
+        justify-content: space-between;
+    }
+
+    .ticket-buttons ins-button,
+    .ticket-buttons,
+    .ticket-buttons button {
+        width: 100%;
+        display: block;
+    }
+
+    #ticket-payment-summary-container,
+    .ticket-payment-summary-container {
+        display: none;
+    }
+
+    .ticket-card-container {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .ticket-number-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .ticket-allocation {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .payment-details-confirmation {
+        margin-top: 24px;
+    }
+
 }

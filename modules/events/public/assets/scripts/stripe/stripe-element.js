@@ -83,7 +83,6 @@ let StripeElement = (() => {
                         this.setButtonLoading(false);
                         App.events.notyf('success', "Credit card has been added.");
                         this.makeCardElement(result.token);
-                        console.log(response)
                         card.clear();
                         
                         if (stripeCardModal) {

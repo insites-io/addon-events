@@ -22,7 +22,6 @@ let StripeModel = (() => {
                     id: id,
                     properties: { is_enabled: false }
                 }
-                console.log(payload)
                 let response = await StripeServices.deleteCreditCard({ payload });
                 if (response.state) {
                     return response;

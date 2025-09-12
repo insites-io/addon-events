@@ -67,26 +67,22 @@ metadata: {
 {%- if context.environment == "staging" -%}
     <script src="{{ 'modules/events/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
     <script src="{{ 'modules/events/scripts/checkout/checkout.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/events/scripts/pay-bills.js' | asset_url }}"></script>
-
     <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/client/scripts/user-profile.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/event-payment.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
 {%- else -%}
-    <script src="{{ 'modules/events/scripts/checkout/checkout-steps.min.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/events/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script>
-    <script src="{{ 'modules/events/scripts/pay-bills.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script> 
+    <script src="{{ 'modules/events/scripts/checkout/checkout.min.js' | asset_url }}" defer></script>
     <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/user-profile.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/event-payment.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
 {%- endif -%} 
 

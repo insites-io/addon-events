@@ -1,3 +1,9 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Selection Step | Ticket Section'
+}
+---
+
 {% graphql venues = 'modules/events/events/get_divisions', event_uuid: event.uuid | dig: 'items','results' %}
 {% assign now = "now" | date: "%s" %}
 <div class="accordion">
@@ -119,27 +125,22 @@
 
                   {% if venue_remaining == 0 %}
                     <div class="ticket-purchaser-counter">
-                      ${{ ticket_tier.price }}
+                      <span>${{ ticket_tier.price }}</span>
                       <div class="ticket-unavailable">Sold out</div>
                     </div>
                   {% elsif ticket_tier.availability_start_date != blank and start_date > now %}
                     <div class="ticket-purchaser-counter">
-                      ${{ ticket_tier.price }}
+                      <span>${{ ticket_tier.price }}</span>
                       <div class="ticket-unavailable">Not available</div>
                     </div>
                   {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
                     <div class="ticket-purchaser-counter">
-                      ${{ ticket_tier.price }}
+                      <span>${{ ticket_tier.price }}</span>
                       <div class="ticket-unavailable">Not available</div>
                     </div>
                   {% else %}
                     <div class="ticket-purchaser-counter">
-                      ${{ ticket_tier.price }}
-                      {% comment %} <ins-input-stepper
-                        data='{{ ticket_data | json }}'
-                        min="0"
-                        max="{{ max_tickets }}">
-                      </ins-input-stepper> {% endcomment %}
+                      <span>${{ ticket_tier.price }}</span>
                        <div class="number-input" >
                         <button class="decrement">-</button>
                         <input data='{{ ticket_data | json }}' type="number" class="input-stepper" value="0" min="0" max="{{ max_tickets }}">

@@ -1,3 +1,10 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Allocation Step | Ticket Allocation Section'
+}
+---
+
+
 {% assign now = "now" | date: "%s" %} 
 {% if context.session.last_purchased_user_uuid == nil %}
   {% assign user_uuid = context.current_user.external_id %}

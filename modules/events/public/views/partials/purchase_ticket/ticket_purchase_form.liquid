@@ -1,3 +1,8 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Purchase Form'
+}
+---
 
 {% comment %} Get event details {% endcomment %}
 {% assign event_uuid = context.params.event %}
@@ -59,7 +64,6 @@
     
     <input type="hidden" id="bill-total-amount" name="{{ props.total_amount.name }}">
     <input type="hidden" id="bill-notes" name="{{ props.uuid.name }}" >
-    <input type="hidden" id="bill-notes" value="{{uuid}}" name="{{ props.uuid.name }}" >
 
     <input type="hidden" id="invoice-number" name="{{ props.order_reference.name }}" value="{{ "" | uuid }}">
     <input type="hidden" id="bill-order-value" name="{{ props.subtotal_amount.name }}">
@@ -142,14 +146,14 @@
             {% comment %} ? BUTTONS - Step 1 {% endcomment %}
             <div id="purchase-ticket-button-step-1" class="grid-x grid-padding-x">
               <div class="large-7 medium-12 small-12 cell">
-                  <div class="grid-x">
-                      <div class="cell large-6 medium-6 small-4"> 
-                        <a onclick="history.back()">
+                  <div class="grid-x grid-padding-y">
+                      <div class="cell large-6 medium-6 small-12"> 
+                        <a class="ticket-buttons" onclick="history.back()">
                           <ins-button type="button" id="cancel-button" label="Cancel" icon="icon-close-1" outlined ></ins-button>
                         </a>
                       </div>
-                      <div class="cell large-6 medium-6 small-8 text-right">
-                        <ins-button {{ is_disabled }} type="button" id="submit-purchase" class="submit-btn" label="Contact & billing" icon-right="icon-arrow-forward" solid ></ins-button>
+                      <div class="cell large-6 medium-6 small-12 text-right">
+                        <ins-button {{ is_disabled }} type="button" id="submit-purchase" class="submit-btn ticket-buttons" label="Contact & billing" icon-right="icon-arrow-forward" solid ></ins-button>
                       </div>
                   </div>                    
               </div> 
@@ -159,12 +163,12 @@
             {% comment %} ? BUTTONS - Step 2 {% endcomment %}
             <div id="purchase-ticket-button-step-2" class="grid-x grid-padding-x hide">
               <div class="large-7 medium-12 small-12 cell">
-                <div class="grid-x">
-                  <div class="cell large-6 medium-6 small-4"> 
-                      <ins-button type="button" id="back-step-2" label="Back" icon="icon-arrow-left" outlined ></ins-button>
+                <div class="grid-x grid-padding-y">
+                  <div class="cell large-6 medium-6 small-12"> 
+                      <ins-button type="button" id="back-step-2" label="Back" icon="icon-arrow-left" class="ticket-buttons" outlined ></ins-button>
                   </div>
                   <div class="cell large-6 medium-6 small-12 text-right">
-                    <ins-button type="button" id="submit-billing-info" class="submit-btn" label="Proceed to payment" icon-right="icon-arrow-forward" solid ></ins-button>
+                    <ins-button type="button" id="submit-billing-info" class="submit-btn ticket-buttons" label="Proceed to payment" icon-right="icon-arrow-forward" solid ></ins-button>
                   </div> 
                 </div>                 
               </div> 
@@ -176,7 +180,7 @@
             {% comment %} ? BUTTONS - Step 5 {% endcomment %}
             <div id="purchase-ticket-button-step-5" class="grid-x grid-padding-x hide">
               <div class="large-7 medium-12 small-12 cell">
-                <div class="grid-x">
+                <div class="grid-x grid-padding-y">
                   <div class="cell large-6 medium-6 small-0"> 
                   </div>
                   <div class="cell large-6 medium-6 small-12 text-right">

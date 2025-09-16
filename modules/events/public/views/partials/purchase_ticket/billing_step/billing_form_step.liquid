@@ -238,7 +238,7 @@ metadata: {
     <div class="show-for-small-only spacer small"></div>
 
     {% if has_profile %}
-        {% include "modules/events/purchase_ticket/billing_form_address", company_uuid: company_uuid %}    
+        {% include "modules/events/purchase_ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
     {% else %}
         {% comment %} Search address {% endcomment %}
         <div id="billing-address-fields" class="address-fields" >

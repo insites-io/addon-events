@@ -3,6 +3,8 @@ slug: api/check-ticket-availability
 format: json
 method: get
 searchable: false
+# authorization_policies:
+#   - modules/insites_core/has_valid_instance_api_authorization
 ---
 
 {%- assign payload = context.params | parse_json -%}

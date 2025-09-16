@@ -119,7 +119,7 @@ metadata: {
                             <div class="grid-x grid-padding-x invoice-details form-group" active>
                                 <div  class="large-7 medium-12 small-12 cell">
                                     {% comment %} Step 4 {% endcomment %}
-                                    {% include "modules/events/purchase_ticket/ticket_allocation_step", event: event, is_disabled: is_disabled, is_visible: is_visible  %}
+                                    {% include "modules/events/purchase_ticket/allocation_step/ticket_allocation_step", event: event, is_disabled: is_disabled, is_visible: is_visible  %}
                                 </div> 
                                 <div  class="large-4 large-offset-1 medium-12 small-12 cell">
                                     {% include "modules/events/purchase_ticket/payment_summary" %}

@@ -45,7 +45,7 @@ metadata: {
     </ins-input> 
             
     {%- comment -%} Address cards {%- endcomment -%}
-    {%- include 'modules/events/purchase_ticket/billing_form_address_card', addresses: addresses, selected_card: context.session.billing_address_id | default: "", type: 'billing' -%}
+    {%- include 'modules/events/purchase_ticket/billing_step/billing_form_address_card', addresses: addresses, selected_card: context.session.billing_address_id | default: "", type: 'billing' -%}
 
 </div>
 

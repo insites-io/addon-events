@@ -4,32 +4,17 @@ metadata: {
 }
 ---
 
-{% parse_json filters %}
+{% parse_json params %}
 {
-  "page": 1,
-  "size": 50,
-  "sort_by": "sponsor_weighting",
-  "order": "ASC"
-  {% comment %}  
-  Additional filters that can be used to retrieve sponsors:
-  "search_by": "first_name",
-  "keyword": "John",
-  {% endcomment %}
+     "page" : 1,
+     "size" : 50,
+     "sort_by" : "sponsor_weighting",     
+     "sort_order" : "ASC"
 }
 {% endparse_json %}
+{% function event_sponsors = "events/event_sponsors/list", uuid: event.uuid, params: params  %}
 
-{% parse_json sponsors_payload %}
-{
-     "uuid": "{{ event.uuid }}",
-     "query_string": "{{ filters | querify }}"
-}
-{% endparse_json %}
-
-{% graphql sponsors = 'modules/website/trigger_api_call', 
-     name: 'modules/events/get_sponsors', 
-     data: sponsors_payload
-     | dig: 'items','response','body' | parse_json
-     | dig: 'results' %}
+{% assign sponsors = event_sponsors | dig: 'results' %}
 
      
 {% if sponsors.size > 0 %}

@@ -26,7 +26,8 @@ query get_filter_category_location (
       uuid: property(name: "uuid")
       event_name: property(name: "event_name")
       event_type: property(name: "event_type")
-      venue_state: property(name: "venue_state")      
+      venue_state: property(name: "venue_state")   
+      category_uuid: property(name: "category_uuid")   
       category: related_record(
         table: "modules/insites_events/event_system_field"
         join_on_property: "category_uuid"

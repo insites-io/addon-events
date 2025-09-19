@@ -57,7 +57,13 @@ metadata: {
      {% liquid 
           assign category_options = 'All' | split: ','
           for category in category_location
+               ## Used for Category options
                assign category_options = category_options | array_add: category.category.value
+
+               ## Used for filtering the list of events by category
+               if category.category.value == selected_category
+                    assign selected_category_uuid = category.category_uuid
+               endif
           endfor
           assign category_options = category_options | array_uniq | array_compact
      %}

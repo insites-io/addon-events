@@ -6,7 +6,7 @@ metadata: {
 <div id="ticket-payment-step" class="hide">
   <script src="https://js.stripe.com/v3/"></script>
 
-  {% function stripe_settings = "modules/portal/stripe/get_stripe_settings" %}
+  {% function stripe_settings = "modules/events/stripe/get_stripe_settings" %}
   <input type="hidden" id="contact_uuid" value="{{ context.current_user.external_id }}">
   <input type="hidden" id="contact_email" value="{{ context.current_user.email }}">
   <input type="hidden" id="stripe_pk_key" value="{{ stripe_settings.pk_key }}">
@@ -80,7 +80,7 @@ metadata: {
     </div>
 
     <div class="spacer"></div>
-    <div class="grid-x grid-padding-x" id="payment-navigation-button">
+    <div class="grid-x grid-padding-x" id="payment-navigation-button-w-cards">
       <div class="large-12 medium-12 small-12 cell">
         <div class="grid-x grid-padding-x grid-padding-y">
           <div class="large-6 medium-6 small-12 cell">

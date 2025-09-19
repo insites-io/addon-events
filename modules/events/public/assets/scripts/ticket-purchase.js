@@ -619,7 +619,7 @@ function transformTicketData(ticketsData, orderNumber) {
             ticket_type: ticket.capacity_type,
             venue_area_name: ticket.ticket_venue_name,
             "venue.uuid": ticket.venue_uuid,
-            "event_venue_area.uuid": ticket.event_venue_area_uuid,
+            "event_pricing_division.uuid": ticket.event_pricing_division_uuid,
             "event_pricing_tier.uuid": ticket["event_pricing_tier.uuid"],
             price: parseFloat(ticket.price),
             tax: ticket.tax || null,
@@ -776,27 +776,29 @@ if (step2) {
         ticketPurchaseData.billing.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || ticketPurchaseData.billing.billing_company_name || "";
 
         const billing_payload = {
-            temp_billing_address_id: getFieldValue(sourceData, "billing_address_id") || "",
-            prefix: getFieldValue(sourceData, "prefix") || "",
-            first_name: getFieldValue(sourceData, isChecked ? "contact_first_name" : "billing_first_name") || ticketPurchaseData.billing.billing_first_name || "",
-            last_name: getFieldValue(sourceData, isChecked ? "contact_last_name" : "billing_last_name") || ticketPurchaseData.billing.billing_last_name || "",
-            email: getFieldValue(sourceData, isChecked ? "contact_email" : "billing_email") || ticketPurchaseData.billing.billing_email || "",
-            company_name: getFieldValue(
-                sourceData,
-                isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name"
-            ) || ticketPurchaseData.billing.billing_company_name || "",                
-            mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
-            mobile_phone_number: contact_phone_number || "",
-            uuid: getFieldValue(sourceData, "user_uuid") || "",
+          temp_billing_address_id: getFieldValue(sourceData, "billing_address_id") || "",
 
-            billing_address_1: getFieldValue(sourceData, "billing_address_1") || ticketPurchaseData.billing.billing_address_1 || selectedAddress?.address_1 || "",
-            billing_address_2: getFieldValue(sourceData, "billing_address_2") || ticketPurchaseData.billing.billing_address_2 || selectedAddress?.address_2 || "",
-            billing_suburb: getFieldValue(sourceData, "billing_suburb") || ticketPurchaseData.billing.billing_suburb || selectedAddress?.suburb || "",
-            billing_state: getFieldValue(sourceData, "billing_state") || ticketPurchaseData.billing.billing_state || selectedAddress?.state || "",
-            billing_postcode: getFieldValue(sourceData, "billing_postcode") || ticketPurchaseData.billing.billing_postcode || selectedAddress?.postcode || "",
-            billing_country: getFieldValue(sourceData, "billing_country") || ticketPurchaseData.billing.billing_country || selectedAddress?.country || ""
+          // Always from orderContactData
+          prefix: getFieldValue(orderContactData, "prefix") || "",
+          first_name: getFieldValue(orderContactData, "contact_first_name") || getFieldValue(orderContactData, "first_name") || "",
+          last_name: getFieldValue(orderContactData, "contact_last_name") || getFieldValue(orderContactData, "last_name") || "",
+          email: getFieldValue(orderContactData, "contact_email") || getFieldValue(orderContactData, "email") || "",
+          company_name: getFieldValue(
+              orderContactData,
+              getFieldValue(orderContactData, "user_uuid") ? "temp_company_name" : "company_name"
+          ) || "",
+          mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
+          mobile_phone_number: contact_phone_number || "",
+          uuid: getFieldValue(orderContactData, "user_uuid") || "",
+
+          // The rest can still come from sourceData/billing/address fallbacks
+          billing_address_1: getFieldValue(sourceData, "billing_address_1") || ticketPurchaseData.billing.billing_address_1 || selectedAddress?.address_1 || "",
+          billing_address_2: getFieldValue(sourceData, "billing_address_2") || ticketPurchaseData.billing.billing_address_2 || selectedAddress?.address_2 || "",
+          billing_suburb: getFieldValue(sourceData, "billing_suburb") || ticketPurchaseData.billing.billing_suburb || selectedAddress?.suburb || "",
+          billing_state: getFieldValue(sourceData, "billing_state") || ticketPurchaseData.billing.billing_state || selectedAddress?.state || "",
+          billing_postcode: getFieldValue(sourceData, "billing_postcode") || ticketPurchaseData.billing.billing_postcode || selectedAddress?.postcode || "",
+          billing_country: getFieldValue(sourceData, "billing_country") || ticketPurchaseData.billing.billing_country || selectedAddress?.country || ""
         };
-
        
       
         const data = await saveContact(billing_payload);
@@ -1053,7 +1055,7 @@ if (containers.length > 0) {
    - For 'individual' we count individual ticket entries. */
 function countSelected(venueUuid, type) {
   return ticketsData.reduce((sum, ticket) => {
-    if (ticket.event_venue_area_uuid !== venueUuid) return sum;
+    if (ticket.event_pricing_division_uuid !== venueUuid) return sum;
     if (type === "group") {
       // Each pushed group "ticket" represents 1 set
       return sum + (ticket.capacity_type === "group" ? 1 : 0);
@@ -1087,7 +1089,7 @@ if (steppers.length > 0) {
 
       // If group type, compute allowed max for THIS stepper based on shared sets
       if (data && data.capacity_type === "group") {
-        const venue = venueCapacityState[data.event_venue_area_uuid];
+        const venue = venueCapacityState[data.event_pricing_division_uuid];
         if (!venue) return;
 
         const previous = parseInt(input.dataset.previousCount) || 0;
@@ -1137,7 +1139,7 @@ if (steppers.length > 0) {
         return;
       }
 
-      const venueState = venueCapacityState[data.event_venue_area_uuid];
+      const venueState = venueCapacityState[data.event_pricing_division_uuid];
       if (!venueState) {
         input.value = previousCount;
         return;
@@ -1149,7 +1151,7 @@ if (steppers.length > 0) {
       /* ---------- GROUP: clamp against shared pool BEFORE mutating ticketsData ---------- */
       if (data.capacity_type === "group") {
         const maxSets = venueState.number_of_group; // fixed total sets
-        const selectedSets = countSelected(data.event_venue_area_uuid, "group"); // includes this stepper's previousCount currently
+        const selectedSets = countSelected(data.event_pricing_division_uuid, "group"); // includes this stepper's previousCount currently
         const otherSets = selectedSets - previousCount; // sets selected by other steppers
         const allowedMaxForThisInput = maxSets - otherSets; // the most this input can be
 
@@ -1202,7 +1204,7 @@ if (steppers.length > 0) {
 
       // Recompute UI / totals
       renderPaymentBreakdown(ticketsData);
-      enforceVenueCapacityLimit(data.event_venue_area_uuid);
+      enforceVenueCapacityLimit(data.event_pricing_division_uuid);
     });
   });
 }
@@ -1228,7 +1230,7 @@ function enforceVenueCapacityLimit(venueUuid) {
     let stepperData;
     try { stepperData = JSON.parse(input.getAttribute('data')); } catch (e) { stepperData = null; }
 
-    if (!stepperData || stepperData.event_venue_area_uuid !== venueUuid) return;
+    if (!stepperData || stepperData.event_pricing_division_uuid !== venueUuid) return;
 
     const type = stepperData.capacity_type;
     const uniqueKey = `${toKebabCase(stepperData.ticket_venue_name)}-${toKebabCase(stepperData.name)}-${toKebabCase(stepperData.capacity_type)}`;

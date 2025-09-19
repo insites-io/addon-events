@@ -96,7 +96,7 @@ metadata: {
                 {% assign ticket_data = '{}' | parse_json %}
                 {% assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type %}
                 {% assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price %}
-                {% assign ticket_data = ticket_data | add_hash_key: "event_venue_area_uuid", ticket_tier.event_venue_area_uuid %}
+                {% assign ticket_data = ticket_data | add_hash_key: "event_pricing_division_uuid", ticket_tier.event_pricing_division_uuid %}
                 {% assign ticket_data = ticket_data | add_hash_key: "name", ticket_tier.name %}
                 {% assign ticket_data = ticket_data | add_hash_key: "tax", ticket_tier.tax %}
                 {% assign ticket_data = ticket_data | add_hash_key: "tax_type", ticket_tier.tax_type %}

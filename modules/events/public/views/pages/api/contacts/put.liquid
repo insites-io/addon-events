@@ -9,11 +9,7 @@ searchable: false
 {%- assign status = 400 -%}
 
 {% comment %} Use Insites V2 API {% endcomment %}
-{%- graphql update_contact = 'modules/website/trigger_api_call', 
-     name: 'modules/portal/update_contact', 
-     data: payload 
-     | dig: 'items','response','body' | parse_json -%}            
-
+ {% function update_contact = "crm/controller/contacts/update", uuid: payload.uuid, params: payload %}
 {% comment %} Set Status {% endcomment %}
 {%- liquid
      if update_contact.id 

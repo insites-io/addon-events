@@ -7,7 +7,7 @@ query get_divisions (
         page: $page,
         per_page: $size,
         filter: {
-            table:{ value: "modules/insites_events/event_venue_area" }
+            table:{ value: "modules/insites_events/event_pricing_division" }
             deleted_at: { exists: false }
             properties: [
                 { name: "event_uuid", value: $event_uuid }
@@ -55,7 +55,7 @@ query get_divisions (
             individual_tickets: related_records(
                 table: "modules/insites_events/event_ticket"
                 join_on_property: "uuid"
-                foreign_property: "event_venue_area_uuid",
+                foreign_property: "event_pricing_division_uuid",
                 filter: {
                     properties: [
                         { name: "event_uuid", value: $event_uuid },
@@ -69,7 +69,7 @@ query get_divisions (
             group_tickets: related_records(
                 table: "modules/insites_events/event_ticket"
                 join_on_property: "uuid"
-                foreign_property: "event_venue_area_uuid"
+                foreign_property: "event_pricing_division_uuid"
                 filter: {
                     properties: [
                         { name: "event_uuid", value: $event_uuid },
@@ -83,7 +83,7 @@ query get_divisions (
             tiers: related_records(
                 table: "modules/insites_events/event_pricing_tier"
                 join_on_property: "uuid"
-                foreign_property: "event_venue_area_uuid"
+                foreign_property: "event_pricing_division_uuid"
                 sort: [
                     {
                         properties: [
@@ -96,7 +96,7 @@ query get_divisions (
                 created_at
                 updated_at
                 uuid: property(name: "uuid")
-                event_venue_area_uuid: property(name: "event_venue_area_uuid")
+                event_pricing_division_uuid: property(name: "event_pricing_division_uuid")
                 capacity_type: property(name: "capacity_type")
                 name: property(name: "name")
                 price: property_float(name: "price")

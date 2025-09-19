@@ -5,7 +5,7 @@ const noCardBox = document.getElementById("no-card");
 const addCardBtnHolder = document.getElementById("add-credit-card-button-holder");
 const checkoutBtn = document.getElementById("checkout-ticket-submit-btn");
 const stripeModal = document.getElementById("stripe-modal");
-const paymentNavigationButton = document.getElementById("payment-navigation-button")
+const paymentNavigationButtonContainer = document.getElementById("payment-navigation-button-w-cards")
 
 let isGuestUser = false
 
@@ -42,7 +42,7 @@ document.addEventListener("click", (e) => {
 async function loadCards(isGuest = false, guestUuid = null) {
     if(isGuest) {
         isGuestUser = true
-        paymentNavigationButton.classList.add('hide')
+        paymentNavigationButtonContainer.classList.add('hide')
     }
 
     // Mount the Stripe Element into the correct container
@@ -66,7 +66,7 @@ async function loadCards(isGuest = false, guestUuid = null) {
             // Guests can only have 1 card
             if (isGuest) {
                 addCardBtnHolder?.classList.add("hide");
-                paymentNavigationButton.classList.remove('hide')
+                paymentNavigationButtonContainer.classList.remove('hide')
             } else {
                 addCardBtnHolder?.classList.remove("hide");
             }

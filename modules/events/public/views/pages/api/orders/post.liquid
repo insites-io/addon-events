@@ -9,8 +9,8 @@ searchable: false
 {%- assign status = 400 -%}
 {% assign errors = "" %}
 
-{% log payload, type: "orderpayload"%}
 {% comment %} Use Insites V2 API {% endcomment %}
+ {% comment %} {% function add_order = "ecommerce/controller/order/create", params: payload %} {% endcomment %}
 {%- graphql add_order = 'modules/website/trigger_api_call', 
      name: 'modules/events/add_order', 
      data: payload 
@@ -25,8 +25,6 @@ searchable: false
      {% assign errors = add_order %}
  {% endif %}
  
- {% log add_order %}
-
 {%- if errors != nil -%}
 {
   "has_error": true,

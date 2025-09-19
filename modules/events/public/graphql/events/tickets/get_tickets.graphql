@@ -3,7 +3,7 @@ query get_tickets (
     $size: Int = 1000,
     $event_uuid: String,
   	$purchased_by_uuid: String,
-  	$event_venue_area_uuid:String,
+  	$event_pricing_division_uuid:String,
   	$event_pricing_tier_uuid:String,
     $expires_in_seconds: Int,
     $sort: RecordsSortInput = { created_at: { order: ASC }}
@@ -17,7 +17,7 @@ query get_tickets (
             properties: [
                 { name: "event_uuid", value: $event_uuid },
               	{ name: "purchased_by_uuid", value: $purchased_by_uuid },
-                { name: "event_venue_area_uuid", value: $event_venue_area_uuid },
+                { name: "event_pricing_division", value: $event_pricing_division_uuid },
                 { name: "event_pricing_tier_uuid", value: $event_pricing_tier_uuid },
             ]
         },
@@ -44,14 +44,14 @@ query get_tickets (
             contact_last_name: property(name: "contact_last_name")
             contact_email: property(name: "contact_email")
 
-            ticket_pdf: property_upload(name: "ticket_pdf", expires_in: expires_in_seconds) {
+            ticket_pdf: property_upload(name: "ticket_pdf", expires_in: $expires_in_seconds) {
           	  url
           	}
 
             venue_area: related_record(
-                table: "modules/insites_events/event_venue_area"
+                table: "modules/insites_events/event_pricing_division"
                 foreign_property: "uuid"
-                join_on_property: "event_venue_area_uuid"
+                join_on_property: "event_pricing_division_uuid"
             ) { 
                 capacity_per_group: property(name: "capacity_per_group")
                 area_name: property(name: "area_name")

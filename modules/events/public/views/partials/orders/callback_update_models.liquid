@@ -103,11 +103,7 @@ metadata: {
     {% assign data = data | add_hash_key: "source", source %}
 {% endif %}
 
-{%  graphql add_payment = 'modules/website/trigger_api_call', 
-    name: "modules/portal/add_payment",
-    data: data
-    | dig: 'items','response','body'
-    | parse_json %}   
+{% function add_payment = "ecommerce/controller/payment/create", params: data %}
 
 {%- liquid
     session paybill_payment_id = add_payment.items.id
@@ -141,11 +137,7 @@ metadata: {
 }
 {% endparse_json %}
 
-{% graphql update_order = 'modules/website/trigger_api_call', 
-    name: "modules/portal/update_order",
-    data: order_data
-    | dig: 'items','response','body'
-    | parse_json %}
+ {% function update_order = "ecommerce/controller/order/update", params: order_data %} 
 
 {% liquid
     session paybill_order_id = update_order.id

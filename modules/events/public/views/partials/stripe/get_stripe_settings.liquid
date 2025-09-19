@@ -5,9 +5,9 @@ metadata: {
 ---
 
 {%  liquid
-    graphql get_stripe_settings = 'modules/website/trigger_api_call', name: 'modules/portal/get_stripe_settings' 
+    function get_stripe_settings = "ecommerce/controller/stripe/get" 
 
-    assign response = get_stripe_settings.items.response.body | parse_json 
+    assign response = get_stripe_settings
 
     # Insites SK Key must be added via Constants - For Stipe Connect
     if response.livemode

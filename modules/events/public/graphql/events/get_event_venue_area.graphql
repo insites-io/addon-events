@@ -5,7 +5,7 @@ query event_venue_area(
     page: 1
     per_page: 10
     filter: {
-      table: { value: "modules/insites_events/event_venue_area" }, 
+      table: { value: "modules/insites_events/event_pricing_division" }, 
       deleted_at: { exists: false }, 
       properties: [
         { name: "event_uuid", value: $event_uuid }

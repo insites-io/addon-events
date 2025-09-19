@@ -3,8 +3,6 @@ slug: api/check-ticket-availability
 format: json
 method: get
 searchable: false
-# authorization_policies:
-#   - modules/insites_core/has_valid_instance_api_authorization
 ---
 
 {%- assign payload = context.params | parse_json -%}
@@ -20,7 +18,7 @@ searchable: false
 {%- assign counts = '' -%}
 
 {% for ticket in ticketData %}
-  {%- assign key = ticket.event_venue_area_uuid | append: '_' | append: ticket.capacity_type -%}
+  {%- assign key = ticket.event_pricing_division | append: '_' | append: ticket.capacity_type -%}
   {%- assign search = key | append: ':' -%}
   {%- assign currentCount = 0 -%}
 

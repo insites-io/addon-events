@@ -16,7 +16,6 @@ searchable: false
 {% if temporary_token.id %}
     {% graphql create_user_profile = 'modules/events/account/create_user_profile', id: temporary_token.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true, password: password %}
     {% else %}
-        {% log 'test' %}
     {% assign errors = "Failed to create temporary token" %}
 {% endif %}
 
@@ -25,8 +24,6 @@ searchable: false
 {% else %}
     {% assign errors = "Failed to create temporary token" %}   
 {% endif %}
-
-{% log create_user_profile %}
 
 {%- if errors != "" -%}
 {% parse_json data %}
@@ -46,5 +43,4 @@ searchable: false
 {%- endif -%}
 
 {{ data }}
-{% comment %} {{ add_order  }} {% endcomment %}
 {%- response_status status -%}

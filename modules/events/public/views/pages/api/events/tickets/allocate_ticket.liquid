@@ -20,28 +20,22 @@ searchable: false
 {% assign ticketPayload = ticketPayload | add_hash_key: "ticket_uuid", ticket_uuid %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
 
-{%- graphql allocate_ticket = 'modules/website/trigger_api_call', 
-     name: 'modules/events/update_ticket', 
-     data: ticketPayload 
-     | dig: 'items','response','body' | parse_json -%}   
-     
+{% function allocate_ticket = "events/event_tickets/update", uuid: ticketPayload.ticket_uuid, event_uuid: ticketPayload.event_uuid, params: ticketPayload.data %}
+
 {% if allocate_ticket.errors  %}
     {% assign errors = allocate_ticket %}
 {% endif %}     
 
-
-{% log errors %}
 {%- if errors != "" -%}
     {% assign data = data | add_hash_key: "has_error", true %}
     {% assign data = data | add_hash_key: "message", errors %}
 {%- else -%}
     {% assign data = data | add_hash_key: "has_error", false %}
-    {% assign data = data | add_hash_key: "message", "Ticket(s) successfully allocated" %}
+    {% assign data = data | add_hash_key: "message", "Ticket successfully allocated" %}
     {% assign data = data | add_hash_key: "data", allocate_ticket %}
     {%- assign status = 200 -%}
 {%- endif -%}
 
 {{ data }}
 
-{% comment %} {{ add_order  }} {% endcomment %}
 {%- response_status status -%}

@@ -16,24 +16,13 @@ searchable: false
 {% assign data = '{}' | parse_json %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
-{% log ticketPayload %}
 
-{%- graphql add_tickets = 'modules/website/trigger_api_call', 
-     name: 'modules/events/add_tickets', 
-     data: ticketPayload 
-     | dig: 'items','response','body' | parse_json -%}  
-    
-{% log add_tickets, type: 'test' %}
-
+{% function add_tickets = "events/event_tickets/create", params: ticketPayload %}
 
 {% if add_tickets.errors  %}
-    {% log 'test' %}
     {% assign errors = add_tickets %}
 {% endif %}     
 
-
-
-{% log errors %}
 {%- if errors != "" -%}
     {% assign data = data | add_hash_key: "has_error", true %}
     {% assign data = data | add_hash_key: "message", errors %}
@@ -46,5 +35,4 @@ searchable: false
 
 {{ data }}
 
-{% comment %} {{ add_order  }} {% endcomment %}
 {%- response_status status -%}

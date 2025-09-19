@@ -1,6 +1,9 @@
 ---
 name: has_valid_instance_api_authorization
 redirect_to: api/v2/401.json
+metadata: {
+    auth_policy_name: "Has Valid Instance API Authorization"
+}
 ---
 {%- graphql instance_api_key = 'modules/insites_core/instance_configurations/get_instance_configuration', name: "instance_api_key" -%}
 

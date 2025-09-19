@@ -2907,6 +2907,15 @@ ins-button.add-credit-card button.ins-button>div,
     height: 41px;
   }
 
+  .not-available {
+    color: #575757;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; 
+    font-family: var(--font-family-02, Archivo);
+  }
+
     .number-input button {
       background-color: #fff;
       border: none;

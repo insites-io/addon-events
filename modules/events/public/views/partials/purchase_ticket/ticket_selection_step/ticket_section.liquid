@@ -121,7 +121,16 @@ metadata: {
                 {% endif %}
 
                 <div class="ticket-purchaser">
-                  <span class="ticket-tier-name">{{ ticket_tier.name }}</span>
+                  <span class="ticket-tier-name">
+                    {{ ticket_tier.name }}                    
+                  {% if ticket_tier.availability_start_date != blank and start_date > now %}
+                    <br>
+                    <span class="not-available">Tickets available from {{ ticket_tier.availability_start_date | date: "%b %d, %Y" }}.</span>
+                  {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
+                    <br>
+                    <span class="not-available">Pre-sale ended.</span>
+                  {% endif %}
+                  </span>
 
                   {% if venue_remaining == 0 %}
                     <div class="ticket-purchaser-counter">

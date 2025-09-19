@@ -12,7 +12,7 @@ metadata: {
 {% endparse_json %}
 {% function event_faqs = "events/event_faqs/list", uuid: event.uuid, params: params  %}
 
-{% assign faqs = event_faqs | dig: 'results' %}
+{% assign faqs = event_faqs.results %}
      
 {% if faqs.size > 0 %}
 

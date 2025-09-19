@@ -14,7 +14,7 @@ metadata: {
 {% endparse_json %}
 {% function event_speakers = "events/event_speakers/list", uuid: event.uuid, params: params  %}
 
-{% assign speakers = event_speakers | dig: 'results' %}
+{% assign speakers = event_speakers.results %}
      
 {% if speakers.size > 0 %}
 

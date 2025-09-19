@@ -71,7 +71,7 @@ metadata: {
      }
      {% endparse_json %}
      {% function system_fields = "events/system_fields/list", uuid: event.uuid, params: params  %}     
-     {% assign categories = system_fields | dig: 'results' %}   
+     {% assign categories = system_fields.results %}   
 
      {% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
      {% assign categories_name = categories | map: 'value' | array_uniq | sort %}     

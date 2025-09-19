@@ -14,7 +14,7 @@ metadata: {
 {% endparse_json %}
 {% function event_sponsors = "events/event_sponsors/list", uuid: event.uuid, params: params  %}
 
-{% assign sponsors = event_sponsors | dig: 'results' %}
+{% assign sponsors = event_sponsors.results %}
 
      
 {% if sponsors.size > 0 %}

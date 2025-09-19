@@ -29,6 +29,22 @@ metadata: {
      endif
 %}
 
+
+{% comment %} Check if Filters & Search are used {% endcomment %}
+{%  liquid
+     assign is_filters_applied = false
+     if context.params.search and context.params.search != ""
+          assign is_filters_applied = true
+     endif
+     if context.params.category and context.params.category != ""
+          assign is_filters_applied = true
+     endif
+     if context.params.location and context.params.location != ""
+          assign is_filters_applied = true
+     endif
+%}
+
+
 {% comment %} Sort by {% endcomment %}
 {% parse_json sort_by %}
 {
@@ -144,11 +160,10 @@ metadata: {
 }
 {% endparse_json %} 
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' -%}
-     
 
      {% comment %} Filters | Search {% endcomment %}
-     {% if events.total_entries == 0 and context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
-          {% comment %} Dont show filters when no events are found in itinerary-upcoming and itinerary-previous {% endcomment %}
+     {% if is_filters_applied == false and events.total_entries == 0 %}
+          {% comment %} Dont show filters blocks when no events are found even if filters are not applied {% endcomment %}
      {% else %}
      <div class="wrapper width-1440">
         <div class="grid-container">
@@ -190,25 +205,29 @@ metadata: {
      <div class="spacer large hide-for-small-only"></div>
      <div class="spacer xxx-large show-for-small-only"></div>
      {% endif %}
-
+     
 {% if events.total_entries == 0 %}
 
      <div class="wrapper width-1440">
           <div class="text-center">
-               {% if context.params.search != blank %}
-                    <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>
-               {% elsif context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
-                    {% liquid 
-                         assign text = 'upcoming'
-                         if context.params.slug == 'itinerary-previous'
-                              assign text = 'previous'
+               {% if context.params.slug == 'itinerary-upcoming' or context.params.slug == 'itinerary-previous' %}
+                    {% liquid                                                   
+                         if is_filters_applied == true
+                              assign text = 'No results found.'
+                         else
+                              assign text = 'You have no upcoming events'
+                              if context.params.slug == 'itinerary-previous'
+                                   assign text = 'You have no previous events'
+                              endif
                          endif
                     %}
                     <div class="empty-box">
-                         <p class="body-large-bold">You have no {{text}} events</p>
+                         <p class="body-large-bold">{{text}}</p>
                     </div>
+               {% elsif context.params.search and context.params.search != "" %}
+                    <p class="subHeading">No results found for keyword "<strong>{{ keyword  }}</strong>"</p>     
                {% else %}
-                    <p class="subHeading">No results found</p>    
+                    <p class="subHeading">No results found.</p>    
                {% endif %}
           </div>
           <div class="spacer section hide-for-small-only"></div>

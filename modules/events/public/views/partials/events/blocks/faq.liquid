@@ -4,25 +4,15 @@ metadata: {
 }
 ---
 
-{% parse_json filters %}
+{% parse_json params %}
 {
-  "page": 1,
-  "size": 50
+     "page" : 1,
+     "size" : 50
 }
 {% endparse_json %}
+{% function event_faqs = "events/event_faqs/list", uuid: event.uuid, params: params  %}
 
-{% parse_json faqs_payload %}
-{
-     "uuid": "{{ event.uuid }}",
-     "query_string": "{{ filters | querify }}"
-}
-{% endparse_json %}
-
-{% graphql faqs = 'modules/website/trigger_api_call', 
-     name: 'modules/events/get_faqs', 
-     data: faqs_payload
-     | dig: 'items','response','body' | parse_json
-     | dig: 'results' %}
+{% assign faqs = event_faqs | dig: 'results' %}
      
 {% if faqs.size > 0 %}
 

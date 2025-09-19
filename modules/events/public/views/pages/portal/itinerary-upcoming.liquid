@@ -10,7 +10,7 @@ metadata: {
     "page_title": "Upcoming Events | Insites",
     "meta_title": "Upcoming Events | Insites" 
 }
-#do not add dynamic_cache here, the download need to refresh to be
+#Do not add dynamic_cache here. The page needs to be refreshed to update the download expires_in.
 ---
 
 {% graphql user_event_uuids = "modules/events/event_tickets/get_user_purchased_tickets", 

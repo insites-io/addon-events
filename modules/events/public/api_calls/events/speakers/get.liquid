@@ -1,8 +1,0 @@
----
-name: get_speakers
-to: 'https://{{context.location.host}}/events/api/v2/events/{{data.uuid}}/speakers?{{data.query_string}}'
-format: http
-request_type: GET
-request_headers: >
-    {% include 'modules/portal/api_headers' %}
----

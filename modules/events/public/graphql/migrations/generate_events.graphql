@@ -1,0 +1,58 @@
+query generate_events(
+    $page: Int = 1
+    $size: Int = 100
+) {
+    items: records(
+        page: $page
+        per_page: $size
+        filter: {
+           	table: { value: "modules/insites_events/event" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "status", value: "enabled"  }
+            ]            
+        }
+    ) {
+        total_entries
+        total_pages
+        per_page
+        current_page
+        results {
+          table
+          
+          slug: property(name: "slug")
+          uuid: property(name: "uuid")
+          status: property(name: "status")
+          event_type: property(name: "event_type")
+          event_name: property(name: "event_name")   
+          
+          venue_type: property(name: "venue_type")
+          venue_uuid: property(name: "venue_uuid")
+          venue_name: property(name: "venue_name")
+          venue_address_1: property(name: "venue_address_1")
+          venue_city: property(name: "venue_city")                              
+          venue_state: property(name: "venue_state")
+          venue_suburb: property(name: "venue_suburb")
+          venue_postcode: property(name: "venue_postcode")
+          venue_country: property(name: "venue_country")
+          venue_country_code: property(name: "venue_country_code")          
+          venue_geojson: property_json(name: "venue_geojson")
+          venue_latitude: property(name: "venue_latitude")
+          venue_longitude: property(name: "venue_longitude")
+          
+          event_time_zone: property(name: "event_time_zone")
+          start_date_time: property(name: "start_date_time")
+          end_date_time: property(name: "end_date_time")
+          
+          category_uuid: property(name: "category_uuid")                                        
+          #online_event_id: property(name: "online_event_id")                              
+          long_description: property(name: "long_description")          
+          #short_description: property(name: "short_description")
+          
+          is_faqs_displayed: property_boolean(name: "is_faqs_displayed")          
+          total_group_tickets_remaining: property_int(name: "total_group_tickets_remaining")
+          total_individual_tickets_remaining: property_int(name: "total_individual_tickets_remaining")
+          #properties              
+        }
+    }
+}

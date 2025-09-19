@@ -4,32 +4,17 @@ metadata: {
 }
 ---
 
-{% parse_json filters %}
+{% parse_json params %}
 {
-  "page": 1,
-  "size": 20,
-  "sort_by": "speaker_weighting",
-  "order": "ASC"
-  {% comment %}  
-  Additional filters that can be used to retrieve speakers:
-  "search_by": "first_name",
-  "keyword": "John",
-  {% endcomment %}
+     "page" : 1,
+     "size" : 50,
+     "sort_by" : "speaker_weighting",     
+     "sort_order" : "ASC"
 }
 {% endparse_json %}
+{% function event_speakers = "events/event_speakers/list", uuid: event.uuid, params: params  %}
 
-{% parse_json speakers_payload %}
-{
-     "uuid": "{{ event.uuid }}",
-     "query_string": "{{ filters | querify }}"
-}
-{% endparse_json %}
-
-{% graphql speakers = 'modules/website/trigger_api_call', 
-     name: 'modules/events/get_speakers', 
-     data: speakers_payload
-     | dig: 'items','response','body' | parse_json
-     | dig: 'results' %}
+{% assign speakers = event_speakers | dig: 'results' %}
      
 {% if speakers.size > 0 %}
 

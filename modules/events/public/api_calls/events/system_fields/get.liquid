@@ -1,8 +1,0 @@
----
-name: get_system_fields
-to: 'https://{{context.location.host}}/events/api/v2/system-fields?{{data.query_string}}'
-format: http
-request_type: GET
-request_headers: >
-    {% include 'modules/portal/api_headers' %}
----

@@ -613,11 +613,13 @@ async function saveOrder(orderPayload) {
 // Transform ticket data into correct payload format
 function transformTicketData(ticketsData, orderNumber) {
     const ticketPayload = [];
+    const event_uuid = event_uuid_hidden.value;
     
     ticketsData.forEach(ticket => {
         const baseTicket = {
             ticket_type: ticket.capacity_type,
             venue_area_name: ticket.ticket_venue_name,
+            event_uuid: event_uuid,
             "venue.uuid": ticket.venue_uuid,
             "event_pricing_division.uuid": ticket.event_pricing_division_uuid,
             "event_pricing_tier.uuid": ticket["event_pricing_tier.uuid"],

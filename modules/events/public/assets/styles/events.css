@@ -1524,12 +1524,22 @@ ins-tag.preorder-tag span.ins-tag {
 .portal.event-details .col-1 {
     width: 100%;
 }
+.portal.event-details ins-tab {
+    font-family: var(--font-family-02);
+}
 .portal.event-details ins-tab-item>div {
     padding: 56px 0px 0px;
 }
 .portal.event-details ins-tab .ins-tab {
     border: none;
     box-shadow: none;
+}
+.portal.event-details ins-tab .ins-tab .ins-tab-headers .ins-tab-header{
+    font-size: 16px;    
+    color: var(--font-color-body);
+}
+.portal.event-details ins-tab .ins-tab .ins-tab-headers .ins-tab-header.active{
+    font-weight: 700;  
 }
 .portal.event-details ins-tab li{
     margin-bottom: 0px;

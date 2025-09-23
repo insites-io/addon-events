@@ -49,8 +49,12 @@ metadata: {
 </div>
 
 <script>
-    const submitTicketAllocation = document.getElementById("submit-ticket-allocation")
-    submitTicketAllocation.addEventListener("insClick", () => {
-        window.location.href = "/purchase-ticket-confirmation";
-    })
+    document.addEventListener("DOMContentLoaded", () => {
+        const submitTicketAllocation = document.getElementById("submit-ticket-allocation");
+        if (submitTicketAllocation) {
+            submitTicketAllocation.addEventListener("insClick", () => {
+            window.location.href = "/purchase-ticket-confirmation";
+            });
+        }
+    });
 </script>

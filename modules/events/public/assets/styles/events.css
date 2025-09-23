@@ -345,7 +345,8 @@ ins-input.hidden-input input {
 
 
 /* Event Cards */
-.event-card-wrap:not(#main-event.event-card-wrap) {
+.event-card-wrap .cell,
+#main-event *:not(.wrap) {
     cursor: pointer;
 }
 .event-card-wrap.grid-x {
@@ -390,10 +391,6 @@ ins-input.hidden-input input {
     height: 585px;     
     max-height: 45vw;  
     min-height: 269px
-}
-#main-event img,
-#main-event h4 {
-    cursor: pointer;
 }
 .event-card-wrap img:hover,
 .event-card-wrap img:hover {
@@ -3036,7 +3033,8 @@ ins-button.add-credit-card button.ins-button>div,
   font-weight: 700;
 }
 
-.icon-map-pin {
+/* Note .icon-map-pin must not have margin-top */
+.icon-map-pin.icon-custom {
     align-self: flex-start;
     margin-top: 4px;
 }

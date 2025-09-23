@@ -1,21 +1,8 @@
-// Select all `.event-card-wrap div`s excluding those inside #main-event
-const allDivs = document.querySelectorAll('.event-card-wrap div');
-const mainEvent = document.getElementById('main-event');
-let cards;
-if (mainEvent) {
-  cards = Array.from(allDivs).filter(el => !mainEvent.contains(el));
-} else {
-  cards = Array.from(allDivs);
-}
+// Select all `.event-card-wrap div`s
+const allDivs = document.querySelectorAll('.event-card-wrap div:not(.wrap)');
+cards = Array.from(allDivs);
 
-
-// Explicitly select the img and h4 inside #main-event
-const extras = document.querySelectorAll('#main-event img, #main-event h4');
-
-// Combine into one list
-const finalTargets = [...cards, ...extras];
-
-finalTargets.forEach(function(element) {
+cards.forEach(function(element) {
   element.addEventListener('click', function(e) {
     // Prevent clicks on <a> itself
     if (!e.target.closest('a')) {

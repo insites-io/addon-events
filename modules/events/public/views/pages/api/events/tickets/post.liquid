@@ -16,10 +16,8 @@ searchable: false
 {% assign data = '{}' | parse_json %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid %}
 {% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
-{% log ticketPayload %}
 
 {% function add_tickets = "events/event_tickets/create", event_uuid: ticketPayload.uuid, params: ticketPayload.data %}
-{% log add_tickets %}
 
 {% if add_tickets.errors  %}
     {% assign errors = add_tickets %}

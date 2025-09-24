@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let allocateTicket = document.getElementById("allocate-ticket");
 let allocateTicketUUID = document.getElementById("allocate-ticket-uuid")
 let allocateButton = document.getElementById("submit-btn");
+let cancelAllocateModal = document.getElementById("cancel")
 let allocationModalButton = document.querySelectorAll(".ticket-alloation-modal-button");
 const allocationModal = document.getElementById("allocationModal");
 
@@ -99,6 +100,10 @@ allocationModalButton.forEach((btn) => {
   });
 });
 
+cancelAllocateModal.addEventListener("insClick", () => {
+  allocationModal.close(); 
+})
+
 // Handle allocation
 allocateButton.addEventListener("insClick", async () => {
   let isEmailValid = validateField(allocateEmail, requiredEmail, "email");
@@ -119,10 +124,11 @@ allocateButton.addEventListener("insClick", async () => {
     App.events.notyf("success", "Your ticket has been successfully allocated!");
     allocationModal.close(); 
     
-    const ticketDetailsEl = document.querySelector(
-      `.ticket-alloation-modal-button[data-uuid="${payload.event.ticketuuid}"]`
-    )?.closest(".ticket-card-container")
-      .querySelector("#ticket-allocated-details");
+  const ticketDetailsEl = document.querySelector(
+    `.ticket-alloation-modal-button[data-uuid="${payload.event.ticketuuid}"]`
+  )?.closest(".ticket-card-container")
+    .querySelector(`#ticket-allocated-details-${payload.event.ticketuuid}`);
+
 
     if (ticketDetailsEl) {
       ticketDetailsEl.innerHTML = `

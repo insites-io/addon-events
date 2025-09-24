@@ -118,7 +118,7 @@ metadata: {
 
                 <div class="ticket-number-container">
                   <div class="ticket-number"><strong>Ticket number: {{ ticket.id }}</strong></div>
-                  <div class="ticket-allocation" id="ticket-allocated-details">
+                  <div class="ticket-allocation" id="ticket-allocated-details-{{ticket.uuid}}">
                   {% if ticket.contact_email == null %}
                     <p>No attendee assigned</p>
                   {% else %}

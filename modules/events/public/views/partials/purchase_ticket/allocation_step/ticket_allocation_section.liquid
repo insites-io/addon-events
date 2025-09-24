@@ -53,7 +53,9 @@ metadata: {
   {% assign first_ticket = venue_tickets[0] %}
 
   <div class="event-ticket-venue-detail">
-    <h3>{{ venue_name }}</h3>
+    {% if venue_name and venue_name != '' %}
+      <h3>{{ venue_name }}</h3>
+    {% endif %}
     <div class="spacer x-small"></div>
     <p class="ticket-venue-sub-place">{{ first_ticket.venue_name }} - {{ first_ticket.venue_area.area_name }}</p>
     <div class="spacer x-small"></div>

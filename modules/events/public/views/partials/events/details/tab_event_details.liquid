@@ -56,8 +56,14 @@ metadata: {
 {% include 'modules/events/events/blocks/sponsors', event: event %}
 
 
+{% comment %} Photo Library {% endcomment %}
+{% if context.params.slug == 'itinerary-previous' %}
+     {% include 'modules/events/events/blocks/photo_library', event: event %}  
+{% endif %}
+
+
 {% comment %} FAQ {% endcomment %}
-{% if context.params.slug == 'itinerary-upcoming'  %}
+{% if context.params.slug == 'itinerary-upcoming' %}
      {% if event.is_faqs_displayed == true %}
           {% include 'modules/events/events/blocks/faq', event: event %}
      {% endif %}   

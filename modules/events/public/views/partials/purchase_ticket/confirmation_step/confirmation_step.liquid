@@ -19,8 +19,6 @@ metadata: {
                 <p id="order-contact-mobile-number">
                     {% if order_details.order_contact_phone_number %}
                         ({{ order_details.order_contact_phone_country_code }}) {{ order_details.order_contact_phone_number }}
-                    {% else %}
-                        --
                     {% endif %}
                 </p>
             </div>
@@ -35,9 +33,7 @@ metadata: {
                 <p id="billing-contact-email">{{ order_details.billing_contact_email }}</p>
                 <p id="billing-contact-mobile-number">
                     {% if order_details.billing_contact_phone_number %}
-                        ({{ order_details.billing_contact_phone_country_code }}) {{ order_details.billing_contact_phone_number }}
-                    {% else %}
-                        --
+                        ({{ order_details.billing_contact_phone_country_code }}) {{ order_details.billing_contact_phone_number }}                    
                     {% endif %}
                 </p>
                 <p id="billing-contact-address">

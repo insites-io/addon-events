@@ -83,16 +83,39 @@ metadata: {
             </div>
         </div>       
     {% else %}
-        {% comment %} ? LIST VIEW TIME AND TIMEZONE {% endcomment %}
-        <div class="grid-x">
-            <i class="icon-calendar"></i>
-            <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }} - {{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
-        </div>
-        <div class="spacer xx-small"></div>
-        <div class="grid-x">
-            <i class="icon-clock"></i>
-            <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
-        </div>    
+        {% if is_details_page == true %}
+            <div class="start_end_time_wrap">
+                <div>
+                    <p class="body-small-bold">Start date & time</p>
+                    <div>
+                        <i class="icon-calendar"></i> <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
+                    </div>
+                    <div>
+                        <i class="icon-clock"></i> <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span> 
+                    </div>                    
+                </div>
+                <div>
+                    <p class="body-small-bold">End date & time</p>
+                    <div>
+                        <i class="icon-calendar"></i> <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span> 
+                    </div>
+                    <div>
+                        <i class="icon-clock"></i> <span>{{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>     
+                    </div>
+                </div>
+            </div>    
+        {% else %}
+            {% comment %} List view {% endcomment %}
+            <div class="grid-x">
+                <i class="icon-calendar"></i>
+                <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }} - {{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
+            </div>
+            <div class="spacer xx-small"></div>
+            <div class="grid-x">
+                <i class="icon-clock"></i>
+                <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
+            </div>    
+        {% endif %}
     {% endif %}
 {% endif %}
 

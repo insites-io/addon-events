@@ -476,6 +476,18 @@ ins-button.event-card-btn .btn__icon {
     text-decoration: underline;
 }
 
+
+/* Date & Time */
+.start_end_time_wrap {
+    display: flex;
+    flex-direction: row;
+    gap: 80px;
+}
+.start_end_time_wrap p {
+    margin-bottom: 4px !important;
+}
+
+
 /* Event Speakers & Sponsors */
 .event-sponsors .img-wrap {
     height: 170px;

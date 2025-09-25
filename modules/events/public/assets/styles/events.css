@@ -2974,19 +2974,23 @@ ins-button.add-credit-card button.ins-button>div,
       background-color: #fff;
       border: none;
       width: 40px;
-      font-size: 18px;
+      font-size: 22px;
+      color: var(--font-color-body);
       cursor: pointer;
     }
 
     .number-input input {
       text-align: center;
-      border: none;
       width: 60px;
       /* height: 100%; */
       font-size: 16px;
       outline: none;
       margin: 0;
       padding: 0;
+      box-shadow: none;
+      border: none;
+      border-left: 1px solid var(--color-ui-04);
+      border-right: 1px solid var(--color-ui-04);
     }
 
     .number-input button:active {

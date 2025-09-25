@@ -402,7 +402,7 @@ function pricify(number) {
  * Step functionality
  */
 const stepMap = {
-    selection: { index: 1, container: step1Container, button: step1button, header: "Ticket Selection", urlParam: "selection" },
+    selection: { index: 1, container: step1Container, button: step1button, header: "Ticket purchase", urlParam: "selection" },
     billing: { index: 2, container: step2Container, button: step2button, header: "Contact & Billing", urlParam: "billing" },
     payment: { index: 3, container: step3Container, button: step3button, header: "Payment", urlParam: "payment" },
     allocation: { index: 4, container: step4Container, button: step4button, header: "Ticket Allocation", urlParam: "allocation" },

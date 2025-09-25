@@ -54,7 +54,7 @@ metadata: {
                     <div id="map-container"></div>
                     <div class="spacer"></div>
                     <div class="event-card-wrap">
-                         {% include 'modules/events/events/event_location', item: event, show_address: true, is_bold_name: true %}
+                         {% include 'modules/events/events/event_location', item: event, show_address: true, is_bold_name: true, is_print: true %}
                     </div>
                     <div class="spacer"></div>
                     <a href="https://www.google.com/maps?q={{ event.venue_name | url_encode }}&ll={{ event.venue_geojson.coordinates[1] }},{{ event.venue_geojson.coordinates[0] }}" target="_blank">

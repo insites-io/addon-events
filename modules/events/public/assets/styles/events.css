@@ -2538,6 +2538,7 @@ ins-button.add-credit-card button.ins-button>div,
 .event-details-card-details .grid-x {
     gap: 8px;
     align-items: center;
+    flex-wrap: nowrap;
 }
 
 .event-details-card-details .paragraph-body-title-case {
@@ -3079,8 +3080,8 @@ ins-button.add-credit-card button.ins-button>div,
   font-weight: 700;
 }
 
-/* Note .icon-map-pin must not have margin-top */
-.icon-map-pin.icon-custom {
+/* Note Not all .icon-map-pin have margin-top */
+.event-details-card-location-details .icon-map-pin {
     align-self: flex-start;
     margin-top: 4px;
 }

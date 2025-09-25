@@ -65,17 +65,20 @@ metadata: {
                     <i class="icon-calendar"></i>
                     <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
                 </div>
+                <div class="spacer xx-small"></div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
                     <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
                 </div>    
             </div>
+            <div class="spacer xx-small"></div>
             <div class="end_time">
                 <span class="body-x-small-bold">End Date & Time</span>
                 <div class="grid-x">
                     <i class="icon-calendar"></i>
                     <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
                 </div>
+                <div class="spacer xx-small"></div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
                     <span>{{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        

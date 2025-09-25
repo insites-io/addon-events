@@ -23,181 +23,31 @@ metadata: {
                 <div class="spacer xx-small"></div>
                 {% include 'modules/events/events/event_date_time', item: event %}
                 <div class="spacer xx-small"></div>
+                       
 
-                {% comment %} ? GET VENUE AREA {% endcomment %}
-                {%- graphql venue_area = 'modules/events/events/get_venue_area', venue_uuid: event.venue_uuid, event_uuid: event.uuid | dig: "items", "results" | first -%} 
-                <span class="paragraph-body-title-case">
-                    <i class="icon-custom icon-map-pin"></i>
-                    {% if event.event_type == 'venue' %}
-                        {% comment %} ? VENUE NAME {% endcomment %}
-                        {% if event.venue_details.venue_name %}
-                            {% assign venue_name = event.venue_details.venue_name  | append: ", " %}
-                        {% endif %}
+                {% comment %} Locataion {% endcomment %}
+                {% assign venue_details = event.venue_details %}
+                {% parse_json event_location %}
+                {
+                    "event_type": "{{ event.event_type }}",
+                    "venue_name": "{{ venue_details.venue_name }}",
+                    "venue_address_1": "{{ venue_details.address_1 }}",
+                    "venue_address_2": "{{ venue_details.address_2 }}",
+                    "venue_address_3": "{{ venue_details.address_3 }}",
+                    "venue_suburb": "{{ venue_details.suburb }}",
+                    "venue_state": "{{ venue_details.state }}",
+                    "venue_postcode": "{{ venue_details.postcode }}",
+                    "venue_country": "{{ venue_details.country }}"
+                }
+                {% endparse_json %}       
+                {% comment %} Print & Export location {% endcomment %}
+                {% include 'modules/events/events/event_location', item: event_location, show_address: true, is_print: true %} 
+                {% assign venue = context.exports.location %}  
 
-                        {% comment %} ? AREA NAME {% endcomment %}
-                        {% if venue_area.area_name %}
-                            {% assign area_name = venue_area.area_name  | append: ", " %}
-                        {% endif %}
-
-                        {% comment %} ? ADDRESS 1 {% endcomment %}
-                        {% if event.venue_details.address_1 %}
-                            {% assign address_1 = event.venue_details.address_1  | append: ", " %}
-                        {% endif %}
-
-                        {% comment %} ? ADDRESS 2 {% endcomment %}
-                        {% if event.venue_details.address_2 %}
-                            {% assign address_2 = event.venue_details.address_2  | append: ", " %}
-                        {% endif %}
-
-                        {% comment %} ? ADDRESS 3 {% endcomment %}
-                        {% if event.venue_details.address_3 %}
-                            {% assign address_3 = event.venue_details.address_3  | append: ", " %}
-                        {% endif %}
-
-                        {% comment %} ? CITY {% endcomment %}
-                        {% if event.venue_details.city %}
-                            {% assign city = event.venue_details.city %}
-                        {% endif %}
-
-                        {% comment %} ? SUBURB {% endcomment %}
-                        {% if event.venue_details.suburb %}
-                            {% assign suburb = " " | append: event.venue_details.suburb %}
-                        {% endif %}
-
-                        {% comment %} ? STATE {% endcomment %}
-                        {% if event.venue_details.state %}
-                            {% assign state = " " | append: event.venue_details.state %}
-                        {% endif %}
-
-                        {% comment %} ? POSTAL {% endcomment %}
-                        {% if event.venue_details.postal %}
-                            {% assign postal = " " | append: event.venue_details.postal %}
-                        {% endif %}
-
-                        {% comment %} ? POSTAL {% endcomment %}
-                        {% if event.venue_details.country %}
-                            {% assign country = ", " | append: event.venue_details.country %}
-                        {% endif %}
-
-                        {% assign venue = venue_name | append: area_name | append: address_1 | append: address_2 | append: address_3 | append: city | append: suburb | append: state | append: postal | append: country %}
-                    
-                        <input type="hidden" id="event-location" name="{{ props.event_location.name }}" value="{{ venue }}">
-
-                    {% else %}
-                        {% if event.event_type == "online_event" %}
-                            {% assign venue = "Online Event" %}
-                        {% else %}
-                            {% assign venue = "To be Announced" %}
-                        {% endif %}   
-                    {% endif %}
-
-                    {{ venue }}
-                    
-                </span>
+                <input type="hidden" id="event-location" name="{{ props.event_location.name }}" value="{{ venue }}">
 
                 <div class="spacer xx-small"></div>
             {% endif %}
         </div>
     </div>
-</div>
-
-        {% comment %} <div class="event-details-card">
-            <h4></h4>
-            <div class="spacer small"></div>
-
-            {% comment %} ? Comparing Start Date and End Date {% endcomment %}
-            {% assign start_date_comparison = event.start_date_time | date: "%b %d, %y" %}
-            {% assign end_date_comparison =  event.end_date_time | date: "%b %d, %y"  %}
-
-            {% comment %} ? IF Start and End are Same Date {% endcomment %}
-            {% if start_date_comparison == end_date_comparison %}
-                <div class="paragraph-body-title-case">
-                    <i class="icon-custom icon-calendar"></i>
-                    <span>{{ event.start_date_time | date: "%A %-d, %B %Y" }}</span>
-                </div>
-
-                <div class="spacer xx-small"></div>
-
-                {% comment %} ? TIME AND TIMEZONE {% endcomment %}
-                {% include 'modules/events/events/event_date_time', data_item: event, data_website: "details_page", start_date_comparison: start_date_comparison, end_date_comparison: end_date_comparison, is_AEDT: is_AEDT  %}   
-            {% else %}
-
-                {% comment %} ? TIME AND TIMEZONE {% endcomment %}
-                {% include 'modules/events/events/event_date_time', data_item: event, data_website: "details_page", start_date_comparison: start_date_comparison, end_date_comparison: end_date_comparison, is_AEDT: is_AEDT  %}   
-            {% endif %}
-
-            <div class="spacer small"></div>
-
-            {% comment %} ? GET VENUE AREA {% endcomment %}
-            {%- graphql venue_area = 'modules/website/events/get_venue_area', venue_uuid: event.venue_uuid, event_uuid: event.uuid | dig: "items", "results" | first -%} 
-            <span class="paragraph-body-title-case">
-                <i class="icon-custom icon-map-pin"></i>
-                {% if event.event_type == 'venue' %}
-                    {% comment %} ? VENUE NAME {% endcomment %}
-                    {% if event.venue_details.venue_name %}
-                        {% assign venue_name = event.venue_details.venue_name  | append: ", " %}
-                    {% endif %}
-
-                    {% comment %} ? AREA NAME {% endcomment %}
-                    {% if venue_area.area_name %}
-                        {% assign area_name = venue_area.area_name  | append: ", " %}
-                    {% endif %}
-
-                    {% comment %} ? ADDRESS 1 {% endcomment %}
-                    {% if event.venue_details.address_1 %}
-                        {% assign address_1 = event.venue_details.address_1  | append: ", " %}
-                    {% endif %}
-
-                    {% comment %} ? ADDRESS 2 {% endcomment %}
-                    {% if event.venue_details.address_2 %}
-                        {% assign address_2 = event.venue_details.address_2  | append: ", " %}
-                    {% endif %}
-
-                    {% comment %} ? ADDRESS 3 {% endcomment %}
-                    {% if event.venue_details.address_3 %}
-                        {% assign address_3 = event.venue_details.address_3  | append: ", " %}
-                    {% endif %}
-
-                    {% comment %} ? CITY {% endcomment %}
-                    {% if event.venue_details.city %}
-                        {% assign city = event.venue_details.city %}
-                    {% endif %}
-
-                    {% comment %} ? SUBURB {% endcomment %}
-                    {% if event.venue_details.suburb %}
-                        {% assign suburb = " " | append: event.venue_details.suburb %}
-                    {% endif %}
-
-                    {% comment %} ? STATE {% endcomment %}
-                    {% if event.venue_details.state %}
-                        {% assign state = " " | append: event.venue_details.state %}
-                    {% endif %}
-
-                    {% comment %} ? POSTAL {% endcomment %}
-                    {% if event.venue_details.postal %}
-                        {% assign postal = " " | append: event.venue_details.postal %}
-                    {% endif %}
-
-                    {% comment %} ? POSTAL {% endcomment %}
-                    {% if event.venue_details.country %}
-                        {% assign country = ", " | append: event.venue_details.country %}
-                    {% endif %}
-
-                    {% assign venue = venue_name | append: area_name | append: address_1 | append: address_2 | append: address_3 | append: city | append: suburb | append: state | append: postal | append: country %}
-                   
-                    <input type="hidden" id="event-location" name="{{ props.event_location.name }}" value="{{ venue }}">
-
-                {% else %}
-                    {% if event.event_type == "online_event" %}
-                        {% assign venue = "Online Event" %}
-                    {% else %}
-                        {% assign venue = "To be Announced" %}
-                    {% endif %}   
-                {% endif %}
-
-                {{ venue }}
-                
-            </span>
-
-
-        </div> {% endcomment %}
+</div>        

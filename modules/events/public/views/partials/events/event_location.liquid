@@ -4,36 +4,56 @@ metadata: {
 }
 ---
 
-<div class="grid-x">
-     <i class="icon-map-pin"></i>
-     <div class="wrap">
-          {% if item.event_type == 'venue' %}
-               <div><span {% if is_bold_name == true %}class="body-bold"{% endif %}>{{ item.venue_name }}</span></div>
-               {% if show_address == true %}
-                    {%- assign address_parts = "," | split: "," -%}
+{% comment %} 
+     Required from parent
+     - item
+{% endcomment %}
 
-                    {%- if item.venue_address_1 %} {%- assign address_parts = address_parts | array_add: item.venue_address_1 -%} {% endif %}
-                    {%- if item.venue_address_2 %} {%- assign address_parts = address_parts | array_add: item.venue_address_2 -%} {% endif %}
-                    {%- if item.venue_address_3 %} {%- assign address_parts = address_parts | array_add: item.venue_address_3 -%} {% endif %}
 
-                    {%- comment %} Combine suburb + state + postcode with spaces and only if at least one exists {% endcomment -%}
-                    {%- assign suburb_state_postcode = "" -%}
-                    {%- if item.venue_suburb %} {%- assign suburb_state_postcode = suburb_state_postcode | append: item.venue_suburb -%} {% endif %}
-                    {%- if item.venue_state %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_state -%} {% endif %}
-                    {%- if item.venue_postcode %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_postcode | strip -%} {% endif %}
-                    {%- if suburb_state_postcode != "" %} {%- assign address_parts = address_parts | array_add: suburb_state_postcode  -%} {% endif %}
+{% if item.event_type == 'venue' %}     
+     {% if show_address == true %}
+          {%- assign address_parts = "," | split: "," -%}
 
-                    {%- if item.venue_country %} {%- assign address_parts = address_parts | array_add: item.venue_country -%} {% endif %}
+          {%- if item.venue_address_1 and item.venue_address_1 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_1 -%} {% endif %}
+          {%- if item.venue_address_2 and item.venue_address_2 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_2 -%} {% endif %}
+          {%- if item.venue_address_3 and item.venue_address_3 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_3 -%} {% endif %}
 
-                    <div>{{ address_parts | join: ', ' }}</div>
+          {%- comment %} Combine suburb + state + postcode with spaces and only if at least one exists {% endcomment -%}
+          {%- assign suburb_state_postcode = "" -%}
+          {%- if item.venue_suburb and item.venue_suburb != "" %} {%- assign suburb_state_postcode = suburb_state_postcode | append: item.venue_suburb -%} {% endif %}
+          {%- if item.venue_state and item.venue_state != "" %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_state -%} {% endif %}
+          {%- if item.venue_postcode and item.venue_postcode != "" %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_postcode | strip -%} {% endif %}
+          {%- if suburb_state_postcode != "" %} {%- assign address_parts = address_parts | array_add: suburb_state_postcode  -%} {% endif %}
 
-               {% endif %}
-          {% else %}
-               {% if item.event_type == "online_event" %}
-                    <span>Online Event</span>
+          {%- if item.venue_country and item.venue_country != "" %} {%- assign address_parts = address_parts | array_add: item.venue_country -%} {% endif %}         
+          {%  assign address_parts = address_parts | join: ', ' %}
+          {% assign location = item.venue_name | append: address_parts %}
+
+     {% endif %}
+{% else %}
+     {% liquid
+          if item.event_type == "online_event" 
+               assign location = "Online Event"     
+          else
+               assign location = "To be Announced"
+          endif
+     %}
+{% endif %} 
+
+{% if is_print == true %}
+     <div class="grid-x">
+          <i class="icon-map-pin"></i>
+          <div class="wrap">
+               {% if item.event_type == 'venue' %}
+                    <div><span {% if is_bold_name == true %}class="body-bold"{% endif %}>{{ item.venue_name }}</span></div>
+                    {% if show_address == true %}
+                         <div>{{ address_parts }}</div>
+                    {% endif %}
                {% else %}
-                    <span>To be Announced</span>
-               {% endif %}   
-          {% endif %}          
+                    <span>{{ location }}</span>
+               {% endif %}                     
+          </div>
      </div>
-</div>
+{% endif %}
+
+{% export location %}

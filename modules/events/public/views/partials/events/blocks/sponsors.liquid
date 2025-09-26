@@ -22,10 +22,10 @@ metadata: {
      <section class="event-sponsors grid-container wrapper width-1296">
           <h2 class="heading-2-xsmall">Thanks to our event sponsors</h2>
           <div class="spacer"></div>
-          <div class="grid-x grid-padding-x grid-padding-y">
+          <div class="event-grid-x">
 
                {% for item in sponsors %}
-                    <div class="cell large-2 medium-4 small-6" data-id="{{item.id}}">
+                    <div class="wrap" data-id="{{item.id}}">
                          <div class="img-wrap">
                               {% if item.logo.url %}
                                    <img src="{{ item.logo.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="180" height="170" alt="{{ item.company_name }}">

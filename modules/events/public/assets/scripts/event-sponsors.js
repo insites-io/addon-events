@@ -1,5 +1,5 @@
 const sponsorsDataEl = document.getElementById('sponsors-data');
-const sponsorItems = document.querySelectorAll('.event-sponsors .cell');
+const sponsorItems = document.querySelectorAll('.event-sponsors .event-grid-x .wrap');
 const sponsorModal = document.getElementById('sponsor-modal');
 const sponsorContent = document.getElementById('sponsor-content');
 
@@ -19,13 +19,18 @@ if (sponsorsDataEl) {
                const oldSubHeading = document.querySelector('#sponsor-modal .sub-heading');
                if (oldSubHeading) oldSubHeading.remove();
 
+               // link
+               const link = sponsor.link 
+                    ? `<a href="${sponsor.link}" target="_blank">${sponsor.link}</a>` 
+                    : '';
+
                const subHeadingHtml = `
                <div class="sub-heading">
                     <div class="spacer x-small"></div>
                     <div class="event-card-wrap">
                          <div class="grid-x">
                          <i class="icon-globals"></i>
-                         <span id="sponsor-email">${sponsor.link}</span>
+                         <span id="sponsor-email">${link}</span>
                          </div>
                     </div>
                     <div class="spacer"></div>

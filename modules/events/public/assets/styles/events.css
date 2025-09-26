@@ -444,6 +444,10 @@ ins-button.event-card-btn .btn__icon {
 .back-events button:hover {
     background-color: transparent !important;
 }
+.event-banner img {
+    max-height: 600px;
+    object-fit: cover;
+}
 .event-details img, 
 .event-details .placeholder-img {
     width: 100%;
@@ -501,13 +505,13 @@ ins-button.event-card-btn .btn__icon {
 .event-sponsors .placeholder-img {
     border-radius: 12px;
     width: 100%;
-    height: 280px !important;
     object-fit: cover;
     cursor: pointer;
 }
 .event-speakers img,
 .event-speakers .placeholder-img {
     object-fit: contain;
+    height: 280px !important;
 }
 .portal.event-details .event-sponsors .grid-x .cell {
     width: 20%;
@@ -548,15 +552,15 @@ ins-button.event-card-btn .btn__icon {
 .event-sponsors .img-wrap {
     border: 1px solid var(--color-ui-04);
     display: flex;
-    /* aspect-ratio: 18 / 17; */
     align-items: center; 
     justify-content: center;
-    padding: 24px;
+    overflow: hidden;
 }
 .event-sponsors img,
 .event-sponsors .placeholder-img {
-    height: 68px !important;
-    object-fit: contain;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
 }
 .event-sponsors img:hover,
 .event-sponsors .placeholder-img:hover {

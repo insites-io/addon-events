@@ -30,7 +30,7 @@ if (sponsorsDataEl) {
                     <div class="event-card-wrap">
                          <div class="grid-x">
                          <i class="icon-globals"></i>
-                         <span id="sponsor-email">${link}</span>
+                         <span id="sponsor-link">${link}</span>
                          </div>
                     </div>
                     <div class="spacer"></div>

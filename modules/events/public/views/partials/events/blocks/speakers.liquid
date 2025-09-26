@@ -41,14 +41,23 @@ metadata: {
                          <div class="spacer"></div>
                          <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
                          <div class="spacer x-small"></div>
+
+                         {% comment %} Company {% endcomment %}
                          {%   liquid
-                              if item.company_name 
+                              assign company_text = ''
+                              if item.company_name and item.company_name != ''
                                    assign company_text = 'at ' | append: item.company_name
-                              else 
-                                   assign company_text = ''
                               endif                         
                          %}
-                         <p class="body-small">{{ item.job_title }} {{ company_text }}</p>
+
+                         {% comment %} Job Title {% endcomment %}
+                         {% liquid 
+                              assign job_title = ''
+                              if item.job_title and item.job_title != ''
+                                   assign job_title = item.job_title
+                              endif
+                         %}
+                         <p class="body-small">{{ job_title }} {{ company_text }}</p>
                     </div>
                {% endfor %}
 

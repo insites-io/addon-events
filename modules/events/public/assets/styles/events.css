@@ -2135,6 +2135,7 @@ ins-filter ins-button button.ins-button.size--small span{
 }
 .ibt-table-wrap.no-label .ibt-table-wrap__no-heading{
     border-radius: 14px;
+    border: none;
 }
 .ibt-table-wrap__settings{
     background-color: transparent;

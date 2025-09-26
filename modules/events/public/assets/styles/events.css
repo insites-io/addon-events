@@ -535,11 +535,6 @@ ins-button.event-card-btn .btn__icon {
         height: auto !important;   
     }            
 }
-@media screen and (max-width: 639px) {
-    .event-sponsors .grid-x {
-        justify-content: center;
-    }
-}
 .event-speakers .placeholder-img .icon-panorame::before {
     content: "\e939" !important;
     font-size: 80px;
@@ -2098,6 +2093,14 @@ ins-filter .date-range__opt-container>div>div:hover{
 }
 ins-filter ins-button button.ins-button.size--small span{
     text-transform: capitalize;
+}
+.ins-modal-wrap.show-modal ins-card .ins-card-wrap {
+    max-width: 90%;
+}
+@media screen and (max-width: 639px) {
+    ins-modal .ins-modal-wrap.show-modal.full-height ins-card .ins-card-wrap {
+        margin: 10px auto;
+    }
 }
 
 #purchased-filter .filter {

@@ -606,6 +606,9 @@ ins-button.event-card-btn .btn__icon {
     scrollbar-width: thin; /* auto | thin | none */
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }  
+.event-modal .ins-modal-body p {
+    margin-bottom: 24px;
+}
 .event-modal .ins-modal-wrap.show-modal .ins-modal-body {
     overflow: auto;
 }

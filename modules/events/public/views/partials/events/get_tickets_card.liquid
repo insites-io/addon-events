@@ -50,6 +50,8 @@ metadata: {
     {%- else -%}
       {%- assign formatted_price = formatted_price | append: ".00" -%}
     {%- endif -%}
+
+    {% assign formatted_price = '$' | append: formatted_price %}
   {%- endif -%}
 
   {%- if tickets_left == 0 -%}
@@ -66,25 +68,54 @@ metadata: {
 {% endif %}
 
 
+{% if is_mobile == true %}
 
-<section id="get-tickets-card">
-     <div class="hide-for-small-only">
-          <div class="spacer x-large"></div>
-          <ins-card steady class="events-card">
-               <h4>Tickets</h4>
-               <div class="spacer small"></div>
-               <hr>
-               <div class="spacer x-large"></div>
-               
-               <p class="body-large">Price starting from</p>
-               <div class="spacer xx-small"></div>
-               <p class="body-xxlarge-bold font-color-head">${{ formatted_price }}</p>
-               
-               <div class="spacer x-large"></div>
-               <a href="{{ event_url }}">
-               <ins-button label="{{label}}" {{disabled}} solid class="btn-full"></ins-button>
-               </a>
-          </ins-card>
-          <div class="spacer x-large"></div>
-     </div>
-</section>
+  {% comment %} Mobile view {% endcomment %}
+  <section id="get-tickets-card-mobile" class="mobile {{ sold_out_class }}">
+    <div class="show-for-small-only">
+      <div class="spacer x-large"></div>
+      <ins-card steady class="events-card">
+        <h5>Tickets</h5>
+        <div class="spacer small"></div>
+        <hr>
+        <div class="spacer small"></div>              
+        <div class="grid-x align-justify align-bottom">
+          <div>
+              <p class="body-large ">Price starting from</p>
+              <div class="spacer xx-small"></div>
+              <p class="ticket-price-mobile">{{ formatted_price }}</p>
+          </div>             
+          {% if is_sold_out == false %} <a href="{{ event_url }}"> {% endif %}       
+            <ins-button label="{{label}}" {{disabled}} solid></ins-button>
+          {% if is_sold_out == false %} </a> {% endif %}
+        </div>               
+      </ins-card>          
+    </div>
+  </section>
+
+{% else %}
+
+  {% comment %} Desktop view {% endcomment %}
+  <section id="get-tickets-card">
+    <div class="hide-for-small-only">
+      <div class="spacer x-large"></div>
+      <ins-card steady class="events-card">
+        <h4>Tickets</h4>
+        <div class="spacer small"></div>
+        <hr>
+        <div class="spacer x-large"></div>
+        
+        <p class="body-large">Price starting from</p>
+        <div class="spacer xx-small"></div>
+        <p class="body-xxlarge-bold font-color-head">{{ formatted_price }}</p>
+        
+        <div class="spacer x-large"></div>
+        {% if is_sold_out == false %} <a href="{{ event_url }}"> {% endif %}
+          <ins-button label="{{label}}" {{disabled}} solid class="btn-full"></ins-button>
+        {% if is_sold_out == false %} </a> {% endif %}
+      </ins-card>
+      <div class="spacer x-large"></div>
+    </div>
+  </section>
+
+{% endif %}

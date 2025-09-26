@@ -613,7 +613,8 @@ ins-button.event-card-btn .btn__icon {
 .event-modal .sub-heading i[class^="icon-"]{
     color: var(--font-color-body);
 }
-.event-modal #sponsor-email a {
+.event-modal #sponsor-link a,
+.event-modal #speaker-email a {
     color: var(--font-color-body);
     font-family: var(--font-family-02);
 }

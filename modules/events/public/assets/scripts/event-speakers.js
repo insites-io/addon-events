@@ -11,6 +11,7 @@ if (speakersDataEl) {
           speakerItem.addEventListener('click', () => {
                const speaker = speakers.find(item => item.id === speakerItem.dataset.id);
                if (!speaker) return;
+               if (!speaker.content || speaker.content.trim() === '') return;
 
                speakerModal.heading = `${speaker.first_name} ${speaker.last_name}`;
                speakerContent.innerHTML = speaker.content;

@@ -24,7 +24,13 @@ metadata: {
           <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
 
                {% for item in speakers %}
-                    <div class="cell large-3 medium-6 small-12" data-id="{{item.id}}">
+
+                    {% comment %} Add no-content class when empty to unset the cursor pointer {% endcomment %}
+                    {% if item.content == blank or item.content == '' %}
+                         {% assign no_content = 'no-content' %}
+                    {% endif %}
+
+                    <div class="cell large-3 medium-6 small-12 {{ no_content }}" data-id="{{item.id}}">
                          <div class="img-wrap">
                               {% if item.image.url %}
                                    <img src="{{ item.image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="270" height="280" alt="{{ item.first_name }}">

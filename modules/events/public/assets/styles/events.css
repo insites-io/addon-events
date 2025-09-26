@@ -519,6 +519,10 @@ ins-button.event-card-btn .btn__icon {
     height: 280px !important;
     border-radius: 12px;
 }
+.event-speakers .cell.no-content,
+.event-speakers .cell.no-content * {
+    cursor: unset;
+}
 .event-sponsors .event-grid-x {
     display: flex;
     flex-direction: row;

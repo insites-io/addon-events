@@ -8,40 +8,17 @@ metadata: {
 {% assign start_date_comparison = item.start_date_time | date: "%b %d, %y" %}
 {% assign end_date_comparison =  item.end_date_time | date: "%b %d, %y"  %}
 
-{% assign is_AEDT = item.custom_fields.daylight_savings_time %}
 
-
-{% comment %} CONVERT TIMEZONE ABBR {% endcomment %}
-{% assign time_zone = item.event_time_zone | split: "@" %}
-{% assign time_zone = time_zone | first %}
-{% if time_zone == "+0800" %}
-    {% assign time_zone_abbr = "AWST" %}
-{% elsif time_zone == "+0930" %}
-    {% assign time_zone_abbr = "ACST" %}
-{% elsif time_zone == "+1000" %}
-    {% assign time_zone_abbr = "AEST" %}
-{% elsif time_zone == "+1030" %}
-    {% assign time_zone_abbr = "ACDT" %}
-{% elsif time_zone == "+1100" %}
-    {% assign time_zone_abbr = "AEDT" %}  
-{% elsif time_zone == "+0100" %}
-    {% assign time_zone_abbr = "BST" %}
-{% elsif time_zone == "+0000" %}
-    {% assign time_zone_abbr = "GMT" %} 
-{% else %}
-    {% if item.event_time_zone != nil %}
-        {% assign time_zone_abbr = "UTC" %}
-    {% endif %}
+{% comment %} Time zone {% endcomment %}
+{% if item.event_time_zone and item.event_time_zone != '' %}
+    {% assign time_zone = item.event_time_zone | split: "@" %}
+    {% assign time_zone = time_zone | first %}
+    {% assign time_zone_abbr = "UTC" %}
+    
+    {% capture formatted_time_zone %}{{ time_zone | slice: 0, 3 }}.{{ time_zone | slice: 3, 2 }}{% endcapture %}
+    {%  assign time_zone = '(' | append: time_zone_abbr | append: formatted_time_zone | append: ')' %}
 {% endif %}
 
-
-{% comment %} Check if AEDT is Toogled {% endcomment %}
-{% if is_AEDT == 'true' %}
-    {% assign time_zone_abbr = "AEDT" %}
-{% endif %}
-
-{% capture formatted_time_zone %}{{ time_zone | slice: 0, 3 }}.{{ time_zone | slice: 3, 2 }}{% endcapture %}
-{%  assign time_zone_abbr = time_zone_abbr | append: formatted_time_zone %}
 
 {% if start_date_comparison == end_date_comparison %}
     {% comment %} Calendar {% endcomment %}
@@ -53,7 +30,7 @@ metadata: {
     {% comment %} Clock {% endcomment %}
     <div class="grid-x">
         <i class="icon-clock"></i>
-        <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
+        <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
     </div>
 {% else %}
     {% if context.params.slug == "purchase-ticket" %}
@@ -68,7 +45,7 @@ metadata: {
                 <div class="spacer xx-small"></div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
-                    <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
+                    <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
                 </div>    
             </div>
             <div class="spacer xx-small"></div>
@@ -81,7 +58,7 @@ metadata: {
                 <div class="spacer xx-small"></div>
                 <div class="grid-x">
                     <i class="icon-clock"></i>
-                    <span>{{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
+                    <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
                 </div>
             </div>
         </div>       
@@ -94,7 +71,7 @@ metadata: {
                         <i class="icon-calendar"></i> <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
                     </div>
                     <div>
-                        <i class="icon-clock"></i> <span>{{ item.start_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span> 
+                        <i class="icon-clock"></i> <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone }}</span> 
                     </div>                    
                 </div>
                 <div>
@@ -103,7 +80,7 @@ metadata: {
                         <i class="icon-calendar"></i> <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span> 
                     </div>
                     <div>
-                        <i class="icon-clock"></i> <span>{{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>     
+                        <i class="icon-clock"></i> <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>     
                     </div>
                 </div>
             </div>    
@@ -116,7 +93,7 @@ metadata: {
             <div class="spacer xx-small"></div>
             <div class="grid-x">
                 <i class="icon-clock"></i>
-                <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} ({{ time_zone_abbr }})</span>        
+                <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
             </div>    
         {% endif %}
     {% endif %}

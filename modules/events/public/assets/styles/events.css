@@ -469,7 +469,7 @@ ins-button.event-card-btn .btn__icon {
     height: 300px;
     width: 100%;
 }
-.event-details .col-1 p {
+.event-details .col-1 p:not(#ticket-allocation-step p){
     margin-bottom: 24px;
 }
 .event-details .col-2 {

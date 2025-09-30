@@ -469,7 +469,7 @@ ins-button.event-card-btn .btn__icon {
     height: 300px;
     width: 100%;
 }
-.event-details .col-1 p {
+.event-details .col-1 p:not(#ticket-allocation-step p){
     margin-bottom: 24px;
 }
 .event-details .col-2 {
@@ -479,6 +479,24 @@ ins-button.event-card-btn .btn__icon {
     color: var(--color-main);
     text-decoration: underline;
 }
+.event-details .about-event h1 {
+    font-size: 32px !important;
+} 
+.event-details .about-event h2 {
+    font-size: 24px !important;
+}    
+.event-details .about-event h3 {
+    font-size: 22px !important;
+}    
+.event-details .about-event h4 {
+    font-size: 18px !important;
+}    
+.event-details .about-event h5 {
+    font-size: 16px !important;
+}    
+.event-details .about-event h6 {
+    font-size: 12px !important;
+}    
 
 
 /* Date & Time */

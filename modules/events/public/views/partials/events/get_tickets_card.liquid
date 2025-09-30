@@ -54,7 +54,7 @@ metadata: {
     {% assign formatted_price = '$' | append: formatted_price %}
   {%- endif -%}
 
-  {%- if tickets_left == 0 -%}
+  {%- if tickets_left <= 0 -%}
     {% assign is_sold_out = true %}
   {%- endif -%}
 

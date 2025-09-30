@@ -20,10 +20,15 @@ if (speakersDataEl) {
                const oldSubHeading = document.querySelector('#speaker-modal .sub-heading');
                if (oldSubHeading) oldSubHeading.remove();
 
-               // Job title
-               const jobTitleText = speaker.company_name
-                    ? `${speaker.job_title} at ${speaker.company_name}`
-                    : speaker.job_title;
+               // Job title and company
+               let jobTitleText = "";
+               if (speaker.job_title && speaker.company_name) {
+                    jobTitleText = `${speaker.job_title} at ${speaker.company_name}`;
+               } else if (speaker.job_title) {
+                    jobTitleText = speaker.job_title;
+               } else if (speaker.company_name) {
+                    jobTitleText = speaker.company_name;
+               }
 
                // Email
                const email = speaker.contact.email 

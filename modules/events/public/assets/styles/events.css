@@ -1608,6 +1608,7 @@ ins-tag.preorder-tag span.ins-tag {
 /* Portal - Ticket Allocation */
 .portal.event-details .ticket-alloation-modal-button {
     min-width: 180px;
+    height: 40px;
 }
 .portal.event-details .download-wrapper {
     min-width: 188px;
@@ -2862,6 +2863,7 @@ ins-button.add-credit-card button.ins-button>div,
   padding: 24px;
   margin-bottom: 24px;
   gap: 24px;
+    align-items: center;
 }
 @media screen and (max-width: 1023px) {
     .portal.event-details .ticket-card-container {
@@ -2902,6 +2904,11 @@ ins-button.add-credit-card button.ins-button>div,
     color: #05051D;
     font-weight: 700;
     font-family: 'DM Sans';
+    width: 56px;   
+    height: 56px;  
+    display: flex;
+    justify-content: center;
+
 }
 
 .ticket-number-container {
@@ -3142,6 +3149,9 @@ ins-button.add-credit-card button.ins-button>div,
     color: #575757;
 }
 
+.ticket-allocation p {
+
+}
 
 @media screen and (max-width: 1023px) { 
     .ticket-stepper-container {
@@ -3201,6 +3211,7 @@ ins-button.add-credit-card button.ins-button>div,
     .ticket-card-container {
         flex-direction: column;
         gap: 24px;
+        align-items: normal;
     }
 
     .ticket-number-container {

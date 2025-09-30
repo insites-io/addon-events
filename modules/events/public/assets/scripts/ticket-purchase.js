@@ -403,7 +403,7 @@ function pricify(number) {
  */
 const stepMap = {
     selection: { index: 1, container: step1Container, button: step1button, header: "Ticket purchase", urlParam: "selection" },
-    billing: { index: 2, container: step2Container, button: step2button, header: "Contact & Billing", urlParam: "billing" },
+    billing: { index: 2, container: step2Container, button: step2button, header: "Contact & billing", urlParam: "billing" },
     payment: { index: 3, container: step3Container, button: step3button, header: "Payment", urlParam: "payment" },
     allocation: { index: 4, container: step4Container, button: step4button, header: "Ticket Allocation", urlParam: "allocation" },
     confirmation: { index: 5, container: step5Container, button: step5button, header: "", urlParam: "confirmation" }
@@ -550,12 +550,13 @@ window.addEventListener("load", () => {
 // Billing Checkbox Sync
 if (checkbox && billingInputs) {
   checkbox.addEventListener("insCheck", function () {
-      const fields = billingInputs.querySelectorAll("[validate]");
+      const fields = billingInputs.querySelectorAll(".required-billing-contact");
       if (this.checked) {
           isChecked = true;
           billingInputs.classList.add("hide");
           fields.forEach(field => {
               field.removeAttribute("validate");
+              field.removeAttribute("has-error");
               field.classList.remove("has-error");
           });
       } else {

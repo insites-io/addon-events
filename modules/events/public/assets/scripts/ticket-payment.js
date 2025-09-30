@@ -63,7 +63,6 @@ async function loadCards(isGuest = false, guestUuid = null) {
             renderCards(cards);
             checkoutBtn?.classList.remove("hide");
 
-            // Guests can only have 1 card
             if (isGuest) {
                 addCardBtnHolder?.classList.add("hide");
                 paymentNavigationButtonContainer.classList.remove('hide')

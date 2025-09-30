@@ -81,7 +81,7 @@ metadata: {
                 value="{{ first_name }}"
                 name="{{ fields.first_name.name }}" 
                 {% if form.errors['first_name'] %} has-error {% endif %}
-                error-message="{{ fields.first_name.validation.rules.presence.message }}">
+                error-message="First name is required.">
             </ins-input>
             </div>
 
@@ -94,7 +94,7 @@ metadata: {
                 value="{{ last_name }}"
                 name="{{ fields.last_name.name }}" 
                 {% if form.errors['last_name'] %} has-error {% endif %}
-                error-message="{{ fields.last_name.validation.rules.presence.message }}">
+                error-message="Last name is required.">
             </ins-input>
             </div>
 
@@ -109,7 +109,7 @@ metadata: {
                 value="{{ email }}"
                 name="{{ fields.email.name }}" 
                 {% if form.errors['email'] %} has-error {% endif %}
-                error-message="{{ fields.email.validation.rules.presence.message }}">
+                error-message="Email is required.">
             </ins-input>
             </div>
 
@@ -179,6 +179,7 @@ metadata: {
       <ins-input required validate 
         label="First Name*" 
         placeholder="First Name"
+        class="required-billing-contact"
         name="{{ prop.billing_contact_first_name.name }}" 
         id="billing-first-name" 
         value="{{ context.session.billing_contact_first_name | default: ''}}"
@@ -189,6 +190,7 @@ metadata: {
       <ins-input required validate 
         label="Last Name*" 
         placeholder="Last Name"
+        class="required-billing-contact"
         name="{{ prop.billing_contact_last_name.name }}" 
         id="billing-last-name" 
         value="{{ context.session.billing_contact_last_name | default: ''}}"
@@ -200,6 +202,7 @@ metadata: {
         label="Email*" 
         placeholder="Email*" 
         field="email"
+        class="required-billing-contact"
         name="{{ prop.billing_contact_email.name }}" 
         id="billing-email" 
         value="{{ context.session.billing_contact_email | default: ''}}"

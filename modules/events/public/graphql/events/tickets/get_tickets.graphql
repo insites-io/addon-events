@@ -2,7 +2,7 @@ query get_tickets (
     $page: Int = 1,
     $size: Int = 1000,
     $event_uuid: String,
-  	$purchased_by_uuid: String,
+  	$purchased_by_uuid: String!,
   	$event_pricing_division_uuid:String,
   	$event_pricing_tier_uuid:String,
     $expires_in_seconds: Int,

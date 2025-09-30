@@ -6,6 +6,9 @@ let cardHolder = document.getElementById('add-credit-card-button-holder');
 let cardFields = document.getElementById('credit-card-fields');
 let guestAddCardForm = document.getElementById("guest-add-card-form")
 let paymentNavigationButtons = document.getElementById("payment-navigation-button")
+let paymentNavigationWButtons = document.getElementById("payment-navigation-button-w-cards")
+
+
 let checkoutBtnEl = document.getElementById("checkout-ticket-submit-btn");
 
 
@@ -195,6 +198,9 @@ let StripeElement = (() => {
                     }
                 }
                 else{
+                    if(isGuestUser) { 
+                        paymentNavigationWButtons.classList.remove("hide")
+                    }
                     if(guestAddCardForm){
                         guestAddCardForm.classList.add("hide");
                     }

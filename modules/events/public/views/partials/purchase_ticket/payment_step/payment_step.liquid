@@ -7,6 +7,7 @@ metadata: {
   <script src="https://js.stripe.com/v3/"></script>
 
   {% function stripe_settings = "modules/events/stripe/get_stripe_settings" %}
+  {{ stripe_settings }}
   <input type="hidden" id="contact_uuid" value="{{ context.current_user.external_id }}">
   <input type="hidden" id="contact_email" value="{{ context.current_user.email }}">
   <input type="hidden" id="stripe_pk_key" value="{{ stripe_settings.pk_key }}">

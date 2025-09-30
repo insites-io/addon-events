@@ -125,7 +125,7 @@ metadata: {
                     {{ ticket_tier.name }}                    
                   {% if ticket_tier.availability_start_date != blank and start_date > now %}
                     <br>
-                    <span class="not-available">Tickets available from {{ ticket_tier.availability_start_date | date: "%b %d, %Y" }}.</span>
+                    <span class="not-available">Tickets available from {{ ticket_tier.availability_start_date | date: "%B %d, %Y" }}.</span>
                   {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
                     <br>
                     <span class="not-available">Pre-sale ended.</span>

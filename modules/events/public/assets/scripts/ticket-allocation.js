@@ -48,7 +48,6 @@ function validateField(inputEl, errorEl, type = "text") {
   const value = inputEl.value.trim();
 
   if (!value) {
-    errorEl.textContent = "Required"; // default message
     errorEl.classList.remove("is_not_visible");
     errorEl.classList.add("is_visible");
     inputEl.setAttribute("has-error", "true");

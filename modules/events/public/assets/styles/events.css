@@ -2642,6 +2642,8 @@ ins-button.add-credit-card button.ins-button>div,
     display: flex;
     align-items: center;
     gap: 32px;
+    width: 30%;
+    justify-content: space-between;
 }
 
 .is_not_visible {
@@ -3131,6 +3133,7 @@ ins-button.add-credit-card button.ins-button>div,
   color: #636368;
   font-weight: 700;
   font-size: 12px;
+  text-align: center;
 }
 
 /* Note Not all .icon-map-pin have margin-top */
@@ -3198,6 +3201,7 @@ ins-button.add-credit-card button.ins-button>div,
 
     .ticket-purchaser-counter { 
         justify-content: space-between;
+        width: auto;
     }
 
     .ticket-buttons ins-button,

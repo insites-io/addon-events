@@ -4,7 +4,9 @@ metadata: {
 }
 ---
 
-{% graphql event = 'modules/events/events/get_event', slug: context.params.slug2 | dig: 'items','results' | first %}
+{% if context.params.slug2 and context.params.slug2 != '' %}
+    {% graphql event = 'modules/events/events/get_event', slug: context.params.slug2 | dig: 'items','results' | first %}
+{% endif %}
 
 {% if event.id == null %}
      {% redirect_to '/404' %}

@@ -1,7 +1,8 @@
 query get_event (
   $page: Int=1
   $size: Int=1
-  $slug: String!  
+  $slug: String
+  $uuid: String
   $uuids: [String!]
 ) {
   items: records(
@@ -13,7 +14,7 @@ query get_event (
      properties: [
         { name: "status", contains: "enabled" }
         { name: "slug", value: $slug }        
-        { name: "uuid", value_in: $uuids }    
+        { name: "uuid", value_in: $uuids, value: $uuid }    
       ]             
     } 
   ) {

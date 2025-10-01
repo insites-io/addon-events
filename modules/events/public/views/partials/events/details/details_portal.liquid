@@ -4,13 +4,15 @@ metadata: {
 }
 ---
 
-{% parse_json args %}
-{
-     "slug": "{{ context.params.slug2 }}",
-     "uuids": {{ user_event_uuids |  default: '[]' }}
-}
-{% endparse_json %}
-{% graphql event = 'modules/events/events/get_event', args: args | dig: 'items','results' | first %}
+{% if context.params.slug2 and context.params.slug2 != '' %}
+     {% parse_json args %}
+     {
+          "slug": "{{ context.params.slug2 }}",
+          "uuids": {{ user_event_uuids |  default: '[]' }}
+     }
+     {% endparse_json %}
+     {% graphql event = 'modules/events/events/get_event', args: args | dig: 'items','results' | first %}
+{% endif %}
 
 {% if event.id == null %}
      {% redirect_to '/404' %}

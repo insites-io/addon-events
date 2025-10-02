@@ -1,0 +1,88 @@
+---
+metadata: {
+    partial_name: 'Events | Emails | Ticket Items'
+}
+---
+
+{% comment %} 
+     Required from parent:
+     - tickets
+{% endcomment %}
+
+{% comment %} Get ticket_venue_name first {% endcomment %}
+{% assign venues = tickets | map: 'ticket_venue_name' | array_uniq | sort %}
+
+
+{% comment %} Get tickets by ticket_venue_name {% endcomment %}
+{% for venue in venues %}
+    {% if venue and venue != '' %}
+
+          {% comment %} Spacer {% endcomment %}
+          {% if forloop.first == false %}
+               {% include 'modules/events/emails/spacer_table_body', spaceSize: 8 %}
+          {% endif %}
+
+          {% comment %} Venue Name {% endcomment %}
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+               <tr>
+                    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+                         <p style="font-weight:600; font-size:14px; color:#525252; margin:0;">
+                              {{ venue }}
+                         </p>
+                    </td>
+               </tr>
+          </table>
+
+          {% comment %} Spacer {% endcomment %}
+          {% include 'modules/events/emails/spacer_table_body', spaceSize: 4 %}
+
+
+          {% comment %} Gather all tier_ids under this venue {% endcomment %}
+          {% liquid  
+               assign tiers = '' | split: ','
+               for ticket in tickets
+                    if ticket.ticket_venue_name == venue                         
+                         assign tiers = tiers | array_add: ticket.tier_id
+                    endif
+               endfor 
+               assign tiers = tiers | array_uniq 
+          %}
+
+          {% comment %} Separate individual and group tiers {% endcomment %}
+          {% liquid
+               assign individual_tiers = '' | split: ','
+               assign group_tiers = '' | split: ','
+
+               for tier in tiers
+                    if tier and tier != ''
+                         assign sample = nil
+                         for ticket in tickets
+                              if ticket.tier_id == tier and ticket.ticket_venue_name == venue
+                              assign sample = ticket
+                              break
+                              endif
+                         endfor
+
+                         if sample.capacity_type == 'individual'
+                              assign individual_tiers = individual_tiers | array_add: tier
+                         else
+                              assign group_tiers = group_tiers | array_add: tier
+                         endif
+                    endif
+               endfor
+          %}
+
+          {% comment %} Render individual tiers first {% endcomment %}
+          {% for tier in individual_tiers %}
+               {% include 'modules/events/emails/ticket_tier', tickets: tickets, venue: venue, tier: tier %}      
+          {% endfor %}
+
+          {% comment %} Render group tiers after {% endcomment %}
+          {% for tier in group_tiers %}
+               {% include 'modules/events/emails/ticket_tier', tickets: tickets, venue: venue, tier: tier %}
+          {% endfor %}
+     
+    {% endif %}
+  
+{% endfor %}
+

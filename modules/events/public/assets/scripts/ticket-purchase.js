@@ -865,6 +865,7 @@ if (step3) {
         //from checkout.js
         let addressCard = selectedAddress
         const orderPayload = {
+            event_uuid: event_uuid_hidden.value,
             order_number: crypto.randomUUID(),
 
             billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
@@ -912,8 +913,12 @@ if (step3) {
             mobile_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
             stripe_credit_card: stripe_credit_card || ""
         };
+        
+        const orderResponse = await saveOrder({
+          ...orderPayload,
+          tickets: ticketPurchaseData.tickets
+        });
 
-        const orderResponse = await saveOrder(orderPayload);
         if (!orderResponse.data.has_error) {
             // Store order data
             ticketPurchaseData.order = orderResponse.data;

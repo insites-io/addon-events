@@ -1,0 +1,24 @@
+---
+metadata: {
+    partial_name: 'Ecommerce | Checkout | Callback Email Notification'
+}
+---
+
+{% comment %}  
+  Required params from parent:
+  - data
+{% endcomment %}
+
+
+{% comment %} Autoresponder: Success payment {% endcomment %}
+{% log "==== Trigger autoresponder order_success notification ====" %}
+{%- graphql trigger = "modules/events/system/trigger_email_notification", 
+    name: 'modules/events/success_ticket_purchase', 
+    data: data -%}
+
+
+{% comment %} Workflow notification {% endcomment %}
+{% log  "==== Trigger workflow notification ====" %}
+{% comment %} {%- graphql trigger = "modules/events/system/trigger_email_notification", 
+    name: 'modules/ecommerce/order_success_workflow', 
+    data: data -%} {% endcomment %}

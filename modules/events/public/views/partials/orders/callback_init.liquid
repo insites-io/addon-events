@@ -43,3 +43,25 @@ metadata: {
     payload: payload,
     order_data: order_data,
     settings: settings %}
+
+
+{% comment %} Step 3: Email Notification {% endcomment %}
+{% if status == 'succeeded' %}    
+
+    {% comment %} Get event details {% endcomment %}
+    {% graphql event = "modules/events/events/get_event", uuid: payload.event_uuid | dig: 'items','results' | first %}
+
+    {% parse_json event_data %}
+    {
+        "name": "{{ event.event_name }}",
+        "image": {{ event.event_image | json }}
+    }
+    {% endparse_json %}    
+
+    {% assign data = payload %} 
+    {% assign data = data | add_hash_key: "payment_response", payment_response.source %}
+    {% assign data = data | add_hash_key: "event", event_data %}
+
+    {% include 'modules/events/orders/callback_email_notifications', data: data %}
+
+{% endif %}

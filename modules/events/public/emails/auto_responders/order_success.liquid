@@ -1,0 +1,423 @@
+---
+name: success_ticket_purchase
+to: '{{ data.order_contact_email }}'
+delay: 0
+enabled: true
+trigger_condition: true
+from: >
+    {%- include 'modules/portal/emails/autoresponder_from' -%}
+reply_to: >
+    {%- include 'modules/portal/emails/autoresponder_reply_to' -%}
+cc:
+bcc:
+subject: Thank you for your ticket order
+layout: modules/insites_core/insites_external_email_layout
+metadata: {
+    "email_name": "Success Ticket Purchase | Autoresponder"
+}
+---
+{% include "modules/insites_cms/globals" %}
+{% assign global = context.exports.global %}
+
+{% assign user = data.customer_info %}
+{% assign form = data.form %}
+{% assign order = data.order_info %}
+{% assign products = data.products %}
+{% assign cart = data.cart %}
+{% assign guest_user = data.guest_user %}
+
+{%- capture cta_link -%}
+    {{ platform_context.host }}/order-history/{{ order.id }}
+{%- endcapture -%}
+
+
+
+{% comment %}  
+    NOTE:
+    Use <table> instead of <div> for layout and spacing in emails.
+    Many email clients (especially Outlook) do not fully support CSS on <div>,
+    but <table> + <td> with inline styles ensures maximum compatibility. 
+{% endcomment %}
+
+
+{% comment %} <!-- Top Background Div with Dynamic Image Variable --> {% endcomment %}
+<div style="width: 100%; height: 249px; background: url({{  'modules/events/images/autoresponder_success.png'  | asset_url }}) lightgray 50% / cover no-repeat;">
+</div>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 56 %}
+
+{% comment %} <!-- Heading --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size: 32px; line-height: 40px; font-weight: 600; color: #0d0d0d; margin:0;">
+        <strong>Thank you for your ticket order</strong>
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 40 %}
+
+{% comment %} <!-- Hi Name --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:16px; line-height:26px; color:#525252; margin:0;">
+        Hi {{ data.order_contact_first_name }} {{ data.order_contact_last_name }},
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 32 %}
+
+{% comment %} <!-- Content --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:16px; line-height:26px; color:#525252; margin:0;">
+        Thanks for your recent ticket purchase from {{ global.company_name }}. We're excited to have you join us.
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 56 %}
+<hr style="margin-left: 40px;margin-right: 40px;border-top: 1px solid #DFDFDF;">
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 56 %}
+
+{% comment %} <!-- Order Number --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:24px; line-height:38px; font-weight:600; color:#0d0d0d; margin:0;">
+        Order Number: {{ data.order_number }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 32 %}
+
+
+{% comment %} <!-- Billing Details --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:16px; line-height:26px; font-weight:600; color:#0d0d0d; margin:0;">
+        Billing Details
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 32 %}
+
+{% comment %} Company Name {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Company Name
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.billing_company_name }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} Name {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Name
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.billing_contact_first_name }} {{ data.billing_contact_last_name }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} Phone Number {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Phone Number
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.billing_contact_phone_country_code }} {{ data.billing_contact_phone_number }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} Email Address {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Email Address
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.billing_contact_email }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} Billing Address {% endcomment %}
+{% liquid 
+    assign address_parts = "" | split: "" 
+
+    if data.billing_address_1 and data.billing_address_1 != ''
+        assign address_parts = address_parts | array_add: data.billing_address_1
+    endif
+    if data.billing_city and data.billing_city != ''
+        assign address_parts = address_parts | array_add: data.billing_city
+    endif
+    if data.billing_state and data.billing_state != ''
+        assign address_parts = address_parts | array_add: data.billing_state
+    endif
+    if data.billing_postcode and data.billing_postcode != ''
+        assign address_parts = address_parts | array_add: data.billing_postcode
+    endif
+    if data.billing_country and data.billing_country != ''
+        assign address_parts = address_parts | array_add: data.billing_country
+    endif
+%} 
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Billing Address
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ address_parts | join: ", " }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 32 %}
+
+{% comment %} <!-- Payment Method --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:16px; line-height:26px; font-weight:600; color:#0d0d0d; margin:0;">
+        Payment Method
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 32 %}
+
+{% comment %} Card Type {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Card Type
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.payment_response.brand }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} Card Number {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Card Number
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        **** **** **** {{ data.payment_response.last4 }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 104 %}
+<hr style="margin-left: 40px;margin-right: 40px;border-top: 1px solid #DFDFDF;">
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 64 %}
+
+
+{% comment %} Image {% endcomment %}
+{% assign imgsrc = data.event.image.url %} 
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="padding:0px 40px 0px 40px; line-height:22px;">
+        {% if imgsrc != '' and imgsrc != blank %}
+            <img  src="{{ imgsrc | replace: ' ', '%20' | escape }}" style="width: 100%; min-height:180px;" alt="{{ data.event.name }}" >
+        {% else %}
+            {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+        {% endif %}
+      </td>
+    </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+
+{% comment %} Event name {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:26px;">
+      <p style="font-weight:600; font-size:16px; color:#0d0d0d; margin:0;">
+        {{ data.event.name }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 8 %}
+
+
+{% comment %} Ticket Items {% endcomment %}
+{% include 'modules/events/emails/ticket_items', tickets: data.tickets %}
+
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 56 %}
+<hr style="margin-left: 40px;margin-right: 40px;border-top: 1px solid #DFDFDF;">
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 48 %}
+
+
+{% comment %} Subtotal {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Subtotal
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.subtotal_amount | pricify: 'USD', no_cents_if_whole: false }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+
+{% comment %} Discount {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Discount
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        -{{ data.total_discount_amount | pricify: 'USD', no_cents_if_whole: false }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+
+{% comment %} Tax {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Tax
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ data.total_tax_amount | pricify: 'USD', no_cents_if_whole: false }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+
+{% comment %} Processing fee {% endcomment %}
+{% assign processing_fee = data.total_amount | minus: data.subtotal_amount | minus: data.total_tax_amount %} 
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+        Processing fee
+      </p>
+      <p style="font-size:14px; color:#525252; margin:0;">
+        {{ processing_fee | pricify: 'USD', no_cents_if_whole: false }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+
+{% comment %} Total {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:26px;">
+      <p style="font-weight:600; font-size:16px; color:#0d0d0d; margin:0;">
+        Total
+      </p>
+      <p style="font-weight:600; font-size:16px; color:#525252; margin:0;">
+        {{ data.total_amount | pricify: 'USD', no_cents_if_whole: false }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} Spacer {% endcomment %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+
+

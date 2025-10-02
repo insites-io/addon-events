@@ -146,8 +146,8 @@ metadata: {
   <div class="grid-x">
 
     <div class="cell">
-      <div class="spacer x-large hide-for-small-only"></div>
-      <div class="spacer show-for-small-only"></div>
+      <div class="spacer xxx-large hide-for-small-only"></div>
+      <div class="spacer x-large show-for-small-only"></div>
       <h4>Billing contact</h4>
       <div class="spacer x-large hide-for-small-only"></div>
       <div class="spacer show-for-small-only"></div>
@@ -237,8 +237,8 @@ metadata: {
     var billingSamewithShippingFlag = {{ context.session.billing_same_with_shipping | default: false }};
 </script>
 
- <div class="hide-for-small-only spacer large"></div>
-    <div class="show-for-small-only spacer small"></div>
+ 
+    
 
     {% if has_profile %}
         {% include "modules/events/purchase_ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
@@ -320,9 +320,9 @@ metadata: {
         </div>
     {% endif %}
 
-
-    
-    <div class="spacer xxx-large"></div>       
+      
+    <div class="hide-for-small-only spacer xxx-large"></div>
+    <div class="show-for-small-only spacer x-large"></div>    
 
 </div>
 

@@ -586,6 +586,11 @@ ins-button.event-card-btn .btn__icon {
     width: 692px;
     border-radius: 14px;
 }
+@media screen and (max-width: 692px) {
+    .event-modal .ins-card-wrap{
+        max-width: 90% !important;
+    }
+}
 .event-modal .ins-modal-wrap.show-modal .ins-modal-head {
     border-bottom: 0px;
     padding: 32px 32px 0px 32px;
@@ -2122,9 +2127,6 @@ ins-filter .date-range__opt-container>div>div:hover{
 }
 ins-filter ins-button button.ins-button.size--small span{
     text-transform: capitalize;
-}
-.ins-modal-wrap.show-modal ins-card .ins-card-wrap {
-    max-width: 90%;
 }
 
 #allocationModal .ins-modal-wrap.show-modal ins-card .ins-card-wrap {

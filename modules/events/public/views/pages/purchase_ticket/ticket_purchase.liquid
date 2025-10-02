@@ -23,15 +23,18 @@ metadata: {
 }
 --- 
 
-<div id="purchase-ticket">
-    <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-spinner"></div>
-    <div id="loadingMessage" class="loading-message">
-      Checking ticket availability... <br>
-      Hang tight, and please do not leave this screen.
-    </div>
-    </div>
+{% comment %} Loading overlay {% endcomment %}
+<div id="loadingOverlay" class="loading-overlay hide">
+    <ins-loader
+        id="purchase-ticket-loader"
+        state-title="" 
+        state-icon="processing" 
+        state-message="Checking ticket availability... Hang tight, and please do not leave this screen.">
+    </ins-loader>
+</div>
 
+<div id="purchase-ticket">
+        
     {% comment %} Stepper {% endcomment %}
     <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
         <div class="wrapper">

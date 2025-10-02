@@ -412,21 +412,18 @@ const stepMap = {
 // Helpers
 function showLoading(step) {
   const overlay = document.getElementById('loadingOverlay');
-  const message = document.getElementById('loadingMessage');
- 
-  if (overlay) {
-    if (step === 1 && message) {
-      message.style.display = 'block';
-    } else if (message) {
-      message.style.display = 'none'; 
-    }
-    overlay.classList.add("active");
+  
+  if (step === 1 && overlay){
+    overlay.classList.remove("hide");
+  } else {
+    overlay.classList.add("hide");
   }
+ 
 }
 function hideLoading() {
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) {
-        overlay.classList.remove("active");
+      overlay.classList.add("hide");
     }
 }
 function scrollToTop() {

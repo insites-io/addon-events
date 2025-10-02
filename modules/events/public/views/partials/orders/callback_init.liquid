@@ -61,6 +61,7 @@ metadata: {
     {% assign data = payload %} 
     {% assign data = data | add_hash_key: "payment_response", payment_response.source %}
     {% assign data = data | add_hash_key: "event", event_data %}
+    {% assign data = data | add_hash_key: "order_data", order_data %}
 
     {% include 'modules/events/orders/callback_email_notifications', data: data %}
 

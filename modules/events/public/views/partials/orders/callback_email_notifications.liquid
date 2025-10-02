@@ -19,6 +19,6 @@ metadata: {
 
 {% comment %} Workflow notification {% endcomment %}
 {% log  "==== Trigger workflow notification ====" %}
-{% comment %} {%- graphql trigger = "modules/events/system/trigger_email_notification", 
-    name: 'modules/ecommerce/order_success_workflow', 
-    data: data -%} {% endcomment %}
+{%- graphql trigger = "modules/events/system/trigger_email_notification", 
+    name: 'modules/events/success_ticket_purchase_workflow', 
+    data: data -%}

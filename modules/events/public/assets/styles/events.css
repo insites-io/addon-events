@@ -427,6 +427,10 @@ ins-button.event-card-btn .btn__icon {
     line-height: 24px; /* 150% */
     margin-right: 8px;
 }
+.event-card-wrap .placeholder-img i[class^="icon-"]{
+    font-size: 48px;   
+    color: #CCCED3;
+}
 
 /* Event List */
 .event-pagination-table .ibt-table-wrap .pagination-wrap {

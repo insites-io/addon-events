@@ -134,22 +134,22 @@ metadata: {
 
                   {% if venue_remaining == 0 %}
                     <div class="ticket-purchaser-counter">
-                      <span>${{ ticket_tier.price }}</span>
+                      <span>{{ ticket_tier.price | pricify: 'USD', no_cents_if_whole: false }}</span>
                       <div class="ticket-unavailable">Sold out</div>
                     </div>
                   {% elsif ticket_tier.availability_start_date != blank and start_date > now %}
                     <div class="ticket-purchaser-counter">
-                      <span>${{ ticket_tier.price }}</span>
+                      <span>{{ ticket_tier.price | pricify: 'USD', no_cents_if_whole: false }}</span>
                       <div class="ticket-unavailable">Not available</div>
                     </div>
                   {% elsif ticket_tier.availability_end_date != blank and end_date < now %}
                     <div class="ticket-purchaser-counter">
-                      <span>${{ ticket_tier.price }}</span>
+                      <span>{{ ticket_tier.price | pricify: 'USD', no_cents_if_whole: false }}</span>
                       <div class="ticket-unavailable">Not available</div>
                     </div>
                   {% else %}
                     <div class="ticket-purchaser-counter">
-                      <span>${{ ticket_tier.price }}</span>
+                      <span>{{ ticket_tier.price | pricify: 'USD', no_cents_if_whole: false }}</span>
                        <div class="number-input" >
                         <button class="decrement">&minus;</button>
                         <input data='{{ ticket_data | json }}' type="number" class="input-stepper" value="0" min="0" max="{{ max_tickets }}">

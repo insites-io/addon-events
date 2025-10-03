@@ -2301,6 +2301,9 @@ ins-gallery-image.active .ins-gallery-image {
 #credit-card-fields .ins-credit-card-compact-size{
     margin-bottom: 0px !important;
 }
+#no-card {
+    margin-top: 24px;
+}
 .empty-card .ins-card-wrap{    
     padding: 56px 24px;
     align-items: center;

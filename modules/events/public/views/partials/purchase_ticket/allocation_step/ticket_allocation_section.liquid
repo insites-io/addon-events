@@ -118,14 +118,16 @@ metadata: {
                   <span>{{ ticket_index }}</span>
                 </div>
 
-                <div class="ticket-number-container">
-                  <div class="ticket-number"><strong>Ticket number: {{ ticket.id }}</strong></div>
-                  <div class="ticket-allocation" id="ticket-allocated-details-{{ticket.uuid}}">
-                  {% if ticket.contact_email == null %}
-                    <p>No attendee assigned</p>
-                  {% else %}
-                    <p>{{ ticket.contact_first_name }} {{ ticket.contact_last_name }}</p> <p> {{ ticket.contact_email }}</p>
-                  {% endif %}
+                <div class="flex-child-auto">
+                  <div class="ticket-number-container">
+                    <div class="ticket-number"><strong>Ticket number: {{ ticket.id }}</strong></div>
+                    <div class="ticket-allocation" id="ticket-allocated-details-{{ticket.uuid}}">
+                    {% if ticket.contact_email == null %}
+                      <p>No attendee assigned</p>
+                    {% else %}
+                      <p>{{ ticket.contact_first_name }} {{ ticket.contact_last_name }}</p> <p> {{ ticket.contact_email }}</p>
+                    {% endif %}
+                    </div>
                   </div>
                 </div>
                

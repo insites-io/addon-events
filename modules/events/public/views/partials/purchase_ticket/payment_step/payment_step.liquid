@@ -30,7 +30,8 @@ metadata: {
         <div class="spacer large"></div>
         <p class="error-message hide">Credit Card is required.</p>
         <div class="grid-container">
-          <div id="card-options-list" class="grid-x grid-padding-x grid-padding-y"></div>
+          {% comment %} A list of credit cards will be populated here via JS {% endcomment %}
+          <div id="card-options-list" data-card-grid="large-6 medium-12 small-12" class="grid-x grid-padding-x grid-padding-y"></div>
         </div>
 
         <ins-input required validate
@@ -43,21 +44,10 @@ metadata: {
       </div>
 
         <!-- For members: if no card -->
-        <div id="no-card" class="empty-box hide">
-            <p class="body-large bold">No card added.</p>
-            <div class="spacer"></div>
-            <div class="grid-x grid-padding-x" id="payment-navigation-button">
-              <div class="large-12 medium-12 small-12 cell">
-                <div class="grid-x grid-padding-x grid-padding-y">
-                  <div class="large-6 medium-6 small-12 cell">
-                    <ins-button id="back-step-3-1" type="button" label="Back"  class="ticket-buttons" outlined icon="icon-arrow-back"></ins-button>
-                  </div>
-                  <div class="large-6 medium-6 small-12 cell text-right">
-                    <ins-button solid type="button" class="add-card-btn icket-buttons" icon="icon-plus" label="Add credit card"></ins-button>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div id="no-card" class="empty-box {% if cards.results.size > 0 %}hide{% endif %}">
+          <p class="body-large bold">No card added.</p>
+          <div class="spacer"></div>
+          <ins-button solid type="button" class="add-card-btn ticket-buttons" icon="icon-plus" label="Add credit card"></ins-button>
         </div>
 
         <!-- Guest checkout form -->

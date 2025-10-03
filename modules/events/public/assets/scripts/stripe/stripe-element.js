@@ -46,7 +46,7 @@ let StripeElement = (() => {
         methods: {
             makeCardElement(token) {
                 if (cardOptionsList && token) {
-                    let grid = cardOptionsList.getAttribute('card-grid') || cardLayout;
+                    let grid = cardOptionsList.getAttribute('data-card-grid') || cardLayout;
                     let divEl = document.createElement("div");
                         divEl.className = `${grid} cell card-options`;
                     let insCardEl = document.createElement("ins-credit-card");
@@ -93,7 +93,7 @@ let StripeElement = (() => {
                         }
 
                         //toggle guest card form
-                        StripeElement.events.toggleGuestCard('add');
+                        StripeElement.events.toggleCreditCard('add');
                     }
                 });
             },
@@ -175,38 +175,27 @@ let StripeElement = (() => {
                     selectedEl.parentNode.remove();
                     App.events.notyf('success', "Credit card has been removed.");
                     StripeElement.methods.checkCardCount();
-                    StripeElement.events.toggleGuestCard('remove');
+                    StripeElement.events.toggleCreditCard('remove');
                     
                 }
             },
-            toggleGuestCard(state){ 
+            toggleCreditCard(state){ 
                 if(state === 'remove'){
                     if(cardOptionsList.querySelectorAll('ins-credit-card').length < 1){
-                        if(isGuestUser) {
-                            if(guestAddCardForm){
-                                guestAddCardForm.classList.remove("hide");
-                                noCardBox.classList.add("hide")
-                            }
-                            if(paymentNavigationButtons){
-                                paymentNavigationButtons.classList.add("hide");
-                            }
-                        }else {
-                             guestAddCardForm.classList.add("hide");
-                             noCardBox.classList.remove("hide") 
-                             paymentNavigationButtons.classList.add("hide");
+                        if(guestAddCardForm && isGuestUser){
+                            guestAddCardForm.classList.remove("hide");
+                        }
+                        if(checkoutBtnEl){
+                            checkoutBtnEl.classList.add("hide");
                         }
                     }
                 }
                 else{
-                    if(isGuestUser) { 
-                        paymentNavigationWButtons.classList.remove("hide")
-                    }
-                    if(guestAddCardForm){
+                    if(guestAddCardForm && isGuestUser){
                         guestAddCardForm.classList.add("hide");
                     }
-                    if(paymentNavigationButtons){
-                        checkoutBtnEl.classList.remove('hide')
-                        paymentNavigationButtons.classList.remove("hide");
+                    if(checkoutBtnEl){
+                        checkoutBtnEl.classList.remove("hide");
                     }
                 }
             }

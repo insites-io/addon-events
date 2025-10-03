@@ -10,7 +10,7 @@ const paymentNavigationButtonContainer = document.getElementById("payment-naviga
 let isGuestUser = false
 
 // Layout for ins-credit-card
-const cardLayouts = "large-4 medium-12 small-12";
+const cardLayouts = cardList.getAttribute('data-card-grid') || "large-4 medium-12 small-12";
 // When add-card is clicked:
 document.addEventListener("click", (e) => {
     if (e.target.closest(".add-card-btn")) {
@@ -19,6 +19,7 @@ document.addEventListener("click", (e) => {
         } else {
             guestAddCardForm.classList.remove('hide');
             noCardBox?.classList.add('hide');
+            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
         }
 
         // Mount the Stripe Element into the correct container
@@ -34,6 +35,7 @@ document.addEventListener("click", (e) => {
             const guestForm = document.getElementById("guest-add-card-form");
             if (guestForm) guestForm.classList.remove("hide"); // show guest form
             if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest
+            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
         }
     }
 });
@@ -70,9 +72,11 @@ async function loadCards(isGuest = false, guestUuid = null) {
                 addCardBtnHolder?.classList.remove("hide");
             }
             noCardBox?.classList.add("hide");
+            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
         } else {
             // No cards found
             noCardBox?.classList.remove("hide");
+            if (checkoutBtn) checkoutBtn.classList.add("hide"); // hide 'Pay now' button
 
             // If guest, show inline form
             if (isGuest) {
@@ -80,11 +84,13 @@ async function loadCards(isGuest = false, guestUuid = null) {
                 if (guestForm) guestForm.classList.remove("hide");
                 addCardBtnHolder?.classList.add("hide"); // guest cannot add more than 1 card
                 noCardBox?.classList.add("hide");
+                if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
             }
         }
     } catch (err) {
         console.error("Error fetching cards:", err);
         noCardBox?.classList.remove("hide");
+        if (checkoutBtn) checkoutBtn.classList.add("hide"); // hide 'Pay now' button
     }
 }
 
@@ -128,5 +134,7 @@ function renderCards(cards) {
 
         divEl.appendChild(insCardEl);
         cardList.appendChild(divEl);
+
+        if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
     });
 }

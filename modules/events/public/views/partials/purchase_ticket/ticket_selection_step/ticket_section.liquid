@@ -41,20 +41,9 @@ metadata: {
         <h3>{{ venue.name }}</h3>
         <div class="spacer x-small"></div>
         <p class="ticket-venue-sub-place">{{ venue.venue.venue_name }} - {{ venue.area_name }}</p>
-        <div class="spacer x-small"></div>
-        {% assign ticket_cat = "" %}
-        {% for tier in venue.tiers %}
-          {% unless ticket_cat contains tier.capacity_type %}
-            {% if ticket_cat == "" %}
-              {% assign ticket_cat = tier.capacity_type %}
-            {% else %}
-              {% assign ticket_cat = ticket_cat | append: "," | append: tier.capacity_type %}
-            {% endif %}
-          {% endunless %}
-        {% endfor %}
-        {% assign ticket_category = ticket_cat | split: "," %}
+        <div class="spacer x-small"></div>       
         <p class="ticket-venue-categories">
-          {{ ticket_category.size }} Ticket categories - Tickets starting from ${{ formatted_price }}.
+          {{ venue.tiers.size }} Ticket categories - Tickets starting from ${{ formatted_price }}.
         </p>
       </div>
       <span class="icon"><i class="icon-angle-up"></i></span>

@@ -29,9 +29,11 @@ metadata: {
     {% if show_element %}
         <div class="spacer small"></div>
         <p>Know who's coming? Allocate now to personalise your tickets. You can change your allocations in the portal at any time before the event.</p>
+        <div class="spacer x-large"></div>
+    {% else %}
+        <div class="spacer"></div>
     {% endif %}
-
-    <div class="spacer x-large"></div>
+    
 
     {% include 'modules/events/purchase_ticket/allocation_step/ticket_allocation_section', event: event %}
 

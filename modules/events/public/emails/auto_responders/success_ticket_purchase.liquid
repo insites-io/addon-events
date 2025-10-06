@@ -349,21 +349,25 @@ metadata: {
 
 
 {% comment %} Discount {% endcomment %}
-<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr>
-    <td style="padding:0px 40px 0px 40px; line-height:22px;">
-      <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
-        Discount
-      </p>
-      <p style="font-size:14px; color:#525252; margin:0;">
-        -{{ data.total_discount_amount | pricify: 'USD', no_cents_if_whole: false }}
-      </p>
-    </td>
-  </tr>
-</table>
+{% if data.total_discount_amount and data.total_discount_amount > 0 %}
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="padding:0px 40px 0px 40px; line-height:22px;">
+        <p style="font-weight:600; font-size:14px; color:#0d0d0d; margin:0;">
+          Discount
+        </p>
+        <p style="font-size:14px; color:#525252; margin:0;">
+          -{{ data.total_discount_amount | pricify: 'USD', no_cents_if_whole: false }}
+        </p>
+      </td>
+    </tr>
+  </table>
 
-{% comment %} Spacer {% endcomment %}
-{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+  {% comment %} Spacer {% endcomment %}
+  {% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+{% endif %}
+
+
 
 
 {% comment %} Tax {% endcomment %}

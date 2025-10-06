@@ -58,7 +58,7 @@ metadata: {
     {% endif %}
     <div class="spacer x-small"></div>
     <p class="ticket-venue-sub-place">{{ first_ticket.venue_name }} - {{ first_ticket.venue_area.area_name }}</p>
-    <div class="spacer x-small"></div>
+    <div class="spacer"></div>
   </div>
 
   {% assign grouped_by_type = venue_tickets | group_by: "ticket_type" %}

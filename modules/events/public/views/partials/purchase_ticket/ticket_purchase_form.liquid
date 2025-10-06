@@ -89,9 +89,7 @@ metadata: {
 
     {% assign event_start_date = event.start_date_time %}
     {% assign event_start_time  = event.start_date_time | date: "%H:%M" %}
-
-    {% comment %} ? CONVERT TIMEZONE ABBR {% endcomment %}
-    {% function time_zone_abbr = "modules/events/my_events/set_timezone" %}
+    {% assign time_zone_abbr = "UTC" %}
 
     <input type="hidden" id="event-name" name="{{ props.event_name.name }}" value="{{ event.event_name }}">
     <input type="hidden" id="event-reference" name="{{ props.event_reference.name }}" value="{{ event.reference_number }}">

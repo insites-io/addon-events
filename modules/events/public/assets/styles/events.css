@@ -2916,6 +2916,10 @@ ins-button.add-credit-card button.ins-button>div,
     width: 50%;
 }
 
+.ticket-number-container .attendee-name {
+    min-width: 175px;
+}
+
 .ticket-number { 
     color: #05051D;
 }

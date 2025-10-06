@@ -125,7 +125,7 @@ metadata: {
                     {% if ticket.contact_email == null %}
                       <p>No attendee assigned</p>
                     {% else %}
-                      <p>{{ ticket.contact_first_name }} {{ ticket.contact_last_name }}</p> <p> {{ ticket.contact_email }}</p>
+                      <p class="attendee-name">{{ ticket.contact_first_name }} {{ ticket.contact_last_name }}</p> <p> {{ ticket.contact_email }}</p>
                     {% endif %}
                     </div>
                   </div>

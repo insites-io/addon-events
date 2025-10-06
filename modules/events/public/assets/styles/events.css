@@ -2054,7 +2054,6 @@ ins-filter-item .filter-item__button--option,
     font-weight: 400;
     color: var(--font-color-body);
 }
-
 .ibt-table .action-item {
     font-weight: 400;
     color: var(--color-main) !important;
@@ -2127,6 +2126,9 @@ ins-filter .date-range__opt-container>div>div:hover{
 }
 ins-filter ins-button button.ins-button.size--small span{
     text-transform: capitalize;
+}
+.ins-step_progress-bar {
+    background: var(--color-ui-04);
 }
 
 #allocationModal .ins-modal-wrap.show-modal ins-card .ins-card-wrap {

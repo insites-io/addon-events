@@ -5,12 +5,13 @@ const noCardBox = document.getElementById("no-card");
 const addCardBtnHolder = document.getElementById("add-credit-card-button-holder");
 const checkoutBtn = document.getElementById("checkout-ticket-submit-btn");
 const stripeModal = document.getElementById("stripe-modal");
-const paymentNavigationButtonContainer = document.getElementById("payment-navigation-button-w-cards")
+const paymentNavigationButtons = document.querySelectorAll("#payment-navigation-buttons ins-button");
 
 let isGuestUser = false
 
 // Layout for ins-credit-card
-const cardLayouts = cardList.getAttribute('data-card-grid') || "large-4 medium-12 small-12";
+const cardLayouts = cardList.getAttribute('data-card-grid') || "large-6 medium-12 small-12";
+
 // When add-card is clicked:
 document.addEventListener("click", (e) => {
     if (e.target.closest(".add-card-btn")) {
@@ -27,14 +28,15 @@ document.addEventListener("click", (e) => {
 });
 
 // Handle Add Card button clicks
-document.addEventListener("click", (e) => {
+document.addEventListener("click", (e) => {    
     if (e.target.closest(".add-card-btn")) {
+        console.log("Handle Add Card button clicks");
         if (contact_Uuid?.value) {
             stripeModal.setAttribute("open", ""); // modal for logged-in users
         } else {
             const guestForm = document.getElementById("guest-add-card-form");
             if (guestForm) guestForm.classList.remove("hide"); // show guest form
-            if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest
+            if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest            
             if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
         }
     }
@@ -44,11 +46,8 @@ document.addEventListener("click", (e) => {
 async function loadCards(isGuest = false, guestUuid = null) {
     if(isGuest) {
         isGuestUser = true
-        paymentNavigationButtonContainer.classList.add('hide')
     }
 
-    // Mount the Stripe Element into the correct container
-    StripeElement.init.stripeElements(isGuestUser);
 
     cardList.innerHTML = "";
 
@@ -63,16 +62,20 @@ async function loadCards(isGuest = false, guestUuid = null) {
 
         if (cards.length) {
             renderCards(cards);
-            checkoutBtn?.classList.remove("hide");
 
             if (isGuest) {
                 addCardBtnHolder?.classList.add("hide");
-                paymentNavigationButtonContainer.classList.remove('hide')
             } else {
                 addCardBtnHolder?.classList.remove("hide");
             }
             noCardBox?.classList.add("hide");
-            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
+
+            // Show back and 'Pay now' button
+            if(paymentNavigationButtons) {
+                paymentNavigationButtons.forEach(btn => {
+                    btn.classList.remove('hide');
+                });
+            }
         } else {
             // No cards found
             noCardBox?.classList.remove("hide");
@@ -83,8 +86,7 @@ async function loadCards(isGuest = false, guestUuid = null) {
                 const guestForm = document.getElementById("guest-add-card-form");
                 if (guestForm) guestForm.classList.remove("hide");
                 addCardBtnHolder?.classList.add("hide"); // guest cannot add more than 1 card
-                noCardBox?.classList.add("hide");
-                if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
+                noCardBox?.classList.add("hide");                
             }
         }
     } catch (err) {

@@ -1,0 +1,52 @@
+---
+metadata: {
+    partial_name: 'Ecommerce | Stripe | Stripe form'
+}
+---
+     
+<script src="https://js.stripe.com/v3/"></script>
+
+<div class="form-row">
+     <div id="card-element">
+     <!-- A Stripe Element will be inserted here. -->
+     </div>
+     <div id="card-errors" class="error-message"></div>
+</div>
+<div class="spacer x-large"></div>
+
+{% comment %} Different arrangement of buttons for modal(member) and block(guest) form {% endcomment %}
+{% if has_profile %}
+     {% comment %} For member modal form {% endcomment %}
+     <div class="grid-x modal-btn-container align-right">
+          <ins-button type="button" outlined 
+               class="card-form-cancel"
+               label="Cancel"
+               icon="icon-x">
+          </ins-button>                    
+          <ins-button type="button" solid 
+               class="card-form-submit"
+               label="Add"
+               data="large-6 medium-6 small-12"
+               icon="icon-task-completed">
+          </ins-button>
+     </div>
+{% else %}
+     {% comment %} For guest block form {% endcomment %}
+     <div class="grid-x block-btn-container">
+          <div class="large-6 medium-6 small-12 cell">                         
+               <ins-button type="button" outlined 
+                    class="card-form-cancel back-step-3-billing"
+                    label="Back"
+                    icon="icon-arrow-back">
+               </ins-button>
+          </div>
+          <div class="large-6 medium-6 small-12 cell text-right">
+               <ins-button type="button" solid 
+                    class="card-form-submit ticket-buttons"
+                    label="Add"
+                    data="large-6 medium-6 small-12"
+                    icon="icon-task-completed">
+               </ins-button>                         
+          </div>
+     </div>
+{% endif %}                              

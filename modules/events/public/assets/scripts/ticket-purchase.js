@@ -449,7 +449,7 @@ function toKebabCase(str) {
 const backStep2 = document.getElementById('back-step-2');
 const backStep3 = document.getElementById('back-step-3');
 const backStep31 = document.getElementById('back-step-3-1');
-const backStep3Billing = document.getElementById('back-step-3-billing');
+const backStep3Billing = document.querySelectorAll('.back-step-3-billing');
 
 if (backStep2) {
   backStep2.addEventListener('click', () => {
@@ -479,11 +479,13 @@ if (backStep31) {
 }
 
 if (backStep3Billing) {
-  backStep3Billing.addEventListener('click', () => {
-    showStep("billing");
-    if (ticketPurchaseStepper) {
-      ticketPurchaseStepper.setStep(2);
-    }
+  backStep3Billing.forEach(btn => {
+    btn.addEventListener('click', () => {
+      showStep("billing");
+      if (ticketPurchaseStepper) {
+        ticketPurchaseStepper.setStep(2);
+      }
+    });
   });
 }
 
@@ -915,6 +917,8 @@ if (step3) {
           ...orderPayload,
           tickets: ticketPurchaseData.tickets
         });
+
+        console.log("orderResponse", orderResponse);
 
         if (!orderResponse.data.has_error) {
             // Store order data

@@ -98,7 +98,7 @@ metadata: {
   <tr>
     <td style="padding:0px 40px 0px 40px;">
       <p style="font-size:24px; line-height:38px; font-weight:600; color:#0d0d0d; margin:0;">
-        Order Number: {{ data.order_number }}
+        Order Number: {{ data.order_data.order_number }}
       </p>
     </td>
   </tr>
@@ -422,6 +422,82 @@ metadata: {
 </table>
 
 {% comment %} Spacer {% endcomment %}
-{% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
+{% include 'modules/events/emails/spacer_table_body', spaceSize: 40 %}
 
 
+{% comment %} <!-- View Button --> {% endcomment %}
+{%- capture upcoming_events_link -%}
+  {{ platform_context.host }}/itinerary-upcoming/{{data.event.slug}}
+{%- endcapture -%}
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td height="100%" valign="top" role="module-content">
+      <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0" border="0">
+        <tr style="width:100%;">
+          <td align="center" style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center;">
+            <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0" border="0">
+              <tr style="width:100%;">
+                <td align="center" style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center; background-color:#3044FF">
+                  <a href="{{- upcoming_events_link -}}" target="_blank"
+                    style="background-color:#3044FF; border:0px solid #3044FF; border-radius:4px; border-width:0px; color:#ffffff; display:inline-block; font-size:16px; font-weight:600; letter-spacing:0px; line-height:normal; padding:16px 0px 16px 0px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit; width:100%;" 
+                    >View Tickets</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table> 
+
+{% comment %} <!-- Spacer --> {% endcomment %}
+{% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 40 %}
+
+{% comment %} <!-- Text: Paste this link --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:26px;">
+      <p style="font-size:16px; color:#525252; margin:0;">
+        Or, paste this link into your browser:
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} <!-- Spacer --> {% endcomment %}
+{% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 8 %}
+
+
+{% comment %} <!-- Link: Browser link --> {% endcomment %}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:22px;">
+      <p style="font-size:14px; color:#3044ff; margin:0;">
+        {{- upcoming_events_link -}}
+      </p>
+    </td>
+  </tr>
+</table>
+
+
+{% comment %} <!-- Spacer --> {% endcomment %}
+{% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 16 %}
+
+{% comment %} <!-- Text: Don't have an account --> {% endcomment %}
+{%- capture forgot_password_link -%}
+  {{ platform_context.host }}/forgot-password
+{%- endcapture -%}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:26px;">
+      <p style="font-size:16px; color:#525252; margin:0;">
+        Don't have an account? <a href="{{- forgot_password_link -}}" style="color:#3044ff;">Create a password</a> to view your tickets.
+      </p>
+    </td>
+  </tr>
+</table>
+
+{% comment %} <!-- Spacer --> {% endcomment %}
+{% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 56 %}

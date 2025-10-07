@@ -53,7 +53,7 @@ data-muid="9a6f2278-aafa-434e-9a1f-1bb56840e20e">
       <td style="padding:0px 40px 0px 40px; line-height:26px; text-align:inherit;"
         height="100%" valign="top" bgcolor="" role="module-content">
           <div style="font-family: inherit; text-align: inherit"><span
-            style="white-space-collapse: preserve; text-wrap: wrap">A new ticket order has been placed with order number {{ data.order_number }} for the event <strong>"{{ data.event.name }}"</strong>.</span></div>
+            style="white-space-collapse: preserve; text-wrap: wrap">A new ticket order has been placed with order number {{ data.order_data.order_number }} for the event <strong>"{{ data.event.name }}"</strong>.</span></div>
       </td>
     </tr>
 </tbody>
@@ -76,80 +76,56 @@ data-muid="9a6f2278-aafa-434e-9a1f-1bb56840e20e">
 {% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 40 %}
 
 {% comment %} <!-- View Button --> {% endcomment %}
-<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
-  <tbody>
-    <tr>
-      <td height="100%" valign="top" role="module-content">
-        <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0"
-          border="0">
-          <tr style="width:100%;">
-            <td align="center"
-              style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center;">
-              <table style="width:100%;background:#FDFDFD;" cellpadding="0"
-                cellspacing="0" border="0">
-                <tr style="width:100%;">
-                  <td align="center"
-                    style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center; background-color:#3044FF">
-                    <a href="{{- cta_link -}}"
-                      style="background-color:#3044FF; border:0px solid #3044FF; border-radius:4px; border-width:0px; color:#ffffff; display:inline-block; font-size:16px; font-weight:600; letter-spacing:0px; line-height:normal; padding:16px 0px 16px 0px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit; width:100%;"
-                      target="_blank">View Order</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td height="100%" valign="top" role="module-content">
+      <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0" border="0">
+        <tr style="width:100%;">
+          <td align="center" style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center;">
+            <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0" border="0">
+              <tr style="width:100%;">
+                <td align="center" style="width:100%;border-radius:6px;padding:0px 40px;font-size:16px; text-align:center; background-color:#3044FF">
+                  <a href="{{- cta_link -}}" target="_blank"
+                    style="background-color:#3044FF; border:0px solid #3044FF; border-radius:4px; border-width:0px; color:#ffffff; display:inline-block; font-size:16px; font-weight:600; letter-spacing:0px; line-height:normal; padding:16px 0px 16px 0px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit; width:100%;" 
+                    >View Order</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>  
 
 {% comment %} <!-- Spacer --> {% endcomment %}
 {% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 40 %}
 
 {% comment %} <!-- Text: Paste this link --> {% endcomment %}
-<table class="module" role="module" data-type="text" border="0" cellpadding="0"
-  cellspacing="0" width="100%" style="table-layout: fixed;"
-  data-muid="fa0dab93-144a-4b01-a832-59e0e2cf3d71.2">
-  <tbody>
-    <tr>
-      <td style="padding:0px 40px 0px 40px; line-height:26px; text-align:inherit;"
-        height="100%" valign="top" bgcolor="" role="module-content">
-        <div>
-          <div style="font-family: inherit; text-align: inherit"><span
-              style="white-space-collapse: preserve; text-wrap: wrap">Or, paste this link into your browser:</span></div>
-          <div></div>
-        </div>
-      </td>
-    </tr>
-  </tbody>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px; line-height:26px;">
+      <p style="font-size:16px; color:#525252; margin:0;">
+        Or, paste this link into your browser:
+      </p>
+    </td>
+  </tr>
 </table>
 
 {% comment %} <!-- Spacer --> {% endcomment %}
 {% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 8 %}
 
 {% comment %} <!-- Link: Browser link --> {% endcomment %}
-<table class="module" role="module" data-type="code" border="0" cellpadding="0"
-  cellspacing="0" width="100%" style="table-layout: fixed;"
-  data-muid="4960b04d-52a3-4afe-bca7-6cc0bf64d397">
-  <tbody>
-    <tr>
-      <td height="100%" valign="top" role="module-content">
-        <table style="width:100%;background:#FDFDFD;" cellpadding="0" cellspacing="0"
-          border="0">
-          <tr style="width:100%;">
-            <td align="left" bgcolor="#FDFDFD" class="inner-td"
-              style="width:100%;text-align:left; background-color:inherit;padding:0px 40px;">
-              <p
-                style="white-space-collapse:preserve;text-wrap:wrap;font-size:14px;line-height:22px;color:#3044ff;text-wrap:wrap;word-break:break-all;margin:0px;">
-                {{- cta_link -}}</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </tbody>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td style="padding:0px 40px 0px 40px;">
+      <p style="font-size:14px; line-height:22px; color:#3044ff; margin:0;">
+        {{- cta_link -}}
+      </p>
+    </td>
+  </tr>
 </table>
+
 
 {% comment %} <!-- Spacer --> {% endcomment %}
 {% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 56 %}

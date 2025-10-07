@@ -865,7 +865,6 @@ if (step3) {
         let addressCard = selectedAddress
         const orderPayload = {
             event_uuid: event_uuid_hidden.value,
-            order_number: crypto.randomUUID(),
 
             billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
             billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb") || addressCard?.suburb || "",

@@ -54,7 +54,8 @@ metadata: {
     {% parse_json event_data %}
     {
         "name": "{{ event.event_name }}",
-        "image": {{ event.event_image | json }}
+        "image": {{ event.event_image | json }},
+        "slug": "{{ event.slug }}"
     }
     {% endparse_json %}    
 

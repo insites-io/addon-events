@@ -2166,8 +2166,10 @@ ins-filter ins-button button.ins-button.size--small span{
 .ibt-table .img-wrap, .ibt-table-accordion .img-wrap {
     margin-right: 5px;
 }
-.ibt-table-wrap.no-label .ibt-table-wrap__no-heading{
+.ibt-table-wrap.no-label .ibt-table-wrap__no-heading {
     border-radius: 14px;
+}
+.event-pagination-table .ibt-table-wrap.no-label .ibt-table-wrap__no-heading {
     border: none;
 }
 .ibt-table-wrap__settings{

@@ -1614,14 +1614,6 @@ ins-tag.preorder-tag span.ins-tag {
 .portal.event-details ins-tab li{
     margin-bottom: 0px;
 }
-/* Portal - Ticket Allocation */
-.portal.event-details .ticket-alloation-modal-button {
-    min-width: 180px;
-    height: 40px;
-}
-.portal.event-details .download-wrapper {
-    min-width: 188px;
-}
 
 /* Overview */
 ins-card.overview a {
@@ -2851,17 +2843,18 @@ ins-button.add-credit-card button.ins-button>div,
 
 /* Ticket allocation */
 
-.ticket-card-container {
-  border-radius: 4px;
-  border: 1px solid var(--UI---color-ui-04, #DFDFDF);
-  background: var(--UI---color-ui-01, #FFF);
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  padding: 24px;
-  margin-bottom: 24px;
-  gap: 24px;
+.ticket-card-container {    
+    border-radius: 4px;
+    border: 1px solid var(--UI---color-ui-04, #DFDFDF);
+    background: var(--UI---color-ui-01, #FFF);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 24px;
+    margin-bottom: 24px;
+    gap: 24px;
     align-items: center;
 }
 @media screen and (max-width: 1023px) {
@@ -2882,7 +2875,7 @@ ins-button.add-credit-card button.ins-button>div,
     .portal.event-details .col-1 .ticket-card-container p {
         margin-bottom: 0px;
     }
-    .portal.event-details .ticket-alloation-modal-button {
+    .portal.event-details .ticket-allocation-modal-button {
         justify-content: center;
     }
     .portal.event-details .download-wrapper button {
@@ -2914,10 +2907,6 @@ ins-button.add-credit-card button.ins-button>div,
 
 }
 
-.ticket-number-container {
-    width: 50%;
-}
-
 .ticket-number-container .attendee-name {
     min-width: 175px;
 }
@@ -2926,23 +2915,57 @@ ins-button.add-credit-card button.ins-button>div,
     color: #05051D;
 }
 
-.ticket-alloation-modal-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 24px;
-  cursor:pointer;
-  border-radius: 100px;
-    justify-content: center;
+.allocate-button-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    min-width: 174px;        
 }
 
-.ticket-alloation-modal-button:hover {
+.ticket-allocation-modal-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    cursor:pointer;
+    border-radius: 100px;
+    justify-content: center;    
+    width: 174px;
+}
+
+@media screen and (max-width: 639px) {
+    .allocate-button-wrapper {
+        justify-content: center;
+    }
+    .ticket-allocation-modal-button {
+        width: 100%;
+    }
+}
+
+/* Portal - Ticket Allocation */
+.portal.event-details .ticket-allocation-modal-button {
+    min-width: 180px;
+    height: 40px;
+}
+.portal.event-details .download-wrapper {
+    min-width: 188px;
+}
+@media screen and (max-width: 1023px) {
+    .portal.event-details .allocate-button-wrapper {
+        flex-direction: column;
+    }
+    .portal.event-details .ticket-allocation-modal-button {
+        width: 100%;
+    }
+} 
+
+.ticket-allocation-modal-button:hover {
   background: rgba(48, 68, 255, 0.06);
 
 }
 
 
-.ticket-alloation-modal-button span {
+.ticket-allocation-modal-button span {
   color:  #3044FF;
   font-family: "DM Sans";
   font-size: 14px;

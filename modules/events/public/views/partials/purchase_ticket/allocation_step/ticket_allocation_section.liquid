@@ -135,23 +135,31 @@ metadata: {
                   {% comment %} Keep this empty div for the design spacing {% endcomment %}
                   <div class="flex-child-auto itinerary-previous"></div>
                 {% else %}
-                  <div class="ticket-alloation-modal-button"  
-                    data-ticket-id="{{ ticket.id }}"
-                    data-tier="{{ ticket.tier.name }}"
-                    data-uuid="{{ ticket.uuid }}"
-                    >
-                    <span>Allocate ticket</span>
-                    <i class="icon-arrow-forward ticket-allocation-icon"></i>
+
+                  <div class="flex-child-auto allocate-button-wrapper">
+                    {% comment %} Allocate ticket button {% endcomment %}
+                    <div class="ticket-allocation-modal-button"  
+                      data-ticket-id="{{ ticket.id }}"
+                      data-tier="{{ ticket.tier.name }}"
+                      data-uuid="{{ ticket.uuid }}"
+                      >
+                      <span>Allocate ticket</span>
+                      <i class="icon-arrow-forward ticket-allocation-icon"></i>
+                    </div>
+
+                    {% comment %} Portal: Download ticket button {% endcomment %}
+                    {% if context.params.slug == 'itinerary-upcoming' %}
+                      <div class="align-center-middle download-wrapper">
+                        <a href="{{ ticket.ticket_pdf.url }}" target="_blank">
+                          <ins-button type="button" label="Download ticket" icon="icon-download" outlined ></ins-button>
+                        </a>
+                      </div>
+                    {% endif %}
                   </div>
+
                 {% endif %}
 
-                {% if context.params.slug == 'itinerary-upcoming' %}
-                  <div class="align-center-middle download-wrapper">
-                    <a href="{{ ticket.ticket_pdf.url }}" target="_blank">
-                      <ins-button type="button" label="Download ticket" icon="icon-download" outlined ></ins-button>
-                    </a>
-                  </div>
-                {% endif %}
+                
         
 
               </div>

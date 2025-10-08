@@ -26,7 +26,7 @@ let allocateTicket = document.getElementById("allocate-ticket");
 let allocateTicketUUID = document.getElementById("allocate-ticket-uuid")
 let allocateButton = document.getElementById("submit-btn");
 let cancelAllocateModal = document.getElementById("cancel")
-let allocationModalButton = document.querySelectorAll(".ticket-alloation-modal-button");
+let allocationModalButton = document.querySelectorAll(".ticket-allocation-modal-button");
 const allocationModal = document.getElementById("allocationModal");
 
 let allocateEmail = document.getElementById("allocate-email");
@@ -124,14 +124,14 @@ allocateButton.addEventListener("insClick", async () => {
     allocationModal.close(); 
     
   const ticketDetailsEl = document.querySelector(
-    `.ticket-alloation-modal-button[data-uuid="${payload.event.ticketuuid}"]`
+    `.ticket-allocation-modal-button[data-uuid="${payload.event.ticketuuid}"]`
   )?.closest(".ticket-card-container")
     .querySelector(`#ticket-allocated-details-${payload.event.ticketuuid}`);
 
 
     if (ticketDetailsEl) {
       ticketDetailsEl.innerHTML = `
-        <p>${payload.ticketData.contact_first_name} ${payload.ticketData.contact_last_name}</p>
+        <p class="attendee-name">${payload.ticketData.contact_first_name} ${payload.ticketData.contact_last_name}</p>
         <p>${payload.ticketData.contact_email}</p>
       `;
     }

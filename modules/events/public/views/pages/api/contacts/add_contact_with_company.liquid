@@ -8,30 +8,44 @@ searchable: false
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
 
-{% comment %} Check if guest already existing {% endcomment %}
-{%- graphql guest_email = "modules/portal/account/get_user_by_email" 
-    email: payload.email 
-    | dig: "items" | dig: "results" | first -%}
+{% comment %} Check if email already exists {% endcomment %}
+{%- graphql user = "modules/portal/account/get_user_by_email" 
+    email: payload.email | dig: "items","results" | first -%}
 
    
-{% if guest_email != nil %}
+{% if user != nil %}
+
+  {% comment %} Email already exists {% endcomment %}
+  {% assign user_id = user.id %}
+
+  {% comment %} Update contact {% endcomment %}
   {% assign payload = payload | add_hash_key: 'uuid', guest_email.uuid %}
-  {% function update_contact = "crm/controller/contacts/update", uuid: payload.uuid, params: payload %}
-    {%- liquid
-      if update_contact.id 
-            assign status = 200
-      endif    
-    -%}
+  {% function update_contact = "crm/controller/contacts/update", uuid: payload.uuid, params: payload %}  
+
+  {% comment %} Set Status {% endcomment %}
+  {%- liquid
+    if update_contact.id 
+        assign status = 200
+    endif    
+  -%}
+  
 {% else %}
+
+  {% comment %} Email does not exist {% endcomment %}
+
+  {% comment %} Create contact {% endcomment %}
   {% function add_contact = "crm/controller/contacts/create", params: payload %}
+  {% assign user_id = add_contact.id %}
+
+  {% comment %} Create company {% endcomment %}
   {% parse_json company_details %}
       {
         "company_name": "{{ payload.company_name }}"
       }
   {% endparse_json %}   
-
   {% function add_company = "crm/controller/companies/create", params: company_details %}
 
+  {% comment %} Associate contact with company {% endcomment %}
   {% parse_json update_contact_data %}
   {
       "uuid": "{{ add_contact.uuid }}",
@@ -39,8 +53,7 @@ searchable: false
       "company.uuid": "{{ add_company.uuid }}"
   }
   {% endparse_json %}
-
-  {% function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data %}
+  {% function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data %}  
 
   {% comment %} Set Status {% endcomment %}
   {%- liquid
@@ -51,6 +64,15 @@ searchable: false
 {% endif %}
 
 
+{% comment %} Generate temporary token {% endcomment %}
+{% graphql temporary_token = 'modules/portal/account/generate_user_temporary_token', 
+      email: payload.email | dig: 'items','results' | first %}
+
+{% comment %} Create user profile: 'modules/portal/portal' {% endcomment %}
+{% graphql create_user_profile = 'modules/portal/account/create_user_profile', 
+  id: user_id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true %}
+
+{% log create_user_profile, type: '===TEST create_user_profile' %}
 
 
 

@@ -804,6 +804,7 @@ if (step2) {
        
       
         const data = await saveContact(billing_payload);
+        ticketPurchaseData.contact.user_id = data.id
 
         if (!ticketPurchaseData.contact.user_uuid) {
           ticketPurchaseData.contact.user_uuid = data.uuid
@@ -914,7 +915,8 @@ if (step3) {
         
         const orderResponse = await saveOrder({
           ...orderPayload,
-          tickets: ticketPurchaseData.tickets
+          tickets: ticketPurchaseData.tickets,
+          user_id: ticketPurchaseData.contact.user_id
         });
 
         console.log("orderResponse", orderResponse);

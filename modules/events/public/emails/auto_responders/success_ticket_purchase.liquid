@@ -486,14 +486,20 @@ metadata: {
 {% include 'modules/ecommerce/emails/spacer_table_body', spaceSize: 16 %}
 
 {% comment %} <!-- Text: Don't have an account --> {% endcomment %}
-{%- capture forgot_password_link -%}
-  {{ platform_context.host }}/forgot-password
+{% parse_json payload %}
+{
+  "id": {{ data.user_id | default: 0 }}
+}
+{% endparse_json %}
+{% assign payload = payload | jwt_encode: 'HS256', 'this-is-secret' %}
+{%- capture create_password_link -%}
+  {{ platform_context.host }}/create-password?id={{ payload }}
 {%- endcapture -%}
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
   <tr>
     <td style="padding:0px 40px 0px 40px; line-height:26px;">
       <p style="font-size:16px; color:#525252; margin:0;">
-        Don't have an account? <a href="{{- forgot_password_link -}}" style="color:#3044ff;">Create a password</a> to view your tickets.
+        Don't have an account? <a href="{{- create_password_link -}}" style="color:#3044ff;">Create a password</a> to view your tickets.
       </p>
     </td>
   </tr>

@@ -491,7 +491,7 @@ metadata: {
   "id": {{ data.user_id | default: 0 }}
 }
 {% endparse_json %}
-{% assign payload = payload | jwt_encode: 'HS256', 'this-is-secret' %}
+{% assign payload = payload | jwt_encode: 'HS256', 'f3ec0718-9600-4289-a716-406d138ea44c' %}
 {%- capture create_password_link -%}
   {{ platform_context.host }}/create-password?id={{ payload }}
 {%- endcapture -%}

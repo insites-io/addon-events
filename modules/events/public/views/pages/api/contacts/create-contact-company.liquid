@@ -12,6 +12,8 @@ searchable: false
 {%- graphql user = "modules/portal/account/get_user_by_email" 
     email: payload.email | dig: "items","results" | first -%}
 
+    {% log user, type: '===TEST user' %}
+
    
 {% if user != nil %}
 

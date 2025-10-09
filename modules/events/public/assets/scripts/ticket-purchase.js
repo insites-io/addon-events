@@ -1375,11 +1375,13 @@ function renderPaymentBreakdown(ticketsData) {
 
     const itemDiscount = subtotal > 0 ? (discountAmount * itemSubtotal) / subtotal : 0;
     const itemDiscountedSubtotal = Math.max(itemSubtotal - itemDiscount, 0);
+    const taxValue = parseFloat(info.tax) || 0;
+    const quantity = info.quantity || 1;
 
     if (info.tax_type === 'percentage') {
-      totalTax += (itemDiscountedSubtotal * parseFloat(info.tax)) / 100;
+      totalTax += (itemDiscountedSubtotal * taxValue) / 100;
     } else {
-      totalTax += parseFloat(info.tax) * info.quantity;
+      totalTax += taxValue * quantity;
     }
   }
 

@@ -697,8 +697,12 @@ if (step1) {
               firstStep.hasError = true;
               firstStep.setAttribute("has-error", true);
               hideLoading();
-              scrollToTop();
-              App.events.notyf('error', "Your selected tickets are either sold out or no longer available. Please choose another option to proceed.");  
+              let confirm = await App.events.swal("error", "Tickets not available", 
+                "Your selected tickets are either sold out or no longer available. Please choose another option to proceed.", 
+                "OK", false);
+              if (confirm) {
+                  window.location.reload();
+              } 
           }else {
             setTimeout(() => {
               hideLoading();
@@ -919,7 +923,16 @@ if (step3) {
           user_id: ticketPurchaseData.contact.user_id
         });
 
-        console.log("orderResponse", orderResponse);
+
+        // The ticket is not available anymore. Reload the page to go back to the ticket selection step.
+        if(orderResponse.data.has_ticket_availability_error == true) {
+          let confirm = await App.events.swal("error", "Tickets not available", 
+            "Your selected tickets are either sold out or no longer available. Please choose another option to proceed.", 
+            "OK", false);
+          if (confirm) {
+              window.location.reload();
+          } 
+        }
 
         if (!orderResponse.data.has_error) {
             // Store order data
@@ -1110,7 +1123,7 @@ if (steppers.length > 0) {
         const newValue = Math.min(value + 1, max, allowedMaxForThisInput);
         if (newValue === value) {
           // nothing to do; optionally show a message
-          App.events.notyf('error', 'You have reached the maximum available group sets for this venue.');
+          App.events.notyf('error', 'You have reached the maximum number of tickets available for this selection.');
           return;
         }
         input.value = String(newValue);
@@ -1120,6 +1133,9 @@ if (steppers.length > 0) {
         if (value < max) {
           input.value = value + 1;
           input.dispatchEvent(new Event('input'));
+        } else {
+          App.events.notyf('error', 'You have reached the maximum number of tickets available for this selection.');
+          return;
         }
       }
     });

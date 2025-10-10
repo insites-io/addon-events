@@ -3053,6 +3053,11 @@ ins-button.add-credit-card button.ins-button>div,
       cursor: pointer;
     }
 
+    .number-input button[disabled] {
+        background: #e6e6e6;
+        cursor:not-allowed
+    }
+
     .number-input input {
       text-align: center;
       width: 60px;

@@ -7,16 +7,25 @@ metadata: {
 {% comment %} 
      Required from parent
      - item
+     - show_address
 {% endcomment %}
 
 
 {% if item.event_type == 'venue' %}     
      {% if show_address == true %}
-          {%- assign address_parts = "," | split: "," -%}
 
-          {%- if item.venue_address_1 and item.venue_address_1 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_1 -%} {% endif %}
-          {%- if item.venue_address_2 and item.venue_address_2 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_2 -%} {% endif %}
-          {%- if item.venue_address_3 and item.venue_address_3 != "" %} {%- assign address_parts = address_parts | array_add: item.venue_address_3 -%} {% endif %}
+          {% assign address_parts = '' | split: '' %}
+
+          {% comment %} Address: address_1, address_2, address_3 {% endcomment %}
+          {% liquid                
+               assign fields = 'venue_address_1,venue_address_2,venue_address_3' | split: ','
+               for field in fields
+                    assign value = item[field] | strip
+                    if value and value != ''
+                         assign address_parts = address_parts | array_add: value
+                    endif
+               endfor
+          %}          
 
           {%- comment %} Combine suburb + state + postcode with spaces and only if at least one exists {% endcomment -%}
           {%- assign suburb_state_postcode = "" -%}
@@ -25,7 +34,10 @@ metadata: {
           {%- if item.venue_postcode and item.venue_postcode != "" %} {%- assign suburb_state_postcode = suburb_state_postcode | append: " " | append: item.venue_postcode | strip -%} {% endif %}
           {%- if suburb_state_postcode != "" %} {%- assign address_parts = address_parts | array_add: suburb_state_postcode  -%} {% endif %}
 
+          {% comment %} Country {% endcomment %}
           {%- if item.venue_country and item.venue_country != "" %} {%- assign address_parts = address_parts | array_add: item.venue_country -%} {% endif %}         
+
+          {% comment %} Convert address array to string {% endcomment %}
           {%  assign address_parts = address_parts | join: ', ' %}
           {% assign location = item.venue_name | append: address_parts %}
 

@@ -197,25 +197,19 @@ metadata: {
 {% include 'modules/events/emails/spacer_table_body', spaceSize: 16 %}
 
 {% comment %} Billing Address {% endcomment %}
-{% liquid 
-    assign address_parts = "" | split: "" 
+{% parse_json address_data %} 
+{
+  "event_type": "venue",
+  "venue_address_1": "{{ data.billing_address_1 }}",
+  "venue_suburb": "{{ data.billing_suburb }}",
+  "venue_state": "{{ data.billing_state }}",
+  "venue_postcode": "{{ data.billing_postcode }}",
+  "venue_country": "{{ data.billing_country }}"
+}
+{% endparse_json %}
+{% include 'modules/events/events/event_location', item: address_data, show_address: true %} {% comment %} Export: location {% endcomment %}
+{% assign location = context.exports.location %}
 
-    if data.billing_address_1 and data.billing_address_1 != ''
-        assign address_parts = address_parts | array_add: data.billing_address_1
-    endif
-    if data.billing_city and data.billing_city != ''
-        assign address_parts = address_parts | array_add: data.billing_city
-    endif
-    if data.billing_state and data.billing_state != ''
-        assign address_parts = address_parts | array_add: data.billing_state
-    endif
-    if data.billing_postcode and data.billing_postcode != ''
-        assign address_parts = address_parts | array_add: data.billing_postcode
-    endif
-    if data.billing_country and data.billing_country != ''
-        assign address_parts = address_parts | array_add: data.billing_country
-    endif
-%} 
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
   <tr>
     <td style="padding:0px 40px 0px 40px; line-height:22px;">
@@ -223,7 +217,7 @@ metadata: {
         Billing Address
       </p>
       <p style="font-size:14px; color:#525252; margin:0;">
-        {{ address_parts | join: ", " }}
+        {{ location }}
       </p>
     </td>
   </tr>

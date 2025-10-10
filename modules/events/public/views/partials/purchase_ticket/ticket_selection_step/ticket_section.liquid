@@ -82,19 +82,22 @@ metadata: {
 
             {% for ticket_tier_list in ticket_tier_category offset: 1 %}
               {% for ticket_tier in ticket_tier_list %}
-                {% assign ticket_data = '{}' | parse_json %}
-                {% assign ticket_data = ticket_data | add_hash_key: "capacity_type", ticket_tier.capacity_type %}
-                {% assign ticket_data = ticket_data | add_hash_key: "price", ticket_tier.price %}
-                {% assign ticket_data = ticket_data | add_hash_key: "event_pricing_division_uuid", ticket_tier.event_pricing_division_uuid %}
-                {% assign ticket_data = ticket_data | add_hash_key: "name", ticket_tier.name %}
-                {% assign ticket_data = ticket_data | add_hash_key: "tax", ticket_tier.tax %}
-                {% assign ticket_data = ticket_data | add_hash_key: "tax_type", ticket_tier.tax_type %}
-                {% assign ticket_data = ticket_data | add_hash_key: "ticket_venue_name", venue.name %}
-                {% assign ticket_data = ticket_data | add_hash_key: "event_pricing_tier.uuid", ticket_tier.uuid %}
-                {% assign ticket_data = ticket_data | add_hash_key: "capacity_max", venue_remaining %}
-                {% assign ticket_data = ticket_data | add_hash_key: "tier_id", ticket_tier.uuid %}
-                {% assign ticket_data = ticket_data | add_hash_key: "venue_uuid", venue.venue_uuid %}
-                {% assign ticket_data = ticket_data | add_hash_key: "venue_name", venue.venue.venue_name %}
+                {% parse_json ticket_data %}
+                {
+                  "capacity_type": "{{ ticket_tier.capacity_type }}",
+                  "price": {{ ticket_tier.price | default: 0 }},
+                  "event_pricing_division_uuid": "{{ ticket_tier.event_pricing_division_uuid }}",
+                  "name": "{{ ticket_tier.name }}",
+                  "tax": {{ ticket_tier.tax | default: 0 }},
+                  "tax_type": "{{ ticket_tier.tax_type }}",
+                  "ticket_venue_name": "{{ venue.name }}",
+                  "event_pricing_tier.uuid": "{{ ticket_tier.uuid }}",
+                  "capacity_max": {{ venue_remaining | default: 0 }},
+                  "tier_id": "{{ ticket_tier.uuid }}",
+                  "venue_uuid": "{{ venue.venue_uuid }}",
+                  "venue_name": "{{ venue.venue.venue_name }}"
+                }
+                {% endparse_json %}
                 {% if ticket_type == 'group' %}
                     {% assign ticket_data = ticket_data | add_hash_key: "capacity_per_group", venue.capacity_per_group %}
                 {% endif %}

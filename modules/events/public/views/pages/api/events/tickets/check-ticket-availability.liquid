@@ -7,75 +7,29 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
-{%- assign ticketData = payload.ticketData | parse_json -%}
-{%- assign event_uuid = payload.eventuuid -%}
 
-{%- graphql divisions = 'modules/events/events/get_divisions', event_uuid: event_uuid | dig: 'items','results' -%}
 
-{%- comment %}
-  1. Build a string-based map of counts (key:value pairs) because Liquid cannot mutate objects/arrays.
-{%- endcomment -%}
-{%- assign counts = '' -%}
+{% comment %} Validate tickets availability; Export: errors {% endcomment %}
+{%- include 'modules/events/purchase_ticket/check_ticket_availability', payload: payload -%}
+{%- assign errors = context.exports.errors -%}
 
-{% for ticket in ticketData %}
-  {%- assign key = ticket.event_pricing_division | append: '_' | append: ticket.capacity_type -%}
-  {%- assign search = key | append: ':' -%}
-  {%- assign currentCount = 0 -%}
 
-  {%- if counts contains search -%}
-    {%- assign parts = counts | split: ',' -%}
-    {%- for p in parts -%}
-      {%- if p contains search -%}
-        {%- assign currentCount = p | split: ':' | last | plus: 0 -%}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endif -%}
+{% comment %} Session will be saved to revalidate ticket availability in the payment step {% endcomment %}
+{%- liquid
+    assign tickets_selected_type = context.session.tickets_selected | type_of 
 
-  {%- assign newCount = currentCount | plus: 1 -%}
+    if context.session.tickets_selected[payload.eventuuid] or tickets_selected_type == 'Hash'
+      ## Session already exists
+      assign tickets_selected = context.session.tickets_selected
+    else
+      ## Session does not exist yet
+      assign tickets_selected = '{}' | parse_json
+    endif
 
-  {%- comment %} Remove old entry if it exists {% endcomment -%}
-  {%- assign newCounts = '' -%}
-  {%- assign parts = counts | split: ',' -%}
-  {%- for p in parts -%}
-    {%- unless p contains search -%}
-      {%- assign newCounts = newCounts | append: p | append: ',' -%}
-    {%- endunless -%}
-  {%- endfor -%}
+    assign tickets_selected = tickets_selected | add_hash_key: payload.eventuuid, payload
+    session tickets_selected = tickets_selected
+-%}
 
-  {%- assign counts = newCounts | append: key | append: ':' | append: newCount | append: ',' -%}
-{% endfor %}
-
-{%- comment %}
-  2. Check against availability
-{%- endcomment -%}
-{% assign errors = '' %}
-{% assign types = "individual,group" | split: "," %}
-
-{% for area in divisions %}
-  {% assign individual_remaining = area.area_individual_tickets_remaining | default: 0 %}
-  {% assign group_remaining = area.area_group_tickets_remaining | default: 0 %}
-
-  {% for type in types %}
-    {% assign lookup_key = area.uuid | append: '_' | append: type %}
-    {% assign search = lookup_key | append: ':' -%}
-    {% assign ticket_count = 0 -%}
-
-    {% if counts contains search %}
-      {% assign parts = counts | split: ',' %}
-      {% for p in parts %}
-        {% if p contains search %}
-          {% assign ticket_count = p | split: ':' | last | plus: 0 %}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
-    {% if type == "individual" and ticket_count > individual_remaining %}
-      {% assign errors = errors | append: "Not enough individual tickets in " | append: area.name | append: ". " %}
-    {% elsif type == "group" and ticket_count > group_remaining %}
-      {% assign errors = errors | append: "Not enough group tickets in " | append: area.name | append: ". " %}
-    {% endif %}
-  {% endfor %}
-{% endfor %}
 
 {%- if errors != '' -%}
 {

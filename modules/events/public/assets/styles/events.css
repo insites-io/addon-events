@@ -3173,7 +3173,7 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .purchase-page {
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 #allocate-ticket .ins-input-wrap .disabled {

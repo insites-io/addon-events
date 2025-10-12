@@ -24,10 +24,10 @@ metadata: {
 
 <div class="form-groups-tab step-scrollbar stepper-wrapper">        
     <ins-steps id="ticket-purchase-stepper">
-        <ins-step id="stepper-purchase-stepper" {{ status }} description="Purchase"></ins-step>
-        <ins-step id="stepper-purchase-stepper"  {{ status }} description="Billing"></ins-step>
-        <ins-step id="stepper-purchase-stepper"  {{ status }} description="Payment"></ins-step>
-        <ins-step id="stepper-purchase-stepper" {{ allocateTicket }}  description="Allocate"></ins-step>
-        <ins-step id="stepper-purchase-stepper"   description="Confirmation"></ins-step>
+        <ins-step {{ status }} description="Purchase"></ins-step>
+        <ins-step {{ status }} description="Billing"></ins-step>
+        <ins-step {{ status }} description="Payment"></ins-step>
+        <ins-step {{ allocateTicket }}  description="Allocate"></ins-step>
+        <ins-step {{ status }} description="Confirmation"></ins-step>
     </ins-steps>
 </div>

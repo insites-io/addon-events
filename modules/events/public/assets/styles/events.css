@@ -1559,7 +1559,7 @@ ins-tag.preorder-tag span.ins-tag {
     gap: 4px;
 }
 
-/* Summary Drawer */
+/* Order Summary Drawer */
 #order-summary-drawer .ins-drawer-wrap .ins-content .ins-drawer-body {
     width: 430px;
     max-width: 100%;
@@ -1575,7 +1575,7 @@ ins-tag.preorder-tag span.ins-tag {
     top: 24px;
 }
 #order-summary-drawer .ins-drawer-header.sticky+.ins-drawer-body {
-    margin-top: 66px;
+    margin-top: 64px;
     padding-top:  0px;
     padding-bottom: 40px;
 }
@@ -2760,6 +2760,8 @@ ins-button.add-credit-card button.ins-button>div,
     display: none;
     flex-direction: column;
     gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-ui-04);
 }
 
 .payment-breakdown-venue-name {

@@ -13,7 +13,6 @@ metadata: {
         <span id="ticket-quantity"></span>
         <span id="ticket-price-summary"></span>
         <div class="spacer medium"></div>
-        <hr>
     </div>
 
     <div class="spacer medium"></div>
@@ -77,3 +76,45 @@ metadata: {
 </div>
 
 
+
+
+
+{% comment %} Mobile view - View order summary button {% endcomment %}
+{%- unless context.params.slug == 'confirmation' -%}
+<div id="mobile-order-summary" class="show-for-small-only">
+    <div class="total">
+        <p class="color-ui-05 body-x-small">Total</p>
+        <p class="order-total">$0.00</p>
+    </div>
+    <ins-button type="button" id="view-order-summary-btn" label="View order summary"></ins-button>
+</div>
+{%- endunless -%}
+
+{% comment %} Mobile view - Order summary drawer {% endcomment %}
+<ins-drawer 
+    custom-width="430px" 
+    position="right" 
+    bordered=false
+    id="order-summary-drawer"
+    class="mobile-order-summary inline">
+
+    {% comment %} The content here is driven by the javascript below {% endcomment %}
+    <div id="order-summary-drawer-content"></div>
+</ins-drawer>
+
+{% comment %} Copy data from Desktop view to Mobile view {% endcomment %}
+<script>
+    let orderSummaryContainer = document.getElementById('ticket-payment-summary-container');
+    let viewOrderSummaryBtn = document.getElementById('view-order-summary-btn');
+    let orderSummaryDrawer = document.getElementById('order-summary-drawer');
+    let orderSummaryDrawerContent = document.getElementById('order-summary-drawer-content');
+
+    viewOrderSummaryBtn.addEventListener('insClick', async event => {
+        let orderSummaryHtmlContent = orderSummaryContainer.innerHTML;
+        // Replace 'id' with 'data'
+        let modifiedHTML = orderSummaryHtmlContent.replace(/\bid="([^"]+)"/g, 'data="$1"');
+
+        orderSummaryDrawer.setDrawerState(true); 
+        orderSummaryDrawerContent.innerHTML = modifiedHTML;
+    });    
+</script>

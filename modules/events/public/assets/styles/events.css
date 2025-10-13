@@ -300,6 +300,9 @@ ins-input.hidden-input input {
     padding: 0px !important;
     border: 0px !important;
 }
+.hidden-input .ins-form-error {
+    margin-bottom: 24px;
+}
 
 .ui-sidebar {
     font-family: var(--font-family-02);

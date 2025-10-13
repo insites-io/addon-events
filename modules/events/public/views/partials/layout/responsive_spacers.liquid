@@ -1,0 +1,17 @@
+---
+metadata: {
+    partial_name: 'Events | Layout | Responsive Spacers'
+}
+---
+{% comment %} 
+     Required from parent
+     - desktop
+     - mobile
+{% endcomment %}
+
+{%  liquid 
+     assign desktop_spacer = desktop | default: 'xxx-large'
+     assign mobile_spacer = mobile | default: 'x-large'
+%}     
+<div class="hide-for-small-only spacer {{ desktop_spacer }}"></div>
+<div class="show-for-small-only spacer {{ mobile_spacer }}"></div> 

@@ -15,5 +15,7 @@ metadata: {
     <div class="spacer x-large"></div>
 
     {% include 'modules/events/purchase_ticket/ticket_selection_step/ticket_section' %}
-    <div class="spacer xxx-large"></div>
+
+    {% comment %} Responsive spacers {% endcomment %}
+    {% include 'modules/events/layout/responsive_spacers', desktop: 'xxx-large', mobile: 'x-large' %}
 </div>

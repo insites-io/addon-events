@@ -45,8 +45,8 @@ var contactServices = (function () {
             let url = "/update-contact"
             return await processRequest('put', url, $payload);
         },
-        addProfile: async function ($payload) {
-            let url = "/add-profile"
+        addPassword: async function ($payload) {
+            let url = "/add-password"
             return await processRequest('put', url, $payload);
         }
     }

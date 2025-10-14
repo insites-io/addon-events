@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         submitBtn.loading = true 
 
-        const response = await contactServices.addProfile(accountPayload);
+        const response = await contactServices.addPassword(accountPayload);
 
         if(response.data.has_error) {
             App.events.notyf("error", "Something went wrong. Please try again.");

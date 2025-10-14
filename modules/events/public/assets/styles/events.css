@@ -2636,7 +2636,6 @@ ins-button.add-credit-card button.ins-button>div,
     display: flex;
     align-items: center;
     gap: 32px;
-    width: 30%;
     justify-content: space-between;
 }
 
@@ -2756,11 +2755,13 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 /* Payment summary */
-#payment-breakdown {
+#payment-breakdown,
+#order-summary-drawer-content .payment-breakdown {
     display: none;
     flex-direction: column;
     gap: 24px;
     padding-bottom: 24px;
+    margin-bottom: 24px;
     border-bottom: 1px solid var(--color-ui-04);
 }
 
@@ -3038,6 +3039,7 @@ ins-button.add-credit-card button.ins-button>div,
     overflow: hidden;
     flex-direction: row;
     height: 41px;
+    min-width: 110px;
   }
 
   .not-available {

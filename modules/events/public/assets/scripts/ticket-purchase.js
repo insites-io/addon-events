@@ -38,6 +38,7 @@ const subtotalElem = document.getElementById('subtotal-price');
 const taxElem = document.getElementById('tax-price'); 
 const processingElem = document.getElementById('proccessing-price');
 const totalElem = document.getElementById('total-price');
+const mobileTotalElem = document.getElementById('mobile-total-price');
 
 let ticketsData = [];
 let ticketPurchaseData = {
@@ -1289,6 +1290,7 @@ function renderPaymentBreakdown(ticketsData) {
   const taxElem = document.getElementById("tax-price");
   const processingElem = document.getElementById("proccessing-price");
   const totalElem = document.getElementById("total-price");
+  const mobileTotalElem = document.getElementById('mobile-total-price');
 
   breakdownContainer.innerHTML = '';
 
@@ -1298,6 +1300,7 @@ function renderPaymentBreakdown(ticketsData) {
     taxElem.textContent = '$0.00';
     processingElem.textContent = '$0.00';
     totalElem.textContent = '$0.00';
+    mobileTotalElem.textContent = '$0.00';
     return;
   }
 
@@ -1414,6 +1417,7 @@ function renderPaymentBreakdown(ticketsData) {
   taxElem.textContent = `$${totalTax.toFixed(2)}`;
   processingElem.textContent = `$${processingFee.toFixed(2)}`;
   totalElem.textContent = `$${total.toFixed(2)}`;
+  mobileTotalElem.textContent = `$${total.toFixed(2)}`;
 
   // Save totals
   const totals = {

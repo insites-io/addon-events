@@ -8,14 +8,12 @@ metadata: {
     <h2 class="heading-2-xsmall">Order summary</h2>
     <div class="spacer x-large hide-for-small-only"></div>
     <div class="spacer show-for-small-only"></div>
-    <div id="payment-breakdown">
+    <div id="payment-breakdown" class="payment-breakdown">
         <span id="ticket-types"></span>
         <span id="ticket-quantity"></span>
         <span id="ticket-price-summary"></span>
         <div class="spacer medium"></div>
     </div>
-
-    <div class="spacer medium"></div>
 
     <div class="subtotal-container">
         <p class="subtotal-container-title">Subtotal</p>
@@ -84,7 +82,7 @@ metadata: {
 <div id="mobile-order-summary" class="show-for-small-only">
     <div class="total">
         <p class="color-ui-05 body-x-small">Total</p>
-        <p class="order-total">$0.00</p>
+        <p id="mobile-total-price" class="order-total">$0.00</p>
     </div>
     <ins-button type="button" id="view-order-summary-btn" label="View order summary"></ins-button>
 </div>

@@ -7,31 +7,31 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 
-{% comment %} Revalidate if tickets are still available; Export: errors {% endcomment %}
+{%- comment -%} Revalidate if tickets are still available; Export: errors {%- endcomment -%}
 {%- include 'modules/events/purchase_ticket/check_ticket_availability', payload: context.session.tickets_selected[payload.event_uuid] -%}
-{% assign ticket_availability_error = context.exports.errors %}
+{%- assign ticket_availability_error = context.exports.errors -%}
 
 
 {%- assign status = 400 -%} 
 
 {%- if ticket_availability_error == '' -%}
               
-     {% assign errors = "" %}
+     {%- assign errors = "" -%}
 
-     {% comment %} Create order {% endcomment %}
+     {%- comment -%} Create order {%- endcomment -%}
      {%- graphql add_order = 'modules/website/trigger_api_call', 
           name: 'modules/events/add_order', 
           data: payload 
           | dig: 'items','response','body' | parse_json -%}            
 
-     {% if add_order.id %}
+     {%- if add_order.id -%}
           {%- include 'modules/events/orders/callback_init', 
                payload: payload,
                order_data: add_order -%}   
-          {% assign errors = context.session.paybill_error %}
-     {% else %}
-          {% assign errors = add_order %}
-     {% endif %}
+          {%- assign errors = context.session.paybill_error -%}
+     {%- else -%}
+          {%- assign errors = add_order -%}
+     {%- endif -%}
      
      {%- if errors != nil -%}
      {
@@ -44,8 +44,8 @@ searchable: false
      "message": "Order successfully created",
      "data": {{ add_order  }}
      }
-     {% session order_uuid = add_order.uuid %}
-     {% session last_purchased_user_uuid = add_order.order_contact.uuid %}
+     {%- session order_uuid = add_order.uuid -%}
+     {%- session last_purchased_user_uuid = add_order.order_contact.uuid -%}
      {%- assign status = 200 -%}
      {%- endif -%}
 

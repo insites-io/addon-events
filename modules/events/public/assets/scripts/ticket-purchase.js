@@ -643,7 +643,6 @@ function transformTicketData(ticketsData, orderNumber) {
             tax: ticket.tax || null,
             tax_type: ticket.tax_type || null,
             venue_name: ticket.venue_name || null,
-            "purchased_by.uuid": ticketPurchaseData.contact.user_uuid || null,
             order_number: parseInt(orderNumber),
             allocation_status: "unallocated"
         };
@@ -695,7 +694,7 @@ async function checkAvailableTickets(ticketData) {
 
 }
 
-// STEP 1
+// STEP 1: Purchase
 if (step1) {
     step1.addEventListener("insClick", async function (event) {
         showLoading(1);
@@ -744,7 +743,7 @@ if (step1) {
     });
 }
 
-// STEP 2
+// STEP 2: Billing
 if (step2) {
     step2.addEventListener("insClick", async function (event) {
         showLoading();
@@ -843,7 +842,7 @@ if (step2) {
     });
 }
 
-    // STEP 3
+// STEP 3: Payment
 if (step3) {
     step3.addEventListener("insClick", async function (event) {
         showLoading();
@@ -985,6 +984,7 @@ if (step3) {
     });
 }
 
+// STEP 4: Allocate
 if (step4) {
     step4.addEventListener("insClick", async function () {
         ticketPurchaseStepperContainer.classList.add("hide");

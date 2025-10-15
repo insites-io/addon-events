@@ -12,6 +12,18 @@ metadata: {
 {%- assign ticketData = payload.ticketData | parse_json -%}
 {%- assign event_uuid = payload.eventuuid -%}
 
+
+{%- comment %} Extract tier UUIDs from ticketData for validation {%- endcomment -%}
+{%- assign tier_uuids_in_cart = '' -%}
+{% for ticket in ticketData %}
+  {% if ticket['event_pricing_tier.uuid'] %}
+    {%- assign current_uuid = ticket['event_pricing_tier.uuid'] | append: ',' -%}
+    {%- unless tier_uuids_in_cart contains current_uuid -%}
+      {%- assign tier_uuids_in_cart = tier_uuids_in_cart | append: current_uuid -%}
+    {%- endunless -%}
+  {% endif %}
+{% endfor %}
+
 {%- graphql divisions = 'modules/events/events/get_divisions', event_uuid: event_uuid | dig: 'items','results' -%}
 
 {%- comment %}
@@ -67,6 +79,38 @@ metadata: {
       {% for p in parts %}
         {% if p contains search %}
           {% assign ticket_count = p | split: ':' | last | plus: 0 %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {%- comment -%}Check tier availability dates{%- endcomment -%}
+    {% if ticket_count > 0 %}
+      {% for tier in area.tiers %}
+        {%- assign tier_uuid_with_comma = tier.uuid | append: ',' -%}
+        {% if tier.capacity_type == type and tier_uuids_in_cart contains tier_uuid_with_comma %}
+          {%- assign is_unavailable = false -%}
+          {%- assign now_s = 'now' | date: '%s' -%}
+
+          {% if tier.availability_start_date %}
+            {% assign start_date_s = tier.availability_start_date | date: '%s' %}
+            {% if start_date_s > now_s %}
+              {% assign is_unavailable = true %}
+            {% endif %}
+          {% endif %}
+
+          {% if tier.availability_end_date and is_unavailable == false %}
+            {% assign end_date_s = tier.availability_end_date | date: '%s' %}
+            {% if end_date_s < now_s %}
+              {% assign is_unavailable = true %}
+            {% endif %}
+          {% endif %}
+
+          {% if is_unavailable %}
+            {%- assign tier_error = "Tier '" | append: tier.name | append: "' for division '" | append: area.name | append: "' is not available at this time. " -%}
+            {%- unless errors contains tier_error -%}
+              {%- assign errors = errors | append: tier_error -%}
+            {%- endunless -%}
+          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}

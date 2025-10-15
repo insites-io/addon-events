@@ -10,7 +10,24 @@ searchable: false
 {% assign errors = "" %}
 
 
-{%- assign ticketData = payload.ticketData | parse_json -%}
+{% comment %} Get user_uuid {% endcomment %}
+{%- if context.current_user -%}
+    {%- comment -%} Logged-in user {%- endcomment -%}
+    {%- assign user_uuid = context.current_user.external_id -%}
+{%- else -%}
+    {%- comment -%} Guest user {%- endcomment -%}
+    {%- assign user_uuid = context.session.guest_uuid -%}
+{%- endif -%}
+
+{% comment %} Inject purchased_by.uuid (user_uuid) into ticketData {% endcomment %}
+{%- assign tempTicketData = payload.ticketData | parse_json -%}
+{%- assign ticketData = '' | split: ',' -%}
+{%- for ticket in tempTicketData -%}
+    {% assign ticket = ticket | add_hash_key: "purchased_by.uuid", user_uuid %}
+    {% assign ticketData = ticketData | array_add: ticket %}
+{% endfor %}
+
+
 {%- assign event_uuid = payload.eventuuid -%}
 {% assign ticketPayload = '{}' | parse_json %}
 {% assign data = '{}' | parse_json %}

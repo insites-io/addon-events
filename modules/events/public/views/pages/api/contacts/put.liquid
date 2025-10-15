@@ -8,14 +8,25 @@ searchable: false
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
 
-{% comment %} Use Insites V2 API {% endcomment %}
- {% function update_contact = "crm/controller/contacts/update", uuid: payload.uuid, params: payload %}
-{% comment %} Set Status {% endcomment %}
-{%- liquid
-     if update_contact.id 
-          assign status = 200
-     endif
--%}
+
+{%- if context.current_user -%}
+     {%- comment -%} Logged-in user {%- endcomment -%}
+     {%- assign user_uuid = context.current_user.external_id -%}
+{%- else -%}
+     {%- comment -%} Guest user {%- endcomment -%}
+     {%- assign user_uuid = context.session.guest_uuid -%}
+{%- endif -%}
+
+
+{%- comment -%} Update contact {%- endcomment -%}
+ {%- function update_contact = "crm/controller/contacts/update", uuid: user_uuid, params: payload -%}
+
+
+{%- comment -%} Set Status {%- endcomment -%}
+{%- if update_contact.id -%}  
+     {%- assign status = 200 -%}
+{%- endif -%}
+
 
 {{ update_contact  }}
 {%- response_status status -%}

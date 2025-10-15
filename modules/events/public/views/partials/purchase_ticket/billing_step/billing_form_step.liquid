@@ -20,7 +20,6 @@ metadata: {
         assign company_name = crm_contact.company.company_name
         assign contact_phone_country_code = crm_contact.mobile_phone_country_code
         assign contact_phone_number = crm_contact.mobile_phone_number
-        assign user_uuid = context.current_user.external_id
         assign company_uuid = crm_contact.company_uuid
     %} 
     {% else %}
@@ -38,7 +37,6 @@ metadata: {
     <div class="spacer x-large hide-for-small-only"></div>
     <div class="spacer show-for-small-only"></div>
     <div class="grid-container">
-        <input id="user_uuid" type="hidden"  value="{{ user_uuid |  default: "" }}" >
         <div class="grid-x grid-padding-x grid-padding-y account-details">      
 
             <div class="large-12 medium-12 small-12 cell">
@@ -243,6 +241,10 @@ metadata: {
     {% if has_profile %}
         {% include "modules/events/purchase_ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
     {% else %}
+
+        {% comment %} Responsive spacers {% endcomment %}
+        {% include 'modules/events/layout/responsive_spacers', desktop: 'xxx-large', mobile: 'x-large' %}
+
         {% comment %} Search address {% endcomment %}
         <div id="billing-address-fields" class="address-fields" >
         <div class="grid-x">        

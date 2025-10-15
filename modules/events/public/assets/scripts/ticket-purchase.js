@@ -569,17 +569,32 @@ if (checkbox && billingInputs) {
   });
 }
 
-async function saveContact(billing_payload) {
+async function saveContact(billing) {
     let result = null;
     try {
-        if (billing_payload.uuid) {
-            // Update existing contact
-            const response = await contactServices.updateContact(billing_payload);
+        const response = await contactServices.validateEmail(billing.email);
+        const validateEmail = response.data;
+
+        // Clear error message
+        contactEmailEl.hasError = false;
+        contactEmailEl.errorMessage = "";
+
+        if (validateEmail.is_guest === false) {
+            // Logged-in user: Update existing contact
+            const response = await contactServices.updateContact(billing);
+            result = response.data;
+        } else if (validateEmail.is_guest === true && validateEmail.form_type == 'edit' && validateEmail.is_guest_editable === true) {
+            // Guest user: Update existing contact
+            const response = await contactServices.updateContact(billing);
+            result = response.data;
+        } else if (validateEmail.is_guest === true && validateEmail.form_type == 'add') {
+            // Guest user: Add new contact
+            const response = await contactServices.addContact(billing);
             result = response.data;
         } else {
-            // Add new contact
-            const response = await contactServices.addContact(billing_payload);
-            result = response.data;
+            // Guest user: Error notice
+            contactEmailEl.hasError = true;
+            contactEmailEl.errorMessage = "Email already in use. Please log in.";
         }
 
         if (result) {
@@ -796,7 +811,6 @@ if (step2) {
           ) || "",
           mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
           mobile_phone_number: contact_phone_number || "",
-          uuid: getFieldValue(orderContactData, "user_uuid") || "",
 
           // The rest can still come from sourceData/billing/address fallbacks
           billing_address_1: getFieldValue(sourceData, "billing_address_1") || ticketPurchaseData.billing.billing_address_1 || selectedAddress?.address_1 || "",
@@ -806,16 +820,8 @@ if (step2) {
           billing_postcode: getFieldValue(sourceData, "billing_postcode") || ticketPurchaseData.billing.billing_postcode || selectedAddress?.postcode || "",
           billing_country: getFieldValue(sourceData, "billing_country") || ticketPurchaseData.billing.billing_country || selectedAddress?.country || ""
         };
-       
-      
+             
         const data = await saveContact(billing_payload);
-        ticketPurchaseData.contact.user_id = data.id
-
-        if (!ticketPurchaseData.contact.user_uuid) {
-          ticketPurchaseData.contact.user_uuid = data.uuid
-        }
-
-    
     
         if (data.uuid) {
             secondStep.hasError = false;
@@ -824,7 +830,7 @@ if (step2) {
             scrollToTop();
             contact_payment_uuid.value = data.uuid
             emailpayment_field.value = data.email
-            if(data.guest) {
+            if(data.is_guest) {
                 loadCards(true);
                 window.isGuestStep2 = true;
             }else {

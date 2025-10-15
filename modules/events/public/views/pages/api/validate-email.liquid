@@ -5,12 +5,45 @@ method: get
 searchable: false
 metadata: {
     "status": "published",
-    "api_endpoint_name": "Check User Email API",
+    "api_endpoint_name": "Validate Email",
     "page_type": "endpoint"
 }
 ---
 
 {%- assign email = context.params.email | default: null -%}
-{%- graphql results = "modules/ecommerce/account/check_user_email", email: email -%}
 
-{{ results }}
+{%- if context.current_user -%}
+    {% comment %} The user is logged in {% endcomment %}
+{%- else -%}
+    {% comment %} Guest user {% endcomment %}
+    {%- function guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}
+    {%- graphql user = 'modules/ecommerce/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
+    {%- assign notes = user| dig: 'profiles' | first | dig: 'properties','notes' | strip -%}
+    
+    {%- liquid
+        assign form_type = 'add'
+        assign is_guest_editable = false
+        if user.email == email 
+            assign form_type = 'edit'
+            if notes == guest_temp_uuid
+                assign is_guest_editable = true
+            endif
+        endif
+    -%}
+        
+{%- endif -%}
+
+
+{%- if context.current_user -%}
+{
+    "is_guest": false
+}
+{%- else -%}    
+{
+    "is_guest": true,
+    "form_type": "{{ form_type }}",
+    "is_guest_editable": {{ is_guest_editable | default: false }}
+}
+{%- endif -%}
+
+{%- response_status 200 -%}

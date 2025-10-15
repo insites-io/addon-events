@@ -64,6 +64,17 @@ metadata: {
     {% assign data = data | add_hash_key: "event", event_data %}
     {% assign data = data | add_hash_key: "order_data", order_data %}
 
+    {% comment %} context.session and context.current_user are not accessible inside emails. Set the data here instead. {% endcomment %}
+    {% liquid
+        if context.current_user
+            assign user_id = context.current_user.id
+        else
+            assign user_id = context.session.guest_id
+        endif
+
+        assign data = data | add_hash_key: "user_id", user_id
+    %}
+
     {% include 'modules/events/orders/callback_email_notifications', data: data %}
 
 {% endif %}

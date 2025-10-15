@@ -37,6 +37,10 @@ var contactServices = (function () {
     }
 
     return {
+        validateEmail: async function ($email) {
+            let url = "/validate-email.json?email="+$email;
+            return await processRequest('get', url);
+        },
         addContact: async function ($payload) {
             let url = "/create-contact-company"
             return await processRequest('post', url, $payload);

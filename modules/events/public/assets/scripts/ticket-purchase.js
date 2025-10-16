@@ -797,7 +797,7 @@ if (step2) {
         ticketPurchaseData.billing.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || ticketPurchaseData.billing.billing_company_name || "";
 
         const billing_payload = {
-          temp_billing_address_id: getFieldValue(sourceData, "billing_address_id") || "",
+          billing_address_uuid: billingAddressUuidEl.value || "",
 
           // Always from orderContactData
           prefix: getFieldValue(orderContactData, "prefix") || "",
@@ -877,6 +877,7 @@ if (step3) {
         const orderPayload = {
             event_uuid: event_uuid_hidden.value,
 
+            billing_address_uuid: billingAddressUuidEl.value || "",
             billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
             billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb") || addressCard?.suburb || "",
             billing_postcode: getFieldValue(ticketPurchaseData.billing, "billing_postcode") || addressCard?.postcode || "",
@@ -925,8 +926,7 @@ if (step3) {
         
         const orderResponse = await saveOrder({
           ...orderPayload,
-          tickets: ticketPurchaseData.tickets,
-          user_id: ticketPurchaseData.contact.user_id
+          tickets: ticketPurchaseData.tickets
         });
 
 

@@ -18,6 +18,9 @@ searchable: false
 {%- endif -%}
 
 
+{% comment %} Use the selected billing_address_uuid as the default_address_uuid {% endcomment %}
+{%- assign payload = payload | add_hash_key: "default_address_uuid", payload.billing_address_uuid -%}
+
 {%- comment -%} Update contact {%- endcomment -%}
  {%- function update_contact = "crm/controller/contacts/update", uuid: user_uuid, params: payload -%}
 

@@ -45,14 +45,14 @@ const modalCountryEl = document.getElementById('modal_country');
 
 // Addresses
 const addressCards = document.getElementById('address-cards');
-let selectedAddressId = null;
 let selectedAddress = {
+    "uuid": "",
     "address_1": "",
     "address_2": "",
     "suburb": "",
     "state": "",
     "postcode": "",
-    "country": ""    
+    "country": ""
 }
 
 // Shipping
@@ -73,7 +73,7 @@ const billingCompanyNameEl = document.getElementById('billing-company-name');
 const billingFirstNameEl = document.getElementById('billing-first-name');
 const billingLastNameEl = document.getElementById('billing-last-name');
 const billingEmailEl = document.getElementById('billing-email');
-const billingAddressID = document.getElementById('billing_address_id');
+const billingAddressUuidEl = document.getElementById('billing_address_uuid');
 const billingSubmitBtn = document.getElementById("billing-submit-button");
 
 // Payment Information
@@ -135,7 +135,7 @@ let Checkout = (function () {
                 const suburbState = [data.suburb, data.state].filter(Boolean).join(' ');
                 let cardHtml = `
                 <div class="large-6 medium-6 small-12 cell">
-                    <ins-checkbox-card data-equalizer-watch="" name="billing-address-cards" selected-color="blue" value="${data.id}" data-address="${data.address_1}" data-address_1="${data.address_1}" data-address_2="${data.address_2}" data-suburb="${data.suburb}" data-state="${data.state}" data-postcode="${data.postcode}" data-country="${data.country}">                    
+                    <ins-checkbox-card data-equalizer-watch="" name="billing-address-cards" selected-color="blue" value="${data.id}" data-uuid="${data.uuid}" data-address="${data.address_1}" data-address_1="${data.address_1}" data-address_2="${data.address_2}" data-suburb="${data.suburb}" data-state="${data.state}" data-postcode="${data.postcode}" data-country="${data.country}">                    
                         <div>
                             <p class="form-label">${data.address_1}${data.address_2 ? `, ${data.address_2}` : ''}</p>
                             <div class="spacer small"></div>
@@ -148,18 +148,18 @@ let Checkout = (function () {
                 return cardHtml;
             },
             checkSelectedCard(){
-                const cards = document.querySelectorAll('ins-checkbox-card');
+                // const cards = document.querySelectorAll('ins-checkbox-card');
         
-                cards.forEach(card => {
-                    const isSelected = card.hasAttribute('selected');
+                // cards.forEach(card => {
+                //     const isSelected = card.hasAttribute('selected');
 
-                    // If a selected card is found, stop further processing
-                    if (isSelected) {
-                        selectedAddressId = card.value;
-                        //Checkout.methods.removeAddressRequiredAttribute();
-                        return; 
-                    }
-                });
+                //     // If a selected card is found, stop further processing
+                //     if (isSelected) {
+                //         selectedAddressId = card.value;
+                //         //Checkout.methods.removeAddressRequiredAttribute();
+                //         return; 
+                //     }
+                // });
             },
             addAddressRequiredAttribute() {
                 // List of input IDs to exclude
@@ -407,7 +407,6 @@ let Checkout = (function () {
                 } else if (page == 'billing') {
                     payload = {
                         type: 'billing',
-                        //billing_address_id: billingAddressID.value,
                         billing_same_with_shipping: billingSamewithShippingFlag,
                         billing_company_name: billingCompanyNameEl.value,
                         billing_contact_first_name: billingFirstNameEl.value,
@@ -470,7 +469,7 @@ let Checkout = (function () {
                 // set selected state
                 addressCard.setAttribute('selected', true);
                 addressCard.selected = true;
-                selectedAddressId = addressCard.value;
+                //selectedAddressId = addressCard.value;
 
                 selectedAddress = {
                     "address_1": addressCard.getAttribute('data-address_1'),
@@ -479,14 +478,10 @@ let Checkout = (function () {
                     "state": addressCard.getAttribute('data-state'),
                     "postcode": addressCard.getAttribute('data-postcode'),
                     "country": addressCard.getAttribute('data-country')   
-                };
+                };                
 
-                if(shippingAddressID){
-                    shippingAddressID.setValue(selectedAddressId);
-                }
-
-                if(billingAddressID){
-                    billingAddressID.setValue(selectedAddressId);
+                if(billingAddressUuidEl){
+                    billingAddressUuidEl.setValue(addressCard.getAttribute('data-uuid'));
                 }                
             },      
             async addressSubmit() {
@@ -547,7 +542,7 @@ let Checkout = (function () {
                     address.setAttribute('selected', false);
                     address.selected = false;
                 });
-                selectedAddressId = null;
+                //selectedAddressId = null;
             },
             // Function to remove 'is-invalid' class from all form elements
             removeInvalidClassFromForm() {
@@ -632,7 +627,7 @@ let Checkout = (function () {
                         }
                     });
                 }                  
-                Checkout.methods.checkSelectedCard();
+                //Checkout.methods.checkSelectedCard();
             },
             initCardsEventListener() {
                 let iterations = 5;

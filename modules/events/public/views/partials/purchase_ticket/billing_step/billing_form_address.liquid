@@ -38,11 +38,11 @@ metadata: {
    
     {% comment %} Selected address {% endcomment %}
     <ins-input validate required
-    id="billing_address_id" 
-    class="hidden-input"
-    value="{{ context.session.billing_address_id }}"
-    name="{{ prop.billing_address_id.name }}"
-    error-message="Billing address is required. Please select from the list below or add new address.">
+        id="billing_address_uuid" 
+        class="hidden-input"
+        value="{{ context.session.billing_address_uuid }}"
+        name="billing_address_uuid"
+        error-message="Billing address is required. Please select from the list below or add new address.">
     </ins-input> 
             
     {%- comment -%} Address cards {%- endcomment -%}

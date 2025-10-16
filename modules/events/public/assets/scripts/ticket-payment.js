@@ -56,7 +56,7 @@ async function loadCards(isGuest = false, guestUuid = null) {
 
     try {
         // Always call the API to check if there are cards
-        const url = `/payment-methods?contact_uuid=${contact_Uuid.value}&size=50`;
+        const url = `/payment-methods`;
         const response = await apiServices.processRequest("get", url);
         const cards = response.data || [];
 

@@ -962,7 +962,7 @@ if (step3) {
                         // showStep("allocation");
                       const urlParams = new URLSearchParams(window.location.search);
                       const eventParam = urlParams.get("event");
-                      window.location.href = "/allocate-ticket?event=" + eventParam ;
+                      window.location.href = "/allocate-ticket?event=" + eventParam + "&order_id=" + orderResponse.data.data.id;
                       saveOrderSummary();
                     },300)
                 } else {

@@ -35,7 +35,7 @@ metadata: {
     {% endif %}
     
 
-    {% include 'modules/events/purchase_ticket/allocation_step/ticket_allocation_section', event: event %}
+    {% include 'modules/events/purchase_ticket/allocation_step/ticket_allocation_section', event: event, order_id: order_id %}
 
     {% comment %} ? BUTTONS - Step 4 {% endcomment %}
     {% if show_element %}

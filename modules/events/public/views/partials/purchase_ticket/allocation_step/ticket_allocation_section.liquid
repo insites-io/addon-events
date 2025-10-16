@@ -32,9 +32,11 @@ metadata: {
   "expires_in_seconds": 604800,
   {% endif %}
   "event_uuid": "{{ event_uuid }}",
-  "purchased_by_uuid": "{{ user_uuid }}"
+  "purchased_by_uuid": "{{ user_uuid }}",
+  "order_id": "{{ order_id }}"
 }
 {% endparse_json %}
+
 
 {% graphql tickets = 'modules/events/events/tickets/get_tickets', args: args  | dig: 'items','results' %}
 {% assign grouped_tiers = tickets | group_by: "venue_area_name" %}

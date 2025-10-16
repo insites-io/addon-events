@@ -26,8 +26,9 @@ metadata: {
 
 {% comment %} Get event details {% endcomment %}
 {% assign event_uuid = context.params.event %}
+{% assign order_id = context.params.order_id %}
 
-{%- graphql event = 'modules/events/events/get_event_by_uuid', uuid: event_uuid | dig: "items", "results" | first -%}
+{%- graphql event = 'modules/events/events/get_event_by_uuid', uuid: event_uuid, order_id: order_id | dig: "items", "results" | first -%}
 {%- graphql venue = 'modules/events/events/get_venue_area', venue_uuid: event.venue_uuid | dig: "items", "results" | first -%}
 {% graphql venue_area = 'modules/events/events/get_event_venue_area', event_uuid: event_uuid | dig: "items", "results" | first %}
 
@@ -123,7 +124,8 @@ metadata: {
                             <div class="grid-x grid-padding-x invoice-details form-group" active>
                                 <div  class="large-7 medium-12 small-12 cell">
                                     {% comment %} Step 4 {% endcomment %}
-                                    {% include "modules/events/purchase_ticket/allocation_step/ticket_allocation_step", event: event, is_disabled: is_disabled, is_visible: is_visible  %}
+                                    {% include "modules/events/purchase_ticket/allocation_step/ticket_allocation_step", 
+                                            event: event, is_disabled: is_disabled, is_visible: is_visible, order_id: order_id %}
                                 </div> 
                                 <div  class="large-4 large-offset-1 medium-12 small-12 cell">
                                     {% include "modules/events/purchase_ticket/order_summary" %}

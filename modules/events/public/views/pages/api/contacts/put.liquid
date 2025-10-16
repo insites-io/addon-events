@@ -18,7 +18,10 @@ searchable: false
 {%- endif -%}
 
 
-{% comment %} Use the selected billing_address_uuid as the default_address_uuid {% endcomment %}
+{% comment %} 
+     Use selected billing_address_uuid as default_address_uuid 
+     — updates the default address shown on the /my-details portal page.
+{% endcomment %}
 {%- assign payload = payload | add_hash_key: "default_address_uuid", payload.billing_address_uuid -%}
 
 {%- comment -%} Update contact {%- endcomment -%}

@@ -60,11 +60,11 @@ metadata: {
         assign last_name = context.current_user.last_name
         assign contact_uuid = context.current_user.external_id
     else 
-        assign user_id = null
-        assign email = payload.billing_contact_email
+        assign user_id = context.session.guest_id
+        assign email = payload.order_contact_email
         assign first_name = payload.order_contact_first_name
         assign last_name = payload.order_contact_last_name
-        assign contact_uuid = payload["order_contact.uuid"]
+        assign contact_uuid = context.session.guest_uuid
     endif
 %}
 

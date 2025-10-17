@@ -28,7 +28,7 @@ const step3button = document.getElementById("purchase-ticket-button-step-3");
 const step4button = document.getElementById("purchase-ticket-button-step-4");
 const step5button = document.getElementById("purchase-ticket-button-step-5");
 
-const checkbox = document.getElementById("billing-same-with-contact");
+const checkbox = document.getElementById("billing-same-with-order");
 const billingInputs = document.querySelector("#billing-contact-inputs");
 let isChecked = false;
 
@@ -82,8 +82,8 @@ async function updateBillingData() {
     const contact_country_code = "+" + contactPhoneCountryData.dialCode;
     const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-    ticketPurchaseData.billing.mobile_phone_country_code = contact_country_code.replace("+", "");
-    ticketPurchaseData.billing.mobile_phone_number = contact_phone_number;
+    ticketPurchaseData.billing.billing_phone_country_code = contact_country_code.replace("+", "");
+    ticketPurchaseData.billing.billing_phone_number = contact_phone_number;
 }
 
 // Function to update contact data (Step 2)
@@ -104,8 +104,8 @@ async function updateContactData() {
     const contact_country_code = "+" + contactPhoneCountryData.dialCode;
     const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-    ticketPurchaseData.contact.mobile_phone_country_code = contact_country_code.replace("+", "");
-    ticketPurchaseData.contact.mobile_phone_number = contact_phone_number;
+    ticketPurchaseData.contact.contact_phone_country_code = contact_country_code.replace("+", "");
+    ticketPurchaseData.contact.contact_phone_number = contact_phone_number;
 }
 
 // Function to update payment data (Step 3)
@@ -782,8 +782,8 @@ if (step2) {
                 const contact_country_code = "+" + contactPhoneCountryData.dialCode;
                 const contact_phone_number = contactPhoneFullValue.replace(contact_country_code, "");
 
-                ticketPurchaseData.billing.mobile_phone_country_code = contact_country_code.replace("+", "");
-                ticketPurchaseData.billing.mobile_phone_number = contact_phone_number;
+                ticketPurchaseData.billing.billing_phone_country_code = contact_country_code.replace("+", "");
+                ticketPurchaseData.billing.billing_phone_number = contact_phone_number;
             }
         }
 
@@ -797,13 +797,13 @@ if (step2) {
         ticketPurchaseData.billing.company_name = getFieldValue(sourceData, isChecked ? (getFieldValue(sourceData, "user_uuid") ? "temp_company_name" : "company_name") : "billing_company_name") || ticketPurchaseData.billing.billing_company_name || "";
 
         const billing_payload = {
-          billing_address_uuid: billingAddressUuidEl.value || "",
+          billing_address_uuid: billingAddressUuidEl?.value || "",
 
-          // Always from orderContactData
+          // Order Contact: Always from orderContactData
           prefix: getFieldValue(orderContactData, "prefix") || "",
-          first_name: getFieldValue(orderContactData, "contact_first_name") || getFieldValue(orderContactData, "first_name") || "",
-          last_name: getFieldValue(orderContactData, "contact_last_name") || getFieldValue(orderContactData, "last_name") || "",
-          email: getFieldValue(orderContactData, "contact_email") || getFieldValue(orderContactData, "email") || "",
+          first_name: getFieldValue(orderContactData, "contact_first_name") || getFieldValue(orderContactData, "contact_first_name") || "",
+          last_name: getFieldValue(orderContactData, "contact_last_name") || getFieldValue(orderContactData, "contact_last_name") || "",
+          email: getFieldValue(orderContactData, "contact_email") || getFieldValue(orderContactData, "contact_email") || "",
           company_name: getFieldValue(
               orderContactData,
               getFieldValue(orderContactData, "user_uuid") ? "temp_company_name" : "company_name"
@@ -811,7 +811,15 @@ if (step2) {
           mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
           mobile_phone_number: contact_phone_number || "",
 
-          // The rest can still come from sourceData/billing/address fallbacks
+          // Billing Contact
+          billing_same_with_order: isChecked || false,
+          billing_first_name: ticketPurchaseData.billing.billing_first_name,
+          billing_last_name: ticketPurchaseData.billing.billing_last_name,
+          billing_email: ticketPurchaseData.billing.billing_email,
+          billing_phone_country_code: ticketPurchaseData.billing.billing_phone_country_code,
+          billing_phone_number: ticketPurchaseData.billing.billing_phone_number,
+
+          // Billing Address: The rest can still come from sourceData/billing/address fallbacks
           billing_address_1: getFieldValue(sourceData, "billing_address_1") || ticketPurchaseData.billing.billing_address_1 || selectedAddress?.address_1 || "",
           billing_address_2: getFieldValue(sourceData, "billing_address_2") || ticketPurchaseData.billing.billing_address_2 || selectedAddress?.address_2 || "",
           billing_suburb: getFieldValue(sourceData, "billing_suburb") || ticketPurchaseData.billing.billing_suburb || selectedAddress?.suburb || "",
@@ -877,37 +885,43 @@ if (step3) {
         const orderPayload = {
             event_uuid: event_uuid_hidden.value,
 
-            billing_address_uuid: billingAddressUuidEl.value || "",
+            //Billing Address
+            billing_address_uuid: billingAddressUuidEl?.value || "",
             billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
-            billing_city: getFieldValue(ticketPurchaseData.billing, "billing_suburb") || addressCard?.suburb || "",
+            billing_suburb: getFieldValue(ticketPurchaseData.billing, "billing_suburb") || addressCard?.suburb || "",
             billing_postcode: getFieldValue(ticketPurchaseData.billing, "billing_postcode") || addressCard?.postcode || "",
             billing_state: getFieldValue(ticketPurchaseData.billing, "billing_state") || addressCard?.state || "",
             billing_country: getFieldValue(ticketPurchaseData.billing, "billing_country") || addressCard?.country || "",
 
+            //Billing Company
             "billing_company.uuid": getFieldValue(ticketPurchaseData.billing, "company_uuid") || "",
             billing_company_name: getFieldValue(ticketPurchaseData.billing, "company_name") || "",
             billing_company_email: getFieldValue(ticketPurchaseData.billing, "company_email") || "",
 
+            //Billing Contact
             "billing_contact.uuid":  getFieldValue(ticketPurchaseData.billing, "user_uuid") || "",
             billing_contact_first_name: getFieldValue(ticketPurchaseData.billing, "billing_first_name") || "",
             billing_contact_last_name: getFieldValue(ticketPurchaseData.billing, "billing_last_name") || "",
             billing_contact_email: getFieldValue(ticketPurchaseData.billing, "billing_email") || "",
-            billing_contact_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
-            billing_contact_phone_number:  getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
+            billing_contact_phone_country_code: getFieldValue(ticketPurchaseData.billing, "billing_phone_country_code") || "",
+            billing_contact_phone_number:  getFieldValue(ticketPurchaseData.billing, "billing_phone_number") || "",
+            
             order_reference: crypto.randomUUID(),
             order_status: "placed",
             order_payment_status: "unpaid",
 
+            //Order Company
             "order_company.uuid": getFieldValue(ticketPurchaseData.contact, "company_uuid") || "",
             order_company_name: getFieldValue(ticketPurchaseData.contact, "company_name") || "",
             order_company_email: getFieldValue(ticketPurchaseData.contact, "company_email") || "",
 
+            //Order Contact
             "order_contact.uuid": getFieldValue(ticketPurchaseData.contact, "user_uuid") || "",
             order_contact_first_name: getFieldValue(ticketPurchaseData.contact, "contact_first_name") || "",
             order_contact_last_name: getFieldValue(ticketPurchaseData.contact, "contact_last_name") || "",
             order_contact_email: getFieldValue(ticketPurchaseData.contact, "contact_email") || "",
-            order_contact_phone_country_code: getFieldValue(ticketPurchaseData.contact, "mobile_phone_country_code") || "",
-            order_contact_phone_number: getFieldValue(ticketPurchaseData.contact, "mobile_phone_number") || "",
+            order_contact_phone_country_code: getFieldValue(ticketPurchaseData.contact, "contact_phone_country_code") || "",
+            order_contact_phone_number: getFieldValue(ticketPurchaseData.contact, "contact_phone_number") || "",
 
             date_time: new Date().toISOString(),
             currency: "AUD",
@@ -919,8 +933,6 @@ if (step3) {
             total_amount: total,
             total_amount_paid: total,
 
-            mobile_phone_number: getFieldValue(ticketPurchaseData.billing, "mobile_phone_number") || "",
-            mobile_phone_country_code: getFieldValue(ticketPurchaseData.billing, "mobile_phone_country_code") || "",
             stripe_credit_card: stripe_credit_card || ""
         };
         
@@ -1462,6 +1474,8 @@ function saveOrderSummary() {
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.location.pathname !== "/purchase-ticket") return;
+
+  isChecked = document.getElementById("billing-same-with-order").value == 'true' ? true : false;
 
   const stepper = document.getElementById("ticket-purchase-stepper");
   if (!stepper || typeof stepper.getAllSteps !== "function") return;

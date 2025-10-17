@@ -1,0 +1,32 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Ticket Purchase Sessions'
+}
+---
+
+{% comment %} 
+    Required from parent
+    - payload
+{% endcomment %}
+
+{% comment %} Order Contact {% endcomment %}
+{% liquid 
+    session contact_first_name = payload.first_name
+    session contact_last_name = payload.last_name
+    session contact_email = payload.email
+    session contact_company_name = payload.contact_company_name
+    session contact_phone_country_code = payload.mobile_phone_country_code
+    session contact_phone_number = payload.mobile_phone_number
+%} 
+
+
+{% comment %} Billing Contact {% endcomment %}
+{% liquid 
+    session billing_same_with_order = payload.billing_same_with_order
+    session billing_company_name = payload.billing_company_name
+    session billing_first_name = payload.billing_first_name
+    session billing_last_name = payload.billing_last_name
+    session billing_email = payload.billing_email
+    session billing_phone_number = payload.billing_phone_number
+    session billing_phone_country_code = payload.billing_phone_country_code
+%} 

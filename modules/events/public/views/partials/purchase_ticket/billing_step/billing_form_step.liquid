@@ -11,23 +11,26 @@ metadata: {
     {% assign profiles_prop = fields.profiles['modules/insites_core/crm_contact'].properties %}
 
     {% if has_profile %}
-    {%  liquid
-        assign first_name = context.current_user.first_name
-        assign last_name = context.current_user.last_name
-        assign email = context.current_user.email
-        graphql user_details = "modules/portal/account/get_user_by_email" email: context.current_user.email | dig: "items" | dig: "results" | first
-        assign crm_contact = user_details.crm_contact | first
-        assign company_name = crm_contact.company.company_name
-        assign contact_phone_country_code = crm_contact.mobile_phone_country_code
-        assign contact_phone_number = crm_contact.mobile_phone_number
-        assign company_uuid = crm_contact.company_uuid
-    %} 
+        {%  liquid
+            assign contact_first_name = context.current_user.first_name
+            assign contact_last_name = context.current_user.last_name
+            assign contact_email = context.current_user.email
+            graphql user_details = "modules/portal/account/get_user_by_email" email: context.current_user.email | dig: "items" | dig: "results" | first
+            assign crm_contact = user_details.crm_contact | first
+            assign contact_company_name = crm_contact.company.company_name
+            assign contact_phone_country_code = crm_contact.mobile_phone_country_code
+            assign contact_phone_number = crm_contact.mobile_phone_number
+            assign company_uuid = crm_contact.company_uuid
+        %} 
     {% else %}
-    {%  liquid      
-        assign first_name = context.session.contact_first_name
-        assign last_name = context.session.contact_last_name
-        assign email = context.session.contact_email
-    %} 
+        {%  liquid      
+            assign contact_first_name = context.session.contact_first_name
+            assign contact_last_name = context.session.contact_last_name
+            assign contact_email = context.session.contact_email
+            assign contact_company_name = context.session.contact_company_name
+            assign contact_phone_country_code = crm_contact.contact_phone_country_code
+            assign contact_phone_number = crm_contact.contact_phone_number
+        %} 
     {% endif %}
 
     
@@ -48,12 +51,12 @@ metadata: {
                 label="Company Name"
                 placeholder="Company Name" 
                 field="text" 
-                value="{{ company_name }}"
+                value="{{ contact_company_name }}"
                 name="temp_company_name"
                 readonly >
                 </ins-input>
 
-                <input type="hidden" name="{{ fields.company_name.name }}" value="{{ company_name }}" >
+                <input type="hidden" name="contact_company_name" value="{{ contact_company_name }}" >
 
             {% else %} 
 
@@ -63,8 +66,8 @@ metadata: {
                 label="Company Name"
                 placeholder="Company Name" 
                 field="text" 
-                value="{{ company_name }}"
-                name="company_name">
+                value="{{ contact_company_name }}"
+                name="contact_company_name">
                 </ins-input>
 
             {% endif %}        
@@ -76,9 +79,8 @@ metadata: {
                 class="label-input"
                 label="First Name*"
                 placeholder="First Name" 
-                value="{{ first_name }}"
-                name="{{ fields.first_name.name }}" 
-                {% if form.errors['first_name'] %} has-error {% endif %}
+                value="{{ contact_first_name }}"
+                name="contact_first_name" 
                 error-message="First name is required.">
             </ins-input>
             </div>
@@ -89,9 +91,8 @@ metadata: {
                 class="label-input"
                 label="Last Name*"
                 placeholder="Last Name" 
-                value="{{ last_name }}"
-                name="{{ fields.last_name.name }}" 
-                {% if form.errors['last_name'] %} has-error {% endif %}
+                value="{{ contact_last_name }}"
+                name="contact_last_name" 
                 error-message="Last name is required.">
             </ins-input>
             </div>
@@ -104,9 +105,8 @@ metadata: {
                 label="Email*"
                 placeholder="Email" 
                 field="email" 
-                value="{{ email }}"
-                name="{{ fields.email.name }}" 
-                {% if form.errors['email'] %} has-error {% endif %}
+                value="{{ contact_email }}"
+                name="contact_email" 
                 error-message="Email is required.">
             </ins-input>
             </div>
@@ -123,13 +123,13 @@ metadata: {
             </ins-input-tel>
 
             <input type="hidden" 
-                id="phone-number"
-                name="{{ profiles_prop.mobile_phone_number.name | default: 'mobile_phone_number'}}"
+                id="contact-phone-number"
+                name="contact_phone_number"
                 value="{{ contact_phone_number }}" >
 
             <input type="hidden" 
-                id="phone-country-code"
-                name="{{ profiles_prop.mobile_phone_country_code.name | default: 'mobile_phone_country_code'}}"
+                id="contact-phone-country-code"
+                name="contact_phone_country_code"
                 value="{{ contact_phone_country_code }}" >
             </div>
 
@@ -149,11 +149,18 @@ metadata: {
       <h4>Billing contact</h4>
       <div class="spacer x-large hide-for-small-only"></div>
       <div class="spacer show-for-small-only"></div>
+        {% if context.session.billing_same_with_order == true %}
+            {% assign checked = 'checked' %}
+            {% assign isChecked = 'true' %}
+        {% else %}
+            {% assign checked = '' %}
+            {% assign isChecked = 'false' %}
+        {% endif %}
         <ins-checkbox class="inline" 
-            {% if context.session.billing_same_with_shipping == true %} checked {% endif %}
-            name="{{ prop.billing_same_with_shipping.name }}"
-            value="true"
-            id="billing-same-with-contact" 
+            {{ checked }}
+            name="billing_same_with_order"
+            value={{isChecked}}
+            id="billing-same-with-order" 
             label="My billing contact is the same as my order contact.">
         </ins-checkbox>
     </div>
@@ -170,7 +177,7 @@ metadata: {
         field="text" 
         id="billing-company-name" 
         value="{{ context.session.billing_company_name }}"
-        name="{{ prop.billing_company_name.name }}">
+        name="billing_company_name">
       </ins-input>
     </div>
     <div class="large-6 medium-6 small-12 cell">
@@ -178,9 +185,9 @@ metadata: {
         label="First Name*" 
         placeholder="First Name"
         class="required-billing-contact"
-        name="{{ prop.billing_contact_first_name.name }}" 
+        name="billing_first_name}" 
         id="billing-first-name" 
-        value="{{ context.session.billing_contact_first_name | default: ''}}"
+        value="{{ context.session.billing_first_name | default: ''}}"
         error-message="First name is required.">
       </ins-input>
     </div>
@@ -189,9 +196,9 @@ metadata: {
         label="Last Name*" 
         placeholder="Last Name"
         class="required-billing-contact"
-        name="{{ prop.billing_contact_last_name.name }}" 
+        name="billing_last_name" 
         id="billing-last-name" 
-        value="{{ context.session.billing_contact_last_name | default: ''}}"
+        value="{{ context.session.billing_last_name | default: ''}}"
         error-message="Last name is required.">
       </ins-input>
     </div>
@@ -201,9 +208,9 @@ metadata: {
         placeholder="Email*" 
         field="email"
         class="required-billing-contact"
-        name="{{ prop.billing_contact_email.name }}" 
+        name="billing_email" 
         id="billing-email" 
-        value="{{ context.session.billing_contact_email | default: ''}}"
+        value="{{ context.session.billing_email | default: ''}}"
         error-message="Email is required.">
       </ins-input>
     </div>
@@ -212,20 +219,20 @@ metadata: {
         class="label-input" 
         id="billing-phone" 
         label="Phone"
-        country-code="{{ context.session.billing_contact_phone_country_code | default: '61'}}"
-        phonenum-value="{{ context.session.billing_contact_phone_number | default: ''}}"
+        country-code="{{ context.session.billing_phone_country_code | default: '61'}}"
+        phonenum-value="{{ context.session.billing_phone_number | default: ''}}"
         phonenum-placeholder="Phone" no-areacode>
       </ins-input-tel>
 
       <input type="hidden" 
         id="billing-phone-number"
-        name="{{ prop.billing_contact_phone_number.name }}"
-        value="{{ context.session.billing_contact_phone_number }}" > 
+        name="billing_phone_number"
+        value="{{ context.session.billing_phone_number }}" > 
 
       <input type="hidden" 
         id="billing-phone-country-code"
-        name="{{ prop.billing_contact_phone_country_code.name }}"
-        value="{{ context.session.billing_contact_phone_country_code }}" >
+        name="billing_phone_country_code"
+        value="{{ context.session.billing_phone_country_code }}" >
     </div>
   </div>
 

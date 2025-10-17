@@ -40,22 +40,44 @@ searchable: false
   {%- endparse_json -%}   
   {%- function add_company = "crm/controller/companies/create", params: company_details -%}
 
+
+  {% comment %} Create Address {% endcomment %}
+  {%- parse_json add_address_data -%}
+  {
+      "contact.uuid" : "{{ guest_uuid }}",
+      "address_label" : "Billing",
+      "address_1" : "{{ payload.billing_address_1 }}",
+      "address_2" : "{{ payload.billing_address_2 }}",
+      "state" : "{{ payload.billing_state }}",
+      "suburb" : "{{ payload.billing_suburb }}",
+      "country" : "{{ payload.billing_country }}",
+      "postcode" : "{{ payload.billing_postcode }}"
+  }
+  {%- endparse_json -%}
+  {%- function add_address = "crm/controller/addresses/create", type: "contact", params: add_address_data -%}
+  {%- session default_address_uuid = add_address.uuid -%}
+
   
   {%- comment -%}
       Save guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
   {%- endcomment -%}
   {%- function guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}  
 
-  {%- comment -%} Associate contact with company; Update notes with guest_temp_uuid {%- endcomment -%}
+  {%- comment -%} 
+    - Associate contact with company    
+    - Set default address
+    - Update notes with guest_temp_uuid
+  {%- endcomment -%}
   {%- parse_json update_contact_data -%}
   {
       "uuid": "{{ add_contact.uuid }}",
       "email": "{{ add_contact.email }}",
       "company.uuid": "{{ add_company.uuid }}",
+      "default_address_uuid": "{{ add_address.uuid }}",
       "notes": "{{ guest_temp_uuid }}"
   }
   {%- endparse_json -%}
-  {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}  
+  {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}    
 
 
   {%- comment -%} Generate temporary token {%- endcomment -%}
@@ -65,6 +87,11 @@ searchable: false
   {%- comment -%} Create user profile: 'modules/portal/portal' {%- endcomment -%}
   {%- graphql create_user_profile = 'modules/portal/account/create_user_profile', 
         id: add_contact.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true -%}
+
+
+  {% comment %} Update sessions {% endcomment %}
+  {% include 'modules/events/purchase_ticket/ticket_purchase_sessions', payload: payload %} 
+
 
 {%- endif -%}
 

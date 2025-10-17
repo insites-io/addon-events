@@ -22,10 +22,37 @@ searchable: false
      Use selected billing_address_uuid as default_address_uuid 
      — updates the default address shown on the /my-details portal page.
 {% endcomment %}
-{%- assign payload = payload | add_hash_key: "default_address_uuid", payload.billing_address_uuid -%}
+{%- if context.current_user -%}
+     {%- assign default_address_uuid = payload.billing_address_uuid -%}
+{%- else -%}
+     {%- assign default_address_uuid = context.session.default_address_uuid -%}
+{%- endif -%}
+{%- assign payload = payload | add_hash_key: "default_address_uuid", default_address_uuid -%}
 
 {%- comment -%} Update contact {%- endcomment -%}
  {%- function update_contact = "crm/controller/contacts/update", uuid: user_uuid, params: payload -%}
+
+
+{% comment %} Guest user: Update Address  {% endcomment %}
+{%- if context.current_user == null -%}
+     {%- parse_json update_address_data -%}
+     {
+          "address.uuid" : "{{ context.session.default_address_uuid }}",
+          "address_label" : "Billing",
+          "address_1" : "{{ payload.billing_address_1 }}",
+          "address_2" : "{{ payload.billing_address_2 }}",          
+          "state" : "{{ payload.billing_state }}",
+          "suburb" : "{{ payload.billing_suburb }}",
+          "country" : "{{ payload.billing_country }}",          
+          "postcode" : "{{ payload.billing_postcode }}"
+     }
+     {%- endparse_json -%}
+     {%- function data = "crm/controller/addresses/update", type: "contact", uuid: context.session.default_address_uuid, params: update_address_data -%}     
+{%- endif -%}     
+
+
+{% comment %} Update sessions {% endcomment %}
+{% include 'modules/events/purchase_ticket/ticket_purchase_sessions', payload: payload %} 
 
 
 {%- comment -%} Set Status {%- endcomment -%}

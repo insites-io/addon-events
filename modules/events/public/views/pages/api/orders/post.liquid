@@ -18,6 +18,8 @@ searchable: false
               
      {%- assign errors = "" -%}
 
+     {%- assign payload = payload | add_hash_key: "is_use_crm_billing_address", true -%}
+
      {%- comment -%} Create order {%- endcomment -%}
      {%- graphql add_order = 'modules/website/trigger_api_call', 
           name: 'modules/events/add_order', 

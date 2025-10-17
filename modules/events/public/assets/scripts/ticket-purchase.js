@@ -725,7 +725,7 @@ if (step1) {
               updateTicketData(); // Store ticket data
               ticketPurchaseStepper.next();
               showStep("billing");
-              scrollToTop();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 500);
           }
         },1000)

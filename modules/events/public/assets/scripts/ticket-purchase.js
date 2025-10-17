@@ -594,7 +594,7 @@ async function saveContact(billing) {
         } else {
             // Guest user: Error notice
             contactEmailEl.hasError = true;
-            contactEmailEl.errorMessage = "Email already in use. Please log in.";
+            contactEmailEl.errorMessage = "Looks like you already have an account with us, please log in to continue.";
         }
 
         if (result) {

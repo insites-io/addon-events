@@ -14,7 +14,7 @@ searchable: false
      {%- assign user_uuid = context.current_user.external_id -%}
 {%- else -%}
      {%- comment -%} Guest user {%- endcomment -%}
-     {%- assign user_uuid = context.session.guest_uuid -%}
+     {%- assign user_uuid = context.session.event_guest_uuid -%}
 {%- endif -%}
 
 

@@ -15,7 +15,7 @@ searchable: false
      if context.current_user
           assign user_uuid = context.current_user.external_id
      else 
-          assign user_uuid = context.session.guest_uuid
+          assign user_uuid = context.session.event_guest_uuid
      endif
 %}
 

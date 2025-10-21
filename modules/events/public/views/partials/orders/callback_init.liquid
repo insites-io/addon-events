@@ -69,7 +69,7 @@ metadata: {
         if context.current_user
             assign user_id = context.current_user.id
         else
-            assign user_id = context.session.guest_id
+            assign user_id = context.session.event_guest_id
         endif
 
         assign data = data | add_hash_key: "user_id", user_id

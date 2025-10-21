@@ -10,7 +10,7 @@ metadata: {
   {% assign contact_uuid = context.current_user.external_id %}
   {% assign email = context.current_user.email %}
 {%- else -%}
-  {% assign contact_uuid = context.session.guest_uuid %}
+  {% assign contact_uuid = context.session.event_guest_uuid %}
   {% assign email = context.session.billing_contact_email %}
 {%- endif -%}
 

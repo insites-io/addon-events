@@ -7,8 +7,8 @@ searchable: false
 
 {%- comment -%} 
   This is where account creation is handled for guest users during ticket purchase.
-  Save guest_uuid to session for later use.
-  guest_uuid is equal to context.current_user.external_id or user uuid once their account is created.
+  Save event_guest_uuid to session for later use.
+  event_guest_uuid is equal to context.current_user.external_id or user uuid once their account is created.
 {%- endcomment -%}
 
 
@@ -28,8 +28,8 @@ searchable: false
 
   {%- comment -%} Save to session for later use {%- endcomment -%}
   {%- session contact_email = add_contact.email -%}
-  {%- session guest_id = add_contact.id -%}
-  {%- session guest_uuid = add_contact.uuid -%}
+  {%- session event_guest_id = add_contact.id -%}
+  {%- session event_guest_uuid = add_contact.uuid -%}
 
 
   {%- comment -%} Create company {%- endcomment -%}
@@ -44,7 +44,7 @@ searchable: false
   {% comment %} Create Address {% endcomment %}
   {%- parse_json add_address_data -%}
   {
-      "contact.uuid" : "{{ guest_uuid }}",
+      "contact.uuid" : "{{ add_contact.uuid }}",
       "address_label" : "Billing",
       "address_1" : "{{ payload.billing_address_1 }}",
       "address_2" : "{{ payload.billing_address_2 }}",

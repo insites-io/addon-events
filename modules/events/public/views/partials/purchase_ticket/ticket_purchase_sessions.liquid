@@ -30,3 +30,15 @@ metadata: {
     session billing_phone_number = payload.billing_phone_number
     session billing_phone_country_code = payload.billing_phone_country_code
 %} 
+
+
+{% comment %} Billing Address {% endcomment %}
+{% liquid 
+    session billing_address_uuid = payload.billing_address_uuid
+    session billing_address_1 = payload.billing_address_1
+    session billing_address_2 = payload.billing_address_2
+    session billing_suburb = payload.billing_suburb
+    session billing_state = payload.billing_state
+    session billing_postcode = payload.billing_postcode
+    session billing_country = payload.billing_country    
+%} 

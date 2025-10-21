@@ -31,9 +31,24 @@ metadata: {
 %} 
 
 
+{% comment %} Billing Address {% endcomment %}
+{% liquid 
+    session billing_address_uuid = null
+    session billing_address_1 = null
+    session billing_address_2 = null
+    session billing_suburb = null
+    session billing_state = null
+    session billing_postcode = null
+    session billing_country = null    
+%} 
+
+
 {% comment %} Guest {% endcomment %}
 {% liquid
     session event_guest_id = null
     session event_guest_uuid = null
     session event_guest_temp_uuid = null
 %}
+
+
+{% log 'Clear ticket purchase sessions', type: 'Events Addon' %}

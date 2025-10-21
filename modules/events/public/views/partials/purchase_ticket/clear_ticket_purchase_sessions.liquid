@@ -4,6 +4,10 @@ metadata: {
 }
 ---
 
+{% comment %} 
+    This file is a callback_actions in form: modules/portal/sign_out
+{% endcomment %}
+
 {% comment %} Order Contact {% endcomment %}
 {% liquid 
     session contact_first_name = null
@@ -25,3 +29,8 @@ metadata: {
     session billing_phone_number = null
     session billing_phone_country_code = null
 %} 
+
+
+{% comment %} Guest {% endcomment %}
+{% session event_guest_id = null %}
+{% session event_guest_uuid = null %} 

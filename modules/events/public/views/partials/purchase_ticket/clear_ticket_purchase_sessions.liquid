@@ -32,5 +32,8 @@ metadata: {
 
 
 {% comment %} Guest {% endcomment %}
-{% session event_guest_id = null %}
-{% session event_guest_uuid = null %} 
+{% liquid
+    session event_guest_id = null
+    session event_guest_uuid = null
+    session event_guest_temp_uuid = null
+%}

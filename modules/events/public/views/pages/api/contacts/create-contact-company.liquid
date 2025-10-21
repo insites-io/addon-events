@@ -59,14 +59,14 @@ searchable: false
 
   
   {%- comment -%}
-      Save guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
+      Save event_guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
   {%- endcomment -%}
-  {%- function guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}  
+  {%- function event_guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}  
 
   {%- comment -%} 
     - Associate contact with company    
     - Set default address
-    - Update notes with guest_temp_uuid
+    - Update notes with event_guest_temp_uuid
   {%- endcomment -%}
   {%- parse_json update_contact_data -%}
   {
@@ -74,7 +74,7 @@ searchable: false
       "email": "{{ add_contact.email }}",
       "company.uuid": "{{ add_company.uuid }}",
       "default_address_uuid": "{{ add_address.uuid }}",
-      "notes": "{{ guest_temp_uuid }}"
+      "notes": "{{ event_guest_temp_uuid }}"
   }
   {%- endparse_json -%}
   {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}    

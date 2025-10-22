@@ -11,7 +11,7 @@ metadata: {
 {% if company_uuid %}
     {% assign related_uuid = related_uuid | array_add: company_uuid %}
 {% endif %}
-{%- graphql addresses = 'modules/ecommerce/address/get_address', 
+{%- graphql addresses = 'modules/events/address/get_address', 
     related_uuid: related_uuid | dig: 'items','results' -%}
 
 <div class="hide-for-small-only spacer xxx-large"></div>

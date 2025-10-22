@@ -14,5 +14,5 @@ searchable: false
      {%- assign user_uuid = context.session.event_guest_uuid -%}
 {%- endif -%}
 
-{%- graphql cards = "modules/ecommerce/payment_method/get_payment_method", contact_uuid: user_uuid, size: 50 | dig: 'items', 'results' -%}
+{%- graphql cards = "modules/events/payment_method/get_payment_method", contact_uuid: user_uuid, size: 50 | dig: 'items', 'results' -%}
 {{ cards }}

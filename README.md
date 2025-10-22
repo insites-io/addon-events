@@ -1,13 +1,9 @@
-# Ecommerce Addon
-Latest `v1.1.0`
+# Events Addon
+Latest `v1.0.0`
 
 
 ## Overview
-The Ecommerce Template provides a starting point for building the ecommerce section of the website, including product listing, product details, shopping cart, checkout process, payment, and order history.
-
-This addon requires Portal Application to be installed first.
-
-The Ecommerce Template is stored in the public folder: modules/ecommerce/.
+The Event Addon is a modular extension designed to integrate seamlessly with the existing Portal Template. It provides a complete solution for managing events and streamlining the ticket purchase process within the portal environment.
 
 
 ## Tech Stack
@@ -24,26 +20,26 @@ It is assumed that the developers or users have knowledge of using these tech st
  
 
 ## Application Dependencies
-Please ensure this application is installed from the Insites Marketplace.
- 
- - Portal
+Please ensure this application is installed first from the Insites Marketplace.
+
+ - Website & Portal
 
 
  ## Module Dependencies
- - API 5.10
- - CMS 5.6.0
- - CRM 5.12.3
- - Ecommerce 5.10.2
- - Events 5.5.1
+ - API 
+ - CMS 
+ - CRM 
+ - Ecommerce 
+ - Events 
 
 
  ## Features
-- Products
-- Cart
-- Discounts
-- Checkout
-- Order History
+- Upcoming events
+- Previous events 
+- Ticket purchase
+- Ticket allocation
+- My events
 
 
 ## Documentation
-[Click Here](https://docs.google.com/document/d/1PwxzrroQ2Bdqj0nAkevEGdX-gxmB6-kWw_WbUpmFJgE/edit?usp=sharing)
+[Click Here](https://docs.google.com/document/d/19UEf4-WL6Ade0CPBmsXNYUZx3o2P2OdrHfgNql7iKxA/edit?usp=sharing)

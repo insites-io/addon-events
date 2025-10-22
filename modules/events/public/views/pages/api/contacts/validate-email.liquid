@@ -17,7 +17,7 @@ metadata: {
 {%- else -%}
     {% comment %} Guest user {% endcomment %}
     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
-    {%- graphql user = 'modules/ecommerce/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
+    {%- graphql user = 'modules/events/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
     {%- assign notes = user| dig: 'profiles' | first | dig: 'properties','notes' | strip -%}
     
     {%- liquid

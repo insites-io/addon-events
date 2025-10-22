@@ -818,19 +818,16 @@ if (step2) {
           billing_address_uuid: billingAddressUuidEl?.value || "",
 
           // Order Contact: Always from orderContactData
-          prefix: getFieldValue(orderContactData, "prefix") || "",
-          first_name: getFieldValue(orderContactData, "contact_first_name") || getFieldValue(orderContactData, "contact_first_name") || "",
-          last_name: getFieldValue(orderContactData, "contact_last_name") || getFieldValue(orderContactData, "contact_last_name") || "",
-          email: getFieldValue(orderContactData, "contact_email") || getFieldValue(orderContactData, "contact_email") || "",
-          company_name: getFieldValue(
-              orderContactData,
-              getFieldValue(orderContactData, "user_uuid") ? "temp_company_name" : "company_name"
-          ) || "",
+          first_name: getFieldValue(orderContactData, "contact_first_name") || "",
+          last_name: getFieldValue(orderContactData, "contact_last_name") || "",
+          email: getFieldValue(orderContactData, "contact_email") || "",
+          company_name: getFieldValue(orderContactData, "contact_company_name") || "",
           mobile_phone_country_code: (contact_country_code || "").replace("+", ""),
           mobile_phone_number: contact_phone_number || "",
 
           // Billing Contact
           billing_same_with_order: isChecked || false,
+          billing_company_name: ticketPurchaseData.billing.billing_company_name,
           billing_first_name: ticketPurchaseData.billing.billing_first_name,
           billing_last_name: ticketPurchaseData.billing.billing_last_name,
           billing_email: ticketPurchaseData.billing.billing_email,

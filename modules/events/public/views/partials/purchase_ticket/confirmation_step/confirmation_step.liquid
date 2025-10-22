@@ -4,6 +4,11 @@ metadata: {
 }
 ---
 
+
+{% comment %} Clear ticket purchase sessions {% endcomment %}
+{% include 'modules/events/purchase_ticket/clear_ticket_purchase_sessions' %} 
+
+
 <div id="ticket-confirmation-step">
     <h2 class="heading-2-xsmall">Order details</h2>
     <div class="spacer x-large"></div>

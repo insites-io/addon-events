@@ -89,18 +89,6 @@ let Checkout = (function () {
                     phoneEl.countryCode.value = phoneValues.country_code;
                 }
             },
-            async checkSignUpUserEmail(field){ 
-                // Attached to the eventlistener
-                let varEmail = field.value;
-                if(App.validation.validateEmail(field)){
-                    let url = '/validate-email.json?'+ 'email='+ varEmail ;
-                    let response = await apiServices.processRequest('get', url);
-                    if(response.state && response.data) {
-                        //Check / Handle if user exist
-                        return Checkout.methods.checkUserEmail(field, response.data);
-                    } 
-                }
-            },
             checkUserEmail(emailElem, data){
                 if(data.items.total_entries > 0){
                     // If the existing email has a 'guest' note, allow it to update the data

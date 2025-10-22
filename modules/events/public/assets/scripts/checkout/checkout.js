@@ -24,9 +24,6 @@ const contactLastNameEl = document.getElementById('contact-last-name');
 const contactEmailEl = document.getElementById('contact-email');
 const contactSubmitBtn = document.getElementById('contact-submit');
 
-// Virtual form for Contact Information (Guest user)
-const virtualContactSubmitBtn = document.querySelector('#virtual-form #contact-submit');
-
 // Address Modal Form
 const addressFormModal = document.getElementById('address-form-modal');
 const addAddressBtn = document.getElementById('add-address-btn');
@@ -246,80 +243,6 @@ let Checkout = (function () {
                 Checkout.methods.extractPhoneNumbers(contactPhone);
                 if(await App.validation.validateForm(form)) {
                     form.submit();
-                } else {
-                    App.events.notyf("error", "Please check missing fields.");
-                    contactSubmitBtn.loading = false;
-                }
-                return false;
-            },
-            async virtualContactSubmit(){                
-                contactSubmitBtn.loading = true;                
-                Checkout.methods.extractPhoneNumbers(contactPhone);
-                let emailStatus = await Checkout.methods.checkSignUpUserEmail(contactEmailEl);
-                if(await App.validation.validateForm(document.getElementById('virtual-form'))) {                    
-                    var companyPayload = {
-                        "company_name" : contactCompanyNameEl.value
-                    };
-                    var contactPayload = {
-                        "first_name" : contactFirstNameEl.value,
-                        "last_name" : contactLastNameEl.value,
-                        "email" : contactEmailEl.value,
-                        "mobile_phone_number" : contactPhone.phone.value,
-                        "mobile_phone_country_code" : contactPhone.countryCode.value,
-                        "notes" : "guest"
-                    };                    
-
-                    if(emailStatus.status == 'existing guest'){
-                        //Add CRM Company
-                        if (contactCompanyNameEl.value) {  
-                            var companies = await apiServices.processRequest('post','/create-company.json',companyPayload);
-                        }
-
-                        //Update CRM Contact
-                        if(companies?.data.uuid){
-                            contactPayload['company.uuid'] = companies?.data.uuid;
-                        }
-                        var contacts = await apiServices.processRequest('put','/update-contact.json',contactPayload);
-
-                        // Submit
-                        if(contacts?.data?.email){
-                            guest_uuid = contacts?.data?.uuid;
-                            if(Checkout.events.saveSessionApi('virtual-contact')){
-                                //Add delay to allow the session to be saved
-                                setTimeout(() => {
-                                    window.location.href = "/checkout/shipping";
-                                }, 1000);       
-                            }                         
-                        } else {
-                            App.events.notyf("error", "API response error. Please notify the website administrator.");
-                        }
-                        contactSubmitBtn.loading = false;
-                    } else if(emailStatus.status == 'not exist'){
-                        //Add CRM Company
-                        if (contactCompanyNameEl.value) {
-                            var companies = await apiServices.processRequest('post','/create-company.json',companyPayload);
-                        }                        
-
-                        //Add CRM Contact
-                        if(companies?.data.uuid){
-                            contactPayload['company.uuid'] = companies?.data.uuid;
-                        }
-                        var contacts = await apiServices.processRequest('post','/create-contact.json',contactPayload);
-
-                        // Submit
-                        if(contacts?.data?.email){
-                            guest_uuid = contacts?.data?.uuid;
-                            if(Checkout.events.saveSessionApi('virtual-contact')){
-                                //Add delay to allow the session to be saved
-                                setTimeout(() => {
-                                    window.location.href = "/checkout/shipping";
-                                }, 1000);       
-                            }               
-                        } else {
-                            App.events.notyf("error", "API response error. Please notify the website administrator.");
-                        }    
-                        contactSubmitBtn.loading = false;           
-                    }               
                 } else {
                     App.events.notyf("error", "Please check missing fields.");
                     contactSubmitBtn.loading = false;
@@ -570,7 +493,6 @@ let Checkout = (function () {
         },
         init: {
             initEventListener() {
-                this.initVitualContactFormListener();
                 this.initShippingDetailsListener();
                 this.initBillingDetailsListener();
                 this.initAddressCardListener();
@@ -596,13 +518,6 @@ let Checkout = (function () {
                     addressSubmitBtn.addEventListener('insClick', () => {
                         Checkout.events.addressSubmit();
                     });
-                }
-            },
-            initVitualContactFormListener() {
-                if (virtualContactSubmitBtn) {
-                    virtualContactSubmitBtn.addEventListener('insClick', (event) => {                        
-                        Checkout.events.virtualContactSubmit(event);
-                    });                    
                 }
             },
             initShippingDetailsListener() {

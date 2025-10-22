@@ -570,12 +570,17 @@ if (checkbox && billingInputs) {
 }
 
 async function saveContact(billing) {
+
+    // Back and Submit buttons loading state
+    if (step2) step2.loading = true;
+    if (backStep2) backStep2.disabled = true;
+
     let result = null;
     try {
         const response = await contactServices.validateEmail(billing.email);
         const validateEmail = response.data;
 
-        // Clear error message
+        // Clear email error message
         contactEmailEl.hasError = false;
         contactEmailEl.errorMessage = "";
 
@@ -595,6 +600,10 @@ async function saveContact(billing) {
             // Guest user: Error notice
             contactEmailEl.hasError = true;
             contactEmailEl.errorMessage = "Looks like you already have an account with us, please log in to continue.";
+            const target = document.getElementById("account-details");
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth" });
+            }                        
         }
 
         if (result) {
@@ -605,6 +614,10 @@ async function saveContact(billing) {
                 profileDiv.setAttribute("label", fullName);
             }
         }
+
+        // Back and Submit buttons normal state
+        if (step2) step2.loading = false;
+        if (backStep2) backStep2.disabled = false;
 
         return result;
     } catch (error) {
@@ -746,6 +759,11 @@ if (step1) {
 // STEP 2: Billing
 if (step2) {
     step2.addEventListener("insClick", async function (event) {
+
+        // Clear email error message
+        contactEmailEl.hasError = false;
+        contactEmailEl.errorMessage = "";
+
         showLoading();
         const steps = await ticketPurchaseStepper.getAllSteps();
         const secondStep = steps[1];
@@ -830,7 +848,7 @@ if (step2) {
              
         const data = await saveContact(billing_payload);
     
-        if (data.uuid) {
+        if (data?.uuid) {
             secondStep.hasError = false;
             ticketPurchaseStepper.next();
             showStep("payment");

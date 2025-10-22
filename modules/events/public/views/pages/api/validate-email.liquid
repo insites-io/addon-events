@@ -16,7 +16,7 @@ metadata: {
     {% comment %} The user is logged in {% endcomment %}
 {%- else -%}
     {% comment %} Guest user {% endcomment %}
-    {%- function event_guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}
+    {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
     {%- graphql user = 'modules/ecommerce/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
     {%- assign notes = user| dig: 'profiles' | first | dig: 'properties','notes' | strip -%}
     
@@ -25,7 +25,7 @@ metadata: {
         assign is_guest_editable = false
         if user.email == email 
             assign form_type = 'edit'
-            if notes == event_guest_temp_uuid
+            if notes == event_guest_temp_uuid and notes != '' and notes != null
                 assign is_guest_editable = true
             endif
         endif

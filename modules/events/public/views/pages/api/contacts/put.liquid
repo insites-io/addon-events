@@ -61,5 +61,11 @@ searchable: false
 {%- endif -%}
 
 
+{% comment %} Guest user: Add is_guest flag to update_contact {% endcomment %}
+{%- unless context.current_user -%}
+     {%- assign update_contact = update_contact | add_hash_key: 'is_guest', 'true' -%}
+{%- endunless -%}
+
+
 {{ update_contact  }}
 {%- response_status status -%}

@@ -61,7 +61,7 @@ searchable: false
   {%- comment -%}
       Save event_guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
   {%- endcomment -%}
-  {%- function event_guest_temp_uuid = 'modules/events/user/get_user_uuid' -%}  
+  {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}  
 
   {%- comment -%} 
     - Associate contact with company    

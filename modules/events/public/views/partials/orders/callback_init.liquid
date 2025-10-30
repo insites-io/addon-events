@@ -51,9 +51,10 @@ metadata: {
     {% comment %} Get event details {% endcomment %}
     {% graphql event = "modules/events/events/get_event", uuid: payload.event_uuid | dig: 'items','results' | first %}
 
+    {% assign event_name = event.event_name | replace: '"', '' | replace: "'", '' | scrub | strip %}
     {% parse_json event_data %}
     {
-        "name": "{{ event.event_name }}",
+        "name": "{{ event_name }}",
         "image": {{ event.event_image | json }},
         "slug": "{{ event.slug }}"
     }

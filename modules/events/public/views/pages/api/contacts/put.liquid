@@ -6,6 +6,12 @@ searchable: false
 ---
 
 {%- assign payload = context.params | parse_json -%}
+
+{% comment %} Convert email to lowercase {% endcomment %}
+{%- assign email = payload.email | downcase -%}
+{%- assign payload = payload | add_hash_key: "email", email -%}
+
+
 {%- assign status = 400 -%}
 
 

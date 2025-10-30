@@ -10,7 +10,7 @@ metadata: {
 }
 ---
 
-{%- assign email = context.params.email | default: null -%}
+{%- assign email = context.params.email | downcase |default: null -%}
 
 {%- if context.current_user -%}
     {% comment %} The user is logged in {% endcomment %}

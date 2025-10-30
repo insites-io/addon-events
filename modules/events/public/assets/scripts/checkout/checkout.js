@@ -22,6 +22,7 @@ const contactCompanyNameEl = document.getElementById('contact-company-name');
 const contactFirstNameEl = document.getElementById('contact-first-name');
 const contactLastNameEl = document.getElementById('contact-last-name');
 const contactEmailEl = document.getElementById('contact-email');
+const contactEmailErrorMessageEl = document.getElementById('contact-email-error-message');
 const contactSubmitBtn = document.getElementById('contact-submit');
 
 // Address Modal Form

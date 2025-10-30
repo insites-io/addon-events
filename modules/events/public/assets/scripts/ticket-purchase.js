@@ -582,7 +582,7 @@ async function saveContact(billing) {
 
         // Clear email error message
         contactEmailEl.hasError = false;
-        contactEmailEl.errorMessage = "";
+        contactEmailErrorMessageEl.classList.add("hide");
 
         if (validateEmail.is_guest === false) {
             // Logged-in user: Update existing contact
@@ -599,7 +599,7 @@ async function saveContact(billing) {
         } else {
             // Guest user: Error notice
             contactEmailEl.hasError = true;
-            contactEmailEl.errorMessage = "Looks like you already have an account with us, please log in to continue.";
+            contactEmailErrorMessageEl.classList.remove("hide");
             const target = document.getElementById("account-details");
             if (target) {
               target.scrollIntoView({ behavior: "smooth" });

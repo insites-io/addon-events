@@ -3276,3 +3276,8 @@ ins-button.add-credit-card button.ins-button>div,
     }
 
 }
+
+.error-message a {
+    color: var(--color-main);
+    font-family: var(--font-family-03);
+}

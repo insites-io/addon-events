@@ -18,14 +18,22 @@ metadata: {
     {% comment %} Guest user {% endcomment %}
     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
     {%- graphql user = 'modules/events/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
-    {%- assign notes = user| dig: 'profiles' | first | dig: 'properties','notes' | strip -%}
+    {%- assign notes = user| dig: 'crm_contact' | first | dig: 'properties','notes' | strip -%}
+    {%- assign portal = user| dig: 'portal' | first -%}
     
     {%- liquid
         assign form_type = 'add'
         assign is_guest_editable = false
         if user.email == email 
             assign form_type = 'edit'
+
+            ## notes = event_guest_temp_uuid
             if notes == event_guest_temp_uuid and notes != '' and notes != null
+                assign is_guest_editable = true
+            endif
+
+            ## the profile portal is not yet added
+            if portal.id == null or portal.id == '' or portal.id == nil
                 assign is_guest_editable = true
             endif
         endif
@@ -42,7 +50,8 @@ metadata: {
 {
     "is_guest": true,
     "form_type": "{{ form_type }}",
-    "is_guest_editable": {{ is_guest_editable | default: false }}
+    "is_guest_editable": {{ is_guest_editable | default: false }},
+    "uuid": "{{ user.uuid }}"
 }
 {%- endif -%}
 

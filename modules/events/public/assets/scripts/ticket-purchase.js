@@ -590,6 +590,7 @@ async function saveContact(billing) {
             result = response.data;
         } else if (validateEmail.is_guest === true && validateEmail.form_type == 'edit' && validateEmail.is_guest_editable === true) {
             // Guest user: Update existing contact
+            billing.user_uuid = validateEmail.uuid;
             const response = await contactServices.updateContact(billing);
             result = response.data;
         } else if (validateEmail.is_guest === true && validateEmail.form_type == 'add') {

@@ -20,7 +20,7 @@ searchable: false
      {%- assign user_uuid = context.current_user.external_id -%}
 {%- else -%}
      {%- comment -%} Guest user {%- endcomment -%}
-     {%- assign user_uuid = context.session.event_guest_uuid -%}
+     {%- assign user_uuid = payload.user_uuid -%}
 {%- endif -%}
 
 
@@ -55,6 +55,21 @@ searchable: false
      {%- endparse_json -%}
      {%- function data = "crm/controller/addresses/update", type: "contact", uuid: context.session.default_address_uuid, params: update_address_data -%}     
 {%- endif -%}     
+
+
+{% comment %} Check if profile portal exists {% endcomment %}
+{%- graphql user = 'modules/events/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
+{%- assign portal_profile = user| dig: 'portal' | first -%}
+
+{%- if portal_profile.id == null or portal_profile.id == '' or portal_profile.id == nil -%}
+     {%- comment -%} Generate temporary token {%- endcomment -%}
+     {%- graphql temporary_token = 'modules/portal/account/generate_user_temporary_token', 
+          email: email | dig: 'items','results' | first -%}
+
+     {% comment %} Create user profile: 'modules/portal/portal' {% endcomment %}
+     {%- graphql create_user_profile = 'modules/portal/account/create_user_profile', 
+          id: update_contact.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true -%}
+{%- endif -%}
 
 
 {% comment %} Update sessions {% endcomment %}

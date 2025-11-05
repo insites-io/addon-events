@@ -13,7 +13,12 @@ query check_user_email($email:String!){
       uuid: external_id
       email
       deleted_at
-      profiles(profile_type: "modules/insites_core/crm_contact"){
+      crm_contact: profiles(profile_type: "modules/insites_core/crm_contact"){
+        id
+        profile_type
+        properties
+      }
+      portal: profiles(profile_type: "modules/portal/portal"){
         id
         profile_type
         properties

@@ -21,6 +21,7 @@ searchable: false
 {%- else -%}
      {%- comment -%} Guest user {%- endcomment -%}
      {%- assign user_uuid = payload.user_uuid -%}
+     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%} 
 {%- endif -%}
 
 
@@ -32,6 +33,9 @@ searchable: false
      {%- assign default_address_uuid = payload.billing_address_uuid -%}
 {%- else -%}
      {%- assign default_address_uuid = context.session.default_address_uuid -%}
+
+     {% comment %} Add event_guest_temp_uuid to notes to be able to edit the contact later while in guest mode {% endcomment %}
+     {%- assign payload = payload | add_hash_key: "notes", event_guest_temp_uuid -%}
 {%- endif -%}
 {%- assign payload = payload | add_hash_key: "default_address_uuid", default_address_uuid -%}
 

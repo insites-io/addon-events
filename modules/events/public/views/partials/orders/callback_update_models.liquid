@@ -158,7 +158,9 @@ metadata: {
 
 {% export update_order %}
 
-{% comment %} ? UNCOMMENT ON WORKING INSTANCE {% endcomment %}
+{% log payload, type: '==TEST payload' %}
+{% log order_data, type: '==TEST order_data' %}
+
 {% comment %} Step 3. Create Event Stream {% endcomment %}
     {%- graphql user = "modules/portal/account/get_user_by_email" 
         email: context.current_user.email 
@@ -166,11 +168,13 @@ metadata: {
     {%- assign crm_contact = user.crm_contact | first -%}
     {%- assign current_user_name = user.first_name | append: ' ' | append: user.last_name | default: user.email -%}
     {%- capture description -%}
-      <a target="_blank" href="/admin/insites/#/crm/contacts/{{ user.id }}">{{ current_user_name | default: user.email }}</a> 
+      <a target="_blank" href="/admin/insites/#/crm/contacts/{{ user.id }}">{{ first_name }} {{ last_name }}</a> 
+      {% if crm_contact.company.company_name and crm_contact.company.company_name != '' %}
       from 
       <a target="_blank" href="/admin/insites#/crm/companies/{{ crm_contact.company_uuid }}">{{ crm_contact.company.company_name }}</a> 
+      {% endif %}
       completed a payment for 
-      <a target="_blank" href="/admin/insites#/ecommerce/orders/{{ order_datas.uuid }}">{{ order_data.order_reference }}</a>
+      <a target="_blank" href="/admin/insites#/ecommerce/orders/{{ order_data.uuid }}">{{ order_id }}</a>
     {%- endcapture -%}
 
     {%- assign payload = '{}' | parse_json -%}

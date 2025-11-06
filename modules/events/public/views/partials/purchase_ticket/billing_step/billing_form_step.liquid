@@ -17,6 +17,7 @@ metadata: {
             assign contact_email = context.current_user.email
             graphql user_details = "modules/portal/account/get_user_by_email" email: context.current_user.email | dig: "items" | dig: "results" | first
             assign crm_contact = user_details.crm_contact | first
+            assign contact_company_uuid = crm_contact.company_uuid
             assign contact_company_name = crm_contact.company.company_name
             assign contact_phone_country_code = crm_contact.mobile_phone_country_code
             assign contact_phone_number = crm_contact.mobile_phone_number
@@ -56,7 +57,7 @@ metadata: {
                 readonly >
                 </ins-input>
 
-                <input type="hidden" name="contact_company_name" value="{{ contact_company_name }}" >
+                <input type="hidden" id="contact-company-uuid" name="contact_company_uuid" value="{{ contact_company_uuid }}" >
 
             {% else %} 
 

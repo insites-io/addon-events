@@ -901,6 +901,8 @@ if (step3) {
         const orderPayload = {
             event_uuid: event_uuid_hidden.value,
 
+            //billing_same_with_order
+
             //Billing Address
             billing_address_uuid: billingAddressUuidEl?.value || "",
             billing_address_1: getFieldValue(ticketPurchaseData.billing, "billing_address_1") || addressCard?.address_1 || "",
@@ -927,12 +929,12 @@ if (step3) {
             order_payment_status: "unpaid",
 
             //Order Company
-            "order_company.uuid": getFieldValue(ticketPurchaseData.contact, "company_uuid") || "",
-            order_company_name: getFieldValue(ticketPurchaseData.contact, "company_name") || "",
-            order_company_email: getFieldValue(ticketPurchaseData.contact, "company_email") || "",
+            "order_company_uuid": getFieldValue(ticketPurchaseData.contact, "contact_company_uuid") || "",
+            order_company_name: getFieldValue(ticketPurchaseData.contact, "contact_company_name") || "",
+            //order_company_email: getFieldValue(ticketPurchaseData.contact, "contact_email") || "",
 
             //Order Contact
-            "order_contact.uuid": getFieldValue(ticketPurchaseData.contact, "user_uuid") || "",
+            //"order_contact.uuid": getFieldValue(ticketPurchaseData.contact, "user_uuid") || "",
             order_contact_first_name: getFieldValue(ticketPurchaseData.contact, "contact_first_name") || "",
             order_contact_last_name: getFieldValue(ticketPurchaseData.contact, "contact_last_name") || "",
             order_contact_email: getFieldValue(ticketPurchaseData.contact, "contact_email") || "",

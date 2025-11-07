@@ -71,7 +71,7 @@ const billingCompanyNameEl = document.getElementById('billing-company-name');
 const billingFirstNameEl = document.getElementById('billing-first-name');
 const billingLastNameEl = document.getElementById('billing-last-name');
 const billingEmailEl = document.getElementById('billing-email');
-const billingAddressUuidEl = document.getElementById('billing_address_uuid');
+const billingAddressUuidEl = document.getElementById('billing-address-uuid');
 const billingSubmitBtn = document.getElementById("billing-submit-button");
 
 // Payment Information

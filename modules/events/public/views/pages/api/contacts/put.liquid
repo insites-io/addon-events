@@ -43,6 +43,11 @@ searchable: false
  {%- function update_contact = "crm/controller/contacts/update", uuid: user_uuid, params: payload -%}
 
 
+ {%- comment -%} Save to session for later use {%- endcomment -%}
+ {%- session event_guest_id = update_contact.id -%}
+ {%- session event_guest_uuid = update_contact.uuid -%}
+
+
 {% comment %} Guest user: Update Address  {% endcomment %}
 {%- if context.current_user == null -%}
      {%- parse_json update_address_data -%}

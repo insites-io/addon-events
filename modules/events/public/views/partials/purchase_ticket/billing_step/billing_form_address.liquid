@@ -17,7 +17,7 @@ metadata: {
 <div class="hide-for-small-only spacer xxx-large"></div>
 <div class="show-for-small-only spacer x-large"></div>
 
-<div id="billing-address-fields" class="wrap {% if context.session.billing_same_with_shipping == true %} hide {% endif %}">
+<div id="billing-address-fields" class="wrap">
     <div class="grid-x">        
         <h4>Billing address</h4>    
         <div class="cell show-for-small-only spacer small"></div>
@@ -38,7 +38,7 @@ metadata: {
    
     {% comment %} Selected address {% endcomment %}
     <ins-input validate required
-        id="billing_address_uuid" 
+        id="billing-address-uuid" 
         class="hidden-input"
         value="{{ context.session.billing_address_uuid }}"
         name="billing_address_uuid"

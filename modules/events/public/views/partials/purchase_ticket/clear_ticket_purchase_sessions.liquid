@@ -21,13 +21,13 @@ metadata: {
 
 {% comment %} Billing Contact {% endcomment %}
 {% liquid 
-    session billing_same_with_order = null
+    session is_billing_same_with_contact = null
     session billing_company_name = null
-    session billing_first_name = null
-    session billing_last_name = null
-    session billing_email = null
-    session billing_phone_number = null
-    session billing_phone_country_code = null
+    session billing_contact_first_name = null
+    session billing_contact_last_name = null
+    session billing_contact_email = null
+    session billing_contact_phone_country_code = null
+    session billing_contact_phone_number = null
 %} 
 
 
@@ -48,6 +48,7 @@ metadata: {
     session event_guest_id = null
     session event_guest_uuid = null
     session event_guest_temp_uuid = null
+    session event_guest_company_uuid = null
 %}
 
 

@@ -151,7 +151,7 @@ metadata: {
       <h4>Billing contact</h4>
       <div class="spacer x-large hide-for-small-only"></div>
       <div class="spacer show-for-small-only"></div>
-        {% if context.session.billing_same_with_order == true %}
+        {% if context.session.is_billing_same_with_contact == true %}
             {% assign checked = 'checked' %}
             {% assign isChecked = 'true' %}
         {% else %}
@@ -160,7 +160,7 @@ metadata: {
         {% endif %}
         <ins-checkbox class="inline" 
             {{ checked }}
-            name="billing_same_with_order"
+            name="is_billing_same_with_contact"
             value={{isChecked}}
             id="billing-same-with-order" 
             label="My billing contact is the same as my order contact.">
@@ -169,7 +169,7 @@ metadata: {
 
   </div>
 
-  <div id="billing-contact-inputs" class="grid-x grid-padding-x grid-padding-y  billing-contact {% if context.session.billing_same_with_shipping == true %} hide {% endif %}">
+  <div id="billing-contact-inputs" class="grid-x grid-padding-x grid-padding-y  billing-contact {% if context.session.is_billing_same_with_contact == true %} hide {% endif %}">
 
     <div class="large-12 medium-12 small-12 cell">
       <ins-input  
@@ -241,12 +241,12 @@ metadata: {
 </div>
 
 <script>
-    var billingSamewithShippingFlag = {{ context.session.billing_same_with_shipping | default: false }};
+    //var billingSamewithShippingFlag = {{ context.session.is_billing_same_with_contact | default: false }};
 </script>
 
  
     
-
+    {% comment %} Billing Address {% endcomment %}
     {% if has_profile %}
         {% include "modules/events/purchase_ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
     {% else %}

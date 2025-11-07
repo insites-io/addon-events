@@ -26,12 +26,6 @@ searchable: false
   {%- function add_contact = "crm/controller/contacts/create", params: payload -%}
 
 
-  {%- comment -%} Save to session for later use {%- endcomment -%}
-  {%- session contact_email = add_contact.email -%}
-  {%- session event_guest_id = add_contact.id -%}
-  {%- session event_guest_uuid = add_contact.uuid -%}
-
-
   {%- comment -%} Create company {%- endcomment -%}
   {%- parse_json company_details -%}
   {
@@ -39,6 +33,13 @@ searchable: false
   }
   {%- endparse_json -%}   
   {%- function add_company = "crm/controller/companies/create", params: company_details -%}
+
+
+  {%- comment -%} Save to session for later use {%- endcomment -%}
+  {%- session contact_email = add_contact.email -%}
+  {%- session event_guest_id = add_contact.id -%}
+  {%- session event_guest_uuid = add_contact.uuid -%}
+  {%- session event_guest_company_uuid = add_company.uuid -%}
 
 
   {% comment %} Create Address {% endcomment %}

@@ -19,6 +19,22 @@ searchable: false
      {%- assign errors = "" -%}
 
      {%- assign payload = payload | add_hash_key: "is_use_crm_billing_address", true -%}
+     
+
+     {% comment %} billing_contact_uuid {% endcomment %}
+     {%- if context.current_user and payload.is_billing_same_with_contact == true -%}
+          {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.current_user.external_id -%}     
+     {%- elsif payload.is_billing_same_with_contact == true -%}
+          {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.session.event_guest_uuid -%}     
+     {%- endif -%}
+
+     {% comment %} Guest purchase: order_company_uuid, billing_company_uuid {% endcomment %}
+     {%- if context.current_user == null -%}
+          {%- assign payload = payload | add_hash_key: "order_company_uuid", context.session.event_guest_company_uuid -%}
+          {%- if payload.is_billing_same_with_contact == true -%}
+               {%- assign payload = payload | add_hash_key: "billing_company_uuid", context.session.event_guest_company_uuid -%}
+          {%- endif -%}
+     {%- endif -%}
 
      {%- comment -%} Create order {%- endcomment -%}
      {%- graphql add_order = 'modules/website/trigger_api_call', 

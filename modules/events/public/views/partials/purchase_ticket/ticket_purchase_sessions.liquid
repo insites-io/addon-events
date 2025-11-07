@@ -22,13 +22,13 @@ metadata: {
 
 {% comment %} Billing Contact {% endcomment %}
 {% liquid 
-    session billing_same_with_order = payload.billing_same_with_order
+    session is_billing_same_with_contact = payload.is_billing_same_with_contact
     session billing_company_name = payload.billing_company_name
-    session billing_first_name = payload.billing_first_name
-    session billing_last_name = payload.billing_last_name
-    session billing_email = payload.billing_email
-    session billing_phone_number = payload.billing_phone_number
-    session billing_phone_country_code = payload.billing_phone_country_code
+    session billing_contact_first_name = payload.billing_contact_first_name
+    session billing_contact_last_name = payload.billing_contact_last_name
+    session billing_contact_email = payload.billing_contact_email
+    session billing_contact_phone_country_code = payload.billing_contact_phone_country_code
+    session billing_contact_phone_number = payload.billing_contact_phone_number
 %} 
 
 

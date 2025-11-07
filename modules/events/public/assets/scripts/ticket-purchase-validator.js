@@ -96,8 +96,10 @@ let TicketScript = (function () {
                     let checkCC = false
                     if (formId == 'checkout-ticket-submit-btn') {
                            
-                    let subTotal = subTotalFormEl.getAttribute('value')
-                    let grandTotal = totalFormEl.getAttribute('value')
+                    let subTotalFormEl = document.getElementById('bill-order-value');
+                    let totalFormEl = document.getElementById('bill-total-amount');
+                    let subTotal = subTotalFormEl ? (subTotalFormEl.value || 0) : 0;
+                    let grandTotal = totalFormEl ? (totalFormEl.value || 0) : 0;
                     if (subTotal == 0 && grandTotal == 0 ) { 
                         checkCC = true
                         isValid = true

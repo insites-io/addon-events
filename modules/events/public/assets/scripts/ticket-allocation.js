@@ -44,6 +44,12 @@ let requiredFirstName = document.getElementById("firstNameRequired");
 let requiredLastName = document.getElementById("lastNameRequired");
 let mobilePhone = ""
 let mobileAreaCode = "61"
+const allocatePhoneDefaultCountryCode = (allocatePhone?.getAttribute("country-code") || mobileAreaCode || "61").toString().replace(/^\+/, "");
+const allocatePhoneDefaultPhoneNumber = (allocatePhone?.getAttribute("phonenum-value") || "").toString().trim();
+mobileAreaCode = allocatePhoneDefaultCountryCode || mobileAreaCode;
+if (allocatePhoneDefaultPhoneNumber) {
+  mobilePhone = allocatePhoneDefaultPhoneNumber;
+}
 
 function validateField(inputEl, errorEl, type = "text") {
   const value = inputEl.value.trim();
@@ -96,6 +102,47 @@ allocationModalButton.forEach((btn) => {
     let id = btn.getAttribute("data-ticket-id");
     allocateTicket.value = id;
     allocateTicketUUID.value = btn.getAttribute("data-uuid")
+
+    const prefillFirstName = btn.dataset.contactFirstName || "";
+    const prefillLastName = btn.dataset.contactLastName || "";
+    const prefillEmail = btn.dataset.contactEmail || "";
+    const prefillPhoneCountryCodeRaw = btn.dataset.contactPhoneCountryCode || "";
+    const prefillPhoneNumber = (btn.dataset.contactPhoneNumber || "").trim();
+    const sanitizedPhoneCountryCode = prefillPhoneCountryCodeRaw
+      ? prefillPhoneCountryCodeRaw.toString().replace(/^\+/, "").trim()
+      : "";
+    const nextPhoneCountryCode = sanitizedPhoneCountryCode || allocatePhoneDefaultCountryCode || "61";
+
+    allocateFirstName.value = prefillFirstName;
+    allocateLastName.value = prefillLastName;
+    allocateEmail.value = prefillEmail;
+
+    if (allocatePhone) {
+      allocatePhone.setAttribute("country-code", nextPhoneCountryCode);
+      allocatePhone.setAttribute("phonenum-value", prefillPhoneNumber);
+      allocatePhone.removeAttribute("has-error");
+    }
+
+    mobileAreaCode = nextPhoneCountryCode;
+    mobilePhone = prefillPhoneNumber;
+
+    // reset validation state whenever modal opens
+    [allocateFirstName, allocateLastName, allocateEmail].forEach((input) => {
+      input.removeAttribute("has-error");
+    });
+    [
+      requiredFirstName,
+      requiredLastName,
+      requiredEmail
+    ].forEach((errorEl) => {
+      errorEl.classList.remove("is_visible");
+      errorEl.classList.add("is_not_visible");
+      // restore default message in case email error text was customised
+      if (errorEl === requiredEmail) {
+        errorEl.textContent = "Email is required.";
+      }
+    });
+
     allocationModal.open(); 
   });
 });
@@ -124,10 +171,12 @@ allocateButton.addEventListener("insClick", async () => {
     App.events.notyf("success", "Your ticket has been successfully allocated!");
     allocationModal.close(); 
     
-  const ticketDetailsEl = document.querySelector(
+  const ticketButton = document.querySelector(
     `.ticket-allocation-modal-button[data-uuid="${payload.event.ticketuuid}"]`
-  )?.closest(".ticket-card-container")
-    .querySelector(`#ticket-allocated-details-${payload.event.ticketuuid}`);
+  );
+  const ticketDetailsEl = ticketButton
+    ?.closest(".ticket-card-container")
+    ?.querySelector(`#ticket-allocated-details-${payload.event.ticketuuid}`);
 
 
     if (ticketDetailsEl) {
@@ -135,6 +184,14 @@ allocateButton.addEventListener("insClick", async () => {
         <p class="attendee-name">${payload.ticketData.contact_first_name} ${payload.ticketData.contact_last_name}</p>
         <p>${payload.ticketData.contact_email}</p>
       `;
+    }
+
+    if (ticketButton) {
+      ticketButton.dataset.contactFirstName = payload.ticketData.contact_first_name || "";
+      ticketButton.dataset.contactLastName = payload.ticketData.contact_last_name || "";
+      ticketButton.dataset.contactEmail = payload.ticketData.contact_email || "";
+      ticketButton.dataset.contactPhoneCountryCode = payload.ticketData.contact_phone_country_code || "";
+      ticketButton.dataset.contactPhoneNumber = payload.ticketData.contact_phone_number || "";
     }
 
   }else {

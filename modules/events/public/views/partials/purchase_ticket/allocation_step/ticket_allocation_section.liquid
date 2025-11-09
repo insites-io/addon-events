@@ -144,6 +144,11 @@ metadata: {
                       data-ticket-id="{{ ticket.id }}"
                       data-tier="{{ ticket.tier.name }}"
                       data-uuid="{{ ticket.uuid }}"
+                      data-contact-first-name="{{ ticket.contact_first_name | escape }}"
+                      data-contact-last-name="{{ ticket.contact_last_name | escape }}"
+                      data-contact-email="{{ ticket.contact_email | escape }}"
+                      data-contact-phone-country-code="{{ ticket.contact_phone_country_code | escape }}"
+                      data-contact-phone-number="{{ ticket.contact_phone_number | escape }}"
                       >
                       <span>Allocate ticket</span>
                       <i class="icon-arrow-forward ticket-allocation-icon"></i>

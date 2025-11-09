@@ -45,6 +45,8 @@ query get_tickets (
             contact_first_name: property(name: "contact_first_name")
             contact_last_name: property(name: "contact_last_name")
             contact_email: property(name: "contact_email")
+            contact_phone_number: property(name: "contact_phone_number")
+            contact_phone_country_code: property(name: "contact_phone_country_code")
 
             ticket_pdf: property_upload(name: "ticket_pdf", expires_in: $expires_in_seconds) {
           	  url

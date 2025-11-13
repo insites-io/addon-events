@@ -20,28 +20,24 @@ query get_events (
     filter: {
       deleted_at: { exists: false }
       table: { value: "modules/insites_events/event" }
+      properties: [
+        { name: "status", contains: "enabled" }
+        { name: "uuid", value_in: $uuids }
+        { name: "event_name", contains: $event_name, exists: true }
+        { name: "start_date_time", exists: true }
+        { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
+        { name: "category_uuid", value: $category_uuid }
+      ]
       or: [
         {
           properties: [
-            { name: "status", contains: "enabled" }
-            { name: "uuid", value_in: $uuids }
-            { name: "event_name", contains: $event_name, exists: true }
-            { name: "event_type", value: $event_type }
-            { name: "start_date_time", exists: true }
-            { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
-            { name: "category_uuid", value: $category_uuid }
             { name: "venue_state", value: $venue_state, exists: true }
+            { name: "event_type", value: $event_type }
           ] 
         }
         {
+          ## venue_state can be null as long as the event_type is online_event
           properties: [
-            { name: "status", contains: "enabled" }
-            { name: "uuid", value_in: $uuids }
-            { name: "event_name", value: $event_name, exists: true }
-            { name: "start_date_time", exists: true }
-            { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
-            { name: "category_uuid", value: $category_uuid }
-            ## venue_state can be null as long as the event_type is online_event
             { name: "venue_state", value: $venue_state, exists: false}
             { name: "event_type", contains: "online_event" }
           ] 
@@ -66,13 +62,7 @@ query get_events (
       event_image: property_upload(name: "event_image") {
         url
       }        
-      # venue: related_record(
-      #   table: "modules/insites_events/venue"
-      #   join_on_property: "venue_uuid"
-      #   foreign_property: "uuid"
-      # ){
-      #   properties
-      # }
+
       category: related_record(
         table: "modules/insites_events/event_system_field"
         join_on_property: "category_uuid"
@@ -80,7 +70,6 @@ query get_events (
       ){
         value: property(name: "value")
       }
-			#properties
     }
   }
 }

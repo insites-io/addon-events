@@ -1259,6 +1259,19 @@ document.addEventListener("DOMContentLoaded", () => {
   StepManager.setupBackNavigation();
   AccordionManager.setup();
   BillingCheckboxHandler.setup();
+  
+  // Check billing checkbox state on page load
+  if (DOM.billingCheckbox && DOM.billingInputs && DOM.billingCheckbox.checked) {
+    isBillingSameAsContact = true;
+    DOM.billingInputs.classList.add("hide");
+    const fields = DOM.billingInputs.querySelectorAll(".required-billing-contact");
+    fields.forEach(field => {
+      field.removeAttribute("validate");
+      field.removeAttribute("has-error");
+      field.classList.remove("has-error");
+    });
+  }
+  
   StepHandlers.handleStep1();
   StepHandlers.handleStep2();
   StepHandlers.handleStep3();

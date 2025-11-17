@@ -163,7 +163,7 @@ metadata: {
 
 {% comment %} Step 3. Create Event Stream {% endcomment %}
     {%- graphql user = "modules/portal/account/get_user_by_email" 
-        email: context.current_user.email 
+        email: order_data.order_contact_email 
         | dig: "items" | dig: "results" | first -%}
     {%- assign crm_contact = user.crm_contact | first -%}
     {%- assign current_user_name = user.first_name | append: ' ' | append: user.last_name | default: user.email -%}

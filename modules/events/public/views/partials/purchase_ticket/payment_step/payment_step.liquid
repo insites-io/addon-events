@@ -128,7 +128,6 @@ metadata: {
 {% endif %}
 
 {%- include 'modules/events/stripe/stripe_element',
-  cc_field_id: "stripe-card",
   public_key: stripe_settings.pk_key,
   has_profile: has_profile -%}
 <!-- END Stripe Element -->

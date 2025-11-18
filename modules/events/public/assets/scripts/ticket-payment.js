@@ -123,16 +123,9 @@ function renderCards(cards) {
         if (idx === 0 && hiddenField) {
             insCardEl.setAttribute("active", "");
             hiddenField.value = card.payment_method_token;
+            
         }
 
-        // Allow clicking to change active card
-        insCardEl.addEventListener("insClick", () => {
-            document.querySelectorAll("ins-credit-card[active]").forEach(el => {
-                el.removeAttribute("active");
-            });
-            insCardEl.setAttribute("active", "");
-            if (hiddenField) hiddenField.value = insCardEl.value;
-        });
 
         divEl.appendChild(insCardEl);
         cardList.appendChild(divEl);

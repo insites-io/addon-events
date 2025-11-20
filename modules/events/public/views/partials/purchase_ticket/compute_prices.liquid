@@ -1,0 +1,87 @@
+---
+metadata: {
+     partial_name: 'Events | Purchase Ticket | Compute Prices'
+}
+---
+
+{% comment %} 
+ 1. Get only the quantity and event_pricing_tier.uuid from the payload
+ 2. Pull the price from the database
+ 3. Calculate prices
+{% endcomment %}
+{% assign tier_uuids = data.selectedTickets | map: 'event_pricing_tier.uuid' | array_uniq | array_compact %}
+
+{% liquid 
+     if tier_uuids.size > 0
+          graphql ticket_prices = 'modules/events/events/pricing/get_ticket_prices', uuid: tier_uuids | dig: 'items','results'
+     else
+          assign ticket_prices = blank
+     endif
+%}
+
+
+{% comment %} Initialize all amount-related variables before calculation {% endcomment %}
+{% liquid
+     assign subtotal_amount = 0     
+     assign processing_fee = 0 
+     assign total_tax_amount = 0     
+     assign total_discount_amount = 0 
+     assign total_shipping_amount = 0 
+     assign total_amount_paid = 0 
+     assign total_amount = 0 
+%}
+
+{% comment %} 
+     NOTE:
+     - total_shipping_amount is always zero, but this variable must still be passed.
+     - total_discount_amount will be implemented as a future feature.
+{% endcomment %}
+
+
+{% comment %} Get total_tax_amount and subtotal_amount for each ticket {% endcomment %}
+{% for ticket in ticket_prices %}
+     {%  liquid
+
+          ## Quantity
+          assign quantity = data.selectedTickets | where: 'event_pricing_tier.uuid', ticket.uuid | map: 'quantity' | first
+
+          ## Tax
+          if ticket.tax_type == 'percentage'
+               assign tax_amount = ticket.price | times: ticket.tax | divided_by: 100
+          else
+               assign tax_amount = ticket.tax
+          endif
+          assign tax_amount = tax_amount | times: quantity
+          assign total_tax_amount = total_tax_amount | plus: tax_amount
+
+          ## Subtotal    
+          assign subtotal = ticket.price | times: quantity
+          assign subtotal_amount = subtotal_amount | plus: subtotal
+     %} 
+{% endfor %}
+
+
+{% comment %} Compute totals {% endcomment %}
+{% liquid 
+     assign temp_total = subtotal_amount | plus: total_tax_amount | plus: total_shipping_amount | minus: total_discount_amount 
+     assign processing_fee = temp_total | times: 0.017
+     assign total_amount = temp_total | plus: processing_fee
+     assign total_amount_paid = total_amount
+     assign total_discount_amount = total_discount_amount
+     assign total_shipping_amount = total_shipping_amount
+%}
+
+
+{% parse_json computed %}
+{
+     "subtotal_amount": {{ subtotal_amount | advanced_format: '%.4f' }},
+     "processing_fee": {{ processing_fee | advanced_format: '%.4f' }},
+     "total_tax_amount": {{ total_tax_amount | advanced_format: '%.4f' }},
+     "total_amount": {{ total_amount | advanced_format: '%.4f'}},
+     "total_amount_paid": {{ total_amount_paid | advanced_format: '%.4f'}},
+     "total_discount_amount": {{ total_discount_amount }},
+     "total_shipping_amount": {{ total_shipping_amount }}
+}
+{% endparse_json %}
+ 
+{% return computed %}

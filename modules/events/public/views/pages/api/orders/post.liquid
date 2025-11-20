@@ -36,6 +36,29 @@ searchable: false
           {%- endif -%}
      {%- endif -%}
 
+     {% comment %} Additional Payload {% endcomment %}
+     {%- assign uuid = '' | uuid -%}
+     {%- assign date_time = "now" | date: "%Y-%m-%dT%H:%M:%SZ" -%}
+     {%- assign payload = payload | add_hash_key: "order_reference", uuid -%}
+     {%- assign payload = payload | add_hash_key: "date_time", date_time -%}
+     {%- assign payload = payload | add_hash_key: "order_status", "placed" -%}
+     {%- assign payload = payload | add_hash_key: "order_payment_status", "unpaid" -%}     
+     {%- assign payload = payload | add_hash_key: "currency", "AUD" -%}
+     
+
+     {% comment %} Computed Prices {% endcomment %}
+     {%- function computed = "modules/events/purchase_ticket/compute_prices", data: payload -%} 
+
+     {% comment %} Prices Payload {% endcomment %}
+     {%- assign payload = payload | add_hash_key: "subtotal_amount", computed.subtotal_amount -%}
+     {%- assign payload = payload | add_hash_key: "processing_fee", computed.processing_fee -%}
+     {%- assign payload = payload | add_hash_key: "total_tax_amount", computed.total_tax_amount -%}
+     {%- assign payload = payload | add_hash_key: "total_amount", computed.total_amount -%}
+     {%- assign payload = payload | add_hash_key: "total_amount_paid", computed.total_amount_paid -%}
+     {%- assign payload = payload | add_hash_key: "total_discount_amount", computed.total_discount_amount -%}
+     {%- assign payload = payload | add_hash_key: "total_shipping_amount", computed.total_shipping_amount -%}
+     
+
      {%- comment -%} Create order {%- endcomment -%}
      {%- graphql add_order = 'modules/website/trigger_api_call', 
           name: 'modules/events/add_order', 

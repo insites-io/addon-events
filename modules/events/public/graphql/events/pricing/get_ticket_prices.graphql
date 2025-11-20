@@ -1,0 +1,26 @@
+query get_ticket_prices (
+    $page: Int = 1
+    $size: Int = 100
+    $uuid: [String!]  	
+) {
+    items: records(
+        page: $page,
+        per_page: $size,
+        filter: {
+            table:{ value: "modules/insites_events/event_pricing_tier" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "uuid", value_in: $uuid },              	
+            ]
+        }
+    ) {
+        results {
+           id           
+           uuid: property(name: "uuid")
+           price: property_float(name: "price")
+           tax: property_float(name: "tax")
+           tax_type: property(name: "tax_type")
+           #properties
+        }
+    }
+}

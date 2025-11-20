@@ -91,6 +91,7 @@ if (!DOM.stepper || !DOM.stepperContainer || !DOM.stepperMessage) {
 let ticketsData = [];
 let isBillingSameAsContact = false;
 let ticketCounter = 0;
+let selectedTickets = [];
 const venueCapacityState = {};
 
 const ticketPurchaseData = {
@@ -391,7 +392,9 @@ const PaymentBreakdownManager = {
 
   calculateTotals(subtotal, ticketCount) {
     let totalTax = 0;
+    selectedTickets = []; // Reset selectedTickets array
     for (const [key, info] of Object.entries(ticketCount)) {
+      selectedTickets.push(info);
       const itemSubtotal = info.price * info.quantity;
       const taxValue = parseFloat(info.tax) || 0;
       const quantity = info.quantity || 1;
@@ -403,8 +406,9 @@ const PaymentBreakdownManager = {
       }
     }
 
-    const processingFee = subtotal * 0.017;
-    const total = subtotal + totalTax + processingFee;
+    const tempTotal = subtotal + totalTax;
+    const processingFee = tempTotal * 0.017;
+    const total = tempTotal + processingFee;
 
     return { subtotal, totalTax, processingFee, total };
   },
@@ -633,7 +637,7 @@ const OrderProcessor = {
     };
   },
 
-  async buildOrderPayload(totals) {
+  async buildOrderPayload(selectedTickets) {
     const eventUuid = DOM.eventUuidHidden?.value;
     const stripeCreditCard = DOM.stripeField?.value || "";
     
@@ -651,17 +655,11 @@ const OrderProcessor = {
       order_contact_phone_country_code: userPayload.mobile_phone_country_code,
       order_contact_phone_number: userPayload.mobile_phone_number,    
 
-      // Order data
-      order_reference: crypto.randomUUID(),
-      order_status: "placed",
-      order_payment_status: "unpaid",
-      date_time: new Date().toISOString(),
-      currency: "AUD",
-      subtotal_amount: totals.subtotal || 0,
-      total_tax_amount: totals.tax || 0,
-      total_amount: totals.total || 0,
-      total_amount_paid: totals.total || 0,
-      stripe_credit_card: stripeCreditCard
+      // Selected card
+      stripe_credit_card: stripeCreditCard,
+      
+      // Selected Tickets
+      selectedTickets: selectedTickets
     };
   }
 };
@@ -1058,15 +1056,9 @@ const StepHandlers = {
         return;
       }
 
-      const totals = window.orderTotals || {};
-      const subtotal = totals.subtotal || 0;
-      const tax = totals.tax || 0;
-      const total = totals.total || subtotal;
-
       DataManager.updatePaymentData();
 
-      //const addressCard = typeof selectedAddress !== 'undefined' ? selectedAddress : null;
-      orderPayload = await OrderProcessor.buildOrderPayload(totals);
+      orderPayload = await OrderProcessor.buildOrderPayload(selectedTickets);
 
       const orderResponse = await OrderProcessor.saveOrder({
         ...orderPayload,

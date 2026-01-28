@@ -118,7 +118,7 @@ searchable: false
   "administrator_uuid": "",
   "uuid": "{{ '' | uuid }}",
   "details": "",
-  "description": "New user <a target='_blank' href='/admin/insites/#/crm/contacts/{{add_contact.id}}'>{{add_contact.first_name}} {{add_contact.last_name}}</a> from <a href='/admin/insites#/crm/companies/{{ add_company.company_uuid }}'>{{ add_company.company_name  }}</a> has been added via ticket purchase."
+  "description": "New user <a target='_blank' href='/admin/insites/#/crm/contacts/{{add_contact.id}}'>{{add_contact.first_name}} {{add_contact.last_name}}</a> from <a target='_blank' href='/admin/insites#/crm/companies/{{ add_company.uuid }}'>{{ add_company.company_name  }}</a> has been added via ticket purchase."
 }
 {%- endparse_json -%}
 {%- function add_event = "crm/controller/event-streams/create", params: event_data -%}

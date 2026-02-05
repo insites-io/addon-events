@@ -51,9 +51,6 @@ async function loadCards(isGuest = false, guestUuid = null) {
 
     cardList.innerHTML = "";
 
-    const hiddenField = document.getElementById("stripe-card");
-    const uuidToUse = guestUuid || contact_Uuid?.value;
-
     try {
         // Always call the API to check if there are cards
         const url = `/payment-methods`;

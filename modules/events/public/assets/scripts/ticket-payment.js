@@ -30,7 +30,6 @@ document.addEventListener("click", (e) => {
 // Handle Add Card button clicks
 document.addEventListener("click", (e) => {    
     if (e.target.closest(".add-card-btn")) {
-        console.log("Handle Add Card button clicks");
         if (contact_Uuid?.value) {
             stripeModal.setAttribute("open", ""); // modal for logged-in users
         } else {
@@ -50,9 +49,6 @@ async function loadCards(isGuest = false, guestUuid = null) {
 
 
     cardList.innerHTML = "";
-
-    const hiddenField = document.getElementById("stripe-card");
-    const uuidToUse = guestUuid || contact_Uuid?.value;
 
     try {
         // Always call the API to check if there are cards

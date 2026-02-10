@@ -60,10 +60,7 @@ searchable: false
      
 
      {%- comment -%} Create order {%- endcomment -%}
-     {%- graphql add_order = 'modules/website/trigger_api_call', 
-          name: 'modules/events/add_order', 
-          data: payload 
-          | dig: 'items','response','body' | parse_json -%}            
+     {% function add_order = "ecommerce/controller/order/create", params: payload %}   
 
      {%- if add_order.id -%}
           {%- include 'modules/events/orders/callback_init', 

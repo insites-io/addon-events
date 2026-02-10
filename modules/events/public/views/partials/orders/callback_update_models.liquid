@@ -158,8 +158,6 @@ metadata: {
 
 {% export update_order %}
 
-{% log payload, type: '==TEST payload' %}
-{% log order_data, type: '==TEST order_data' %}
 
 {% comment %} Step 3. Create Event Stream {% endcomment %}
     {%- graphql user = "modules/portal/account/get_user_by_email" 

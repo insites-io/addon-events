@@ -38,26 +38,33 @@ metadata: {
 {% endcomment %}
 
 
-{% comment %} Get total_tax_amount and subtotal_amount for each ticket {% endcomment %}
-{% for ticket in ticket_prices %}
-     {%  liquid
+{% comment %} 
+     Get total_tax_amount and subtotal_amount for each ticket (one entry per unique tier UUID).
+     Use tier_uuids instead of ticket_prices when looping.
+     - This avoids problems in computation when there are duplicates in event_pricing_tier due to the migration file.
+{% endcomment %}
+{% for tier_uuid in tier_uuids %}
+     {% assign ticket = ticket_prices | where: 'uuid', tier_uuid | first %}
+     {% if ticket %}
+          {%  liquid
 
-          ## Quantity
-          assign quantity = data.selectedTickets | where: 'event_pricing_tier.uuid', ticket.uuid | map: 'quantity' | first
+               ## Quantity
+               assign quantity = data.selectedTickets | where: 'event_pricing_tier.uuid', ticket.uuid | map: 'quantity' | first
 
-          ## Tax
-          if ticket.tax_type == 'percentage'
-               assign tax_amount = ticket.price | times: ticket.tax | divided_by: 100
-          else
-               assign tax_amount = ticket.tax
-          endif
-          assign tax_amount = tax_amount | times: quantity
-          assign total_tax_amount = total_tax_amount | plus: tax_amount
+               ## Tax
+               if ticket.tax_type == 'percentage'
+                    assign tax_amount = ticket.price | times: ticket.tax | divided_by: 100
+               else
+                    assign tax_amount = ticket.tax
+               endif
+               assign tax_amount = tax_amount | times: quantity
+               assign total_tax_amount = total_tax_amount | plus: tax_amount
 
-          ## Subtotal    
-          assign subtotal = ticket.price | times: quantity
-          assign subtotal_amount = subtotal_amount | plus: subtotal
-     %} 
+               ## Subtotal    
+               assign subtotal = ticket.price | times: quantity
+               assign subtotal_amount = subtotal_amount | plus: subtotal
+          %}
+     {% endif %}
 {% endfor %}
 
 

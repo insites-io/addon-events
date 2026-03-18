@@ -1,29 +1,22 @@
- ## Change Log
- 
-- Prerequisite module: Portal v1.3.0
-  - Rounded buttons
-  - Gradient background color for solid buttons
-- Text headings and labels ( except for Product Name )
-  - Use sentence case ( Sample title ) instead of title case ( Sample Title )
-- New design for loader - https://cbo.d.pr/i/D0lLrp
-- Mega Menu
-  - Added max-width to align with the navbar width
-  - Add background to main categories
-- Product carousel (New Arrivals & What's Hot) pagination button - removed border line
-- Products page
-  - Products page container width
-    - To maintenance the product image ratio, set the page wrapper max-width to 1344px.
-  - Product item
-    - zoom in image on hover
-    - image opacity change on hover
-    - rounded image
-    - rounded product wrapper
-  - Pagination style similar to ins-table
-  - No result found - add border
-  - Filters - rounded select buttons
-- Checkout
-  - Contact
-    - Add 'Contact information' form steps for guest user
-      - save user data in CRM
-  - Shipping & Billing
-    - Use modal form in adding new address
+## Changelog
+All notable changes to the Events Addon are documented here.
+
+## [v1.1.0] - 2026-03-17
+### Prerequisites
+- Portal template/app: >= v1.3.0
+
+### Added
+- Event pricing divisions seed/migration: `modules/events/public/migrations/20260218023005_event_pricing_division.liquid`
+- Attachments galleries query restored: `modules/events/public/graphql/attachments/get_galleries.graphql`
+
+### Changed
+- Venues seed/migration updated to align with removal of `event_venue_area` and addition of pricing divisions: `modules/events/public/migrations/20250916010845_venues.liquid`
+- Purchase ticket price computation now pulls tier pricing from the database and deduplicates tier UUIDs before computing totals: `modules/events/public/views/partials/purchase_ticket/compute_prices.liquid`
+
+### Fixed
+- Checkout totals computation bug when duplicate `event_pricing_tier` records exist (migration/test): `modules/events/public/views/partials/purchase_ticket/compute_prices.liquid`
+- Order update callback controller issues during payment callback processing: `modules/events/public/views/partials/orders/callback_update_models.liquid`
+
+## [v1.0.0] - 2026-02-16
+### Added
+- Initial release (tagged `v1.0.0`)

@@ -136,6 +136,8 @@ body .checkout > .wrapper,
 
 .heading-2-xsmall {
     font-size: 32px;
+    line-height: 130%;
+    letter-spacing: 0.32px;
 }
 .heading-3-small {
     font-family: var(--font-family-01);

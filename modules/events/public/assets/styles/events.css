@@ -1781,6 +1781,10 @@ ins-tab .ins-tab .ins-tab-headers .ins-tab-header:hover::before{
     }
 }
 
+ins-filter .filter__btn-container {
+    height: 41px;
+}
+
 /* Order History Summary */
 .ecommerce .ibt-table-wrap .ibt-table_th {
     color: var(--font-color-head);

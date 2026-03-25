@@ -197,6 +197,9 @@ body,
     font-weight: 400;
     line-height: 150%; /* 21px */
 }
+.body-large {
+    line-height: 150%; /* 27px */
+}
 .body-medium,
 .body-bold,
 .venue-state {

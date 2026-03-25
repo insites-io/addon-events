@@ -70,6 +70,7 @@ metadata: {
 {%- if context.environment == "staging" -%}
     <script src="{{ 'modules/events/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
     <script src="{{ 'modules/events/scripts/checkout/checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
@@ -80,6 +81,7 @@ metadata: {
 {%- else -%}
     <script src="{{ 'modules/events/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script> 
     <script src="{{ 'modules/events/scripts/checkout/checkout.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>

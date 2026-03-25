@@ -12,37 +12,22 @@ let isGuestUser = false
 // Layout for ins-credit-card
 const cardLayouts = cardList.getAttribute('data-card-grid') || "large-6 medium-12 small-12";
 
-// When add-card is clicked:
-document.addEventListener("click", (e) => {
-    if (e.target.closest(".add-card-btn")) {
-        if (!isGuestUser) {
-            stripeModal.setAttribute("open", "");
-        } else {
-            guestAddCardForm.classList.remove('hide');
-            noCardBox?.classList.add('hide');
-            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
-        }
-
-        // Mount the Stripe Element into the correct container
-    }
-});
-
 // Handle Add Card button clicks
-document.addEventListener("click", (e) => {    
-    if (e.target.closest(".add-card-btn")) {
-        if (contact_Uuid?.value) {
-            stripeModal.setAttribute("open", ""); // modal for logged-in users
-        } else {
-            const guestForm = document.getElementById("guest-add-card-form");
-            if (guestForm) guestForm.classList.remove("hide"); // show guest form
-            if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest            
-            if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
-        }
+document.addEventListener("click", (e) => {
+    if (!e.target.closest(".add-card-btn")) return;
+
+    if (contact_Uuid?.value) {
+        stripeModal.setAttribute("open", ""); // modal for logged-in users
+    } else {
+        const guestForm = document.getElementById("guest-add-card-form");
+        if (guestForm) guestForm.classList.remove("hide"); // show guest form
+        if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest
+        if (checkoutBtn) checkoutBtn.classList.remove("hide"); // show 'Pay now' button
     }
 });
 
 
-async function loadCards(isGuest = false, guestUuid = null) {
+async function loadCards(isGuest = false) {
     if(isGuest) {
         isGuestUser = true
     }

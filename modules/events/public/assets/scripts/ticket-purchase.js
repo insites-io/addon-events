@@ -369,7 +369,7 @@ const PaymentBreakdownManager = {
         venueCount[key].quantity++;
       });
 
-      for (const [key, info] of Object.entries(venueCount)) {
+      for (const [, info] of Object.entries(venueCount)) {
         const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
         const displayQty = info.quantity;
         const formattedPrice = parseFloat(info.price).toFixed(2);
@@ -393,7 +393,7 @@ const PaymentBreakdownManager = {
   calculateTotals(subtotal, ticketCount) {
     let totalTax = 0;
     selectedTickets = []; // Reset selectedTickets array
-    for (const [key, info] of Object.entries(ticketCount)) {
+    for (const [, info] of Object.entries(ticketCount)) {
       selectedTickets.push(info);
       const itemSubtotal = info.price * info.quantity;
       const taxValue = parseFloat(info.tax) || 0;
@@ -536,7 +536,7 @@ const OrderProcessor = {
       };
 
       if (ticket.capacity_type === "group") {
-        baseTicket.group_id = `GROUP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        baseTicket.group_id = `GROUP-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
         baseTicket.allocation = "unallocated";
         baseTicket.price_includes_tax = null;
       }
@@ -592,6 +592,9 @@ const OrderProcessor = {
 
   async buildBillingPayload() {
     const phoneNumber = await Utils.extractPhoneNumbers(document.getElementById('billing-phone'));
+
+    let billing_company_name, billing_company_uuid, billing_first_name,
+        billing_last_name, billing_email, billing_phone_country_code, billing_phone_number;
 
     if(isBillingSameAsContact === true){
       billing_company_name = userPayload.company_name;

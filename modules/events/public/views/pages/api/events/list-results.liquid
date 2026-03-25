@@ -1,0 +1,77 @@
+---
+slug: api/events/list-results
+format: json
+method: get
+searchable: false
+---
+
+{%- liquid
+    assign page_num           = context.params.page      | default: 1  | plus: 0
+    assign per_page           = context.params.per_page  | default: 12 | plus: 0
+    assign keyword            = context.params.search    | default: ""
+    assign selected_category  = context.params.category  | default: ""
+    assign selected_location  = context.params.location  | default: ""
+    assign sort               = context.params.sort
+    assign page_type          = context.params.page_type
+
+    if sort == "Earliest to latest"
+        assign order = "ASC"
+    elsif sort == "Latest to earlier"
+        assign order = "DESC"
+    endif
+-%}
+
+{% parse_json sort_by %}
+{ "properties": [{ "name": "start_date_time", "order": "{{ order | default: 'ASC' }}" }] }
+{% endparse_json %}
+
+{% parse_json category_params %}
+{ "page": 1, "size": 50, "system_field": "event_category" }
+{% endparse_json %}
+{% function system_fields = "events/system_fields/list", params: category_params %}
+{% assign categories = system_fields.results %}
+{% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}
+
+{% parse_json filters %}
+{
+    "page": {{ page_num }},
+    "size": {{ per_page }},
+    {% if page_type == 'upcoming-events' %}
+        "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+    {% elsif page_type == 'previous-events' %}
+        "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+    {% endif %}
+    {% if selected_category_uuid and selected_category_uuid != '' %}
+        "category_uuid": "{{ selected_category_uuid }}",
+    {% endif %}
+    {% if selected_location == 'WEB' %}
+        "event_type": "online_event",
+    {% elsif selected_location != '' %}
+        "venue_state": "{{ selected_location }}",
+    {% endif %}
+    {% if keyword != '' %}
+        "event_name": "{{ keyword }}",
+    {% endif %}
+    "sort_by": {{ sort_by }}
+}
+{% endparse_json %}
+{% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' %}
+
+{% capture cards_html %}
+<div class="grid-x grid-padding-x event-card-wrap">
+    {% for item in events.results %}
+        <div class="cell large-4 medium-6 small-12">
+            {% include 'modules/events/events/card', item: item, list: true, page: page_type %}
+            <div class="spacer xxx-large hide-for-small-only"></div>
+        </div>
+        <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
+    {% endfor %}
+</div>
+{% endcapture %}
+
+{
+    "html": {{ cards_html | json }},
+    "totalCount": {{ events.total_entries | default: 0 }},
+    "pageNumber": {{ page_num }},
+    "pageSize": {{ per_page }}
+}

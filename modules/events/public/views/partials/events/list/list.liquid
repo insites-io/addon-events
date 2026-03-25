@@ -238,14 +238,16 @@ metadata: {
      <div class="wrapper width-1440">     
           
           {% comment %} List {% endcomment %}
+          <div id="events-card-grid">
           <div class="grid-x grid-padding-x event-card-wrap">
                {% for item in events.results %}
                     <div class="cell large-4 medium-6 small-12">
                          {% include 'modules/events/events/card', item: item, list: true, page: page %}
                          <div class="spacer xxx-large hide-for-small-only"></div>
-                    </div>                    
+                    </div>
                     <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
-               {% endfor %}	
+               {% endfor %}
+          </div>
           </div>
 
           {% comment %} Pagination {% endcomment %}
@@ -269,7 +271,8 @@ metadata: {
      "pageNumber": {{ page_num }},
      "pageSize": {{ per_page }},
      "pageSizeOptions": [12, 24, 30],
-     "paginationText": "Items per page"
+     "paginationText": "Items per page",
+     "pageType": "{{ page }}"
 }
 </script>
 

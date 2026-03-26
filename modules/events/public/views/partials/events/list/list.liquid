@@ -85,22 +85,26 @@ metadata: {
      %}
 
 {% else %}
-     {% parse_json params %}
+     {% parse_json filters_category %}
      {
-          "page" : 1,
-          "size" : 50,
-          "system_field" : "event_category"
+          {% if page == 'upcoming-events' %}
+               "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}"
+          {% elsif page == 'previous-events' %}
+               "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}"
+          {% endif %}
      }
      {% endparse_json %}
-     {% function system_fields = "events/system_fields/list", uuid: event.uuid, params: params  %}     
-     {% assign categories = system_fields.results %}   
-
-     {% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
-     {% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
-
-     {% capture category_options %}  
-          {{ categories_name | array_prepend: 'All' }}
-     {% endcapture %}
+     {% graphql category_location_public = 'modules/events/events/get_filter_category_location_public', args: filters_category | dig: 'items','results' -%}
+     {% liquid
+          assign category_options = 'All' | split: ','
+          for category in category_location_public
+               assign category_options = category_options | array_add: category.category.value
+               if category.category.value == selected_category
+                    assign selected_category_uuid = category.category_uuid
+               endif
+          endfor
+          assign category_options = category_options | array_uniq | array_compact | sort
+     %}
 {% endif %}
 
      

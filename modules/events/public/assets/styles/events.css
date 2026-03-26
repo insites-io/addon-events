@@ -383,7 +383,12 @@ ins-input.hidden-input input {
 .event-card-wrap .placeholder-img,
 .event-card-wrap .img-wrap,
 .event-card-wrap img {
-    border-radius: 20px; 
+    border-radius: 20px;
+}
+.event-card-wrap.grid-x .placeholder-img,
+.event-card-wrap.grid-x .img-wrap,
+.event-card-wrap.grid-x img {
+    border-radius: 12px;
 }
 .event-card-wrap img {       
     width: 100%;

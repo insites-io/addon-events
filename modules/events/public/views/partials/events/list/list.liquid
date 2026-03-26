@@ -119,10 +119,14 @@ metadata: {
           assign location_options = location_options | array_prepend: 'All'
      %}
 {% else %}
-     {% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
-     {% capture location_options %}  
-          {{ locations | map: 'state' | array_uniq | array_prepend: 'WEB' | array_prepend: 'All'  }}
-     {% endcapture %}
+     {% liquid
+          assign location_options = category_location_public | map: 'venue_state' | array_uniq | array_compact | sort
+          assign has_online_event = category_location_public | map: 'event_type' | array_uniq | array_any: 'online_event'
+          if has_online_event
+               assign location_options = location_options | array_prepend: 'WEB'
+          endif
+          assign location_options = location_options | array_prepend: 'All'
+     %}
 {% endif %}
 
 

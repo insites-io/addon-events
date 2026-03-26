@@ -2172,6 +2172,18 @@ ins-filter ins-button button.ins-button.size--small span{
         margin-bottom: 0px;
     }
 }
+@media screen and (max-width: 420px) {
+    ins-filter .filter__btn-container {
+        height: auto;
+    }
+    ins-filter-item {
+        width: 100%;
+        margin-right: 0;
+    }
+    ins-filter-item .filter-item__button {
+        width: 100%;
+    }
+}
 .ins-select-wrap.buttonise .ins-select-label-wrap {
     padding: 12px 16px;
 }

@@ -1043,7 +1043,7 @@ ins-carousel .product-cards .placeholder-img {
     background: var(--color-ui-02);
 }
 #mobile-filter-drawer .open .ins-accordion-item_header>.inner-head {
-    background: var(--color-main-hover-light);    
+    background: var(--color-ui-03);
 }
 #mobile-filter-drawer .ins-accordion-item_header>.inner-head a{
     display: inline;
@@ -1105,14 +1105,14 @@ ins-carousel .product-cards .placeholder-img {
 #mobile-filter-drawer .ins-drawer-body .wrap > ins-accordion .ins-accordion-item_header .inner-head a{
     font-weight: 700;
     font-size: 14px !important;
-    border-bottom: 1px solid #EBEBEB;
+    border-bottom: 1px solid var(--color-ui-03);
 }
 #mobile-filter-drawer .ins-drawer-body .ins-accordion.menu ins-accordion-item:first-of-type .ins-accordion-item_header{
     border-top: none;
 }
 
 ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-accordion-item{
-    border-bottom: 1px solid #EBEBEB;
+    border-bottom: 1px solid var(--color-ui-03);
 }
 ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-accordion-item .inner-head{
     padding-left: 40px;
@@ -1125,6 +1125,9 @@ ins-drawer#mobile-menu ins-accordion .ins-accordion-item .ins-accordion-item_con
 }
 ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-accordion-item .inner-content .ins-accordion-link{
     padding-left: 24px;
+}
+.ins-accordion.menu .ins-accordion-item .inner-head:hover {
+    background-color: var(--color-ui-02) !important;
 }
 
 /* Search group Stylesheet */

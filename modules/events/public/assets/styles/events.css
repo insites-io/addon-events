@@ -1120,11 +1120,22 @@ ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-acco
 ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-accordion-item_header  >.inner-head .heading{
     font-weight: 400 !important;
 }
-ins-drawer#mobile-menu ins-accordion .ins-accordion-item .ins-accordion-item_content .ins-accordion-link{
-    padding-left: 16px;
+ins-drawer#mobile-menu ins-accordion .ins-accordion-item .ins-accordion-item_content .ins-accordion-link,
+ins-drawer#mobile-menu ins-accordion .ins-accordion-item .ins-accordion-item_content > a,
+ins-drawer#mobile-menu ins-accordion .ins-accordion-item .inner-content > a {
+    padding-left: 40px;
 }
 ins-drawer#mobile-menu ins-accordion .ins-accordion-item ins-accordion .ins-accordion-item .inner-content .ins-accordion-link{
     padding-left: 24px;
+}
+ins-drawer#mobile-menu .menu .ins-accordion-item_content .ins-accordion-link>a {
+    padding-left: 0px !important;
+}
+ins-drawer#mobile-menu .menu li button {
+    padding-left: 40px !important;
+}
+ins-drawer#mobile-menu .ins-accordion-item>.ins-accordion-item_header>.inner-head .heading:hover {
+    color: var(--color-main);
 }
 .ins-accordion.menu .ins-accordion-item .inner-head:hover {
     background-color: var(--color-ui-02) !important;

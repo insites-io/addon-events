@@ -470,6 +470,9 @@ ins-button.event-card-btn .btn__icon {
     max-height: 600px;
     object-fit: cover;
 }
+@media screen and (max-width: 639px) {
+    .event-banner img { height: 300px; }
+}
 .event-details img, 
 .event-details .placeholder-img {
     width: 100%;

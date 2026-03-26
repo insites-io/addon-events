@@ -390,14 +390,19 @@ ins-input.hidden-input input {
 .event-card-wrap.grid-x img {
     border-radius: 12px;
 }
+.event-card-wrap.grid-x .img-wrap,
+.event-card-wrap:not(#main-event) img,
+.event-card-wrap .placeholder-img {
+    aspect-ratio: 384/245;
+}
+.event-card-wrap.grid-x img,
+.event-card-wrap.grid-x .placeholder-img {
+    height: 100%;
+}
 .event-card-wrap img {       
     width: 100%;
     object-fit: cover;
     transition: transform 0.3s ease, filter 0.3s ease;
-}
-.event-card-wrap:not(#main-event) img,
-.event-card-wrap .placeholder-img {
-    height: 269px;       
 }
 #main-event img,
 #main-event .placeholder-img {

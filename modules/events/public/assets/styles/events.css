@@ -3331,6 +3331,27 @@ ins-button.add-credit-card button.ins-button>div,
     font-family: var(--font-family-03);
 }
 
+/* Events search — X (clear) button, mirrors app.js .search-bars styles
+   but scoped to #search-event so app.js no longer needs to touch this input */
+#search-event .ins-input-wrap .input-wrap .icon-close-1 {
+    background: var(--color-ui-01, #fff);
+    border: none;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    right: 32px;
+    top: 12px;
+    color: var(--font-color-body, #575757);
+    border-right: 1px solid var(--color-ui-04, #DFDFDF);
+    padding-right: 8px;
+    transition: color .25s ease-in-out;
+    cursor: pointer;
+}
+#search-event .ins-input-wrap .input-wrap .icon-close-1:hover {
+    color: var(--color-main);
+}
+
 /* Event card skeleton loader */
 @keyframes sk-shimmer {
     0%   { background-position: -600px 0; }

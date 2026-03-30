@@ -113,11 +113,69 @@ function handlePaginationChange(event) {
     fetchAndReplaceGrid({ page: pageNumber, per_page: pageSize });
 }
 
+// Search input — icon click and Enter key
 if (searchKey) {
-    searchKey.addEventListener('insIconClick', handleSearch);
+    searchKey.addEventListener('insIconClick', () => {
+        if (searchKey.value.trim()) handleSearch();
+    });
     searchKey.addEventListener('insInput', e => {
         if (e.detail.keyCode === 13) handleSearch();
     });
+}
+
+// X (clear) button for the search input.
+// Managed here instead of relying on app.js, which targeted .search-bars and
+// used window.location.reload() on clear. We use a MutationObserver because
+// ins-input renders its child DOM asynchronously — querying .input-wrap too
+// early returns null, so we wait until it appears before wiring up the button.
+if (searchKey && AJAX_PAGE_TYPES.includes(pageType)) {
+    const initSearchClear = () => {
+        const inputEl   = searchKey.getElementsByTagName('input')[0];
+        const inputWrap = searchKey.querySelector('.input-wrap');
+        const iconEl    = searchKey.querySelector('.icon-search-1') || searchKey.querySelector('.icon-search');
+
+        if (!inputEl || !inputWrap || !iconEl) return false;  // not ready yet
+
+        let closeIcon = null;
+
+        const showClose = () => {
+            if (closeIcon) return;
+            closeIcon = document.createElement('i');
+            closeIcon.classList.add('icon-close-1', 'icon-wrap', 'icon-close-active', 'icon-close-style');
+            inputWrap.insertBefore(closeIcon, iconEl);
+        };
+
+        const hideClose = () => {
+            if (!closeIcon) return;
+            closeIcon.remove();
+            closeIcon = null;
+        };
+
+        // Show X on load if the search param was already set (e.g. page loaded with ?search=)
+        if (inputEl.value.trim()) showClose();
+
+        inputEl.addEventListener('input', () => {
+            inputEl.value.trim() ? showClose() : hideClose();
+        });
+
+        searchKey.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('icon-close-1')) return;
+            inputEl.value = '';
+            hideClose();
+            fetchAndReplaceGrid({ search: '', page: 1 });
+        });
+
+        return true;  // initialised successfully
+    };
+
+    // Try immediately in case the component already rendered
+    if (!initSearchClear()) {
+        // Otherwise observe until .input-wrap appears
+        const observer = new MutationObserver(() => {
+            if (initSearchClear()) observer.disconnect();
+        });
+        observer.observe(searchKey, { childList: true, subtree: true });
+    }
 }
 
 function handleSearch() {

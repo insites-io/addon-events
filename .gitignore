@@ -16,6 +16,9 @@
 /vue/*/node_modules
 /vue/*/dist
 
+# QA scripts (local tooling, not deployed)
+/scripts
+
 # local env files
 .env.local
 .env.*.local

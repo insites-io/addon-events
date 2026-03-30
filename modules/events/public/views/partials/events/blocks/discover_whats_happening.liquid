@@ -23,13 +23,15 @@ metadata: {
 
           {% comment %} Main Event {% endcomment %}
           <section class="wrapper width-1440">          
-               <div class="spacer xxxx-large"></div>
+               <div class="spacer xxxx-large hide-for-small-only"></div>
+               <div class="spacer large show-for-small-only"></div>
                <div class="text-center">
                     <h2>Discover what's happening</h2>
                     <div class="spacer small"></div>
                     <p class="body-large">Event updates - stay informed about upcoming and current events!</p>
                </div>
-               <div class="spacer section"></div>
+               <div class="spacer xxxx-large hide-for-small-only"></div>
+               <div class="spacer xxx-large show-for-small-only"></div>
 
                <div id="main-event" class="event-card-wrap">
                     {% include 'modules/events/events/card', item: main_event %}

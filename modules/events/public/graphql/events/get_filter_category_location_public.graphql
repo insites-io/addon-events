@@ -1,9 +1,8 @@
-query get_filter_category_location (
+query get_filter_category_location_public (
   $page: Int=1
   $size: Int=300
   $gt_date_now: String
   $lt_date_now: String
-  $uuids: [String!]
 ) {
   items: records(
     page: $page
@@ -13,20 +12,18 @@ query get_filter_category_location (
       table: { value: "modules/insites_events/event" }
       properties: [
         { name: "status", contains: "enabled" }
-        { name: "uuid", value_in: $uuids }
         { name: "event_name", exists: true }
         { name: "start_date_time", exists: true }
         { name: "end_date_time",  range:{ gt: $gt_date_now, lt: $lt_date_now  } }
       ]
-    } 
+    }
   ) {
     results {
       id
       uuid: property(name: "uuid")
-      event_name: property(name: "event_name")
       event_type: property(name: "event_type")
-      venue_state: property(name: "venue_state")   
-      category_uuid: property(name: "category_uuid")   
+      venue_state: property(name: "venue_state")
+      category_uuid: property(name: "category_uuid")
       category: related_record(
         table: "modules/insites_events/event_system_field"
         join_on_property: "category_uuid"
@@ -34,7 +31,6 @@ query get_filter_category_location (
       ){
         value: property(name: "value")
       }
-			#properties
     }
   }
 }

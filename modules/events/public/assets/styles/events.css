@@ -3330,3 +3330,62 @@ ins-button.add-credit-card button.ins-button>div,
     color: var(--color-main);
     font-family: var(--font-family-03);
 }
+
+/* Event card skeleton loader */
+@keyframes sk-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+}
+.event-card-skeleton {
+    pointer-events: none;
+}
+.event-card-skeleton .sk-image {
+    aspect-ratio: 384 / 245;
+    border-radius: 12px;
+    width: 100%;
+}
+.event-card-skeleton .sk-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0;
+}
+.event-card-skeleton .sk-meta .sk-line:first-child { width: 20%; }
+.event-card-skeleton .sk-meta .sk-line:last-child  { width: 35%; }
+.event-card-skeleton .sk-hr {
+    height: 1px;
+    width: 100%;
+    border-radius: 0;
+    margin-bottom: 16px;
+    background: var(--color-ui-04);
+}
+.event-card-skeleton .sk-heading-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.event-card-skeleton .sk-heading { height: 24px; flex: 1; }
+.event-card-skeleton .sk-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.event-card-skeleton .sk-line { height: 16px; margin-bottom: 8px; width: 70%; }
+/* shimmer applied to all skeleton blocks except the static hr */
+.event-card-skeleton .sk-image,
+.event-card-skeleton .sk-line,
+.event-card-skeleton .sk-heading,
+.event-card-skeleton .sk-btn {
+    background: linear-gradient(
+        90deg,
+        var(--color-ui-03) 25%,
+        var(--color-ui-04) 50%,
+        var(--color-ui-03) 75%
+    );
+    background-size: 1200px 100%;
+    border-radius: 8px;
+    animation: sk-shimmer 1.4s ease-in-out infinite;
+}

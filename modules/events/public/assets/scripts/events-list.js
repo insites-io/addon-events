@@ -20,6 +20,34 @@ if (dataElement) {
 
 const AJAX_PAGE_TYPES = ['upcoming-events', 'previous-events'];
 
+function buildSkeletonGrid(count) {
+    const skeletonCard = `
+        <div class="event-card-skeleton">
+            <div class="sk-image"></div>
+            <div class="sk-meta">
+                <div class="sk-line"></div>
+                <div class="sk-line"></div>
+            </div>
+            <div class="sk-hr"></div>
+            <div class="sk-heading-wrap">
+                <div class="sk-heading"></div>
+                <div class="sk-btn"></div>
+            </div>
+            <div class="sk-line" style="width:55%"></div>
+            <div class="sk-line" style="width:45%"></div>
+        </div>`;
+
+    const cells = Array.from({ length: count }, () => `
+        <div class="cell large-4 medium-6 small-12">
+            ${skeletonCard}
+            <div class="spacer xxx-large hide-for-small-only"></div>
+        </div>
+        <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
+    `).join('');
+
+    return `<div class="grid-x grid-padding-x event-card-wrap">${cells}</div>`;
+}
+
 // Shared fetch + replace — called by both pagination and filters
 async function fetchAndReplaceGrid(overrides) {
     const cardGrid = document.getElementById('events-card-grid');
@@ -47,8 +75,9 @@ async function fetchAndReplaceGrid(overrides) {
 
     const fetchParams = new URLSearchParams({ page_type: pageType, ...merged });
 
-    cardGrid.style.opacity = '0.5';
-    cardGrid.style.pointerEvents = 'none';
+    // Show skeletons matching the current page size
+    cardGrid.innerHTML = buildSkeletonGrid(merged.per_page || 12);
+    window.scrollTo({ top: cardGrid.offsetTop - 100, behavior: 'smooth' });
 
     try {
         const response = await fetch(`/api/events/list-results?${fetchParams}`);
@@ -74,13 +103,8 @@ async function fetchAndReplaceGrid(overrides) {
         if (parseInt(newUrl.searchParams.get('page') || 1) <= 1) newUrl.searchParams.delete('page');
         if (parseInt(newUrl.searchParams.get('per_page') || 12) === 12) newUrl.searchParams.delete('per_page');
         history.pushState(null, '', newUrl.toString());
-
-        window.scrollTo({ top: cardGrid.offsetTop - 100, behavior: 'smooth' });
     } catch {
         updateUrlParams(overrides);
-    } finally {
-        cardGrid.style.opacity = '';
-        cardGrid.style.pointerEvents = '';
     }
 }
 

@@ -1,21 +1,17 @@
-// Select all `.event-card-wrap div`s
-const allDivs = document.querySelectorAll('.event-card-wrap div:not(.wrap)');
-cards = Array.from(allDivs);
+// Use event delegation on the persistent grid container so clicks work
+// after AJAX replaces the card HTML.
+const cardGrid = document.getElementById('events-card-grid') || document;
 
-cards.forEach(function(element) {
-  element.addEventListener('click', function(e) {
-    // Prevent clicks on <a> itself
-    if (!e.target.closest('a')) {
-      // Look for nearest parent that contains an <a>
-      let parent = element;
-      while (parent && !parent.querySelector('a')) {
-        parent = parent.parentElement;
-      }
+cardGrid.addEventListener('click', function(e) {
+  // Do nothing if the click was on (or inside) an <a>
+  if (e.target.closest('a')) return;
 
-      const link = parent?.querySelector('a');
-      if (link) {
-        link.click();
-      }
-    }
-  });
+  // Only act when the click lands inside a .event-card-wrap descendant
+  const cardDiv = e.target.closest('.event-card-wrap div:not(.wrap)');
+  if (!cardDiv) return;
+
+  const link = cardDiv.closest('.event-card-wrap')?.querySelector('a');
+  if (link) {
+    link.click();
+  }
 });

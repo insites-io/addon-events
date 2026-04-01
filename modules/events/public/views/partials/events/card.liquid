@@ -32,7 +32,7 @@ metadata: {
           {% endif %}
           <p class="venue-state">{{ venue_state }}</p>
           <div class="flex-child-auto text-right">
-               <i class="icon-bookmark-1"></i>
+               <i class="icon-bookmark-1" aria-hidden="true"></i>
                <span>{{ item.category.value }}</span>
           </div>
      </div>
@@ -47,7 +47,7 @@ metadata: {
                <h2 class="heading-4 flex-child-auto">{{ item.event_name }}</h2>
           {% endif %}                         
           <div class="event-button-wrap">
-               <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}">
+               <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}" aria-label="View details for {{ item.event_name | replace: '"', "" }}">
                     <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label=""></ins-button>
                </a>
           </div>                         

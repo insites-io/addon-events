@@ -23,13 +23,13 @@ metadata: {
 {% if start_date_comparison == end_date_comparison %}
     {% comment %} Calendar {% endcomment %}
     <div class="grid-x">
-        <i class="icon-calendar"></i>
+        <i class="icon-calendar" aria-hidden="true"></i>
         <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
     </div>
     <div class="spacer xx-small"></div>
     {% comment %} Clock {% endcomment %}
     <div class="grid-x">
-        <i class="icon-clock"></i>
+        <i class="icon-clock" aria-hidden="true"></i>
         <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
     </div>
 {% else %}
@@ -39,12 +39,12 @@ metadata: {
             <div class="start_time">
                 <span class="body-x-small-bold">Start Date & Time</span>
                 <div class="grid-x">
-                    <i class="icon-calendar"></i>
+                    <i class="icon-calendar" aria-hidden="true"></i>
                     <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
                 </div>
                 <div class="spacer xx-small"></div>
                 <div class="grid-x">
-                    <i class="icon-clock"></i>
+                    <i class="icon-clock" aria-hidden="true"></i>
                     <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
                 </div>    
             </div>
@@ -52,12 +52,12 @@ metadata: {
             <div class="end_time">
                 <span class="body-x-small-bold">End Date & Time</span>
                 <div class="grid-x">
-                    <i class="icon-calendar"></i>
+                    <i class="icon-calendar" aria-hidden="true"></i>
                     <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
                 </div>
                 <div class="spacer xx-small"></div>
                 <div class="grid-x">
-                    <i class="icon-clock"></i>
+                    <i class="icon-clock" aria-hidden="true"></i>
                     <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
                 </div>
             </div>
@@ -68,31 +68,31 @@ metadata: {
                 <div>
                     <p class="body-small-bold">Start date & time</p>
                     <div>
-                        <i class="icon-calendar"></i> <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
+                        <i class="icon-calendar" aria-hidden="true"></i> <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }}</span>
                     </div>
                     <div>
-                        <i class="icon-clock"></i> <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone }}</span> 
+                        <i class="icon-clock" aria-hidden="true"></i> <span>{{ item.start_date_time | date: "%H:%M" }} {{ time_zone }}</span> 
                     </div>                    
                 </div>
                 <div>
                     <p class="body-small-bold">End date & time</p>
                     <div>
-                        <i class="icon-calendar"></i> <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span> 
+                        <i class="icon-calendar" aria-hidden="true"></i> <span>{{ item.end_date_time | date: "%A %-d, %B %Y" }}</span> 
                     </div>
                     <div>
-                        <i class="icon-clock"></i> <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>     
+                        <i class="icon-clock" aria-hidden="true"></i> <span>{{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>     
                     </div>
                 </div>
             </div>    
         {% else %}
             {% comment %} List view {% endcomment %}
             <div class="grid-x">
-                <i class="icon-calendar"></i>
+                <i class="icon-calendar" aria-hidden="true"></i>
                 <span>{{ item.start_date_time | date: "%A %-d, %B %Y" }} - {{ item.end_date_time | date: "%A %-d, %B %Y" }}</span>
             </div>
             <div class="spacer xx-small"></div>
             <div class="grid-x">
-                <i class="icon-clock"></i>
+                <i class="icon-clock" aria-hidden="true"></i>
                 <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
             </div>    
         {% endif %}

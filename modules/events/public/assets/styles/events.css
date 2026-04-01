@@ -1992,6 +1992,10 @@ ins-button.add-credit-card button.ins-button>div,
     font-weight: 700;
 }
 
+.ins-accordion.menu .ins-accordion-item .inner-head:hover .heading {
+    color: var(--color-main) !important;
+}
+
 /* Ticket allocation */
 
 .ticket-card-container {    

@@ -560,6 +560,11 @@ ins-button.event-card-btn .btn__icon {
     object-fit: cover;
     cursor: pointer;
 }
+.event-speakers .img-wrap,
+.event-speakers img,
+.event-speakers .placeholder-img {
+    aspect-ratio: auto 270 / 280 !important;
+}
 .event-speakers img,
 .event-speakers .placeholder-img {
     object-fit: contain;
@@ -582,10 +587,10 @@ ins-button.event-card-btn .btn__icon {
         justify-content: center;
     }
 }
-@media screen and (max-width: 1023px) {
+@media screen and (max-width: 1295px) {
     .event-speakers img {
-        height: auto !important;   
-    }            
+        height: auto !important;
+    }
 }
 .event-speakers .placeholder-img .icon-panorame::before {
     content: "\e939" !important;

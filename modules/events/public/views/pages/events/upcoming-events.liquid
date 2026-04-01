@@ -37,7 +37,7 @@ dynamic_cache:
 
     {% comment %} Hero title and description {% endcomment %}
     {% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
-    {% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
+    {% include 'modules/events/events/hero_title', header: 'Upcoming events', description: description %}
 
     {% include 'modules/events/events/list/list', page: 'upcoming-events' %}
 

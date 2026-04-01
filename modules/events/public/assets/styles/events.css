@@ -333,6 +333,18 @@ ins-input.hidden-input input {
     padding-right: var(--container-padding-xx-large);
 }
 
+/* Hero Title */
+.hero-title .page-hero-container {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+}
+.hero-title .page-hero-container p {
+    font-size: var(--font-large); /* 18px */
+    line-height: 150%;
+    color: var(--font-color-body);
+}
+
 /* Homepage */
 /* Main Event */
 #main-event {

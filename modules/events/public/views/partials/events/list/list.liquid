@@ -195,10 +195,10 @@ metadata: {
                     </ins-filter>
                 </div>
                 <div class="large-4 medium-12 small-12 cell search-container-cell small-order-2">
-                    <div class="">
+                    <div role="search">
                         <ins-input
                             id="search-event"
-                            role="searchbox"
+                            role="textbox"
                             placeholder="Search by event name"
                             aria-label="Search by event name"
                             icon-event
@@ -261,14 +261,14 @@ metadata: {
 
           {% comment %} Pagination {% endcomment %}
           <div class="spacer small show-for-small-only"></div>
-          <ins-table no-wrap
-               static-table
-               id="paginationTable"
-               class="event-pagination-table"
-               without-search
-               aria-label="Pagination"
-               role="region">    
-          </ins-table>
+          <section aria-label="Pagination">
+               <ins-table no-wrap
+                    static-table
+                    id="paginationTable"
+                    class="event-pagination-table"
+                    without-search>
+               </ins-table>
+          </section>
      </div>
      <div class="spacer section hide-for-small-only"></div>
      <div class="spacer xxx-large show-for-small-only"></div>  

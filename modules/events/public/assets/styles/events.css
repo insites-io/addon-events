@@ -358,8 +358,8 @@ ins-input.hidden-input input {
 
 
 /* Event Cards */
-.event-card-wrap .cell,
-#main-event *:not(.wrap) {
+.event-card-wrap .cell a,
+#main-event *:not(.wrap) a {
     cursor: pointer;
 }
 .event-card-wrap.grid-x {

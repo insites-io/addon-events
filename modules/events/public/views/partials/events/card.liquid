@@ -4,7 +4,7 @@ metadata: {
 }
 ---
 
-<article class="wrap" >
+<article class="wrap" aria-labelledby="event-title-{{ item.slug }}">
      <div class="img-wrap">
           {% if item.event_image.url %}
                <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
@@ -40,9 +40,9 @@ metadata: {
      {% comment %} Event Name | Button {% endcomment %}
      <div class="event-heading-wrap">
           {% if list == true %}
-               <h2 class="heading-5 flex-child-auto">{{ item.event_name | strip }}</h2>
+               <h2 id="event-title-{{ item.slug }}" class="heading-5 flex-child-auto">{{ item.event_name | strip }}</h2>
           {% else %}
-               <h2 class="heading-4 flex-child-auto">{{ item.event_name | strip }}</h2>
+               <h2 id="event-title-{{ item.slug }}" class="heading-4 flex-child-auto">{{ item.event_name | strip }}</h2>
           {% endif %}                         
           <div class="event-button-wrap">
                <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}" aria-label="View details for {{ item.event_name | strip | replace: '"', "" }}">

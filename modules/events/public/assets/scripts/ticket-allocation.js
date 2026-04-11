@@ -98,6 +98,13 @@ function createAllocationPayload() {
 
 // Open modal
 allocationModalButton.forEach((btn) => {
+  // Keyboard support: role="button" divs don't fire click on Enter/Space natively
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      btn.click();
+    }
+  });
   btn.addEventListener("click", () => {
     let id = btn.getAttribute("data-ticket-id");
     allocateTicket.value = id;

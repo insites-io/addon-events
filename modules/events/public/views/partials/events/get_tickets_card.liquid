@@ -67,6 +67,7 @@ metadata: {
   %}
 {% endif %}
 
+{% assign event_name = event.event_name | replace: '"', '' | strip %}
 
 {% if is_mobile == true %}
 
@@ -85,8 +86,8 @@ metadata: {
               <div class="spacer xx-small"></div>
               <p class="ticket-price-mobile">{{ formatted_price }}</p>
           </div>             
-          {% if is_sold_out == false %} <a href="{{ event_url }}"> {% endif %}       
-            <ins-button label="{{label}}" {{disabled}} solid></ins-button>
+          {% if is_sold_out == false %} <a href="{{ event_url }}" aria-label="Get tickets for {{ event_name }}"> {% endif %}
+            <ins-button label="{{label}}" {{disabled}} solid {% unless is_sold_out %}aria-hidden="true"{% endunless %}></ins-button>
           {% if is_sold_out == false %} </a> {% endif %}
         </div>               
       </ins-card>          
@@ -110,8 +111,8 @@ metadata: {
         <p class="body-xxlarge-bold font-color-head">{{ formatted_price }}</p>
         
         <div class="spacer x-large"></div>
-        {% if is_sold_out == false %} <a href="{{ event_url }}"> {% endif %}
-          <ins-button label="{{label}}" {{disabled}} solid class="btn-full"></ins-button>
+        {% if is_sold_out == false %} <a href="{{ event_url }}" aria-label="Get tickets for {{ event_name }}"> {% endif %}
+          <ins-button label="{{label}}" {{disabled}} solid class="btn-full" {% unless is_sold_out %}aria-hidden="true"{% endunless %}></ins-button>
         {% if is_sold_out == false %} </a> {% endif %}
       </ins-card>
       <div class="spacer x-large"></div>

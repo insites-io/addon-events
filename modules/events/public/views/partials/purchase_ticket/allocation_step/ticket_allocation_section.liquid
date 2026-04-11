@@ -140,7 +140,10 @@ metadata: {
 
                   <div class="flex-child-auto allocate-button-wrapper">
                     {% comment %} Allocate ticket button {% endcomment %}
-                    <div class="ticket-allocation-modal-button"  
+                    <div class="ticket-allocation-modal-button"
+                      role="button"
+                      tabindex="0"
+                      aria-label="Allocate ticket {{ ticket.id }}"
                       data-ticket-id="{{ ticket.id }}"
                       data-tier="{{ ticket.tier.name }}"
                       data-uuid="{{ ticket.uuid }}"
@@ -151,14 +154,14 @@ metadata: {
                       data-contact-phone-number="{{ ticket.contact_phone_number | escape }}"
                       >
                       <span>Allocate ticket</span>
-                      <i class="icon-arrow-forward ticket-allocation-icon"></i>
+                      <i class="icon-arrow-forward ticket-allocation-icon" aria-hidden="true"></i>
                     </div>
 
                     {% comment %} Portal: Download ticket button {% endcomment %}
                     {% if context.params.slug == 'itinerary-upcoming' %}
                       <div class="align-center-middle download-wrapper">
-                        <a href="{{ ticket.ticket_pdf.url }}" target="_blank">
-                          <ins-button type="button" label="Download ticket" icon="icon-download" outlined ></ins-button>
+                        <a href="{{ ticket.ticket_pdf.url }}" target="_blank" rel="noopener noreferrer" aria-label="Download ticket (opens in new tab)">
+                          <ins-button type="button" label="Download ticket" icon="icon-download" outlined aria-hidden="true"></ins-button>
                         </a>
                       </div>
                     {% endif %}

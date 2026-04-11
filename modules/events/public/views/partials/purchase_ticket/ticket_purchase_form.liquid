@@ -146,9 +146,7 @@ metadata: {
               <div class="large-7 medium-12 small-12 cell">
                   <div class="grid-x grid-padding-y">
                       <div class="cell large-6 medium-6 small-12"> 
-                        <a class="ticket-buttons" onclick="history.back()">
-                          <ins-button type="button" id="cancel-button" label="Cancel" icon="icon-close-1" outlined ></ins-button>
-                        </a>
+                        <ins-button type="button" id="cancel-button" label="Cancel" icon="icon-close-1" outlined class="ticket-buttons" onclick="history.back()"></ins-button>
                       </div>
                       <div class="cell large-6 medium-6 small-12 text-right">
                         <ins-button {{ is_disabled }} type="button" id="submit-purchase" class="submit-btn ticket-buttons" label="Contact & billing" icon-right="icon-arrow-forward" solid ></ins-button>

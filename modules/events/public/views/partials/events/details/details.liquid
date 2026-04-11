@@ -9,8 +9,8 @@ metadata: {
 <section class="width-1296 event-details wrapper">
 
      {% comment %} Back {% endcomment %}
-     <a href="/{{context.params.slug}}">
-          <ins-button label="Back to events" icon="icon-arrow-back" class="back-events"></ins-button> 
+     <a href="/{{context.params.slug}}" aria-label="Back to events">
+          <ins-button label="Back to events" icon="icon-arrow-back" class="back-events" aria-hidden="true"></ins-button>
      </a>
      <div class="spacer xxxx-large hide-for-small-only"></div>
      <div class="spacer show-for-small-only"></div>
@@ -21,7 +21,7 @@ metadata: {
                {% comment %} Category {% endcomment %}
                <div class="event-card-wrap">
                     <div class="grid-x">
-                         <i class="icon-bookmark-1"></i>
+                         <i class="icon-bookmark-1" aria-hidden="true"></i>
                          <span>{{ event.category.value }}</span>
                     </div>
                </div>
@@ -46,7 +46,7 @@ metadata: {
                {% if event.event_type == 'online_event' %}
                     <div class="event-card-wrap">
                          <div class="grid-x">
-                              <i class="icon-map-pin"></i>
+                              <i class="icon-map-pin" aria-hidden="true"></i>
                               <span>Online event</span>
                          </div>
                     </div>
@@ -57,8 +57,8 @@ metadata: {
                          {% include 'modules/events/events/event_location', item: event, show_address: true, is_bold_name: true, is_print: true %}
                     </div>
                     <div class="spacer"></div>
-                    <a href="https://www.google.com/maps?q={{ event.venue_name | url_encode }}&ll={{ event.venue_geojson.coordinates[1] }},{{ event.venue_geojson.coordinates[0] }}" target="_blank">
-                         <ins-button label="Get directions" icon="icon-navigation" outlined></ins-button>
+                    <a href="https://www.google.com/maps?q={{ event.venue_name | url_encode }}&ll={{ event.venue_geojson.coordinates[1] }},{{ event.venue_geojson.coordinates[0] }}" target="_blank" rel="noopener noreferrer" aria-label="Get directions (opens in new tab)">
+                         <ins-button label="Get directions" icon="icon-navigation" outlined aria-hidden="true"></ins-button>
                     </a>
                {% endif %}
                <div class="spacer xxx-large"></div>

@@ -29,6 +29,13 @@ const GalleriesModule = {
 
          const galleryItems = document.querySelectorAll('#event-galleries .pagination-item');
          galleryItems.forEach(galleryItem => {
+             // Keyboard support: role="button" divs don't fire click on Enter/Space natively
+             galleryItem.addEventListener('keydown', (e) => {
+                 if (e.key === 'Enter' || e.key === ' ') {
+                     e.preventDefault();
+                     galleryItem.click();
+                 }
+             });
              galleryItem.addEventListener('click', () => {
                  this.currentSlideIndex = parseInt(galleryItem.dataset.item, 10) - 1;
                  this.galleriesCarousel.goTo(this.currentSlideIndex);
@@ -67,6 +74,17 @@ const GalleriesModule = {
      },
 
      setupClickHandlers() {
+          // Keyboard support for the close button
+          const closeBtn = document.querySelector('#galleries-modal .icon-close-1');
+          if (closeBtn) {
+              closeBtn.addEventListener('keydown', (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      closeBtn.click();
+                  }
+              });
+          }
+
           // When the carousel gallery is open and the user clicks anywhere other than on an image or a button, the modal carousel should close.
 
          // Prevent propagation from buttons and images

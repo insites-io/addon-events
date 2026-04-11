@@ -15,7 +15,7 @@ metadata: {
     <div class="grid-x" id="order-details-container">
         <div class="large-6 medium-6 small-12">
             <div class="order-contact-conirmation">
-                <h5 class="heading-5-small">Order contact</h5>
+                <h3 class="heading-5-small">Order contact</h3>
                 <div class="spacer small"></div>
                 <p id="order-contact-name">
                     {{ order_details.order_contact_first_name }} {{ order_details.order_contact_last_name }}
@@ -30,7 +30,7 @@ metadata: {
 
             <div class="spacer x-large"></div>
             <div class="billing-conirmation">
-                <h5 class="heading-5-small">Billing details</h5>
+                <h3 class="heading-5-small">Billing details</h3>
                 <div class="spacer small"></div>
                 <p id="billing-contact-name">
                     {{ order_details.billing_contact_first_name }} {{ order_details.billing_contact_last_name }}
@@ -55,7 +55,7 @@ metadata: {
 
         <div class="large-6 medium-6 small-12 payment-details-confirmation">
             <div class="wrap">
-                <h5 class="heading-5-small">Payment details</h5>                    
+                <h3 class="heading-5-small">Payment details</h3>                    
                 <div class="spacer small"></div>
                 <p class="font-cabin">
                     {{ order_details.payment.card_brand | upcase }} **** **** **** {{ order_details.payment.card_last_four_digits }}

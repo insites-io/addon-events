@@ -25,7 +25,7 @@ metadata: {
           <div class="event-grid-x">
 
                {% for item in sponsors %}
-                    <div class="wrap" data-id="{{item.id}}">
+                    <div class="wrap" data-id="{{item.id}}"{% if item.content and item.content != '' %} role="button" tabindex="0" aria-label="View details for {{ item.company_name }}"{% endif %}>
                          <div class="img-wrap">
                               {% if item.logo.url %}
                                    <img src="{{ item.logo.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="180" height="170" alt="{{ item.company_name }}">

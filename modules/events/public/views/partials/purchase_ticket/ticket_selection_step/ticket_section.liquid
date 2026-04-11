@@ -45,7 +45,7 @@ metadata: {
             {{ venue.tiers.size }} Ticket categories - Tickets starting from ${{ formatted_price }}.
           </p>
         </div>
-        <span class="icon"><i class="icon-angle-up"></i></span>
+        <span class="icon"><i class="icon-angle-up" aria-hidden="true"></i></span>
       </div>
 
       {% assign grouped_tiers = venue.tiers | group_by: "capacity_type" %}
@@ -72,7 +72,7 @@ metadata: {
               data-number-of-group="{{ venue.number_of_groups }}"
             >
               <div class="ticket-category">
-                <i class="{{ ticket_icon }}"></i>
+                <i class="{{ ticket_icon }}" aria-hidden="true"></i>
                 <p>{{ ticket_category_name }}</p>
               </div>
               <div class="spacer small"></div>
@@ -142,9 +142,9 @@ metadata: {
                       <div class="ticket-purchaser-counter">
                         <span>{{ ticket_tier.price | pricify: 'USD', no_cents_if_whole: false }}</span>
                         <div class="number-input" >
-                          <button class="decrement">&minus;</button>
-                          <input data='{{ ticket_data | json }}' type="number" class="input-stepper" value="0" min="0" max="{{ max_tickets }}">
-                          <button class="increment">&plus;</button>
+                          <button class="decrement" aria-label="Decrease quantity for {{ ticket_tier.name }}">&minus;</button>
+                          <input data='{{ ticket_data | json }}' type="number" class="input-stepper" value="0" min="0" max="{{ max_tickets }}" aria-label="{{ ticket_tier.name }} quantity">
+                          <button class="increment" aria-label="Increase quantity for {{ ticket_tier.name }}">&plus;</button>
                         </div>
                       </div>
                     {% endif %}

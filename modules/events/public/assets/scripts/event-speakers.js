@@ -8,6 +8,13 @@ if (speakersDataEl) {
      const { speakers } = mapData;
 
      speakerItems.forEach(speakerItem => {
+          // Keyboard support: role="button" divs don't fire click on Enter/Space natively
+          speakerItem.addEventListener('keydown', (e) => {
+               if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    speakerItem.click();
+               }
+          });
           speakerItem.addEventListener('click', () => {
                const speaker = speakers.find(item => item.id === speakerItem.dataset.id);
                if (!speaker) return;
@@ -31,8 +38,8 @@ if (speakersDataEl) {
                }
 
                // Email
-               const email = speaker.contact.email 
-                    ? `<a href="mailto:${speaker.contact.email}" target="_blank">${speaker.contact.email}</a>` 
+               const email = speaker.contact.email
+                    ? `<a href="mailto:${speaker.contact.email}">${speaker.contact.email}</a>`
                     : '';
 
                const subHeadingHtml = `
@@ -42,7 +49,7 @@ if (speakersDataEl) {
                     <div class="spacer small"></div>
                     <div class="event-card-wrap">
                          <div class="grid-x">
-                         <i class="icon-email-1"></i>
+                         <i class="icon-email-1" aria-hidden="true"></i>
                          <span id="speaker-email">${email}</span>
                          </div>
                     </div>

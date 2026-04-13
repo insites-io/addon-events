@@ -5,10 +5,10 @@ metadata: {
 ---
 
 
-
 <div id="event-details-card">
-    <div class="event-details-card-img">
-        <img src="{{ event.event_image.url }}" alt="">
+    <div class="event-details-card-img">      
+        {% assign safe_event_name = event.event_name | replace: '"', '' | strip %}  
+        <img src="{{ event.event_image.url }}" alt="{{ safe_event_name }}">
     </div>
 
     <div class="event-details-card-details">

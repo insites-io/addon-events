@@ -187,7 +187,7 @@ metadata: {
         label="First Name*" 
         placeholder="First Name"
         class="required-billing-contact"
-        name="billing_first_name}" 
+        name="billing_first_name"
         id="billing-first-name" 
         value="{{ context.session.billing_first_name | default: ''}}"
         error-message="First name is required.">
@@ -341,8 +341,8 @@ metadata: {
         <div class="address-fields" >
 
             <ins-input address-lookup 
-                label="Search Addresss" name="modal" id="modal_search"              
-                placeholder="Search Addresss" icon="icon-map-pin">
+                label="Search Address" name="modal" id="modal_search"
+                placeholder="Search Address" icon="icon-map-pin">
             </ins-input>  
 
             <input type="hidden" id="modal_latitude" value="">

@@ -46,10 +46,6 @@
     --color-ui-06: #575757;
     --color-ui-07: #436CF2;
     --color-ui-08: #000000;
-    /* Gradiant Background */
-    --color-gradiant1: linear-gradient(90deg, #1E4AA2 0%, #1B78CC 100%);
-    --color-gradiant2: linear-gradient(90deg, #8C1EE3 0%, #C71EE3 100%);
-    --color-gradiant3: linear-gradient(90deg, #E3351E 0%, #F07B26 100%);
     /* Font family */
     --font-family-01: 'DM Sans', sans-serif;
     /* usually on heading */
@@ -684,6 +680,14 @@ ins-button.event-card-btn .btn__icon {
     object-fit: cover;
     cursor: pointer;
 }
+.event-galleries .grid-padding-x > .cell {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.event-galleries .grid-padding-y > .cell {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
 .event-pagination .ibt-table-wrap .pagination-wrap {
     padding: 0px;
 }
@@ -1276,7 +1280,7 @@ ins-button button[type=submit].primary.solid {
     min-height: 40px;
     padding: 11px 24px; 
     border-radius: 14px;
-    background: var(--Gradient---color-gradient1, linear-gradient(95deg, #0095FF 6.51%, #3044FF 94.43%)); 
+    background: var(--color-gradiant1); 
 }
 ins-button button.blue.outlined, 
 ins-button button.primary.outlined, 
@@ -1678,13 +1682,13 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .purchase-ticket-wrapper {
-    border-bottom: 1px solid var(--color-ui-04, #DFDFDF);
-    background: var(--color-ui-02, #F9FAFB);
+    border-bottom: 1px solid var(--color-ui-04);
+    background: var(--color-ui-02);
 }
 
 .purchase-ticket-wrapper  .ins-steps,
 .purchase-ticket-wrapper .ins-step_details {
-    background: var(--color-ui-02, #F9FAFB)
+    background: var(--color-ui-02)
 }
 
 /* Purchase Ticket Stepper */
@@ -1727,8 +1731,8 @@ ins-button.add-credit-card button.ins-button>div,
 #event-details-card {
     padding: 24px;
     border-radius: 4px;
-    border: 1px solid var(--color-ui-04, #DFDFDF);
-    background: var(--color-ui-01, #FFF);
+    border: 1px solid var(--color-ui-04);
+    background: var(--color-ui-01);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
     display: flex;
     justify-content: space-between;
@@ -1768,8 +1772,8 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .event-ticket-venue-detail h3 {
-    color: var(--font-color-head, #05051D);
-    font-family: var(----font-family-01, "DM Sans");
+    color: var(--font-color-head);
+    font-family: var(--font-family-01);
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
@@ -1777,8 +1781,8 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .event-ticket-venue-detail .ticket-venue-sub-place {
-    color: var(--font-color-head, #05051D);
-    font-family: var(--font-family-02, Archivo);
+    color: var(--font-color-head);
+    font-family: var(--font-family-02);
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -1786,8 +1790,8 @@ ins-button.add-credit-card button.ins-button>div,
 }
 
 .event-ticket-venue-detail .ticket-venue-categories {
-    color: var(--font-color-body, #575757);
-    font-family: var(--font-family-02, Archivo);
+    color: var(--font-color-body);
+    font-family: var(--font-family-02);
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -1797,8 +1801,8 @@ ins-button.add-credit-card button.ins-button>div,
 .ticket-category-container {
     padding: 24px;
     border-radius: 8px;
-    border: 1px solid var(--color-ui-04, #DFDFDF);
-    background: var(--color-ui-01, #FFF);
+    border: 1px solid var(--color-ui-04);
+    background: var(--color-ui-01);
 }
 
 .ticket-category {
@@ -1835,8 +1839,8 @@ ins-button.add-credit-card button.ins-button>div,
 
 .subtotal-container-title,
 .total-container-title {
-    color: var(--font-color-head, #05051D);
-    font-family: var(--font-family-02, Archivo);
+    color: var(--font-color-head);
+    font-family: var(--font-family-02);
     font-size: 16px;
     font-style: normal;
     font-weight: 700;
@@ -1845,7 +1849,7 @@ ins-button.add-credit-card button.ins-button>div,
 
 .total-container p {
     font-size: 24px;
-    color: var(--font-color-head, #05051D);
+    color: var(--font-color-head);
     font-weight: 700;
 }
 
@@ -2005,8 +2009,8 @@ ins-button.add-credit-card button.ins-button>div,
 
 .ticket-card-container {    
     border-radius: 4px;
-    border: 1px solid var(--UI---color-ui-04, #DFDFDF);
-    background: var(--UI---color-ui-01, #FFF);
+    border: 1px solid var(--color-ui-04);
+    background: var(--color-ui-01);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
     display: flex;
     flex-wrap: wrap;
@@ -2202,7 +2206,7 @@ ins-button.add-credit-card button.ins-button>div,
     font-style: normal;
     font-weight: 400;
     line-height: 150%; 
-    font-family: var(--font-family-02, Archivo);
+    font-family: var(--font-family-02);
   }
 
     .number-input button {
@@ -2250,8 +2254,8 @@ ins-button.add-credit-card button.ins-button>div,
     }
 .item {
     border-radius: 4px;
-    border: 1px solid var(--color-ui-04, #DFDFDF);
-    background: var(--color-ui-01, #FFF);
+    border: 1px solid var(--color-ui-04);
+    background: var(--color-ui-01);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
     overflow: hidden;
     transition: all 0.3s ease;
@@ -2439,7 +2443,7 @@ ins-button.add-credit-card button.ins-button>div,
 /* Events search — X (clear) button, mirrors app.js .search-bars styles
    but scoped to #search-event so app.js no longer needs to touch this input */
 #search-event .ins-input-wrap .input-wrap .icon-close-1 {
-    background: var(--color-ui-01, #fff);
+    background: var(--color-ui-01);
     border: none;
     position: absolute;
     display: flex;
@@ -2447,8 +2451,8 @@ ins-button.add-credit-card button.ins-button>div,
     font-size: 16px;
     right: 32px;
     top: 12px;
-    color: var(--font-color-body, #575757);
-    border-right: 1px solid var(--color-ui-04, #DFDFDF);
+    color: var(--font-color-body);
+    border-right: 1px solid var(--color-ui-04);
     padding-right: 8px;
     transition: color .25s ease-in-out;
     cursor: pointer;

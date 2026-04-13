@@ -6,11 +6,11 @@ cardGrid.addEventListener('click', function(e) {
   // Do nothing if the click was on (or inside) an <a>
   if (e.target.closest('a')) return;
 
-  // Only act when the click lands inside a .event-card-wrap descendant
-  const cardDiv = e.target.closest('.event-card-wrap div:not(.wrap)');
-  if (!cardDiv) return;
+  // Find the specific card article containing the click
+  const article = e.target.closest('article');
+  if (!article) return;
 
-  const link = cardDiv.closest('.event-card-wrap')?.querySelector('a');
+  const link = article.querySelector('a');
   if (link) {
     link.click();
   }

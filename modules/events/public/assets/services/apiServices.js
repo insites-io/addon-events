@@ -6,6 +6,6 @@ var apiServices = (function () {
         removeDiscountCode: function (payload) {
             return httpClient.processRequest('post', '/remove-discount-code.json', payload);
         },
-        processRequest: httpClient.processRequest
+        processRequest: function() { return httpClient.processRequest.apply(httpClient, arguments); }
     };
 })();

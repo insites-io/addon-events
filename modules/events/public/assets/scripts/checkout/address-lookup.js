@@ -154,7 +154,7 @@ var AddressLookup = (function () {
                 let name = field.getAttribute('name');
                 let setStateInterval = setInterval(() => {
                     let lookupField = field.querySelector('input');
-                    if (lookupField && google !== undefined) {
+                    if (lookupField && typeof google !== 'undefined' && google.maps && google.maps.places) {
                         // Initialize google autocomplete on field
                         let searchAddressField = new google.maps.places.Autocomplete(lookupField);
 

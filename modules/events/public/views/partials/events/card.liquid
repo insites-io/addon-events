@@ -4,7 +4,8 @@ metadata: {
 }
 ---
 
-<article class="wrap" aria-labelledby="event-title-{{ item.slug }}">
+<article class="{% if list %}wrap{% else %}event-card-featured{% endif %}" aria-labelledby="event-title-{{ item.slug }}">
+     {% if list %}
      <div class="img-wrap">
           {% if item.event_image.url %}
                <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
@@ -12,13 +13,24 @@ metadata: {
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}
      </div>
-<div class="wrap" >
+     <div class="wrap">
+     {% else %}
+     <div class="wrap">
+          <div class="img-wrap">
+               {% if item.event_image.url %}
+                    <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
+               {% else %}
+                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+               {% endif %}
+          </div>
+     </div>
+     <div class="wrap">
+          <div class="spacer show-for-small-only"></div>
+     {% endif %}
 
      {% comment %} Spacer {% endcomment %}
      {% if list == true %}                         
           <div class="spacer"></div>
-     {% else %}
-          <div class="spacer show-for-small-only"></div>
      {% endif %}
 
      {% comment %} State | Category {% endcomment %}

@@ -247,20 +247,56 @@ ins-input.hidden-input input {
 }
 
 /* Homepage */
-/* Main Event */
-#main-event {
+/* Main Event — two columns (image | content) inside article.event-card-featured */
+#main-event article.event-card-featured {
     display: flex;
     column-gap: 40px;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
-#main-event > .wrap:nth-child(1) {
-    width: 68%;
+/* flex-basis % + gap needs shrinkable columns; 0 0 50% on both overflows by the gap width */
+#main-event article.event-card-featured > .wrap:first-child {
+    flex: 0 1 68%;
+    min-width: 0;
+    max-width: 68%;
+}
+#main-event article.event-card-featured > .wrap:last-child {
+    flex: 1 1 0;
+    min-width: 0;
+}
+@media screen and (max-width: 880px) {
+    /* ~60% / ~40% of row after column-gap (flex-grow 6:4) */
+    #main-event article.event-card-featured > .wrap:first-child {
+        flex: 6 1 0;
+        min-width: 0;
+        max-width: none;
+    }
+    #main-event article.event-card-featured > .wrap:last-child {
+        flex: 4 1 0;
+        min-width: 0;
+        max-width: none;
+    }
+}
+@media screen and (max-width: 720px) {
+    /* 50% / 50% of row after column-gap */
+    #main-event article.event-card-featured > .wrap:first-child,
+    #main-event article.event-card-featured > .wrap:last-child {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+    }
 }
 @media screen and (max-width: 639px) {
-    #main-event {
-        flex-direction: column
+    #main-event article.event-card-featured {
+        flex-direction: column;
     }
-    #main-event > .wrap:nth-child(1) {
+    #main-event article.event-card-featured > .wrap:first-child,
+    #main-event article.event-card-featured > .wrap:last-child {
         width: 100%;
+        max-width: 100%;
+        flex: 1 1 auto;
     }
 }
 

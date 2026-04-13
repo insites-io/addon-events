@@ -15,7 +15,7 @@ metadata: {
     {% assign time_zone = time_zone | first %}
     {% assign time_zone_abbr = "UTC" %}
     
-    {% capture formatted_time_zone %}{{ time_zone | slice: 0, 3 }}.{{ time_zone | slice: 3, 2 }}{% endcapture %}
+    {% capture formatted_time_zone %}{{ time_zone | slice: 0, 3 }}:{{ time_zone | slice: 3, 2 }}{% endcapture %}
     {%  assign time_zone = '(' | append: time_zone_abbr | append: formatted_time_zone | append: ')' %}
 {% endif %}
 

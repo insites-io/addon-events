@@ -71,7 +71,8 @@ metadata: {
      {
           "lng": {{ event.venue_geojson.coordinates[0] | default: 0 }},
           "lat": {{ event.venue_geojson.coordinates[1] | default: 0 }},
-          "location_name": "{{ event.venue_name }}"
+          "location_name": "{{ event.venue_name }}",
+          "map_id": "{{ context.constants.GOOGLE_MAPS_MAP_ID }}"
      }
      </script>
      {% if context.environment == "staging" %}

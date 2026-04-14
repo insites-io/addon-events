@@ -36,5 +36,5 @@ metadata: {
 
 
 {% comment %} Get tickets (mobile) {% endcomment %}
-{% assign event_url = "/purchase-ticket?event=" | append: event.uuid %}
+{% assign event_url = "/ticket-purchase?event=" | append: event.uuid %}
 {% include 'modules/events/events/get_tickets_card', is_mobile: true, event_url: event_url %}

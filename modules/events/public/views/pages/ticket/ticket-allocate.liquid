@@ -1,5 +1,5 @@
 ---
-slug: allocate-ticket
+slug: ticket-allocate
 layout: modules/website/website_default
 max_deep_level: 1
 authorization_policies:
@@ -23,6 +23,11 @@ metadata: {
 }
 --- 
 
+
+{% comment %} Guard: payment must be completed (event + order_id required) {% endcomment %}
+{% if context.params.event == blank or context.params.order_id == blank %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
 
 {% comment %} Get event details {% endcomment %}
 {% assign event_uuid = context.params.event %}
@@ -97,7 +102,7 @@ metadata: {
         <div class="wrapper">
             <div class="grid-container">
                 <div class="grid-x ticket-stepper-container">
-                    {%- include 'modules/events/purchase_ticket/stepper' -%}
+                    {%- include 'modules/events/ticket/stepper' -%}
                 </div>
             </div>
         </div>
@@ -105,7 +110,7 @@ metadata: {
 
     {% comment %} Stepper {% endcomment %} 
     <div id="purchase-ticket-confirmation-message" class="hide">
-        {%- include 'modules/events/purchase_ticket/success_message_section' -%} 
+        {%- include 'modules/events/ticket/success_message_section' -%} 
     </div>
   {% comment %} Purchase ticket form {% endcomment %}
     <div class="purchase-ticket-form">
@@ -124,11 +129,11 @@ metadata: {
                             <div class="grid-x grid-padding-x invoice-details form-group" active>
                                 <div  class="large-7 medium-12 small-12 cell">
                                     {% comment %} Step 4 {% endcomment %}
-                                    {% include "modules/events/purchase_ticket/allocation_step/ticket_allocation_step", 
+                                    {% include "modules/events/ticket/allocation_step/ticket_allocation_step", 
                                             event: event, is_disabled: is_disabled, is_visible: is_visible, order_id: order_id %}
                                 </div> 
                                 <div  class="large-4 large-offset-1 medium-12 small-12 cell">
-                                    {% include "modules/events/purchase_ticket/order_summary" %}
+                                    {% include "modules/events/ticket/ticket_order_summary", order_id: order_id, event_uuid: event_uuid %}
                                 </div>
                             </div>
                         </div>

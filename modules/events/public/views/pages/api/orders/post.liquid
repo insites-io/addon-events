@@ -8,7 +8,7 @@ searchable: false
 {%- assign payload = context.params | parse_json -%}
 
 {%- comment -%} Revalidate if tickets are still available; Export: errors {%- endcomment -%}
-{%- include 'modules/events/purchase_ticket/check_ticket_availability', payload: context.session.tickets_selected[payload.event_uuid] -%}
+{%- include 'modules/events/ticket/check_ticket_availability', payload: context.session.tickets_selected[payload.event_uuid] -%}
 {%- assign ticket_availability_error = context.exports.errors -%}
 
 
@@ -47,7 +47,7 @@ searchable: false
      
 
      {% comment %} Computed Prices {% endcomment %}
-     {%- function computed = "modules/events/purchase_ticket/compute_prices", data: payload -%} 
+     {%- function computed = "modules/events/ticket/compute_prices", data: payload -%} 
 
      {% comment %} Prices Payload {% endcomment %}
      {%- assign payload = payload | add_hash_key: "subtotal_amount", computed.subtotal_amount -%}
@@ -84,6 +84,11 @@ searchable: false
      }
      {%- session order_uuid = add_order.uuid -%}
      {%- session last_purchased_user_uuid = add_order.order_contact.uuid -%}
+     {%- session pending_allocation_order_id = add_order.id -%}
+     {%- session pending_allocation_event_uuid = payload.event_uuid -%}
+     {%- comment -%} Clear tickets_selected for this event so ticket-billing guard blocks re-entry {%- endcomment -%}
+     {%- assign _ts = context.session.tickets_selected | add_hash_key: payload.event_uuid, null -%}
+     {%- session tickets_selected = _ts -%}
      {%- assign status = 200 -%}
      {%- endif -%}
 

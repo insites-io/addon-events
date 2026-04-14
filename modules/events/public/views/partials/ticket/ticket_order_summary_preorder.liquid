@@ -1,0 +1,231 @@
+---
+metadata: {
+    partial_name: 'Events | Ticket | Order Summary (Pre-payment, DB pricing)'
+}
+---
+
+{%- comment -%}
+  Renders the order summary for /ticket-billing and /ticket-payment.
+  Reads selected tickets from context.session.tickets_selected[event_uuid],
+  then queries event_pricing_tier for current prices — never reads from sessionStorage.
+{%- endcomment -%}
+
+{%- assign event_uuid = context.params.event -%}
+{%- assign session_data = context.session.tickets_selected[event_uuid] -%}
+{%- assign ticket_data = session_data.ticketData | parse_json -%}
+
+{%- comment -%} Build array of unique tier UUIDs for the DB query {%- endcomment -%}
+{%- assign _uuid_str = "" -%}
+{%- for td in ticket_data -%}
+  {%- assign _tuuid = td['event_pricing_tier.uuid'] -%}
+  {%- if _tuuid != blank -%}
+    {%- assign _uuid_str = _uuid_str | append: _tuuid | append: "," -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign tier_uuids = _uuid_str | split: "," | array_compact | array_uniq -%}
+
+{%- comment -%} Fetch current prices from event_pricing_tier {%- endcomment -%}
+{%- if tier_uuids.size > 0 -%}
+  {%- graphql prices_result = 'modules/events/events/pricing/get_ticket_prices', uuid: tier_uuids -%}
+  {%- assign tier_prices = prices_result | dig: 'items', 'results' -%}
+{%- else -%}
+  {%- assign tier_prices = blank -%}
+{%- endif -%}
+
+{%- comment -%} Compute totals grouped by venue → tier+type {%- endcomment -%}
+{%- assign subtotal = 0 -%}
+{%- assign total_tax = 0 -%}
+{%- assign seen_venue_keys = "" -%}
+
+<div id="ticket-payment-summary-container" class="ticket-payment-summary-container">
+    <h2 class="heading-2-xsmall">Order summary</h2>
+    <div class="spacer x-large hide-for-small-only"></div>
+    <div class="spacer show-for-small-only"></div>
+    <div id="payment-breakdown" class="payment-breakdown" style="display:flex">
+
+      {%- for td in ticket_data -%}
+        {%- assign vname = td.ticket_venue_name | default: "" -%}
+        {%- assign vkey = "|" | append: vname | append: "|" -%}
+        {%- unless seen_venue_keys contains vkey -%}
+          {%- assign seen_venue_keys = seen_venue_keys | append: vkey -%}
+          {%- assign venue_tickets = ticket_data | where: "ticket_venue_name", vname -%}
+          {%- assign display_vname = vname | default: "No Venue" -%}
+
+          <div class="payment-break-downs">
+            <p class="payment-breakdown-venue-name">{{ display_vname }}</p>
+            <div>
+              {%- assign seen_tier_keys = "" -%}
+              {%- for vt in venue_tickets -%}
+                {%- assign _vt_uuid = vt['event_pricing_tier.uuid'] -%}
+                {%- assign tkey = "|" | append: _vt_uuid | append: "|" | append: vt.capacity_type | append: "|" -%}
+                {%- unless seen_tier_keys contains tkey -%}
+                  {%- assign seen_tier_keys = seen_tier_keys | append: tkey -%}
+
+                  {%- comment -%} Count tickets with this tier+type in this venue {%- endcomment -%}
+                  {%- assign qty = 0 -%}
+                  {%- for vt2 in venue_tickets -%}
+                    {%- assign _vt2_uuid = vt2['event_pricing_tier.uuid'] -%}
+                    {%- assign tkey2 = "|" | append: _vt2_uuid | append: "|" | append: vt2.capacity_type | append: "|" -%}
+                    {%- if tkey2 == tkey -%}
+                      {%- assign qty = qty | plus: 1 -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- comment -%} Look up current price + name from DB {%- endcomment -%}
+                  {%- assign db_tier = tier_prices | where: "uuid", _vt_uuid | first -%}
+                  {%- assign unit_price = db_tier.price | plus: 0 -%}
+                  {%- assign unit_tax = db_tier.tax | plus: 0 -%}
+                  {%- assign unit_tax_type = db_tier.tax_type -%}
+                  {%- assign tier_name = db_tier.name | default: vt.name | default: vt.capacity_type -%}
+
+                  {%- comment -%} Accumulate totals {%- endcomment -%}
+                  {%- assign item_subtotal = unit_price | times: qty -%}
+                  {%- assign subtotal = subtotal | plus: item_subtotal -%}
+                  {%- if unit_tax_type == "percentage" -%}
+                    {%- assign item_tax = item_subtotal | times: unit_tax | divided_by: 100.0 -%}
+                  {%- else -%}
+                    {%- assign item_tax = unit_tax | times: qty -%}
+                  {%- endif -%}
+                  {%- assign total_tax = total_tax | plus: item_tax -%}
+
+                  {%- comment -%} Format unit price to 2 decimal places {%- endcomment -%}
+                  {%- assign _c = unit_price | times: 100 | round -%}
+                  {%- assign _d = _c | divided_by: 100.0 -%}
+                  {%- assign _fmt = _d | append: "" -%}
+                  {%- if _fmt contains "." -%}
+                    {%- assign _p = _fmt | split: "." -%}
+                    {%- if _p[1].size == 1 -%}{%- assign _fmt = _fmt | append: "0" -%}{%- endif -%}
+                  {%- else -%}
+                    {%- assign _fmt = _fmt | append: ".00" -%}
+                  {%- endif -%}
+
+                  {%- assign cap_type = vt.capacity_type | capitalize -%}
+                  <div class="payment-break-down-tier-container">
+                    <div class="payment-break-down-tier-name">{{ cap_type }} - {{ tier_name }}</div>
+                    <div class="payment-break-down-tier-price"><p>{{ qty }} x </p> ${{ _fmt }}</div>
+                  </div>
+                {%- endunless -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endunless -%}
+      {%- endfor -%}
+
+      <div class="spacer medium"></div>
+    </div>
+
+    {%- comment -%} Compute processing fee and grand total {%- endcomment -%}
+    {%- assign temp_total = subtotal | plus: total_tax -%}
+    {%- assign processing_fee = temp_total | times: 0.017 -%}
+    {%- assign grand_total = temp_total | plus: processing_fee -%}
+
+    {%- comment -%} Format subtotal {%- endcomment -%}
+    {%- assign _c = subtotal | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+    {%- assign subtotal_fmt = _d | append: "" -%}
+    {%- if subtotal_fmt contains "." -%}{%- assign _p = subtotal_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign subtotal_fmt = subtotal_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign subtotal_fmt = subtotal_fmt | append: ".00" -%}{%- endif -%}
+
+    {%- comment -%} Format tax {%- endcomment -%}
+    {%- assign _c = total_tax | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+    {%- assign tax_fmt = _d | append: "" -%}
+    {%- if tax_fmt contains "." -%}{%- assign _p = tax_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign tax_fmt = tax_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign tax_fmt = tax_fmt | append: ".00" -%}{%- endif -%}
+
+    {%- comment -%} Format processing fee {%- endcomment -%}
+    {%- assign _c = processing_fee | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+    {%- assign processing_fmt = _d | append: "" -%}
+    {%- if processing_fmt contains "." -%}{%- assign _p = processing_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign processing_fmt = processing_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign processing_fmt = processing_fmt | append: ".00" -%}{%- endif -%}
+
+    {%- comment -%} Format grand total {%- endcomment -%}
+    {%- assign _c = grand_total | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+    {%- assign total_fmt = _d | append: "" -%}
+    {%- if total_fmt contains "." -%}{%- assign _p = total_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign total_fmt = total_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign total_fmt = total_fmt | append: ".00" -%}{%- endif -%}
+
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Subtotal</p>
+        <p id="subtotal-price">${{ subtotal_fmt }}</p>
+    </div>
+    <div class="spacer x-small"></div>
+
+    {% comment %} Discount section — hidden by default {% endcomment %}
+    <div class="subtotal-container discount-summary is_not_visible">
+        <p class="subtotal-container-title">Discounts</p>
+        <p id="display-discount-value-summary">$0.00</p>
+    </div>
+    <div class="discount-summary-card is_not_visible">
+        <div class="spacer x-small"></div>
+        <ins-card steady>
+            <div class="discount-summary-details">
+                <div>
+                    <div class="body-x-small-bold">
+                        <span id="display-discount-name" class="body-x-small-bold"></span>
+                    </div>
+                    <div class="body-x-small">
+                        <span id="display-discount-code" class="body-x-small"></span> - <span id="display-discount-value" class="body-x-small"> </span>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" id="remove-discount" aria-label="Remove discount"><i class="icon-close-1" aria-hidden="true"></i></button>
+                </div>
+            </div>
+        </ins-card>
+        <div class="spacer x-small"></div>
+    </div>
+
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Tax</p>
+        <p id="tax-price">${{ tax_fmt }}</p>
+    </div>
+    <div class="spacer x-small"></div>
+
+    <div class="subtotal-container">
+        <p class="subtotal-container-title">Processing fee (1.7%)</p>
+        <p id="proccessing-price">${{ processing_fmt }}</p>
+    </div>
+
+    <div class="spacer medium"></div>
+    <hr>
+    <div class="spacer medium"></div>
+
+    <div class="total-container">
+        <p class="total-container-title">Total</p>
+        <p id="total-price">${{ total_fmt }}</p>
+    </div>
+
+    {% include 'modules/events/layout/responsive_spacers', desktop: 'xxx-large', mobile: 'x-large' %}
+</div>
+
+
+{% comment %} Mobile total bar {% endcomment %}
+{%- unless context.params.slug == 'confirmation' -%}
+<div id="mobile-order-summary" class="show-for-small-only">
+    <div class="total">
+        <p class="color-ui-05 body-x-small">Total</p>
+        <p id="mobile-total-price" class="order-total">${{ total_fmt }}</p>
+    </div>
+    <ins-button type="button" id="view-order-summary-btn" label="View order summary"></ins-button>
+</div>
+{%- endunless -%}
+
+{% comment %} Mobile drawer {% endcomment %}
+<ins-drawer
+    custom-width="430px"
+    position="right"
+    bordered=false
+    id="order-summary-drawer"
+    class="mobile-order-summary inline">
+    <div id="order-summary-drawer-content"></div>
+</ins-drawer>
+
+{% comment %} Copy desktop content to mobile drawer {% endcomment %}
+<script>
+    let orderSummaryContainer = document.getElementById('ticket-payment-summary-container');
+    let viewOrderSummaryBtn = document.getElementById('view-order-summary-btn');
+    let orderSummaryDrawer = document.getElementById('order-summary-drawer');
+    let orderSummaryDrawerContent = document.getElementById('order-summary-drawer-content');
+
+    viewOrderSummaryBtn.addEventListener('insClick', async event => {
+        let orderSummaryHtmlContent = orderSummaryContainer.innerHTML;
+        let modifiedHTML = orderSummaryHtmlContent.replace(/\bid="([^"]+)"/g, 'data="$1"');
+        orderSummaryDrawer.setDrawerState(true);
+        orderSummaryDrawerContent.innerHTML = modifiedHTML;
+    });
+</script>

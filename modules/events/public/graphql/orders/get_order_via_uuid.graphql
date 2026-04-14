@@ -17,7 +17,8 @@ query get_order_via_uuid (
 			
       created_at
       id
-      uuid: property(name: "uuid")      
+      uuid: property(name: "uuid")
+      event_uuid: property(name: "event_uuid")
       order_reference: property(name: "order_reference")
       date_time: property(name: "date_time")       
       notes: property(name: "notes")

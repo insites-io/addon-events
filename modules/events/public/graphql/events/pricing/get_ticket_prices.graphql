@@ -15,12 +15,12 @@ query get_ticket_prices (
         }
     ) {
         results {
-           id           
+           id
            uuid: property(name: "uuid")
+           name: property(name: "name")
            price: property_float(name: "price")
            tax: property_float(name: "tax")
            tax_type: property(name: "tax_type")
-           #properties
         }
     }
 }

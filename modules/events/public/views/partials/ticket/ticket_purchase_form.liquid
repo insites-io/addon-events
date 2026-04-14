@@ -126,17 +126,11 @@ metadata: {
             <div class="grid-x grid-padding-x invoice-details form-group" active>
                 <div  class="large-7 medium-12 small-12 cell">
                     {% comment %} Step 1 {% endcomment %}
-                    {% include "modules/events/purchase_ticket/ticket_selection_step/ticket_selection_step", is_disabled: is_disabled, is_visible: is_visible  %}    
-                    
-                    {% comment %} Step 2 {% endcomment %}
-                    {% include "modules/events/purchase_ticket/billing_step/billing_form_step", is_disabled: is_disabled, is_visible: is_visible  %}    
-                    
-                    {% comment %} Step 3 {% endcomment %}
-                    {% include "modules/events/purchase_ticket/payment_step/payment_step", is_disabled: is_disabled, is_visible: is_visible  %}    
+                    {% include "modules/events/ticket/ticket_selection_step/ticket_selection_step", is_disabled: is_disabled, is_visible: is_visible  %}
 
                 </div> 
                 <div  class="large-4 large-offset-1 medium-12 small-12 cell">
-                    {% include "modules/events/purchase_ticket/order_summary" %}
+                    {% include "modules/events/ticket/order_summary" %}
                 </div>
             </div>
 
@@ -156,36 +150,7 @@ metadata: {
               <div class="large-4 large-offset-1 medium-12 small-12 cell"></div>
             </div>
 
-            {% comment %} ? BUTTONS - Step 2 {% endcomment %}
-            <div id="purchase-ticket-button-step-2" class="grid-x grid-padding-x hide">
-              <div class="large-7 medium-12 small-12 cell">
-                <div class="grid-x grid-padding-y">
-                  <div class="cell large-6 medium-6 small-12"> 
-                      <ins-button type="button" id="back-step-2" label="Back" icon="icon-arrow-left" class="ticket-buttons" outlined ></ins-button>
-                  </div>
-                  <div class="cell large-6 medium-6 small-12 text-right">
-                    <ins-button type="button" id="submit-billing-info" class="submit-btn ticket-buttons" label="Proceed to payment" icon-right="icon-arrow-forward" solid ></ins-button>
-                  </div> 
-                </div>                 
-              </div> 
-              <div class="large-4 large-offset-1 medium-12 small-12 cell"></div>
-            </div>
-            
             {% comment %} ? BUTTONS - Step 3 (already has buttons from ecommerce module) {% endcomment %}
-
-            {% comment %} ? BUTTONS - Step 5 {% endcomment %}
-            <div id="purchase-ticket-button-step-5" class="grid-x grid-padding-x hide">
-              <div class="large-7 medium-12 small-12 cell">
-                <div class="grid-x grid-padding-y">
-                  <div class="cell large-6 medium-6 small-0"> 
-                  </div>
-                  <div class="cell large-6 medium-6 small-12 text-right">
-                    <ins-button type="button" id="submit-ticket-confirmation" class="submit-btn" label="Create account" icon-right="icon-arrow-forward" solid ></ins-button>
-                  </div> 
-                </div>                 
-              </div> 
-              <div class="large-4 large-offset-1 medium-12 small-12 cell"></div>
-            </div>
 
         </div>
     </div>

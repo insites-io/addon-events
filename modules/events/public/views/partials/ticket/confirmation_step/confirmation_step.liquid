@@ -6,7 +6,7 @@ metadata: {
 
 
 {% comment %} Clear ticket purchase sessions {% endcomment %}
-{% include 'modules/events/purchase_ticket/clear_ticket_purchase_sessions' %} 
+{% include 'modules/events/ticket/clear_ticket_purchase_sessions' %} 
 
 
 <div id="ticket-confirmation-step">
@@ -32,23 +32,30 @@ metadata: {
             <div class="billing-conirmation">
                 <h3 class="heading-5-small">Billing details</h3>
                 <div class="spacer small"></div>
-                <p id="billing-contact-name">
-                    {{ order_details.billing_contact_first_name }} {{ order_details.billing_contact_last_name }}
-                </p>
+                <p id="billing-contact-name">{{- order_details.billing_contact_first_name }} {{ order_details.billing_contact_last_name -}}</p>
                 <p id="billing-contact-email">{{ order_details.billing_contact_email }}</p>
                 <p id="billing-contact-mobile-number">
-                    {% if order_details.billing_contact_phone_number %}
-                        ({{ order_details.billing_contact_phone_country_code }}) {{ order_details.billing_contact_phone_number }}                    
-                    {% endif %}
+                  {%- if order_details.billing_contact_phone_number -%}
+                    ({{ order_details.billing_contact_phone_country_code }}) {{ order_details.billing_contact_phone_number }}
+                  {%- endif -%}
                 </p>
                 <p id="billing-contact-address">
-                    {{ order_details.billing_address_1 }}
-                    {% if order_details.billing_address_2 %}, {{ order_details.billing_address_2 }}{% endif %}
-                    {% if order_details.billing_address_3 %}, {{ order_details.billing_address_3 }}{% endif %}
-                    {% if order_details.billing_suburb %}, {{ order_details.billing_suburb }}{% endif %}
-                    {% if order_details.billing_state %}, {{ order_details.billing_state }}{% endif %}
-                    {% if order_details.billing_postcode %}, {{ order_details.billing_postcode }}{% endif %}
-                    {% if order_details.billing_country %}, {{ order_details.billing_country }}{% endif %}
+                  {% comment %} This guarantees no trailing spaces sneak in from any field regardless of position. {% endcomment %}
+                  {%- assign _a1 = order_details.billing_address_1 | strip -%}
+                  {%- assign _a2 = order_details.billing_address_2 | strip -%}
+                  {%- assign _a3 = order_details.billing_address_3 | strip -%}
+                  {%- assign _suburb = order_details.billing_suburb | strip -%}
+                  {%- assign _state = order_details.billing_state | strip -%}
+                  {%- assign _postcode = order_details.billing_postcode | strip -%}
+                  {%- assign _country = order_details.billing_country | strip -%}
+                  {%- assign addr = _a1 -%}
+                  {%- if _a2 != blank -%}{%- assign addr = addr | append: ', ' | append: _a2 -%}{%- endif -%}
+                  {%- if _a3 != blank -%}{%- assign addr = addr | append: ', ' | append: _a3 -%}{%- endif -%}
+                  {%- if _suburb != blank -%}{%- assign addr = addr | append: ', ' | append: _suburb -%}{%- endif -%}
+                  {%- if _state != blank -%}{%- assign addr = addr | append: ', ' | append: _state -%}{%- endif -%}
+                  {%- if _postcode != blank -%}{%- assign addr = addr | append: ' ' | append: _postcode -%}{%- endif -%}
+                  {%- if _country != blank -%}{%- assign addr = addr | append: ', ' | append: _country -%}{%- endif -%}
+                  {{ addr }}
                 </p>
             </div>
         </div>

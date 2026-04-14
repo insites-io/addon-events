@@ -1,5 +1,5 @@
 ---
-slug: purchase-ticket
+slug: ticket-purchase
 layout: modules/website/website_default
 max_deep_level: 1
 authorization_policies:
@@ -21,7 +21,20 @@ metadata: {
     open_graph_description: "Purchase Event Tickets",
     sitemap_change_frequency: "always",
 }
---- 
+---
+
+{% comment %} Guard: redirect to allocate if a payment is pending allocation {% endcomment %}
+{%- liquid
+  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
+    assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
+    redirect_to _alloc_url
+  endif
+-%}
+
+{% comment %} Guard: event UUID required to purchase tickets {% endcomment %}
+{% if context.params.event == blank %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
 
 {% comment %} Loading overlay {% endcomment %}
 <div id="loadingOverlay" class="loading-overlay hide">
@@ -40,7 +53,7 @@ metadata: {
         <div class="wrapper">
             <div class="grid-container">
                 <div class="grid-x ticket-stepper-container">
-                    {%- include 'modules/events/purchase_ticket/stepper' -%}
+                    {%- include 'modules/events/ticket/stepper' -%}
                 </div>
             </div>
         </div>
@@ -48,14 +61,14 @@ metadata: {
 
     {% comment %} Stepper {% endcomment %} 
     <div id="purchase-ticket-confirmation-message" class="hide">
-        {%- include 'modules/events/purchase_ticket/success_message_section' -%} 
+        {%- include 'modules/events/ticket/success_message_section' -%} 
     </div>
   {% comment %} Purchase ticket form {% endcomment %}
     <div class="purchase-ticket-form">
         <div class="wrapper">
             <div class="grid-container">
                 <div class="grid-x">
-                    {%- include 'modules/events/purchase_ticket/ticket_purchase_form' -%}
+                    {%- include 'modules/events/ticket/ticket_purchase_form' -%}
                 </div>
             </div>
         </div>
@@ -66,28 +79,15 @@ metadata: {
 <input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-{% include 'modules/website/layout/googlemaps' %}
 {%- if context.environment == "staging" -%}
-    <script src="{{ 'modules/events/scripts/checkout/address-lookup.js' | asset_url }}" defer></script> 
-    <script src="{{ 'modules/events/scripts/checkout/checkout.js' | asset_url }}" defer></script>
     <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
 {%- else -%}
-    <script src="{{ 'modules/events/scripts/checkout/address-lookup.min.js' | asset_url }}" defer></script> 
-    <script src="{{ 'modules/events/scripts/checkout/checkout.min.js' | asset_url }}" defer></script>
     <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
 {%- endif -%} 
 

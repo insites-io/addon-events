@@ -1,0 +1,102 @@
+---
+slug: ticket-payment
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Payment",
+    page_name: "Payment",
+    meta_title: "Payment",
+    page_title: "Payment",
+    sitemap_enabled: "false",
+    meta_description: "Payment for ticket purchase",
+}
+---
+
+{% comment %} Guard: redirect to allocate if a payment is pending allocation {% endcomment %}
+{%- liquid
+  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
+    assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
+    redirect_to _alloc_url
+  endif
+-%}
+
+{% comment %} Guard: billing must be completed (contact save sets this session var) {% endcomment %}
+{% if context.session.billing_contact_email == blank %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
+
+{% comment %} Loading overlay {% endcomment %}
+<div id="loadingOverlay" class="loading-overlay hide">
+    <ins-loader
+        id="ticket-loader"
+        state-title=""
+        state-icon="processing"
+        state-message="Processing your payment... Hang tight, and please do not leave this screen.">
+    </ins-loader>
+</div>
+
+<div id="purchase-ticket">
+
+    {% comment %} Stepper {% endcomment %}
+    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/ticket/stepper' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="purchase-ticket-form">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x">
+                    <div id="purchase-ticket-container">
+                        <div class="spacer xxxx-large"></div>
+                        <div id="ticket-purchase-header-container">
+                            <h1 id="ticket-purchase-header" class="heading-1-xsmall">Payment</h1>
+                            <div class="spacer xxx-large hide-for-small-only"></div>
+                            <div class="spacer show-for-small-only"></div>
+                        </div>
+                        <div class="purchase-page">
+                            <div class="grid-x grid-padding-x invoice-details form-group" active>
+                                <div class="large-7 medium-12 small-12 cell">
+                                    {%- include 'modules/events/ticket/payment_step/payment_step' -%}
+                                </div>
+                                <div class="large-4 large-offset-1 medium-12 small-12 cell">
+                                    {% include 'modules/events/ticket/ticket_order_summary_preorder' %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spacer xxxx-large"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Hidden fields required by payment validator {% endcomment %}
+<input type="hidden" id="bill-total-amount">
+<input type="hidden" id="bill-order-value">
+<input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+{%- endif -%}

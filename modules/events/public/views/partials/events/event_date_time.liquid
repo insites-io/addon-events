@@ -33,7 +33,7 @@ metadata: {
         <span>{{ item.start_date_time | date: "%H:%M" }} - {{ item.end_date_time | date: "%H:%M" }} {{ time_zone }}</span>        
     </div>
 {% else %}
-    {% if context.params.slug == "purchase-ticket" %}
+    {% if context.params.slug == "ticket-purchase" %}
         {% comment %} ? DETAILS VIEW TIME AND TIMEZONE {% endcomment %}
         <div class="details_page_start_end_time">
             <div class="start_time">

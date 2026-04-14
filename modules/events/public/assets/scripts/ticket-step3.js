@@ -1,45 +1,8 @@
 /**
- * Ticket Payment Page
- * Handles Stripe card loading, order creation, ticket provisioning,
- * and redirects to /ticket-allocate.
+ * Ticket Step 3 — Payment
+ * Restores state from sessionStorage, handles credit card selection,
+ * creates order + tickets, redirects to /ticket-allocate.
  */
-
-// ============================================================================
-// STRIPE PATCH — guest checkout
-// stripe-element.js (portal module) sets stripe-card to tok_... (the raw
-// Stripe token) in both createStripeCardModel and setStripeCardField.
-// The order API expects the stored card ID (card_...) from the
-// create-credit-card response. Patch both methods after stripe-ready fires.
-// ============================================================================
-
-document.addEventListener("stripe-ready", () => {
-    if (!window.StripeElement || !window.StripeModel) return;
-
-    // Override createStripeCardModel: call the API and set stripe-card to
-    // the returned card ID (response.data.stripe_id) not the raw token.
-    StripeElement.methods.createStripeCardModel = async function(token) {
-        const data = {
-            email: document.getElementById('card_email')?.value || "",
-            first_name: document.getElementById('card_first_name')?.value || "",
-            last_name: document.getElementById('card_last_name')?.value || "",
-            creditcard: token.id,
-            card_brand: token.card?.brand || ""
-        };
-        const response = await window.StripeModel.creditcard.createCreditCard(data);
-        if (response.state) {
-            const cardId = response.data?.stripe_id;
-            const field = document.getElementById('stripe-card');
-            if (field && cardId) field.setAttribute('value', cardId);
-        }
-        return response;
-    };
-
-    // setStripeCardField is called immediately after createStripeCardModel
-    // in tokenizedStripeCC and would overwrite card_... back to tok_...
-    // Neutralise it — the value is already correctly set above.
-    StripeElement.methods.setStripeCardField = function() {};
-});
-
 
 // ============================================================================
 // RESTORE STATE FROM SESSION STORAGE
@@ -69,13 +32,6 @@ if (_saved.orderTotals) window.orderTotals = _saved.orderTotals;
 // DOM ELEMENTS
 // ============================================================================
 
-const cardList = document.getElementById("card-options-list");
-const noCardBox = document.getElementById("no-card");
-const addCardBtnHolder = document.getElementById("add-credit-card-button-holder");
-const stripeModal = document.getElementById("stripe-modal");
-const paymentNavigationButtons = document.querySelectorAll("#payment-navigation-buttons ins-button");
-const cardLayouts = cardList?.getAttribute('data-card-grid') || "large-6 medium-12 small-12";
-
 const DOM = {
   stepper: document.getElementById("ticket-purchase-stepper"),
 
@@ -83,9 +39,18 @@ const DOM = {
   step3: document.getElementById("checkout-ticket-submit-btn"),
   step3Container: document.getElementById("ticket-payment-step"),
 
+  // Order summary
+  breakdownContainer: document.getElementById('payment-breakdown'),
+  subtotalElem: document.getElementById('subtotal-price'),
+  taxElem: document.getElementById('tax-price'),
+  processingElem: document.getElementById('proccessing-price'),
+  totalElem: document.getElementById('total-price'),
+  mobileTotalElem: document.getElementById('mobile-total-price'),
+
   // Payment fields
   stripeField: document.getElementById('stripe-card'),
   contactPaymentUuid: document.getElementById("contact_uuid"),
+
 
   // Event UUID
   eventUuidHidden: document.getElementById("event_uuid_hidden"),
@@ -93,102 +58,6 @@ const DOM = {
   // Loading overlay
   loadingOverlay: document.getElementById('loadingOverlay')
 };
-
-
-// ============================================================================
-// CARD MANAGEMENT
-// ============================================================================
-
-// Handle Add Card button clicks.
-// ins-button fires 'insClick' (not native click). Mirror checkout.js: attach
-// insClick directly on each button and use modal.open() — not setAttribute.
-function handleAddCardClick() {
-    // Use stripeModal existence (server-rendered only for logged-in members) as the
-    // authoritative check. In the new multi-page flow, contact_uuid is populated for
-    // guests too (session is set after billing), so contact_Uuid?.value is truthy for
-    // guests — using it crashes with TypeError when stripeModal is null.
-    if (stripeModal) {
-        stripeModal.open(); // modal for logged-in users
-    } else {
-        const guestForm = document.getElementById("guest-add-card-form");
-        if (guestForm) guestForm.classList.remove("hide"); // show guest form
-        if (noCardBox) noCardBox.classList.add("hide"); // hide no-card for guest
-        if (DOM.step3) DOM.step3.classList.remove("hide"); // show 'Pay now' button
-    }
-}
-
-async function loadCards() {
-    cardList.innerHTML = "";
-
-    try {
-        const url = `/payment-methods`;
-        const response = await apiServices.processRequest("get", url);
-        const cards = response.data || [];
-
-        if (cards.length) {
-            renderCards(cards);
-
-            if (isGuest) {
-                addCardBtnHolder?.classList.add("hide");
-            } else {
-                addCardBtnHolder?.classList.remove("hide");
-            }
-            noCardBox?.classList.add("hide");
-
-            if (paymentNavigationButtons) {
-                paymentNavigationButtons.forEach(btn => {
-                    btn.classList.remove('hide');
-                });
-            }
-        } else {
-            noCardBox?.classList.remove("hide");
-            if (DOM.step3) DOM.step3.classList.add("hide"); // hide 'Pay now' button
-
-            if (isGuest) {
-                const guestForm = document.getElementById("guest-add-card-form");
-                if (guestForm) guestForm.classList.remove("hide");
-                addCardBtnHolder?.classList.add("hide");
-                noCardBox?.classList.add("hide");
-            }
-        }
-    } catch (err) {
-        console.error("Error fetching cards:", err);
-        noCardBox?.classList.remove("hide");
-        if (DOM.step3) DOM.step3.classList.add("hide"); // hide 'Pay now' button
-    }
-}
-
-function renderCards(cards) {
-    cards.forEach((card, idx) => {
-        const divEl = document.createElement("div");
-        divEl.className = `${cardLayouts} cell card-options`;
-        const insCardEl = document.createElement("ins-credit-card");
-        insCardEl.setAttribute("full-year", "");
-        insCardEl.setAttribute("brand", card.card_brand);
-        insCardEl.setAttribute("last-four", card.card_last_four_digits);
-        insCardEl.setAttribute("expiry-month", card.card_expiry_month);
-        insCardEl.setAttribute("expiry-year", card.card_expiry_year);
-        insCardEl.setAttribute("compact", "");
-        insCardEl.setAttribute("data-id", card.id);
-        insCardEl.value = card.payment_method_token;
-        insCardEl.addEventListener('insClick', () => {
-            StripeElement.events.selectCard(insCardEl);
-        });
-        insCardEl.addEventListener('insClose', () => {
-            StripeElement.events.removeCard(insCardEl);
-        });
-
-        if (idx === 0 && DOM.stripeField) {
-            insCardEl.setAttribute("active", "");
-            DOM.stripeField.value = card.payment_method_token;
-        }
-
-        divEl.appendChild(insCardEl);
-        cardList.appendChild(divEl);
-
-        if (DOM.step3) DOM.step3.classList.remove("hide"); // show 'Pay now' button
-    });
-}
 
 
 // ============================================================================
@@ -206,6 +75,110 @@ const Utils = {
 
   scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+
+
+// ============================================================================
+// PAYMENT BREAKDOWN MANAGER — renders order summary from sessionStorage data
+// ============================================================================
+
+const PaymentBreakdownManager = {
+  render(ticketsData) {
+    if (!ticketsData || ticketsData.length === 0) {
+      this.renderEmpty();
+      return;
+    }
+    const venueMap = this.groupTicketsByVenue(ticketsData);
+    const ticketCount = this.aggregateTickets(ticketsData);
+    const { orderSummaryHTML, subtotal } = this.buildOrderSummaryHTML(venueMap);
+    const { subtotal: calculatedSubtotal, totalTax, processingFee, total } =
+      this.calculateTotals(subtotal, ticketCount);
+    this.updateDOM(orderSummaryHTML, calculatedSubtotal, totalTax, processingFee, total);
+  },
+
+  renderEmpty() {
+    if (DOM.subtotalElem) DOM.subtotalElem.textContent = '$0.00';
+    if (DOM.taxElem) DOM.taxElem.textContent = '$0.00';
+    if (DOM.processingElem) DOM.processingElem.textContent = '$0.00';
+    if (DOM.totalElem) DOM.totalElem.textContent = '$0.00';
+    if (DOM.mobileTotalElem) DOM.mobileTotalElem.textContent = '$0.00';
+  },
+
+  groupTicketsByVenue(ticketsData) {
+    const venueMap = {};
+    ticketsData.forEach(ticket => {
+      const venue = ticket.ticket_venue_name || 'No Venue';
+      if (!venueMap[venue]) venueMap[venue] = [];
+      venueMap[venue].push(ticket);
+    });
+    return venueMap;
+  },
+
+  aggregateTickets(ticketsData) {
+    const ticketCount = {};
+    ticketsData.forEach(ticket => {
+      const key = `${ticket.ticket_venue_name || 'No Venue'}-${ticket.name}-${ticket.capacity_type}`;
+      if (!ticketCount[key]) ticketCount[key] = { ...ticket, quantity: 0 };
+      ticketCount[key].quantity++;
+    });
+    return ticketCount;
+  },
+
+  buildOrderSummaryHTML(venueMap) {
+    let orderSummaryHTML = '';
+    let subtotal = 0;
+    for (const [venue, tickets] of Object.entries(venueMap)) {
+      orderSummaryHTML += `<div class="payment-break-downs"><p class="payment-breakdown-venue-name">${venue}</p><div>`;
+      const venueCount = {};
+      tickets.forEach(ticket => {
+        const key = `${ticket.name}-${ticket.capacity_type}`;
+        if (!venueCount[key]) venueCount[key] = { ...ticket, quantity: 0 };
+        venueCount[key].quantity++;
+      });
+      for (const [, info] of Object.entries(venueCount)) {
+        const capacityType = info.capacity_type.charAt(0).toUpperCase() + info.capacity_type.slice(1);
+        const formattedPrice = parseFloat(info.price).toFixed(2);
+        const totalPrice = info.quantity * parseFloat(info.price);
+        subtotal += totalPrice;
+        orderSummaryHTML += `
+          <div class="payment-break-down-tier-container">
+            <div class="payment-break-down-tier-name">${capacityType} - ${info.name}</div>
+            <div class="payment-break-down-tier-price"><p>${info.quantity} x </p> $${formattedPrice}</div>
+          </div>`;
+      }
+      orderSummaryHTML += `</div></div>`;
+    }
+    return { orderSummaryHTML, subtotal };
+  },
+
+  calculateTotals(subtotal, ticketCount) {
+    let totalTax = 0;
+    for (const [, info] of Object.entries(ticketCount)) {
+      const itemSubtotal = info.price * info.quantity;
+      const taxValue = parseFloat(info.tax) || 0;
+      if (info.tax_type === 'percentage') {
+        totalTax += (itemSubtotal * taxValue) / 100;
+      } else {
+        totalTax += taxValue * (info.quantity || 1);
+      }
+    }
+    const tempTotal = subtotal + totalTax;
+    const processingFee = tempTotal * 0.017;
+    const total = tempTotal + processingFee;
+    return { subtotal, totalTax, processingFee, total };
+  },
+
+  updateDOM(orderSummaryHTML, subtotal, totalTax, processingFee, total) {
+    if (DOM.breakdownContainer) {
+      DOM.breakdownContainer.innerHTML = orderSummaryHTML;
+      DOM.breakdownContainer.style.display = 'flex';
+    }
+    if (DOM.subtotalElem) DOM.subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+    if (DOM.taxElem) DOM.taxElem.textContent = `$${totalTax.toFixed(2)}`;
+    if (DOM.processingElem) DOM.processingElem.textContent = `$${processingFee.toFixed(2)}`;
+    if (DOM.totalElem) DOM.totalElem.textContent = `$${total.toFixed(2)}`;
+    if (DOM.mobileTotalElem) DOM.mobileTotalElem.textContent = `$${total.toFixed(2)}`;
   }
 };
 
@@ -286,7 +259,7 @@ const OrderProcessor = {
 
 
 // ============================================================================
-// STEP HANDLER
+// STEP 3 HANDLER
 // ============================================================================
 
 const StepHandlers = {
@@ -379,16 +352,18 @@ window.addEventListener("load", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Wire up add-card buttons
-  document.querySelectorAll(".add-card-btn").forEach(btn => {
-    btn.addEventListener("insClick", handleAddCardClick);
-  });
-
   // Show payment container
   if (DOM.step3Container) DOM.step3Container.classList.remove("hide");
 
-  // Load saved credit cards
-  loadCards();
+  // Restore order summary from sessionStorage
+  if (ticketsData.length > 0) {
+    PaymentBreakdownManager.render(ticketsData);
+  }
+
+  // Load saved credit cards (function defined in ticket-payment.js)
+  if (typeof loadCards === "function") {
+    loadCards(isGuest);
+  }
 
   StepHandlers.handleStep3();
 });

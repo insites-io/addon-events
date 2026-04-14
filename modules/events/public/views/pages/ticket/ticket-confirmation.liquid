@@ -1,5 +1,5 @@
 ---
-slug: purchase-ticket-confirmation
+slug: ticket-confirmation
 layout: modules/website/website_default
 max_deep_level: 1
 authorization_policies:
@@ -22,6 +22,17 @@ metadata: {
     sitemap_change_frequency: "always",
 }
 --- 
+{% comment %} Guard: order must exist in session (set after payment) {% endcomment %}
+{% if context.session.order_uuid == blank %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
+
+{% comment %} Allocation complete — allow new purchases {% endcomment %}
+{%- liquid
+  session pending_allocation_order_id = null
+  session pending_allocation_event_uuid = null
+-%}
+
 {% graphql order_details = "modules/events/orders/get_order_via_uuid",
     uuid: context.session.order_uuid | dig: 'items' | dig: 'results' | first %}
 <div class="spacer section"></div>
@@ -44,47 +55,16 @@ metadata: {
 <div class="grid-container">
 <div class="grid-x grid-padding-x invoice-details form-group">
     <div  class="large-7 medium-12 small-12 cell">
-        {% include "modules/events/purchase_ticket/confirmation_step/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
+        {% include "modules/events/ticket/confirmation_step/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
     </div>
 
     <div  class="large-4 large-offset-1 medium-12 small-12 cell">
-        {% include "modules/events/purchase_ticket/order_summary" %}
+        {% include "modules/events/ticket/ticket_order_summary", order_id: order_details.id, event_uuid: order_details.event_uuid %}
     </div>
 </div>
 </div>
 
 </div>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        if (window.location.pathname.includes("/allocate-ticket") || window.location.pathname.includes("/purchase-ticket-confirmation")) {
-            const saved = localStorage.getItem("orderSummary");
-            if (saved) {
-            const data = JSON.parse(saved);
-
-            // Restore breakdown HTML
-            const breakdownEl = document.getElementById("payment-breakdown");
-            breakdownEl.innerHTML = data.breakdown;
-            breakdownEl.style.display = "block"; // force display
-
-            // Restore totals
-            document.getElementById("subtotal-price").textContent = data.subtotal;
-            document.getElementById("tax-price").textContent = data.tax;
-            document.getElementById("proccessing-price").textContent = data.processing;
-            document.getElementById("total-price").textContent = data.total;
-            document.getElementById("mobile-total-price").textContent = data.total;
-
-            // 🔒 Always hide discount section
-            document.querySelector(".discount-summary").classList.add("is_not_visible");
-            document.querySelector(".discount-summary-card").classList.add("is_not_visible");
-            }
-        }
-
-        const summaryContainer = document.getElementById("ticket-payment-summary-container")
-        summaryContainer.style.display = 'block'
-});
-</script>
 
 
 

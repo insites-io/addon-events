@@ -1,0 +1,32 @@
+query get_tickets_by_order (
+    $order_id: String!,
+    $event_uuid: String
+) {
+    items: records(
+        per_page: 1000,
+        filter: {
+            table: { value: "modules/insites_events/event_ticket" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "order_number", value: $order_id },
+                { name: "event_uuid", value: $event_uuid }
+            ]
+        }
+    ) {
+        results {
+            id
+            venue_area_name: property(name: "venue_area_name")
+            ticket_type: property(name: "ticket_type")
+            price: property_float(name: "price")
+            tax: property_float(name: "tax")
+            tax_type: property(name: "tax_type")
+            tier: related_record(
+                table: "modules/insites_events/event_pricing_tier"
+                foreign_property: "uuid"
+                join_on_property: "event_pricing_tier_uuid"
+            ) {
+                name: property(name: "name")
+            }
+        }
+    }
+}

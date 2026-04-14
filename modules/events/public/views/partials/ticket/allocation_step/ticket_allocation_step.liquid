@@ -20,7 +20,7 @@ metadata: {
 <div id="ticket-allocation-step">
 
     {% if show_element %}
-        {% include 'modules/events/purchase_ticket/event_details_card' %}
+        {% include 'modules/events/ticket/event_details_card' %}
         <div class="spacer xxx-large"></div>
     {% endif %}
     
@@ -35,7 +35,7 @@ metadata: {
     {% endif %}
     
 
-    {% include 'modules/events/purchase_ticket/allocation_step/ticket_allocation_section', event: event, order_id: order_id %}
+    {% include 'modules/events/ticket/allocation_step/ticket_allocation_section', event: event, order_id: order_id %}
 
     {% comment %} ? BUTTONS - Step 4 {% endcomment %}
     {% if show_element %}
@@ -55,7 +55,7 @@ metadata: {
         const submitTicketAllocation = document.getElementById("submit-ticket-allocation");
         if (submitTicketAllocation) {
             submitTicketAllocation.addEventListener("insClick", () => {
-            window.location.href = "/purchase-ticket-confirmation";
+            window.location.href = "/ticket-confirmation";
             });
         }
     });

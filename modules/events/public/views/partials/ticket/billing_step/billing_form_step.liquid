@@ -244,7 +244,7 @@ metadata: {
     
     {% comment %} Billing Address {% endcomment %}
     {% if has_profile %}
-        {% include "modules/events/purchase_ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
+        {% include "modules/events/ticket/billing_step/billing_form_address", company_uuid: company_uuid %}    
     {% else %}
 
         {% comment %} Responsive spacers {% endcomment %}

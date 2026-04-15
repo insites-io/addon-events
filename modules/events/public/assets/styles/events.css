@@ -1869,7 +1869,7 @@ ins-button.add-credit-card button.ins-button>div,
 
 .payment-breakdown-venue-name {
     color: var(--font-color-head);
-    font-family:  Archivo;
+    font-family: var(--font-family-02);
     font-size: 16px;
     font-style: normal;
     font-weight: 700;
@@ -2011,7 +2011,7 @@ ins-button.add-credit-card button.ins-button>div,
     font-size: 24px;
     color: #05051D;
     font-weight: 700;
-    font-family: 'DM Sans';
+    font-family: var(--font-family-01);
     width: 56px;   
     height: 56px;  
     display: flex;
@@ -2079,7 +2079,7 @@ ins-button.add-credit-card button.ins-button>div,
 
 .ticket-allocation-modal-button span {
   color:  #3044FF;
-  font-family: "DM Sans";
+  font-family: var(--font-family-01);
   font-size: 14px;
   font-style: normal;
   font-weight: 700;

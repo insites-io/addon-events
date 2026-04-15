@@ -31,7 +31,7 @@ metadata: {
 
 {% comment %} Get event details {% endcomment %}
 {% assign event_uuid = context.params.event %}
-{% assign order_id = context.params.order_id %}
+{% assign order_id = context.params.order_id | plus: 0 %}
 
 {%- graphql event = 'modules/events/events/get_event_by_uuid', uuid: event_uuid, order_id: order_id | dig: "items", "results" | first -%}
 {%- graphql venue = 'modules/events/events/get_venue_area', venue_uuid: event.venue_uuid | dig: "items", "results" | first -%}

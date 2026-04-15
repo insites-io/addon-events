@@ -1,5 +1,5 @@
 query get_tickets_by_order (
-    $order_id: String!,
+    $order_id: Int!,
     $event_uuid: String
 ) {
     items: records(
@@ -8,7 +8,7 @@ query get_tickets_by_order (
             table: { value: "modules/insites_events/event_ticket" }
             deleted_at: { exists: false }
             properties: [
-                { name: "order_number", value: $order_id },
+                { name: "order_number", value_int: $order_id },
                 { name: "event_uuid", value: $event_uuid }
             ]
         }

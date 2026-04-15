@@ -33,7 +33,7 @@ metadata: {
   {% endif %}
   "event_uuid": "{{ event_uuid }}",
   "purchased_by_uuid": "{{ user_uuid }}",
-  "order_id": "{{ order_id }}"
+  "order_id": {{ order_id | default: 'null' }}
 }
 {% endparse_json %}
 

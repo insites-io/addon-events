@@ -82,7 +82,7 @@ searchable: false
      "message": "Order successfully created",
      "data": {{ add_order  }}
      }
-     {%- session order_uuid = add_order.uuid -%}
+     {%- session event_order_uuid = add_order.uuid -%}
      {%- session last_purchased_user_uuid = add_order.order_contact.uuid -%}
      {%- session pending_allocation_order_id = add_order.id -%}
      {%- session pending_allocation_event_uuid = payload.event_uuid -%}

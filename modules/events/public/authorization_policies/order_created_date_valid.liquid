@@ -1,0 +1,17 @@
+---
+name: order_created_date_valid
+redirect_to: /upcoming-events
+flash_alert: Order confirmation page has expired.
+---
+{% graphql order = "modules/events/orders/get_order_via_uuid",
+    id: context.params.order_id | dig: 'items' | dig: 'results' | first %}
+
+{% assign now = 'now' | to_time %}
+
+{% comment %} Using plus filter will convert string into int {% endcomment %}
+{% assign diff = order.created_at | time_diff: now, 'minutes' | plus: 0 %}
+
+{% comment %} Allow user to see confirmation page for 15 minutes {% endcomment %}
+{%- if diff < 15 -%}
+    true
+{%- endif -%}

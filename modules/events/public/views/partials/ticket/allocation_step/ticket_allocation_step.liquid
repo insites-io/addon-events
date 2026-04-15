@@ -55,7 +55,7 @@ metadata: {
         const submitTicketAllocation = document.getElementById("submit-ticket-allocation");
         if (submitTicketAllocation) {
             submitTicketAllocation.addEventListener("insClick", () => {
-            window.location.href = "/ticket-confirmation";
+            window.location.href = "/ticket-confirmation?event={{ event_uuid }}&order_id={{ order_id }}";
             });
         }
     });

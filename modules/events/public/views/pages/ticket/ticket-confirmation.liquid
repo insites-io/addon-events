@@ -3,6 +3,7 @@ slug: ticket-confirmation
 layout: modules/website/website_default
 max_deep_level: 1
 authorization_policies:
+    - modules/events/order_created_date_valid
 metadata: {
     status: "published",
     heading: "Purchase Ticket Confirmation",
@@ -22,19 +23,16 @@ metadata: {
     sitemap_change_frequency: "always",
 }
 --- 
-{% comment %} Guard: order must exist in session (set after payment) {% endcomment %}
-{% if context.session.order_uuid == blank %}
-  {% redirect_to '/upcoming-events' %}
-{% endif %}
-
 {% comment %} Allocation complete — allow new purchases {% endcomment %}
+{%- assign order_id = context.params.order_id | plus: 0 -%}
 {%- liquid
   session pending_allocation_order_id = null
   session pending_allocation_event_uuid = null
 -%}
 
 {% graphql order_details = "modules/events/orders/get_order_via_uuid",
-    uuid: context.session.order_uuid | dig: 'items' | dig: 'results' | first %}
+    id: context.params.order_id | dig: 'items' | dig: 'results' | first %}
+
 <div class="spacer section"></div>
 <div class="thank-you">
     <div class="grid-x grid-padding-x  align-center">
@@ -44,7 +42,7 @@ metadata: {
             </div>
             <h1 class="heading-3">We've received your order</h1>
             <div class="spacer small"></div>
-            <p class="p-body p-dark">Your order has been received with order number <strong>{{ order_details.id }}</strong>. <br>You will receive an email confirmation shortly.</p> 
+            <p class="p-body p-dark">Your order has been received with order number <strong>{{ order_id }}</strong>. <br>You will receive an email confirmation shortly.</p>
             <div class='spacer x-large'></div>
 
         </div>
@@ -55,11 +53,11 @@ metadata: {
 <div class="grid-container">
 <div class="grid-x grid-padding-x invoice-details form-group">
     <div  class="large-7 medium-12 small-12 cell">
-        {% include "modules/events/ticket/confirmation_step/confirmation_step", is_disabled: is_disabled, is_visible: is_visible  %}
+        {% include "modules/events/ticket/confirmation_step/confirmation_step", is_disabled: is_disabled, is_visible: is_visible, order_details: order_details %}
     </div>
 
     <div  class="large-4 large-offset-1 medium-12 small-12 cell">
-        {% include "modules/events/ticket/ticket_order_summary", order_id: order_details.id, event_uuid: order_details.event_uuid %}
+        {% include "modules/events/ticket/ticket_order_summary", order_id: order_id, event_uuid: context.params.event %}
     </div>
 </div>
 </div>

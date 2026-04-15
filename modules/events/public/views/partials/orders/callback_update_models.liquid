@@ -142,7 +142,7 @@ metadata: {
 {% liquid
     session paybill_order_id = update_order.id
     session paybill_order_reference = update_order.order_reference
-    session order_uuid = update_order.uuid
+    session event_order_uuid = update_order.uuid
 %}
 
 {% if add_payment.id == nil %}

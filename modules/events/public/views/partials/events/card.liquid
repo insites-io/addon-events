@@ -8,7 +8,7 @@ metadata: {
      {% if list %}
      <div class="img-wrap">
           {% if item.event_image.url %}
-               <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
+               <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="920" height="585" alt="">
           {% else %}
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}

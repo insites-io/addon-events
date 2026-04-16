@@ -250,7 +250,11 @@ metadata: {
           <div class="grid-x grid-padding-x event-card-wrap">
                {% for item in events.results %}
                     <div class="cell large-4 medium-6 small-12">
-                         {% include 'modules/events/events/card', item: item, list: true, page: page %}
+                         {% assign is_lcp = false %}
+                         {% if forloop.index <= 3 %}
+                              {% assign is_lcp = true %}
+                         {% endif %}
+                         {% include 'modules/events/events/card', item: item, list: true, page: page, is_lcp: is_lcp %}
                          <div class="spacer xxx-large hide-for-small-only"></div>
                     </div>
                     <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>

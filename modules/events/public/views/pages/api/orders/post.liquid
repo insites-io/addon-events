@@ -54,6 +54,7 @@ searchable: false
      {%- assign payload = payload | add_hash_key: "processing_fee", computed.processing_fee -%}
      {%- assign payload = payload | add_hash_key: "total_tax_amount", computed.total_tax_amount -%}
      {%- assign payload = payload | add_hash_key: "total_amount", computed.total_amount -%}
+     {%- assign payload = payload | add_hash_key: "order_total", computed.order_total -%}
      {%- assign payload = payload | add_hash_key: "total_amount_paid", computed.total_amount_paid -%}
      {%- assign payload = payload | add_hash_key: "total_discount_amount", computed.total_discount_amount -%}
      {%- assign payload = payload | add_hash_key: "total_shipping_amount", computed.total_shipping_amount -%}

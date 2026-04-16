@@ -83,9 +83,9 @@ metadata: {
     "card_expiry_month": "{{ card.exp_month }}",
     "card_expiry_year": "{{ card.exp_year }}",
     "currency": "{{ settings.currency }}",
-    "order_value": {{ payload.total_amount }},
-    "amount": {{ payload.total_amount | times: 1.0 }},
-    "amount_due": {{ payload.total_amount }},
+    "order_value": {{ payload.order_total }},
+    "amount": {{ payload.order_total | times: 1.0 }},
+    "amount_due": {{ payload.order_total }},
     "notes": "{{ form.properties.notes | default: "No notes available" }}"
 }
 {% endparse_json %}
@@ -127,6 +127,7 @@ metadata: {
     "order_status": "{{ order_status | default: "" }}",
     "order_payment_status" : "{{ order_payment_status | default: "" }}",
     "total_amount" : {{ order_data.total_amount |  times: 1.0 | default: 0.0   }},
+    "order_total" : {{ order_data.total_amount |  times: 1.0 | default: 0.0   }},
     "total_tax_amount": {{ order_data.total_tax_amount | times: 1.0 | default: 0.0   }},
     "date_time": "{{ order_data.date_time | default: "" }}",
     "currency": "{{ order_data.currency | default: "" }}",
@@ -200,7 +201,7 @@ metadata: {
                         "order_status": "{{ order_status }}",
                         "order_payment_status" : "{{ order_payment_status }}",
                         "amount_due" : "{{ amount_due }}",
-                        "total_amount" : "{{ order_data.total_amount }}",
+                        "order_total" : "{{ order_data.total_amount }}",
                         "total_shipping_amount": "0",
                         "total_tax_amount": "{{ order_data.total_tax_amount }}",
                         "order_value" : "{{ computed.total_amount }}"

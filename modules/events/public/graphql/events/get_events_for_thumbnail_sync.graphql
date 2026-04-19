@@ -1,0 +1,29 @@
+query get_events_for_thumbnail_sync (
+    $page: Int = 1
+) {
+    results: records(
+        page: $page
+        per_page: 200
+        filter: {
+            table: { value: "modules/insites_events/event" }
+        }
+    ) {
+        total_pages
+        current_page
+        items: results {
+            id
+            uuid: property(name: "uuid")
+            event_image: property_upload(name: "event_image") {
+                url
+            }
+            custom_fields: related_records(
+                table: "modules/ins_events/event_custom_field"
+                foreign_property: "event_uuid"
+                join_on_property: "uuid"
+            ) {
+                id
+                image_thumbnail_source: property(name: "image_thumbnail_source")
+            }
+        }
+    }
+}

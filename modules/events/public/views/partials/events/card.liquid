@@ -5,10 +5,12 @@ metadata: {
 ---
 
 <article class="{% if list %}wrap{% else %}event-card-featured{% endif %}" aria-labelledby="event-title-{{ item.slug }}">
+     {% assign cf = item.custom_fields | first %}
+     {% assign card_image = cf.image_thumbnail.url | default: item.event_image.url %}
      {% if list %}
      <div class="img-wrap">
-          {% if item.event_image.url %}
-               <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="920" height="585" alt="">
+          {% if card_image %}
+               <img src="{{ card_image | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="920" height="585" alt="">
           {% else %}
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}
@@ -17,8 +19,8 @@ metadata: {
      {% else %}
      <div class="wrap">
           <div class="img-wrap">
-               {% if item.event_image.url %}
-                    <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
+               {% if card_image %}
+                    <img src="{{ card_image | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
                {% else %}
                     {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                {% endif %}

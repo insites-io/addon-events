@@ -61,7 +61,17 @@ query get_events (
       
       event_image: property_upload(name: "event_image") {
         url
-      }        
+      }
+
+      custom_fields: related_records(
+        table: "modules/ins_events/event_custom_field"
+        foreign_property: "event_uuid"
+        join_on_property: "uuid"
+      ) {
+        image_thumbnail: property_upload(name: "image_thumbnail") {
+          url
+        }
+      }
 
       category: related_record(
         table: "modules/insites_events/event_system_field"

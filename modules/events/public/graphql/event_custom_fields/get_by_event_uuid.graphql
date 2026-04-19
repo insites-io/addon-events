@@ -1,0 +1,24 @@
+query get_event_custom_field_by_event_uuid (
+    $event_uuid: String!
+) {
+    results: records(
+        per_page: 1
+        filter: {
+            table: { value: "modules/ins_events/event_custom_field" }
+            properties: [
+                { name: "event_uuid", value: $event_uuid }
+            ]
+        }
+    ) {
+        results {
+            id
+            event_uuid: property(name: "event_uuid")
+            image_thumbnail_source: property(name: "image_thumbnail_source")
+            image_thumbnail: property_upload(name: "image_thumbnail") {
+                url
+                file_name
+                extension
+            }
+        }
+    }
+}

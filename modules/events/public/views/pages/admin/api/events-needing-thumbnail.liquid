@@ -1,0 +1,54 @@
+---
+slug: admin/api/events-needing-thumbnail
+format: json
+method: get
+searchable: false
+---
+
+{% assign page = context.params.page | plus: 0 | default: 1 %}
+
+{% graphql data = 'modules/events/events/get_events_for_thumbnail_sync',
+    page: page
+%}
+
+{% log data, type: '==test get_events_for_thumbnail_sync' %}
+
+{% assign events_list = data.results.items %}
+
+{
+    "total_pages": {{ data.results.total_pages | default: 1 }},
+    "current_page": {{ data.results.current_page | default: 1 }},
+    "debug": [
+        {% assign first_debug = true %}
+        {% for event in events_list %}
+            {% assign image_url = event.event_image.url %}
+            {% assign cf = event.custom_fields | first %}
+            {% assign stored_source = cf.image_thumbnail_source %}
+            {% unless first_debug %},{% endunless %}
+            {% assign first_debug = false %}
+            {
+                "uuid": {{ event.uuid | json }},
+                "event_image": {{ image_url | json }},
+                "stored_source": {{ stored_source | json }}
+            }
+        {% endfor %}
+    ],
+    "events": [
+        {% assign first_item = true %}
+        {% for event in events_list %}
+            {% assign image_url = event.event_image.url %}
+            {% assign cf = event.custom_fields | first %}
+            {% assign stored_source = cf.image_thumbnail_source %}
+            {% if image_url != blank %}                
+                {% unless stored_source == image_url %}
+                    {% unless first_item %},{% endunless %}
+                    {% assign first_item = false %}
+                    {
+                        "uuid": {{ event.uuid | json }},
+                        "image_src": {{ image_url | json }}
+                    }
+                {% endunless %}
+            {% endif %}
+        {% endfor %}
+    ]
+}

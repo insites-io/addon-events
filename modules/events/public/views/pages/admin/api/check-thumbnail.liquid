@@ -1,0 +1,22 @@
+---
+slug: admin/api/check-thumbnail
+format: json
+method: get
+searchable: false
+---
+
+{% assign event_uuid = context.params.event_uuid %}
+
+{% graphql custom_field = 'modules/events/event_custom_fields/get_by_event_uuid',
+    event_uuid: event_uuid
+%}
+{% assign cf = custom_field.results.results | first %}
+
+{% if cf.id != blank %}
+    {
+        "id": "{{ cf.id }}",
+        "image_thumbnail_source": {{ cf.image_thumbnail_source | json }}
+    }
+{% else %}
+    { "id": null, "image_thumbnail_source": null }
+{% endif %}

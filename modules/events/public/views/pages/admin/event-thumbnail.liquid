@@ -1,0 +1,192 @@
+---
+slug: admin/event-thumbnail
+searchable: false
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sync Event Thumbnails</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 1.25rem; margin-bottom: 6px; }
+    p.subtitle { font-size: 0.875rem; color: #6b7280; margin-bottom: 24px; }
+    button { padding: 10px 24px; background: #1a56db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.875rem; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #summary { margin-top: 16px; font-size: 0.875rem; min-height: 20px; }
+    #summary.error { color: #e02424; }
+    #summary.success { color: #057a55; }
+    #log { margin-top: 16px; font-size: 0.8125rem; font-family: monospace; max-height: 420px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 12px; display: none; }
+    .log-entry { margin: 2px 0; }
+    .log-ok   { color: #057a55; }
+    .log-err  { color: #e02424; }
+    .log-info { color: #1a56db; }
+  </style>
+</head>
+<body>
+
+  <h1>Sync Event Thumbnails</h1>
+  <p class="subtitle">Finds events where <code>event_image</code> differs from the stored thumbnail source and regenerates the 600&times;383 thumbnail.</p>
+
+  <button id="run-btn" onclick="runSync()">Start Sync</button>
+
+  <div id="summary"></div>
+  <div id="log"></div>
+
+  <script>
+    const W = 600;
+    const H = 383;
+
+    function setSummary(msg, type = '') {
+      const el = document.getElementById('summary');
+      el.textContent = msg;
+      el.className = type;
+    }
+
+    function addLog(msg, type = '') {
+      const log = document.getElementById('log');
+      log.style.display = 'block';
+      const entry = document.createElement('div');
+      entry.className = 'log-entry' + (type ? ' log-' + type : '');
+      entry.textContent = msg;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function getJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
+
+    async function postJson(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    }
+
+    async function resizeImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onerror = () => reject(new Error('Failed to load image — check CORS on source URL'));
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = W;
+          canvas.height = H;
+          const ctx = canvas.getContext('2d');
+
+          const srcRatio = img.width / img.height;
+          const dstRatio = W / H;
+          let sx, sy, sw, sh;
+          if (srcRatio > dstRatio) {
+            sh = img.height; sw = sh * dstRatio;
+            sx = (img.width - sw) / 2; sy = 0;
+          } else {
+            sw = img.width; sh = sw / dstRatio;
+            sx = 0; sy = (img.height - sh) / 2;
+          }
+
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')), 'image/webp', 0.85);
+        };
+        img.src = src;
+      });
+    }
+
+    async function uploadToS3(uploadUrl, payload, blob) {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+      fd.append('file', blob, 'thumbnail.webp');
+      const res = await fetch(uploadUrl, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error(`S3 upload failed (${res.status})`);
+      const key = payload.key.replace('${filename}', 'thumbnail.webp');
+      return uploadUrl.replace(/\/$/, '') + '/' + key;
+    }
+
+    async function processEvent(event) {
+      const blob = await resizeImage(event.image_src);
+      const { upload_url, upload_url_payload } = await getJson('/admin/api/thumbnail-upload-url');
+      const thumbnailUrl = await uploadToS3(upload_url, upload_url_payload, blob);
+      const result = await postJson('/admin/api/save-thumbnail', {
+        event_uuid:    event.uuid,
+        thumbnail_url: thumbnailUrl,
+        source_url:    event.image_src
+      });
+      if (result.status !== 'ok') throw new Error(result.message || 'save-thumbnail failed');
+    }
+
+    async function runSync() {
+      const btn = document.getElementById('run-btn');
+      btn.disabled = true;
+
+      const log = document.getElementById('log');
+      log.innerHTML = '';
+      log.style.display = 'none';
+
+      let updated = 0;
+      let failed  = 0;
+
+      try {
+        let page = 1;
+        let totalPages = 1;
+
+        do {
+          setSummary(`Scanning events (page ${page} of ${totalPages})...`);
+          const data = await getJson(`/admin/api/events-needing-thumbnail?page=${page}`);
+          totalPages = data.total_pages;
+
+          if (data.debug) {
+            addLog(`--- page ${page} scan (${data.debug.length} events) ---`, 'info');
+            for (const row of data.debug) {
+              addLog(`  uuid: ${row.uuid}`, 'info');
+              addLog(`    event_image:   ${row.event_image || '(blank)'}`, 'info');
+              addLog(`    stored_source: ${row.stored_source || '(blank)'}`, 'info');
+            }
+          }
+
+          if (data.events.length === 0 && page === 1 && totalPages <= 1) {
+            setSummary('All thumbnails are already up to date.', 'success');
+            btn.disabled = false;
+            return;
+          }
+
+          for (const event of data.events) {
+            setSummary(`Updating ${updated + failed + 1} — ${event.uuid}...`);
+            try {
+              await processEvent(event);
+              updated++;
+              addLog(`✓ ${event.uuid}`, 'ok');
+            } catch (err) {
+              failed++;
+              addLog(`✗ ${event.uuid}: ${err.message}`, 'err');
+              console.error(event.uuid, err);
+            }
+          }
+
+          page++;
+        } while (page <= totalPages);
+
+        const parts = [];
+        if (updated) parts.push(`${updated} updated`);
+        if (failed)  parts.push(`${failed} failed`);
+        if (!parts.length) parts.push('nothing to update');
+        setSummary(`Done — ${parts.join(', ')}.`, failed ? 'error' : 'success');
+
+      } catch (err) {
+        setSummary(`Error: ${err.message}`, 'error');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+</body>
+</html>

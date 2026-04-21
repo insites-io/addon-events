@@ -8,14 +8,14 @@ metadata: {
      This banner is being used in:
      - /upcoming-events
      - /previous-events
-     - portal/upcoming
-     - portal/previous
+     - portal: itinerary-upcoming
+     - portal: itinerary-previous
 {% endcomment %}
 
 <div class="wrap event-banner" >
      <div class="img-wrap">
           {% if event.event_image.url %}
-               <img src="{{ event.event_image.url | replace: ' ', '%20' | escape }}" decoding="async" width="920" height="585" alt="{{ event.event_name }}">          
+               <img src="{{ event.event_image.url | replace: ' ', '%20' | escape }}" fetchpriority="high" decoding="async" width="920" height="585" alt="{{ event.event_name }}">          
           {% endif %}
      </div>
 </div>

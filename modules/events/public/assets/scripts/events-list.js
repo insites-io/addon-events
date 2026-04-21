@@ -91,9 +91,10 @@ async function fetchAndReplaceGrid(overrides) {
 
     const fetchParams = new URLSearchParams({ page_type: pageType, ...merged });
 
-    // Show skeletons matching the current page size
+    // Read offsetTop before the DOM write to avoid a forced reflow.
+    const scrollTarget = cardGrid.offsetTop - 100;
     cardGrid.innerHTML = buildSkeletonGrid(merged.per_page || 12);
-    window.scrollTo({ top: cardGrid.offsetTop - 100, behavior: 'smooth' });
+    window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
 
     try {
         const response = await fetch(`/api/events/list-results?${fetchParams}`);
@@ -151,6 +152,9 @@ if (searchKey && AJAX_PAGE_TYPES.includes(pageType)) {
         const iconEl    = searchKey.querySelector('.icon-search-1') || searchKey.querySelector('.icon-search');
 
         if (!inputEl || !inputWrap || !iconEl) return false;  // not ready yet
+
+        // aria-label on the custom element isn't passed through — apply it to the real input.
+        inputEl.setAttribute('aria-label', inputEl.placeholder);
 
         let closeIcon = null;
 

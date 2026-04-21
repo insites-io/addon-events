@@ -18,6 +18,21 @@ const GalleriesModule = {
          galleriesPagination.pageSize = perPage;
          galleriesPagination.paginationText = "Items per page";
          galleriesPagination.addEventListener('insPaginationChange', this.paginationHandler);
+
+         // ins-table renders its <select> asynchronously — wait for it to appear
+         // then add aria-label to fix "Select has no associated label" Lighthouse audit.
+         const labelSelect = () => {
+             const select = galleriesPagination.querySelector('select');
+             if (!select) return false;
+             select.setAttribute('aria-label', galleriesPagination.paginationText);
+             return true;
+         };
+         if (!labelSelect()) {
+             const observer = new MutationObserver(() => {
+                 if (labelSelect()) observer.disconnect();
+             });
+             observer.observe(galleriesPagination, { childList: true, subtree: true });
+         }
      },
 
      setupModal() {
@@ -26,6 +41,23 @@ const GalleriesModule = {
          this.galleriesCarousel = document.getElementById('galleries-carousel');
          this.currentSlideIndex = 0;
          this.totalSlides = document.querySelectorAll('#galleries-carousel-img .img-wrap').length;
+
+         // ins-carousel renders its nav buttons asynchronously — wait for them to appear
+         // then label them so screen readers can announce "Previous slide" / "Next slide".
+         const labelCarouselButtons = () => {
+             const prevBtn = this.galleriesCarousel.querySelector('button:has(.icon-angle-left)');
+             const nextBtn = this.galleriesCarousel.querySelector('button:has(.icon-angle-right)');
+             if (!prevBtn || !nextBtn) return false;
+             prevBtn.setAttribute('aria-label', 'Previous slide');
+             nextBtn.setAttribute('aria-label', 'Next slide');
+             return true;
+         };
+         if (!labelCarouselButtons()) {
+             const observer = new MutationObserver(() => {
+                 if (labelCarouselButtons()) observer.disconnect();
+             });
+             observer.observe(this.galleriesCarousel, { childList: true, subtree: true });
+         }
 
          const galleryItems = document.querySelectorAll('#event-galleries .pagination-item');
          galleryItems.forEach(galleryItem => {

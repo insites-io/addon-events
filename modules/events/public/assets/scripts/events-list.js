@@ -15,6 +15,22 @@ if (dataElement) {
     paginationTable.pageSize = paginationData.pageSize;
     paginationTable.paginationText = paginationData.paginationText;
     paginationTable.addEventListener('insPaginationChange', handlePaginationChange);
+
+    // ins-table renders its <select> asynchronously, so we wait for it to appear
+    // before adding aria-label — fixes "Select has no associated label" Lighthouse audit.
+    const labelPaginationSelect = () => {
+      const select = paginationTable.querySelector('select');
+      if (!select) return false;
+      select.setAttribute('aria-label', paginationData.paginationText);
+      return true;
+    };
+
+    if (!labelPaginationSelect()) {
+      const observer = new MutationObserver(() => {
+        if (labelPaginationSelect()) observer.disconnect();
+      });
+      observer.observe(paginationTable, { childList: true, subtree: true });
+    }
   }
 }
 

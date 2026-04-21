@@ -10,7 +10,7 @@ metadata: {
      {% if list %}
      <div class="img-wrap">
           {% if card_image %}
-               <img src="{{ card_image | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="920" height="585" alt="">
+               <img src="{{ card_image | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="420" height="268" alt="">
           {% else %}
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}
@@ -20,7 +20,7 @@ metadata: {
      <div class="wrap">
           <div class="img-wrap">
                {% if card_image %}
-                    <img src="{{ card_image | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="">
+                    <img src="{{ card_image | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="420" height="268" alt="">
                {% else %}
                     {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                {% endif %}
@@ -60,7 +60,7 @@ metadata: {
           {% endif %}                         
           <div class="event-button-wrap">
                <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}" aria-label="View details for {{ item.event_name | strip | replace: '"', "" }}">
-                    <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label=""></ins-button>
+                    <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label="" inert></ins-button>
                </a>
           </div>                         
      </div>

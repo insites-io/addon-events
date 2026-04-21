@@ -94,12 +94,9 @@ const GalleriesModule = {
      },
 
      updateCarouselNav() {
-         const buttons = Array.from(this.galleriesCarousel.querySelectorAll('button'));
-         if (buttons.length < 2) return;
-
-         buttons.sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
-         const prevBtn = buttons[0];
-         const nextBtn = buttons[buttons.length - 1];
+         const prevBtn = this.galleriesCarousel.querySelector('button:has(.icon-angle-left)');
+         const nextBtn = this.galleriesCarousel.querySelector('button:has(.icon-angle-right)');
+         if (!prevBtn || !nextBtn) return;
 
          prevBtn.style.visibility = this.currentSlideIndex === 0 ? 'hidden' : '';
          nextBtn.style.visibility = this.currentSlideIndex >= this.totalSlides - 1 ? 'hidden' : '';

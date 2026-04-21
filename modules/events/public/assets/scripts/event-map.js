@@ -36,11 +36,21 @@ var MapView = (function () {
          events: {
              initEventListeners: function () {
                  const dataElement = document.getElementById('map-data');
+                 const mapContainer = document.getElementById('map-container');
 
-                 if (dataElement) {
-                     const mapData = JSON.parse(dataElement.textContent);
+                 if (!dataElement || !mapContainer) return;
+
+                 const mapData = JSON.parse(dataElement.textContent);
+
+                 // Defer map initialisation until the container is near the viewport so
+                 // Google Maps reflows don't happen on the critical rendering path.
+                 const observer = new IntersectionObserver((entries, obs) => {
+                     if (!entries[0].isIntersecting) return;
+                     obs.disconnect();
                      waitForGoogleMaps(() => initMap(mapData));
-                 }
+                 }, { rootMargin: '200px' });
+
+                 observer.observe(mapContainer);
              }
          }
      };
@@ -48,6 +58,6 @@ var MapView = (function () {
 
  window.MapView = MapView;
 
- setTimeout(() => {
+ document.addEventListener('DOMContentLoaded', () => {
      MapView.events.initEventListeners();
- }, 200);
+ });

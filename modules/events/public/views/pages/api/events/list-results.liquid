@@ -25,6 +25,13 @@ searchable: false
 { "properties": [{ "name": "start_date_time", "order": "{{ order | default: 'ASC' }}" }] }
 {% endparse_json %}
 
+{% if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' %}
+    {% graphql user_tickets = "modules/events/event_tickets/get_user_purchased_tickets",
+        purchased_by_uuid: context.current_user.external_id %}
+    {% assign user_event_uuids = user_tickets.items.results | map: 'event_uuid' %}
+{% endif %}
+
+
 {% parse_json category_params %}
 { "page": 1, "size": 50, "system_field": "event_category" }
 {% endparse_json %}
@@ -36,10 +43,13 @@ searchable: false
 {
     "page": {{ page_num }},
     "size": {{ per_page }},
-    {% if page_type == 'upcoming-events' %}
+    {% if page_type == 'upcoming-events' or page_type == 'itinerary-upcoming' %}
         "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
-    {% elsif page_type == 'previous-events' %}
+    {% elsif page_type == 'previous-events' or page_type == 'itinerary-previous' %}
         "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+    {% endif %}
+    {% if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' %}
+        "uuids": {{ user_event_uuids | default: '[]' }},
     {% endif %}
     {% if selected_category_uuid and selected_category_uuid != '' %}
         "category_uuid": "{{ selected_category_uuid }}",

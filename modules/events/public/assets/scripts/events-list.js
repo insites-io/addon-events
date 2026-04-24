@@ -34,7 +34,7 @@ if (dataElement) {
   }
 }
 
-const AJAX_PAGE_TYPES = ['upcoming-events', 'previous-events'];
+const AJAX_PAGE_TYPES = ['upcoming-events', 'previous-events', 'itinerary-upcoming', 'itinerary-previous'];
 
 function buildSkeletonGrid(count) {
     const skeletonCard = `

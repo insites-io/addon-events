@@ -12,7 +12,7 @@ All notable changes to the Events Addon are documented here.
 - Category and location filter options are now scoped to only show values that have associated events
 - Ticket purchase flow restructured for improved reliability and maintainability
 - Ticket confirmation page restructured for improved reliability and maintainability
-- Ecommerce and events modules brought up to date
+- Ecommerce and Events modules brought up to date
 
 ### Fixed
 - Layout and visual inconsistencies across the homepage, event list, event detail view, and all ticket purchase steps

@@ -15,6 +15,7 @@ query get_tickets_by_order (
     ) {
         results {
             id
+            created_at
             venue_area_name: property(name: "venue_area_name")
             ticket_type: property(name: "ticket_type")
             price: property_float(name: "price")

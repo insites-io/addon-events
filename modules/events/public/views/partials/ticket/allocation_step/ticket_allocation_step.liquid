@@ -54,8 +54,14 @@ metadata: {
     document.addEventListener("DOMContentLoaded", () => {
         const submitTicketAllocation = document.getElementById("submit-ticket-allocation");
         if (submitTicketAllocation) {
-            submitTicketAllocation.addEventListener("insClick", () => {
-            window.location.href = "/ticket-confirmation?event={{ event_uuid }}&order_id={{ order_id }}";
+            submitTicketAllocation.addEventListener("insClick", async () => {
+                submitTicketAllocation.loading = true;
+                try {
+                    await apiServices.processRequest("post", "/set-confirmation-timestamp", {});
+                } catch (e) {
+                    // non-blocking — redirect regardless
+                }
+                window.location.href = "/ticket-confirmation?event={{ event_uuid }}&order_id={{ order_id }}";
             });
         }
     });

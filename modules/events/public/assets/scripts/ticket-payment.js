@@ -41,28 +41,14 @@ document.addEventListener("stripe-ready", () => {
 });
 
 
-// ============================================================================
-// RESTORE STATE FROM SESSION STORAGE
-// ============================================================================
-
-const _saved = JSON.parse(sessionStorage.getItem('purchaseTicketData') || '{}');
-let ticketsData = _saved.ticketsData || [];
-let selectedTickets = _saved.selectedTickets || [];
-let userPayload = _saved.userPayload || {};
-let billingPayload = _saved.billingPayload || {};
-// Determine isGuest from server-rendered DOM — stripe-modal is only rendered
-// for logged-in members (server-side has_profile = true), so its presence is
-// the authoritative signal. This is more reliable than sessionStorage, which
-// may be missing (direct navigation) or contain a wrong value from the API.
+// isGuest: stripe-modal is only rendered for logged-in members (server-side
+// has_profile = true), so its presence is the authoritative signal.
 const isGuest = !document.getElementById('stripe-modal');
 
 const ticketPurchaseData = {
-  tickets: ticketsData,
   order: {},
   createdTickets: []
 };
-
-if (_saved.orderTotals) window.orderTotals = _saved.orderTotals;
 
 
 // ============================================================================
@@ -225,40 +211,21 @@ const OrderProcessor = {
     return false;
   },
 
-  transformTicketData(ticketsData, orderNumber) {
-    const ticketPayload = [];
-    const eventUuid = DOM.eventUuidHidden?.value;
-    ticketsData.forEach(ticket => {
-      const baseTicket = {
-        ticket_type: ticket.capacity_type,
-        venue_area_name: ticket.ticket_venue_name,
-        event_uuid: eventUuid,
-        "venue.uuid": ticket.venue_uuid,
-        "event_pricing_division.uuid": ticket.event_pricing_division_uuid,
-        "event_pricing_tier.uuid": ticket["event_pricing_tier.uuid"],
-        price: parseFloat(ticket.price),
-        tax: ticket.tax || null,
-        tax_type: ticket.tax_type || null,
-        venue_name: ticket.venue_name || null,
-        order_number: parseInt(orderNumber),
-        allocation_status: "unallocated"
-      };
-      if (ticket.capacity_type === "group") {
-        baseTicket.group_id = `GROUP-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-        baseTicket.allocation = "unallocated";
-        baseTicket.price_includes_tax = null;
-      }
-      ticketPayload.push(baseTicket);
-    });
-    return ticketPayload;
+  async retryPayment(orderPayload) {
+    try {
+      const response = await orderServices.updateOrder(orderPayload);
+      if (response.data) return response;
+    } catch (error) {
+      console.error("Update order error:", error);
+    }
+    return false;
   },
 
-  async createTickets(ticketPayload) {
+  async createTickets() {
     const urlParams = new URLSearchParams(window.location.search);
     const eventParam = urlParams.get("event");
-    const queryString = encodeURIComponent(JSON.stringify(ticketPayload));
     try {
-      const response = await ticketServices.createTickets(eventParam, queryString);
+      const response = await ticketServices.createTickets(eventParam);
       if (response.data) return response;
     } catch (error) {
       console.error("Ticket creation error:", error);
@@ -266,20 +233,10 @@ const OrderProcessor = {
     return false;
   },
 
-  async buildOrderPayload(selectedTickets) {
-    const eventUuid = DOM.eventUuidHidden?.value;
-    const stripeCreditCard = DOM.stripeField?.value || "";
+  async buildOrderPayload() {
     return {
-      event_uuid: eventUuid,
-      order_company_name: userPayload.company_name,
-      order_company_uuid: userPayload.company_uuid,
-      order_contact_first_name: userPayload.first_name,
-      order_contact_last_name: userPayload.last_name,
-      order_contact_email: userPayload.email,
-      order_contact_phone_country_code: userPayload.mobile_phone_country_code,
-      order_contact_phone_number: userPayload.mobile_phone_number,
-      stripe_credit_card: stripeCreditCard,
-      selectedTickets: selectedTickets
+      event_uuid: DOM.eventUuidHidden?.value,
+      stripe_credit_card: DOM.stripeField?.value || ""
     };
   }
 };
@@ -293,11 +250,80 @@ const StepHandlers = {
   async handleStep3() {
     if (!DOM.step3) return;
 
+    const isRetryMode = !!document.getElementById('ticket_retry_mode');
+    let isPaymentRetryMode = !!document.getElementById('payment_retry_mode');
+
     DOM.step3.addEventListener("insClick", async function (event) {
       Utils.showLoading();
       DOM.step3.loading = true;
       const steps = await DOM.stepper.getAllSteps();
       const thirdStep = steps[2];
+
+      // Ticket retry mode: payment already processed, just re-run ticket creation.
+      if (isRetryMode) {
+        thirdStep.hasError = false;
+        DOM.stepper.next();
+        const ticketResponse = await OrderProcessor.createTickets();
+        const orderId = document.getElementById('pending_order_id')?.value;
+        if (!ticketResponse || ticketResponse.data?.has_error) {
+          DOM.step3.loading = false;
+          thirdStep.hasError = true;
+          thirdStep.setAttribute("has-error", true);
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('error', "Failed to create tickets. Please try again or contact support.");
+        } else {
+          ticketPurchaseData.createdTickets = ticketResponse.data;
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('success', "Thank you! We've received your payment and your order is complete.");
+          setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventParam = urlParams.get("event");
+            window.location.href = `/ticket-allocate?event=${eventParam}&order_id=${orderId}`;
+          }, 300);
+        }
+        return;
+      }
+
+      // Payment retry mode: order exists but payment failed, retry with current card.
+      if (isPaymentRetryMode) {
+        const orderPayload = await OrderProcessor.buildOrderPayload();
+        const orderResponse = await OrderProcessor.retryPayment(orderPayload);
+        if (!orderResponse || orderResponse.data?.has_error) {
+          DOM.step3.loading = false;
+          thirdStep.hasError = true;
+          thirdStep.setAttribute("has-error", true);
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          const retryStripeMsg = orderResponse?.data?.message?.stripe?.error?.message;
+          App.events.swal("error", "Payment Failed", retryStripeMsg || "Your payment failed. Please check the details and try again.", "OK", false);
+          return;
+        }
+        ticketPurchaseData.order = orderResponse.data;
+        thirdStep.hasError = false;
+        DOM.stepper.next();
+        const ticketResponse = await OrderProcessor.createTickets();
+        if (!ticketResponse || ticketResponse.data?.has_error) {
+          DOM.step3.loading = false;
+          thirdStep.hasError = true;
+          thirdStep.setAttribute("has-error", true);
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('error', "Failed to create tickets. Please try again.");
+        } else {
+          ticketPurchaseData.createdTickets = ticketResponse.data;
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('success', "Thank you! We've received your payment and your order is complete.");
+          setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventParam = urlParams.get("event");
+            window.location.href = `/ticket-allocate?event=${eventParam}&order_id=${orderResponse.data.data.id}`;
+          }, 300);
+        }
+        return;
+      }
 
       const isValid = await TicketScript.methods.validateForm(event, DOM.step3Container);
       if (!isValid) {
@@ -308,12 +334,8 @@ const StepHandlers = {
         return;
       }
 
-      const orderPayload = await OrderProcessor.buildOrderPayload(selectedTickets);
-      const orderResponse = await OrderProcessor.saveOrder({
-        ...orderPayload,
-        ...billingPayload,
-        tickets: ticketPurchaseData.tickets
-      });
+      const orderPayload = await OrderProcessor.buildOrderPayload();
+      const orderResponse = await OrderProcessor.saveOrder(orderPayload);
 
       if (orderResponse.data.has_ticket_availability_error === true) {
         const confirm = await App.events.swal(
@@ -329,34 +351,35 @@ const StepHandlers = {
       if (!orderResponse.data.has_error) {
         ticketPurchaseData.order = orderResponse.data;
 
-        setTimeout(async () => {
-          thirdStep.hasError = false;
-          DOM.stepper.next();
+        thirdStep.hasError = false;
+        DOM.stepper.next();
 
-          const ticketPayload = OrderProcessor.transformTicketData(
-            ticketPurchaseData.tickets,
-            orderResponse.data.data.id
-          );
-          const ticketResponse = await OrderProcessor.createTickets(ticketPayload);
+        const ticketResponse = await OrderProcessor.createTickets();
 
-          if (!ticketResponse.data.has_error) {
-            ticketPurchaseData.createdTickets = ticketResponse.data;
-            Utils.scrollToTop();
-            Utils.hideLoading();
-            App.events.notyf('success', "Thank you! We've received your payment and your order is complete.");
-            setTimeout(() => {
-              const urlParams = new URLSearchParams(window.location.search);
-              const eventParam = urlParams.get("event");
-              window.location.href = `/ticket-allocate?event=${eventParam}&order_id=${orderResponse.data.data.id}`;
-            }, 300);
-          } else {
-            App.events.notyf('error', "Failed to create tickets. Please try again.");
-            thirdStep.hasError = true;
-            thirdStep.setAttribute("has-error", true);
-          }
-        }, 500);
+        if (!ticketResponse.data.has_error) {
+          ticketPurchaseData.createdTickets = ticketResponse.data;
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('success', "Thank you! We've received your payment and your order is complete.");
+          setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventParam = urlParams.get("event");
+            window.location.href = `/ticket-allocate?event=${eventParam}&order_id=${orderResponse.data.data.id}`;
+          }, 300);
+        } else {
+          DOM.step3.loading = false;
+          thirdStep.hasError = true;
+          thirdStep.setAttribute("has-error", true);
+          Utils.scrollToTop();
+          Utils.hideLoading();
+          App.events.notyf('error', "Failed to create tickets. Please try again.");
+        }
       } else {
-        App.events.notyf('error', "Your payment failed. Please check the details and try again.");
+        if (orderResponse.data.has_payment_error) {
+          isPaymentRetryMode = true;
+        }
+        const stripeMsg = orderResponse.data?.message?.stripe?.error?.message;
+        App.events.swal("error", "Payment Failed", stripeMsg || "Your payment failed. Please check the details and try again.", "OK", false);
         DOM.step3.loading = false;
         thirdStep.hasError = true;
         thirdStep.setAttribute("has-error", true);
@@ -387,8 +410,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show payment container
   if (DOM.step3Container) DOM.step3Container.classList.remove("hide");
 
-  // Load saved credit cards
   loadCards();
-
   StepHandlers.handleStep3();
 });

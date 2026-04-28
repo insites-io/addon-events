@@ -4,18 +4,9 @@
  * saves contact via API, then redirects to /ticket-payment.
  */
 
-// ============================================================================
-// RESTORE STATE FROM SESSION STORAGE
-// ============================================================================
-
-const _saved = JSON.parse(sessionStorage.getItem('purchaseTicketData') || '{}');
-let ticketsData = _saved.ticketsData || [];
-let selectedTickets = _saved.selectedTickets || [];
 let isBillingSameAsContact = false;
 let userPayload = {};
 let billingPayload = {};
-
-if (_saved.orderTotals) window.orderTotals = _saved.orderTotals;
 
 
 // ============================================================================
@@ -237,15 +228,6 @@ const StepHandlers = {
 
       if (data?.uuid) {
         secondStep.hasError = false;
-
-        // Save all state needed for the payment page
-        const currentSaved = JSON.parse(sessionStorage.getItem('purchaseTicketData') || '{}');
-        sessionStorage.setItem('purchaseTicketData', JSON.stringify({
-          ...currentSaved,
-          userPayload,
-          billingPayload,
-          isGuest: data.is_guest
-        }));
 
         const urlParams = new URLSearchParams(window.location.search);
         const eventParam = urlParams.get("event");

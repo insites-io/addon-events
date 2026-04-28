@@ -1,0 +1,9 @@
+---
+slug: api/set-confirmation-timestamp
+format: json
+method: post
+searchable: false
+---
+
+{%- session allocation_confirmed_at = 'now' | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+{ "status": "ok" }

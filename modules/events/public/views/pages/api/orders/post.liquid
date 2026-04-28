@@ -6,98 +6,188 @@ searchable: false
 ---
 
 {%- assign payload = context.params | parse_json -%}
+{%- assign event_uuid = payload.event_uuid -%}
+
+{%- assign status = 400 -%}
+
+{%- comment -%} Guard: prevent duplicate order if ticket selection was already consumed {%- endcomment -%}
+{%- if context.session.tickets_selected[event_uuid] == blank -%}
+{
+    "has_error": true,
+    "message": "No ticket selection found. Please start your purchase again."
+}
+{%- response_status status -%}
+{%- else -%}
 
 {%- comment -%} Revalidate if tickets are still available; Export: errors {%- endcomment -%}
-{%- include 'modules/events/ticket/check_ticket_availability', payload: context.session.tickets_selected[payload.event_uuid] -%}
+{%- include 'modules/events/ticket/check_ticket_availability', payload: context.session.tickets_selected[event_uuid] -%}
 {%- assign ticket_availability_error = context.exports.errors -%}
 
-
-{%- assign status = 400 -%} 
-
 {%- if ticket_availability_error == '' -%}
-              
-     {%- assign errors = "" -%}
 
-     {%- assign payload = payload | add_hash_key: "is_use_crm_billing_address", true -%}
-     
+    {%- assign errors = "" -%}
 
-     {% comment %} billing_contact_uuid {% endcomment %}
-     {%- if context.current_user and payload.is_billing_same_with_contact == true -%}
-          {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.current_user.external_id -%}     
-     {%- elsif payload.is_billing_same_with_contact == true -%}
-          {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.session.event_guest_uuid -%}     
-     {%- endif -%}
+    {%- comment -%}
+      Enrich payload with contact/billing data from server session.
+      These were saved by api/contacts/post and api/contacts/put via
+      ticket_purchase_sessions.liquid when the billing form was submitted.
+      The client only needs to send event_uuid and stripe_credit_card.
+    {%- endcomment -%}
+    {%- liquid
+        assign payload = payload | add_hash_key: "order_contact_first_name",           context.session.contact_first_name
+        assign payload = payload | add_hash_key: "order_contact_last_name",            context.session.contact_last_name
+        assign payload = payload | add_hash_key: "order_contact_email",                context.session.contact_email
+        assign payload = payload | add_hash_key: "order_contact_phone_country_code",   context.session.contact_phone_country_code
+        assign payload = payload | add_hash_key: "order_contact_phone_number",         context.session.contact_phone_number
+        assign payload = payload | add_hash_key: "order_company_name",                 context.session.contact_company_name
+        assign payload = payload | add_hash_key: "billing_contact_first_name",         context.session.billing_contact_first_name
+        assign payload = payload | add_hash_key: "billing_contact_last_name",          context.session.billing_contact_last_name
+        assign payload = payload | add_hash_key: "billing_contact_email",              context.session.billing_contact_email
+        assign payload = payload | add_hash_key: "billing_contact_phone_country_code", context.session.billing_contact_phone_country_code
+        assign payload = payload | add_hash_key: "billing_contact_phone_number",       context.session.billing_contact_phone_number
+        assign payload = payload | add_hash_key: "billing_company_name",               context.session.billing_company_name
+        assign payload = payload | add_hash_key: "is_billing_same_with_contact",       context.session.is_billing_same_with_contact
+        assign payload = payload | add_hash_key: "billing_address_uuid",               context.session.billing_address_uuid
+        assign payload = payload | add_hash_key: "billing_address_1",                  context.session.billing_address_1
+        assign payload = payload | add_hash_key: "billing_address_2",                  context.session.billing_address_2
+        assign payload = payload | add_hash_key: "billing_suburb",                     context.session.billing_suburb
+        assign payload = payload | add_hash_key: "billing_state",                      context.session.billing_state
+        assign payload = payload | add_hash_key: "billing_postcode",                   context.session.billing_postcode
+        assign payload = payload | add_hash_key: "billing_country",                    context.session.billing_country
+        assign payload = payload | add_hash_key: "is_use_crm_billing_address",         true
+    -%}
 
-     {% comment %} Guest purchase: order_company_uuid, billing_company_uuid {% endcomment %}
-     {%- if context.current_user == null -%}
-          {%- assign payload = payload | add_hash_key: "order_company_uuid", context.session.event_guest_company_uuid -%}
-          {%- if payload.is_billing_same_with_contact == true -%}
-               {%- assign payload = payload | add_hash_key: "billing_company_uuid", context.session.event_guest_company_uuid -%}
-          {%- endif -%}
-     {%- endif -%}
+    {%- comment -%} billing_contact_uuid {%- endcomment -%}
+    {%- if context.current_user and context.session.is_billing_same_with_contact == true -%}
+        {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.current_user.external_id -%}
+    {%- elsif context.session.is_billing_same_with_contact == true -%}
+        {%- assign payload = payload | add_hash_key: "billing_contact_uuid", context.session.event_guest_uuid -%}
+    {%- endif -%}
 
-     {% comment %} Additional Payload {% endcomment %}
-     {%- assign uuid = '' | uuid -%}
-     {%- assign date_time = "now" | date: "%Y-%m-%dT%H:%M:%SZ" -%}
-     {%- assign payload = payload | add_hash_key: "order_reference", uuid -%}
-     {%- assign payload = payload | add_hash_key: "date_time", date_time -%}
-     {%- assign payload = payload | add_hash_key: "order_status", "placed" -%}
-     {%- assign payload = payload | add_hash_key: "order_payment_status", "unpaid" -%}     
-     {%- assign payload = payload | add_hash_key: "currency", "AUD" -%}
-     
+    {%- comment -%} Company UUIDs {%- endcomment -%}
+    {%- if context.current_user == null -%}
+        {%- assign payload = payload | add_hash_key: "order_company_uuid", context.session.event_guest_company_uuid -%}
+        {%- if context.session.is_billing_same_with_contact == true -%}
+            {%- assign payload = payload | add_hash_key: "billing_company_uuid", context.session.event_guest_company_uuid -%}
+        {%- endif -%}
+    {%- else -%}
+        {%- assign payload = payload | add_hash_key: "order_company_uuid", context.session.contact_company_uuid -%}
+    {%- endif -%}
 
-     {% comment %} Computed Prices {% endcomment %}
-     {%- function computed = "modules/events/ticket/compute_prices", data: payload -%} 
+    {%- comment -%}
+      Build selectedTickets from server session for compute_prices.
+      Session ticketData has one entry per ticket; group by tier UUID and count.
+    {%- endcomment -%}
+    {%- assign _raw_tickets = context.session.tickets_selected[event_uuid].ticketData | parse_json -%}
+    {%- assign _tier_counts = "" -%}
+    {%- for _t in _raw_tickets -%}
+        {%- assign _tuuid  = _t['event_pricing_tier.uuid'] -%}
+        {%- assign _search = _tuuid | append: ":" -%}
+        {%- assign _count  = 0 -%}
+        {%- if _tier_counts contains _search -%}
+            {%- assign _parts = _tier_counts | split: "," -%}
+            {%- for _p in _parts -%}
+                {%- if _p contains _search -%}{%- assign _count = _p | split: ":" | last | plus: 0 -%}{%- endif -%}
+            {%- endfor -%}
+        {%- endif -%}
+        {%- assign _count = _count | plus: 1 -%}
+        {%- assign _new = "" -%}
+        {%- assign _parts = _tier_counts | split: "," -%}
+        {%- for _p in _parts -%}
+            {%- unless _p contains _search -%}{%- assign _new = _new | append: _p | append: "," -%}{%- endunless -%}
+        {%- endfor -%}
+        {%- assign _tier_counts = _new | append: _tuuid | append: ":" | append: _count | append: "," -%}
+    {%- endfor -%}
+    {%- assign _selectedTickets = "" | split: "," -%}
+    {%- assign _parts = _tier_counts | split: "," | array_compact -%}
+    {%- for _p in _parts -%}
+        {%- assign _tuuid = _p | split: ":" | first -%}
+        {%- assign _qty   = _p | split: ":" | last | plus: 0 -%}
+        {%- assign _st    = '{}' | parse_json -%}
+        {%- assign _st    = _st | add_hash_key: "event_pricing_tier.uuid", _tuuid -%}
+        {%- assign _st    = _st | add_hash_key: "quantity", _qty -%}
+        {%- assign _selectedTickets = _selectedTickets | array_add: _st -%}
+    {%- endfor -%}
+    {%- assign payload = payload | add_hash_key: "selectedTickets", _selectedTickets -%}
 
-     {% comment %} Prices Payload {% endcomment %}
-     {%- assign payload = payload | add_hash_key: "subtotal_amount", computed.subtotal_amount -%}
-     {%- assign payload = payload | add_hash_key: "processing_fee", computed.processing_fee -%}
-     {%- assign payload = payload | add_hash_key: "total_tax_amount", computed.total_tax_amount -%}
-     {%- assign payload = payload | add_hash_key: "total_amount", computed.total_amount -%}
-     {%- assign payload = payload | add_hash_key: "order_total", computed.order_total -%}
-     {%- assign payload = payload | add_hash_key: "total_amount_paid", computed.total_amount_paid -%}
-     {%- assign payload = payload | add_hash_key: "total_discount_amount", computed.total_discount_amount -%}
-     {%- assign payload = payload | add_hash_key: "total_shipping_amount", computed.total_shipping_amount -%}
-     
+    {%- comment -%} Additional Payload {%- endcomment -%}
+    {%- assign uuid = '' | uuid -%}
+    {%- assign date_time = "now" | date: "%Y-%m-%dT%H:%M:%SZ" -%}
+    {%- assign payload = payload | add_hash_key: "order_reference", uuid -%}
+    {%- assign payload = payload | add_hash_key: "date_time", date_time -%}
+    {%- assign payload = payload | add_hash_key: "order_status", "Placed" -%}
+    {%- assign payload = payload | add_hash_key: "order_payment_status", "unpaid" -%}
+    {%- assign payload = payload | add_hash_key: "currency", "AUD" -%}
 
-     {%- comment -%} Create order {%- endcomment -%}
-     {% function add_order = "ecommerce/controller/order/create", params: payload %}   
 
-     {%- if add_order.id -%}
-          {%- include 'modules/events/orders/callback_init', 
-               payload: payload,
-               order_data: add_order -%}   
-          {%- assign errors = context.session.paybill_error -%}
-     {%- else -%}
-          {%- assign errors = add_order -%}
-     {%- endif -%}
-     
-     {%- if errors != nil -%}
-     {
-     "has_error": true,
-     "message": {{ errors }}
-     }
-     {%- else -%}
-     {
-     "has_error": false,
-     "message": "Order successfully created",
-     "data": {{ add_order  }}
-     }
-     {%- session event_order_uuid = add_order.uuid -%}
-     {%- session last_purchased_user_uuid = add_order.order_contact.uuid -%}
-     {%- session pending_allocation_order_id = add_order.id -%}
-     {%- session pending_allocation_event_uuid = payload.event_uuid -%}
-     {%- comment -%} Clear tickets_selected for this event so ticket-billing guard blocks re-entry {%- endcomment -%}
-     {%- assign _ts = context.session.tickets_selected | add_hash_key: payload.event_uuid, null -%}
-     {%- session tickets_selected = _ts -%}
-     {%- assign status = 200 -%}
-     {%- endif -%}
+    {%- comment -%} Computed Prices {%- endcomment -%}
+    {%- function computed = "modules/events/ticket/compute_prices", data: payload -%}
+
+    {%- comment -%} Prices Payload {%- endcomment -%}
+    {%- assign payload = payload | add_hash_key: "subtotal_amount", computed.subtotal_amount -%}
+    {%- assign payload = payload | add_hash_key: "processing_fee", computed.processing_fee -%}
+    {%- assign payload = payload | add_hash_key: "total_tax_amount", computed.total_tax_amount -%}
+    {%- assign payload = payload | add_hash_key: "total_amount", computed.total_amount -%}
+    {%- assign payload = payload | add_hash_key: "order_total", computed.order_total -%}
+    {%- assign payload = payload | add_hash_key: "total_amount_paid", computed.total_amount_paid -%}
+    {%- assign payload = payload | add_hash_key: "total_discount_amount", computed.total_discount_amount -%}
+    {%- assign payload = payload | add_hash_key: "total_shipping_amount", computed.total_shipping_amount -%}
+
+
+    {%- comment -%} Create order {%- endcomment -%}
+    {% function add_order = "ecommerce/controller/order/create", params: payload %}
+
+    {%- assign has_payment_error = false -%}
+    {%- if add_order.id -%}
+        {%- include 'modules/events/orders/callback_init',
+            payload: payload,
+            order_data: add_order -%}
+        {%- assign errors = context.session.paybill_error -%}
+        {%- if errors != nil -%}
+            {%- assign has_payment_error = true -%}
+            {%- session event_order_uuid = add_order.uuid -%}
+            {%- session pending_payment_retry_order_id = add_order.id -%}
+            {%- session pending_allocation_event_uuid = event_uuid -%}
+            {%- comment -%} Snapshot ticket data and clear selection so re-submitting create-order is blocked {%- endcomment -%}
+            {%- session pending_tickets_data = context.session.tickets_selected[event_uuid] -%}
+            {%- assign _ts = context.session.tickets_selected | add_hash_key: event_uuid, null -%}
+            {%- session tickets_selected = _ts -%}
+        {%- endif -%}
+    {%- else -%}
+        {%- assign errors = add_order -%}
+    {%- endif -%}
+
+    {%- if errors != nil -%}
+    {
+    "has_error": true,
+    "has_payment_error": {{ has_payment_error }},
+    "message": {{ errors }}
+    }
+    {%- else -%}
+    {
+    "has_error": false,
+    "message": "Order successfully created",
+    "data": {{ add_order }}
+    }
+    {%- session event_order_uuid = add_order.uuid -%}
+    {%- session last_purchased_user_uuid = add_order.order_contact.uuid -%}
+    {%- session pending_allocation_order_id = add_order.id -%}
+    {%- session pending_allocation_event_uuid = event_uuid -%}
+    {%- comment -%} Snapshot validated ticket data for api/create-tickets before clearing the session {%- endcomment -%}
+    {%- session pending_tickets_data = context.session.tickets_selected[event_uuid] -%}
+    {%- comment -%} Clear tickets_selected for this event so ticket-billing guard blocks re-entry {%- endcomment -%}
+    {%- assign _ts = context.session.tickets_selected | add_hash_key: event_uuid, null -%}
+    {%- session tickets_selected = _ts -%}
+    {%- assign status = 200 -%}
+    {%- endif -%}
 
 {%- else -%}
 {
   "has_ticket_availability_error": true,
   "message": "{{ ticket_availability_error }}"
 }
+{%- endif -%}
+
 {%- endif -%}
 
 {%- response_status status -%}

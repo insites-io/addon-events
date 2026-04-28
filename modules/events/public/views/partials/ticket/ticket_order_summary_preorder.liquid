@@ -7,14 +7,15 @@ metadata: {
 {%- comment -%}
   Renders the order summary for /ticket-billing and /ticket-payment.
   Reads selected tickets from context.session.tickets_selected[event_uuid],
-  then queries event_pricing_tier for current prices — never reads from sessionStorage.
+  then queries event_pricing_tier and event_pricing_division for current data —
+  never reads from sessionStorage.
 {%- endcomment -%}
 
 {%- assign event_uuid = context.params.event -%}
 {%- assign session_data = context.session.tickets_selected[event_uuid] -%}
 {%- assign ticket_data = session_data.ticketData | parse_json -%}
 
-{%- comment -%} Build array of unique tier UUIDs for the DB query {%- endcomment -%}
+{%- comment -%} Collect unique tier + division UUIDs {%- endcomment -%}
 {%- assign _uuid_str = "" -%}
 {%- for td in ticket_data -%}
   {%- assign _tuuid = td['event_pricing_tier.uuid'] -%}
@@ -32,10 +33,13 @@ metadata: {
   {%- assign tier_prices = blank -%}
 {%- endif -%}
 
-{%- comment -%} Compute totals grouped by venue → tier+type {%- endcomment -%}
+{%- comment -%} Fetch division names and venue names from DB {%- endcomment -%}
+{%- graphql divisions_result = 'modules/events/events/get_divisions', event_uuid: event_uuid -%}
+{%- assign all_divisions = divisions_result | dig: 'items', 'results' -%}
+
 {%- assign subtotal = 0 -%}
 {%- assign total_tax = 0 -%}
-{%- assign seen_venue_keys = "" -%}
+{%- assign seen_division_keys = "" -%}
 
 <div id="ticket-payment-summary-container" class="ticket-payment-summary-container">
     <h2 class="heading-2-xsmall">Order summary</h2>
@@ -44,41 +48,41 @@ metadata: {
     <div id="payment-breakdown" class="payment-breakdown" style="display:flex">
 
       {%- for td in ticket_data -%}
-        {%- assign vname = td.ticket_venue_name | default: "" -%}
-        {%- assign vkey = "|" | append: vname | append: "|" -%}
-        {%- unless seen_venue_keys contains vkey -%}
-          {%- assign seen_venue_keys = seen_venue_keys | append: vkey -%}
-          {%- assign venue_tickets = ticket_data | where: "ticket_venue_name", vname -%}
-          {%- assign display_vname = vname | default: "No Venue" -%}
+        {%- assign div_uuid = td.event_pricing_division_uuid -%}
+        {%- assign dkey = "|" | append: div_uuid | append: "|" -%}
+        {%- unless seen_division_keys contains dkey -%}
+          {%- assign seen_division_keys = seen_division_keys | append: dkey -%}
+
+          {%- comment -%} Look up division name and venue name from DB {%- endcomment -%}
+          {%- assign db_division = all_divisions | where: "uuid", div_uuid | first -%}
+          {%- assign display_div_name = db_division.name | default: "No Venue" -%}
+
+          {%- comment -%} All tickets in this division {%- endcomment -%}
+          {%- assign div_tickets = ticket_data | where: "event_pricing_division_uuid", div_uuid -%}
 
           <div class="payment-break-downs">
-            <p class="payment-breakdown-venue-name">{{ display_vname }}</p>
+            <p class="payment-breakdown-venue-name">{{ display_div_name }}</p>
             <div>
               {%- assign seen_tier_keys = "" -%}
-              {%- for vt in venue_tickets -%}
+              {%- for vt in div_tickets -%}
                 {%- assign _vt_uuid = vt['event_pricing_tier.uuid'] -%}
                 {%- assign tkey = "|" | append: _vt_uuid | append: "|" | append: vt.capacity_type | append: "|" -%}
                 {%- unless seen_tier_keys contains tkey -%}
                   {%- assign seen_tier_keys = seen_tier_keys | append: tkey -%}
 
-                  {%- comment -%} Count tickets with this tier+type in this venue {%- endcomment -%}
                   {%- assign qty = 0 -%}
-                  {%- for vt2 in venue_tickets -%}
+                  {%- for vt2 in div_tickets -%}
                     {%- assign _vt2_uuid = vt2['event_pricing_tier.uuid'] -%}
                     {%- assign tkey2 = "|" | append: _vt2_uuid | append: "|" | append: vt2.capacity_type | append: "|" -%}
-                    {%- if tkey2 == tkey -%}
-                      {%- assign qty = qty | plus: 1 -%}
-                    {%- endif -%}
+                    {%- if tkey2 == tkey -%}{%- assign qty = qty | plus: 1 -%}{%- endif -%}
                   {%- endfor -%}
 
-                  {%- comment -%} Look up current price + name from DB {%- endcomment -%}
                   {%- assign db_tier = tier_prices | where: "uuid", _vt_uuid | first -%}
                   {%- assign unit_price = db_tier.price | plus: 0 -%}
                   {%- assign unit_tax = db_tier.tax | plus: 0 -%}
                   {%- assign unit_tax_type = db_tier.tax_type -%}
-                  {%- assign tier_name = db_tier.name | default: vt.name | default: vt.capacity_type -%}
+                  {%- assign tier_name = db_tier.name | default: vt.capacity_type -%}
 
-                  {%- comment -%} Accumulate totals {%- endcomment -%}
                   {%- assign item_subtotal = unit_price | times: qty -%}
                   {%- assign subtotal = subtotal | plus: item_subtotal -%}
                   {%- if unit_tax_type == "percentage" -%}
@@ -88,7 +92,6 @@ metadata: {
                   {%- endif -%}
                   {%- assign total_tax = total_tax | plus: item_tax -%}
 
-                  {%- comment -%} Format unit price to 2 decimal places {%- endcomment -%}
                   {%- assign _c = unit_price | times: 100 | round -%}
                   {%- assign _d = _c | divided_by: 100.0 -%}
                   {%- assign _fmt = _d | append: "" -%}
@@ -114,27 +117,22 @@ metadata: {
       <div class="spacer medium"></div>
     </div>
 
-    {%- comment -%} Compute processing fee and grand total {%- endcomment -%}
     {%- assign temp_total = subtotal | plus: total_tax -%}
     {%- assign processing_fee = temp_total | times: 0.017 -%}
     {%- assign grand_total = temp_total | plus: processing_fee -%}
 
-    {%- comment -%} Format subtotal {%- endcomment -%}
     {%- assign _c = subtotal | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
     {%- assign subtotal_fmt = _d | append: "" -%}
     {%- if subtotal_fmt contains "." -%}{%- assign _p = subtotal_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign subtotal_fmt = subtotal_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign subtotal_fmt = subtotal_fmt | append: ".00" -%}{%- endif -%}
 
-    {%- comment -%} Format tax {%- endcomment -%}
     {%- assign _c = total_tax | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
     {%- assign tax_fmt = _d | append: "" -%}
     {%- if tax_fmt contains "." -%}{%- assign _p = tax_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign tax_fmt = tax_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign tax_fmt = tax_fmt | append: ".00" -%}{%- endif -%}
 
-    {%- comment -%} Format processing fee {%- endcomment -%}
     {%- assign _c = processing_fee | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
     {%- assign processing_fmt = _d | append: "" -%}
     {%- if processing_fmt contains "." -%}{%- assign _p = processing_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign processing_fmt = processing_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign processing_fmt = processing_fmt | append: ".00" -%}{%- endif -%}
 
-    {%- comment -%} Format grand total {%- endcomment -%}
     {%- assign _c = grand_total | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
     {%- assign total_fmt = _d | append: "" -%}
     {%- if total_fmt contains "." -%}{%- assign _p = total_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign total_fmt = total_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign total_fmt = total_fmt | append: ".00" -%}{%- endif -%}

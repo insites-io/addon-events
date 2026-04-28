@@ -210,7 +210,12 @@ const OrderProcessor = {
   async checkAvailableTickets(ticketData) {
     const urlParams = new URLSearchParams(window.location.search);
     const eventParam = urlParams.get("event");
-    const queryString = encodeURIComponent(JSON.stringify(ticketData));
+    const trimmed = ticketData.map(ticket => ({
+      'event_pricing_tier.uuid': ticket['event_pricing_tier.uuid'],
+      event_pricing_division_uuid: ticket.event_pricing_division_uuid,
+      capacity_type: ticket.capacity_type
+    }));
+    const queryString = encodeURIComponent(JSON.stringify(trimmed));
     try {
       const response = await ticketServices.checkTicketAvailability(eventParam, queryString);
       return response;
@@ -491,13 +496,7 @@ const StepHandlers = {
             const urlParams = new URLSearchParams(window.location.search);
             const eventParam = urlParams.get("event");
 
-            sessionStorage.setItem('purchaseTicketData', JSON.stringify({
-              ticketsData,
-              selectedTickets,
-              orderTotals: window.orderTotals || {}
-            }));
-
-            window.location.href = `/ticket-billing?event=${eventParam}`;
+              window.location.href = `/ticket-billing?event=${eventParam}`;
           }, 500);
         }
       }, 1000);

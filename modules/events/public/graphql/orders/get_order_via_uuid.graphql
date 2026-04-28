@@ -44,9 +44,12 @@ query get_order_via_uuid (
       billing_postcode: property(name: "billing_postcode") 
       billing_country: property(name: "billing_country")   
       
-      total_tax_amount: property_float(name: "total_tax_amount")   
-      total_amount: property_float(name: "total_amount")  
-      
+      total_tax_amount: property_float(name: "total_tax_amount")
+      total_amount: property_float(name: "total_amount")
+      subtotal_amount: property_float(name: "subtotal_amount")
+      total_discount_amount: property_float(name: "total_discount_amount")
+      currency: property(name: "currency")
+
       order_status: property(name: "order_status")    
       order_payment_status: property(name: "order_payment_status") 
       order_shipping_status: property(name: "order_shipping_status")     

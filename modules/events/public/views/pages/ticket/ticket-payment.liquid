@@ -14,9 +14,9 @@ metadata: {
 }
 ---
 
-{% comment %} Guard: redirect to allocate if a payment is pending allocation {% endcomment %}
+{% comment %} Guard: redirect to allocate only when order is paid AND tickets are already created {% endcomment %}
 {%- liquid
-  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
+  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank and context.session.pending_tickets_data == blank
     assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
     redirect_to _alloc_url
   endif
@@ -84,19 +84,27 @@ metadata: {
 <input type="hidden" id="bill-order-value">
 <input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{% comment %} Ticket retry mode: order was paid but ticket creation failed on the previous attempt {% endcomment %}
+{%- if context.session.pending_payment_retry_order_id != blank -%}
+<input type="hidden" id="payment_retry_mode" value="true">
+{%- elsif context.session.pending_allocation_order_id != blank and context.session.pending_tickets_data != blank -%}
+<input type="hidden" id="ticket_retry_mode" value="true">
+<input type="hidden" id="pending_order_id" value="{{ context.session.pending_allocation_order_id }}">
+{%- endif -%}
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}
-    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
 {%- else -%}
-    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
 {%- endif -%}

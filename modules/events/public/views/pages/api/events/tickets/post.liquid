@@ -7,8 +7,7 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
-{% assign errors = "" %}
-
+{%- assign errors = "" -%}
 
 {% comment %} Get user_uuid {% endcomment %}
 {%- if context.current_user -%}
@@ -19,35 +18,97 @@ searchable: false
     {%- assign user_uuid = context.session.event_guest_uuid -%}
 {%- endif -%}
 
-{% comment %} Inject purchased_by.uuid (user_uuid) into ticketData {% endcomment %}
-{%- assign tempTicketData = payload.ticketData | parse_json -%}
-{%- assign ticketData = '' | split: ',' -%}
-{%- for ticket in tempTicketData -%}
-    {% assign ticket = ticket | add_hash_key: "purchased_by.uuid", user_uuid %}
-    {% assign ticketData = ticketData | array_add: ticket %}
-{% endfor %}
-
-
+{%- comment -%}
+  Read ticket data from the server-side session set by api/create-order.
+  The browser never sends ticket UUIDs — this closes the exploit where a user
+  could pay for a cheap tier but request creation of a more expensive one.
+  Price, tax, and venue fields are re-fetched from the DB here rather than
+  trusted from the session, so the session payload only needs the 3 identity
+  fields (tier UUID, division UUID, capacity_type).
+{%- endcomment -%}
 {%- assign event_uuid = payload.eventuuid -%}
-{% assign ticketPayload = '{}' | parse_json %}
-{% assign data = '{}' | parse_json %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
+{%- assign order_number = context.session.pending_allocation_order_id | plus: 0 -%}
+{%- assign tempTicketData = context.session.pending_tickets_data.ticketData | parse_json -%}
 
-{% function add_tickets = "events/event_tickets/create", event_uuid: ticketPayload.uuid, params: ticketPayload.data %}
+{%- assign data = '{}' | parse_json -%}
 
-{% if add_tickets.errors  %}
-    {% assign errors = add_tickets %}
-{% endif %}     
+{%- if tempTicketData == nil or tempTicketData.size == 0 -%}
+    {%- assign errors = "Ticket session data not found. Please start your purchase again." -%}
+{%- else -%}
+    {%- comment -%} Collect unique tier UUIDs for price lookup {%- endcomment -%}
+    {%- assign tier_uuids = '' | split: ',' -%}
+    {%- for ticket in tempTicketData -%}
+        {%- assign _tuuid = ticket['event_pricing_tier.uuid'] -%}
+        {%- unless tier_uuids contains _tuuid -%}
+            {%- assign tier_uuids = tier_uuids | array_add: _tuuid -%}
+        {%- endunless -%}
+    {%- endfor -%}
+
+    {%- comment -%} Re-fetch price/tax from DB (authoritative, not from session) {%- endcomment -%}
+    {%- graphql tier_records = 'modules/events/events/pricing/get_ticket_prices', uuid: tier_uuids | dig: 'items', 'results' -%}
+
+    {%- comment -%} Re-fetch venue/division names from DB {%- endcomment -%}
+    {%- graphql division_records = 'modules/events/events/get_divisions', event_uuid: event_uuid | dig: 'items', 'results' -%}
+
+    {%- comment -%} Build ticket records, enriched from DB lookups {%- endcomment -%}
+    {%- assign ticketData = '' | split: ',' -%}
+    {%- for ticket in tempTicketData -%}
+        {%- assign _tier_uuid     = ticket['event_pricing_tier.uuid'] -%}
+        {%- assign _division_uuid = ticket.event_pricing_division_uuid -%}
+
+        {%- assign matched_tier = nil -%}
+        {%- for tr in tier_records -%}
+            {%- if tr.uuid == _tier_uuid -%}{%- assign matched_tier = tr -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- assign matched_division = nil -%}
+        {%- for dr in division_records -%}
+            {%- if dr.uuid == _division_uuid -%}{%- assign matched_division = dr -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- assign t = '{}' | parse_json -%}
+        {%- assign t = t | add_hash_key: "ticket_type",                    ticket.capacity_type -%}
+        {%- assign t = t | add_hash_key: "venue_area_name",                matched_division.name -%}
+        {%- assign t = t | add_hash_key: "event_uuid",                     event_uuid -%}
+        {%- assign t = t | add_hash_key: "venue.uuid",                     matched_division.venue_uuid -%}
+        {%- assign t = t | add_hash_key: "event_pricing_division.uuid",    _division_uuid -%}
+        {%- assign t = t | add_hash_key: "event_pricing_tier.uuid",        _tier_uuid -%}
+        {%- assign t = t | add_hash_key: "price",                          matched_tier.price -%}
+        {%- assign t = t | add_hash_key: "tax",                            matched_tier.tax -%}
+        {%- assign t = t | add_hash_key: "tax_type",                       matched_tier.tax_type -%}
+        {%- assign t = t | add_hash_key: "venue_name",                     matched_division.venue.venue_name -%}
+        {%- assign t = t | add_hash_key: "order_number",                   order_number -%}
+        {%- assign t = t | add_hash_key: "allocation_status",              "unallocated" -%}
+        {%- assign t = t | add_hash_key: "purchased_by.uuid",              user_uuid -%}
+        {%- if ticket.capacity_type == "group" -%}
+            {%- assign _gid = '' | uuid -%}
+            {%- assign _gid = "GROUP-" | append: _gid -%}
+            {%- assign t = t | add_hash_key: "group_id",    _gid -%}
+            {%- assign t = t | add_hash_key: "allocation",  "unallocated" -%}
+        {%- endif -%}
+        {%- assign ticketData = ticketData | array_add: t -%}
+    {%- endfor -%}
+
+    {%- assign ticketPayload = '{}' | parse_json -%}
+    {%- assign ticketPayload = ticketPayload | add_hash_key: "uuid", event_uuid -%}
+    {%- assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData -%}
+
+    {%- function add_tickets = "events/event_tickets/create", event_uuid: ticketPayload.uuid, params: ticketPayload.data -%}
+
+    {%- if add_tickets.errors -%}
+        {%- assign errors = add_tickets -%}
+    {%- endif -%}
+{%- endif -%}
 
 {%- if errors != "" -%}
-    {% assign data = data | add_hash_key: "has_error", true %}
-    {% assign data = data | add_hash_key: "message", errors %}
+    {%- assign data = data | add_hash_key: "has_error", true -%}
+    {%- assign data = data | add_hash_key: "message", errors -%}
 {%- else -%}
-    {% assign data = data | add_hash_key: "has_error", false %}
-    {% assign data = data | add_hash_key: "message", "Ticket(s) successfully created" %}
-    {% assign data = data | add_hash_key: "data", add_tickets %}
+    {%- assign data = data | add_hash_key: "has_error", false -%}
+    {%- assign data = data | add_hash_key: "message", "Ticket(s) successfully created" -%}
+    {%- assign data = data | add_hash_key: "data", add_tickets -%}
     {%- assign status = 200 -%}
+    {%- session pending_tickets_data = nil -%}
 {%- endif -%}
 
 {{ data }}

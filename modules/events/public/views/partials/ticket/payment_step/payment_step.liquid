@@ -96,8 +96,8 @@ metadata: {
         <div id="payment-navigation-buttons" class="grid-x grid-padding-x">  
           <div class="large-6 medium-6 small-12 cell">        
             {% comment %} Hide back button for guest users {% endcomment %}
-            <a href="/ticket-billing?event={{ context.params.event }}" class="{% if has_profile != true %} hide {% endif %}">
-              <ins-button type="button" outlined label="Back" icon="icon-arrow-back" class="ticket-buttons"></ins-button>
+            <a href="/ticket-billing?event={{ context.params.event }}" class="">
+              <ins-button {% if has_profile == true %}id="logged-in-back-btn"{% endif %} type="button" outlined label="Back" icon="icon-arrow-back" class="ticket-buttons{% if has_profile != true %} hide{% endif %}"></ins-button>
             </a>
           </div>
           <div class="show-for-small-only spacer xxx-large"></div> 

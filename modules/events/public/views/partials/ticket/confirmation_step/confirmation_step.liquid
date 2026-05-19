@@ -113,7 +113,7 @@ metadata: {
             <div class="cell large-6 medium-6 small-0"> 
             </div>
             <div class="cell large-6 medium-6 small-12 text-right">
-            <ins-button type="button" id="submit-ticket-confirmation" class="submit-btn" label="Create account" solid ></ins-button>
+            <ins-button type="button" id="submit-create-account" class="submit-btn" label="Create account" solid ></ins-button>
             </div> 
         </div>
     {% endif %}
@@ -136,7 +136,7 @@ metadata: {
 document.addEventListener("DOMContentLoaded", function () {
     const emailInput = document.getElementById("confirmation-email-input");
     const passwordInput = document.getElementById("confirmation-email-password");
-    const submitBtn = document.getElementById("submit-ticket-confirmation");
+    const submitBtn = document.getElementById("submit-create-account");
 
     function showError(input, message, addHasError = false) {
         input.setAttribute("error-message", message);

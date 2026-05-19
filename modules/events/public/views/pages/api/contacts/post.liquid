@@ -78,16 +78,7 @@ searchable: false
       "notes": "{{ event_guest_temp_uuid }}"
   }
   {%- endparse_json -%}
-  {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}    
-
-
-  {%- comment -%} Generate temporary token {%- endcomment -%}
-  {%- graphql temporary_token = 'modules/portal/account/generate_user_temporary_token', 
-        email: payload.email | dig: 'items','results' | first -%}
-
-  {%- comment -%} Create user profile: 'modules/portal/portal' {%- endcomment -%}
-  {%- graphql create_user_profile = 'modules/portal/account/create_user_profile', 
-        id: add_contact.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true -%}
+  {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}
 
 
   {% comment %} Update sessions {% endcomment %}

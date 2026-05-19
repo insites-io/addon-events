@@ -1662,11 +1662,6 @@ ins-button.add-credit-card button.ins-button>div,
     margin-top: 0;
 }
 
-#ticket-purchase-stepper .ins-step.active .ins-step_indicator,
-#ticket-purchase-stepper .ins-step_indicator {
-    border-color: var(--font-color-body);
-    background: var(--color-ui-01);
-}
 
 #ticket-purchase-stepper .ins-step.active .ins-step_indicator .ins-step_dot {
     background: var(--font-color-body); 

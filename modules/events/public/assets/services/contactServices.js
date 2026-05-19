@@ -1,7 +1,7 @@
 var contactServices = (function () {
     return {
         validateEmail: function (email) {
-            return httpClient.processRequest('get', '/validate-email.json?email=' + email);
+            return httpClient.processRequest('post', '/validate-email.json', { email: email });
         },
         addContact: function (payload) {
             return httpClient.processRequest('post', '/create-contact-company', payload);

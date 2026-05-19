@@ -407,6 +407,14 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("insClick", handleAddCardClick);
   });
 
+  // Wire up guest "Back" button (multi-page flow: navigate to /ticket-billing)
+  document.querySelectorAll(".back-step-3-billing").forEach(btn => {
+    btn.addEventListener("insClick", () => {
+      const eventParam = new URLSearchParams(window.location.search).get("event");
+      window.location.href = `/ticket-billing?event=${eventParam}`;
+    });
+  });
+
   // Show payment container
   if (DOM.step3Container) DOM.step3Container.classList.remove("hide");
 

@@ -14,16 +14,17 @@ metadata: {
 }
 ---
 
-{% comment %} Guard: redirect to allocate only when order is paid AND tickets are already created {% endcomment %}
+{% comment %} Detect pending allocation — only when order is paid AND tickets are already created (otherwise it's ticket retry mode and we let the user retry here) {% endcomment %}
 {%- liquid
+  assign has_pending_allocation = false
   if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank and context.session.pending_tickets_data == blank
-    assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
-    redirect_to _alloc_url
+    assign has_pending_allocation = true
+    assign pending_allocation_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
   endif
 -%}
 
 {% comment %} Guard: billing must be completed (contact save sets this session var) {% endcomment %}
-{% if context.session.billing_contact_email == blank %}
+{% if context.session.billing_contact_email == blank and has_pending_allocation == false %}
   {% redirect_to '/upcoming-events' %}
 {% endif %}
 
@@ -37,6 +38,9 @@ metadata: {
     </ins-loader>
 </div>
 
+{%- if has_pending_allocation -%}
+    {%- include 'modules/events/ticket/pending_allocation_notice', pending_allocation_url: pending_allocation_url -%}
+{%- else -%}
 <div id="purchase-ticket">
 
     {% comment %} Stepper {% endcomment %}
@@ -107,4 +111,5 @@ metadata: {
     <script defer src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
     <script defer src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
     <script defer src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+{%- endif -%}
 {%- endif -%}

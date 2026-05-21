@@ -2466,3 +2466,8 @@ ins-button.add-credit-card button.ins-button>div,
     border-radius: 8px;
     animation: sk-shimmer 1.4s ease-in-out infinite;
 }
+
+.warning-notice i {
+    font-size: 4rem;
+    color: var(--warning);
+}    

@@ -23,16 +23,17 @@ metadata: {
 }
 ---
 
-{% comment %} Guard: redirect to allocate if a payment is pending allocation {% endcomment %}
+{% comment %} Detect pending allocation from a previous purchase — notify user before sending them to allocation {% endcomment %}
 {%- liquid
+  assign has_pending_allocation = false
   if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
-    assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
-    redirect_to _alloc_url
+    assign has_pending_allocation = true
+    assign pending_allocation_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
   endif
 -%}
 
 {% comment %} Guard: event UUID required to purchase tickets {% endcomment %}
-{% if context.params.event == blank %}
+{% if context.params.event == blank and has_pending_allocation == false %}
   {% redirect_to '/upcoming-events' %}
 {% endif %}
 
@@ -40,56 +41,60 @@ metadata: {
 <div id="loadingOverlay" class="loading-overlay hide">
     <ins-loader
         id="purchase-ticket-loader"
-        state-title="" 
-        state-icon="processing" 
+        state-title=""
+        state-icon="processing"
         state-message="Checking ticket availability... Hang tight, and please do not leave this screen.">
     </ins-loader>
 </div>
 
-<div id="purchase-ticket">
-        
-    {% comment %} Stepper {% endcomment %}
-    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
-        <div class="wrapper">
-            <div class="grid-container">
-                <div class="grid-x ticket-stepper-container">
-                    {%- include 'modules/events/ticket/stepper' -%}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% comment %} Stepper {% endcomment %} 
-    <div id="purchase-ticket-confirmation-message" class="hide">
-        {%- include 'modules/events/ticket/success_message_section' -%} 
-    </div>
-  {% comment %} Purchase ticket form {% endcomment %}
-    <div class="purchase-ticket-form">
-        <div class="wrapper">
-            <div class="grid-container">
-                <div class="grid-x">
-                    {%- include 'modules/events/ticket/ticket_purchase_form' -%}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% comment %} ? EVENT UUID {% endcomment %}
-<input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-{%- if context.environment == "staging" -%}
-    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+{%- if has_pending_allocation -%}
+    {%- include 'modules/events/ticket/pending_allocation_notice', pending_allocation_url: pending_allocation_url -%}
 {%- else -%}
-    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
-{%- endif -%} 
+    <div id="purchase-ticket">
+
+        {% comment %} Stepper {% endcomment %}
+        <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
+            <div class="wrapper">
+                <div class="grid-container">
+                    <div class="grid-x ticket-stepper-container">
+                        {%- include 'modules/events/ticket/stepper' -%}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% comment %} Stepper {% endcomment %}
+        <div id="purchase-ticket-confirmation-message" class="hide">
+            {%- include 'modules/events/ticket/success_message_section' -%}
+        </div>
+      {% comment %} Purchase ticket form {% endcomment %}
+        <div class="purchase-ticket-form">
+            <div class="wrapper">
+                <div class="grid-container">
+                    <div class="grid-x">
+                        {%- include 'modules/events/ticket/ticket_purchase_form' -%}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} ? EVENT UUID {% endcomment %}
+    <input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    {%- if context.environment == "staging" -%}
+        <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+    {%- else -%}
+        <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+        <script src="{{ 'modules/events/scripts/ticket-purchase.js' | asset_url }}"></script>
+    {%- endif -%}
+{%- endif -%}
 
 
 

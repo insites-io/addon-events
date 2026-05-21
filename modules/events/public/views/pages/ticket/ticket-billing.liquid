@@ -14,16 +14,17 @@ metadata: {
 }
 ---
 
-{% comment %} Guard: redirect to allocate if a payment is pending allocation {% endcomment %}
+{% comment %} Detect pending allocation from a previous purchase — notify user before sending them to allocation {% endcomment %}
 {%- liquid
+  assign has_pending_allocation = false
   if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
-    assign _alloc_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
-    redirect_to _alloc_url
+    assign has_pending_allocation = true
+    assign pending_allocation_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
   endif
 -%}
 
 {% comment %} Guard: ticket availability check must have passed for this event (set by /api/check-ticket-availability) {% endcomment %}
-{% if context.session.tickets_selected[context.params.event] == blank %}
+{% if context.session.tickets_selected[context.params.event] == blank and has_pending_allocation == false %}
   {% redirect_to '/upcoming-events' %}
 {% endif %}
 
@@ -37,6 +38,9 @@ metadata: {
     </ins-loader>
 </div>
 
+{%- if has_pending_allocation -%}
+    {%- include 'modules/events/ticket/pending_allocation_notice', pending_allocation_url: pending_allocation_url -%}
+{%- else -%}
 <div id="purchase-ticket">
 
     {% comment %} Stepper {% endcomment %}
@@ -116,4 +120,5 @@ metadata: {
     <script src="{{ 'modules/events/scripts/checkout/checkout.min.js' | asset_url }}" defer></script>
     <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/events/scripts/ticket-billing.js' | asset_url }}"></script>
+{%- endif -%}
 {%- endif -%}

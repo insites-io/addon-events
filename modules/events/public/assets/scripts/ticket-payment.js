@@ -5,18 +5,18 @@
  */
 
 // ============================================================================
-// STRIPE PATCH — guest checkout
+// STRIPE PATCH
 // stripe-element.js (portal module) sets stripe-card to tok_... (the raw
-// Stripe token) in both createStripeCardModel and setStripeCardField.
-// The order API expects the stored card ID (card_...) from the
-// create-credit-card response. Patch both methods after stripe-ready fires.
+// Stripe token) in setStripeCardField, and makeCardElement seeds the new
+// ins-credit-card with token.card.id and auto-clicks it. The order API needs
+// the persisted card ID from /payment-methods (the customer-linked source).
+// Poll for the StripeElement global rather than relying on load order, so the
+// patch is robust even if the script include order changes.
 // ============================================================================
 
-document.addEventListener("stripe-ready", () => {
-    if (!window.StripeElement || !window.StripeModel) return;
-
-    // Override createStripeCardModel: call the API and set stripe-card to
-    // the returned card ID (response.data.stripe_id) not the raw token.
+function applyStripePatches() {
+    // createStripeCardModel: save the card and set stripe-card to the returned
+    // stripe_card_id (the customer-linked source) rather than the raw token.
     StripeElement.methods.createStripeCardModel = async function(token) {
         const data = {
             email: document.getElementById('card_email')?.value || "",
@@ -26,19 +26,36 @@ document.addEventListener("stripe-ready", () => {
             card_brand: token.card?.brand || ""
         };
         const response = await window.StripeModel.creditcard.createCreditCard(data);
-        if (response.state) {
-            const cardId = response.data?.stripe_id;
+        const cardId = response?.data?.stripe_card_id;
+        if (cardId) {
             const field = document.getElementById('stripe-card');
-            if (field && cardId) field.setAttribute('value', cardId);
+            if (field) field.setAttribute('value', cardId);
         }
         return response;
     };
 
-    // setStripeCardField is called immediately after createStripeCardModel
-    // in tokenizedStripeCC and would overwrite card_... back to tok_...
-    // Neutralise it — the value is already correctly set above.
+    // setStripeCardField would overwrite the field with token.id (tok_...).
     StripeElement.methods.setStripeCardField = function() {};
-});
+
+    // makeCardElement seeds value=token.card.id and auto-clicks the new card,
+    // which would re-set stripe-card to a card object not linked to the
+    // customer. Refresh from /payment-methods instead — DB has the correct
+    // payment_method_token (the customer-linked source).
+    StripeElement.methods.makeCardElement = function() {
+        if (typeof loadCards === 'function') loadCards();
+    };
+}
+
+// stripe-element.js declares `StripeElement` with `let` at top level, which
+// creates a global lexical binding but NOT a window property — so reference
+// it by name, not via window.StripeElement (which is always undefined).
+(function waitForStripeElement() {
+    if (typeof StripeElement !== 'undefined' && window.StripeModel) {
+        applyStripePatches();
+        return;
+    }
+    setTimeout(waitForStripeElement, 50);
+})();
 
 
 // isGuest: stripe-modal is only rendered for logged-in members (server-side

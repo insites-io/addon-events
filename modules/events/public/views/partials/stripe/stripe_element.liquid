@@ -4,147 +4,52 @@ metadata: {
 }
 ---
 
-{% comment %} Set value depending if guest or logged in (with profile) {% endcomment %}
-{%  liquid
+{% comment %}
+  Thin wrapper around portal's stripe-element.js / stripe-model.js.
+
+  Required params:
+    public_key  - Stripe publishable key
+    has_profile - true for logged-in members, false for guests
+
+  Sets globals that portal's stripe-element.js expects:
+    payByCardField, emailField, stripeFirstName, stripeLastName,
+    guestAddCardForm, submitButtons, stripe
+{% endcomment %}
+
+{%- liquid
     if has_profile
         assign email = context.current_user.email
         assign first_name = context.current_user.first_name
         assign last_name = context.current_user.last_name
     else
-        # Use contact info here rather than billing info, becase the stripe_id is connected in crm_profile
+        # Use contact info here rather than billing info, because stripe_id is connected in crm_profile
         assign email = context.session.contact_email
         assign first_name = context.session.contact_first_name
         assign last_name = context.session.contact_last_name
     endif
-%}
+-%}
 
-<input type="hidden" id="card_email" value="{{ email }}" >
-<input type="hidden" id="card_first_name" value="{{ first_name }}" >
-<input type="hidden" id="card_last_name" value="{{ last_name }}" >
+<input type="hidden" id="card_email" value="{{ email }}">
+<input type="hidden" id="card_first_name" value="{{ first_name }}">
+<input type="hidden" id="card_last_name" value="{{ last_name }}">
 
-
+<script src="https://js.stripe.com/v3/"></script>
 <script>
     let payByCardField = document.getElementById('stripe-card');
     let emailField = document.getElementById('card_email');
     let stripeFirstName = document.getElementById('card_first_name');
     let stripeLastName = document.getElementById('card_last_name');
     let guestAddCardForm = document.getElementById("guest-add-card-form");
-    let submitButtons = document.getElementById("payment-navigation-buttons");    
+    let submitButtons = document.getElementById("payment-navigation-buttons");
+    let stripe = Stripe('{{ public_key }}');
 </script>
 
-
-{% comment %} 
-
-    ──────────────────────────────────────────────
-     Stripe Script Loader Notes
-    ──────────────────────────────────────────────
-
-    Dynamically load Stripe.js and its dependent scripts (instead of including them directly like below):
-
-        <script src="https://js.stripe.com/v3/"></script>
-        <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}" defer></script>
-        <script src="{{ 'modules/portal/scripts/stripe/stripe-element.js' | asset_url }}" defer></script>
-        <script src="{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}" defer></script>
-
-    Load Stripe.js with retry logic to handle CDN delays or network issues.
-    Ensures Stripe is available before dependent modules run.
-
-    #1 loadScript()  → handles adding <script> tags
-    #2 loadStripeWithRetry()  → includes the retry + "wait for Stripe to appear" logic 
-    #3 await loadStripeWithRetry("https://js.stripe.com/v3/")
-    #4 Initialize Stripe (window.stripe = Stripe(...))
-    #5 Load dependent Stripe scripts (services, element, model)
-
-    If the maxRetries is reached, the page will be reloaded.
-
-{% endcomment %}
-
-<script defer>
-  document.addEventListener("DOMContentLoaded", async () => {
-    // 1️⃣ Function to dynamically load a script
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        // Prevent duplicate loading
-        if (document.querySelector(`script[src="${src}"]`)) {
-          return resolve();
-        }
-
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load ${src}`));
-        document.head.appendChild(script);
-      });
-    }
-
-    // 2️⃣ Function to retry loading Stripe.js if it fails
-    async function loadStripeWithRetry(url, maxRetries = 5, retryDelay = 1000) {
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                await loadScript(url);
-                console.log("✅ Stripe.js script tag added");
-
-                // Wait for Stripe to be available (poll every 200ms, max 2s)
-                let waitTime = 0;
-                while (typeof Stripe === "undefined" && waitTime < 2000) {
-                    await new Promise(r => setTimeout(r, 200));
-                    waitTime += 200;
-                }
-
-                if (typeof Stripe !== "undefined") {
-                    console.log("✅ Stripe object detected");
-                    return true;
-                } else {
-                    throw new Error("Stripe global not ready after script load");
-                    return false;
-                }
-
-            } catch (err) {
-                console.warn(`⚠️ Attempt ${attempt} failed to load Stripe.js: ${err.message}`);
-                if (attempt < maxRetries) {
-                    console.log(`Retrying in ${retryDelay}ms...`);
-                    await new Promise(r => setTimeout(r, retryDelay));
-                } else {
-                    console.error("❌ Failed to load Stripe.js after multiple attempts");
-                    window.location.reload(); // ✅ Reload only after final failure
-                    return false;
-                }
-            }
-        }
-    }
-
-
-    // 3️⃣ Load Stripe.js (with retry)
-    const stripeLoaded = await loadStripeWithRetry("https://js.stripe.com/v3/");
-    if (!stripeLoaded) return;
-
-    // 4️⃣ Initialize Stripe
-    if (typeof Stripe !== "undefined") {
-        window.stripe = Stripe("{{ public_key }}");
-        console.log("✅ Stripe initialized:", window.stripe);
-        document.dispatchEvent(new Event("stripe-ready")); // optional event
-    } else {
-        console.error("❌ Stripe object not found after load");
-        return;
-    }
-
-    // 5️⃣ Load your dependent scripts (after Stripe is ready)
-    const stripeScripts = [
-        "{{ 'modules/portal/services/stripeServices.js' | asset_url }}",
-        "{{ 'modules/portal/scripts/stripe/stripe-element.js' | asset_url }}",
-        "{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}"
-    ];
-
-    for (const src of stripeScripts) {
-        try {
-            await loadScript(src);
-            console.log(`✅ Loaded: ${src}`);
-        } catch (err) {
-            console.error(err.message);
-        }
-    }
-
-    console.log("🎉 All Stripe scripts loaded and initialized");
-  });
-</script>
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/portal/services/stripeServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/portal/services/stripeServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-element.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/stripe/stripe-model.min.js' | asset_url }}"></script>
+{%- endif -%}

@@ -1,0 +1,87 @@
+---
+metadata: {
+    partial_name: 'Events | Ticket | Order Summary (Post-payment, locked pricing)'
+}
+---
+
+{%- comment -%}
+  Post-payment wrapper for the order summary. Used on /ticket-allocate and
+  /ticket-confirmation. Reads event_ticket records (price/tax locked at order
+  creation time) so the displayed amount always matches what was charged.
+  Delegates rendering to order_summary_final.
+
+  Parameters: order_id, event_uuid
+{%- endcomment -%}
+
+{%- graphql tickets_result = 'modules/events/orders/get_tickets_by_order', order_id: order_id, event_uuid: event_uuid -%}
+{%- assign db_tickets = tickets_result | dig: "items", "results" -%}
+
+{%- assign breakdown = '' | split: ',' -%}
+{%- assign subtotal = 0 -%}
+{%- assign total_tax = 0 -%}
+{%- assign seen_venue_keys = "" -%}
+
+{%- for ticket in db_tickets -%}
+  {%- assign vname = ticket.venue_area_name | default: "" -%}
+  {%- assign vkey = "|" | append: vname | append: "|" -%}
+  {%- unless seen_venue_keys contains vkey -%}
+    {%- assign seen_venue_keys = seen_venue_keys | append: vkey -%}
+    {%- assign venue_tickets = db_tickets | where: "venue_area_name", vname -%}
+    {%- assign display_vname = vname | default: "No Venue" -%}
+
+    {%- assign items = '' | split: ',' -%}
+    {%- assign seen_tier_keys = "" -%}
+
+    {%- for vt in venue_tickets -%}
+      {%- assign tier_name = vt.tier.name | default: vt.ticket_type -%}
+      {%- assign tkey = "|" | append: tier_name | append: "|" | append: vt.ticket_type | append: "|" -%}
+      {%- unless seen_tier_keys contains tkey -%}
+        {%- assign seen_tier_keys = seen_tier_keys | append: tkey -%}
+
+        {%- assign qty = 0 -%}
+        {%- assign unit_price = vt.price | plus: 0 -%}
+        {%- assign unit_tax = vt.tax | plus: 0 -%}
+        {%- assign unit_tax_type = vt.tax_type -%}
+        {%- for vt2 in venue_tickets -%}
+          {%- assign t2_tier = vt2.tier.name | default: vt2.ticket_type -%}
+          {%- assign tkey2 = "|" | append: t2_tier | append: "|" | append: vt2.ticket_type | append: "|" -%}
+          {%- if tkey2 == tkey -%}{%- assign qty = qty | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- assign item_subtotal = unit_price | times: qty -%}
+        {%- assign subtotal = subtotal | plus: item_subtotal -%}
+        {%- if unit_tax_type == "percentage" -%}
+          {%- assign item_tax = item_subtotal | times: unit_tax | divided_by: 100.0 -%}
+        {%- else -%}
+          {%- assign item_tax = unit_tax | times: qty -%}
+        {%- endif -%}
+        {%- assign total_tax = total_tax | plus: item_tax -%}
+
+        {%- assign cap_type = vt.ticket_type | capitalize -%}
+        {%- assign item_name = cap_type | append: " - " | append: tier_name -%}
+
+        {%- assign item = '{}' | parse_json -%}
+        {%- assign item = item | add_hash_key: "name", item_name -%}
+        {%- assign item = item | add_hash_key: "qty", qty -%}
+        {%- assign item = item | add_hash_key: "unit_price", unit_price -%}
+        {%- assign items = items | array_add: item -%}
+      {%- endunless -%}
+    {%- endfor -%}
+
+    {%- assign venue_entry = '{}' | parse_json -%}
+    {%- assign venue_entry = venue_entry | add_hash_key: "venue_name", display_vname -%}
+    {%- assign venue_entry = venue_entry | add_hash_key: "items", items -%}
+    {%- assign breakdown = breakdown | array_add: venue_entry -%}
+  {%- endunless -%}
+{%- endfor -%}
+
+{%- assign temp_total = subtotal | plus: total_tax -%}
+{%- assign processing_fee = temp_total | times: 0.017 -%}
+{%- assign grand_total = temp_total | plus: processing_fee -%}
+
+{% include 'modules/events/ticket/order_summary',
+    breakdown: breakdown,
+    subtotal: subtotal,
+    total_tax: total_tax,
+    processing_fee: processing_fee,
+    grand_total: grand_total %}

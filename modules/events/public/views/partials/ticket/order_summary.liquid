@@ -1,63 +1,111 @@
 ---
 metadata: {
-    partial_name: 'Events | Purchase Ticket | Payment Summary'
+    partial_name: 'Events | Ticket | Order Summary (Shared Layout)'
 }
 ---
+
+{%- comment -%}
+  Shared layout for the order summary card.
+
+  Called by:
+    - order_summary_pre_payment   (server-rendered from session + DB tier prices)
+    - order_summary_post_payment  (server-rendered from event_ticket records)
+    - ticket_purchase_form      (no params → empty shell, JS fills the IDs live)
+
+  Optional parameters — omit on step 1 to get the JS-driven empty shell:
+    breakdown      → array of { venue_name, items: [{ name, qty, unit_price }] }
+    subtotal       → float
+    total_tax      → float
+    processing_fee → float
+    grand_total    → float
+{%- endcomment -%}
+
+{%- liquid
+  if subtotal == blank
+    assign subtotal = 0
+  endif
+  if total_tax == blank
+    assign total_tax = 0
+  endif
+  if processing_fee == blank
+    assign processing_fee = 0
+  endif
+  if grand_total == blank
+    assign grand_total = 0
+  endif
+-%}
+
+{%- assign _c = subtotal | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+{%- assign subtotal_fmt = _d | append: "" -%}
+{%- if subtotal_fmt contains "." -%}{%- assign _p = subtotal_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign subtotal_fmt = subtotal_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign subtotal_fmt = subtotal_fmt | append: ".00" -%}{%- endif -%}
+
+{%- assign _c = total_tax | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+{%- assign tax_fmt = _d | append: "" -%}
+{%- if tax_fmt contains "." -%}{%- assign _p = tax_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign tax_fmt = tax_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign tax_fmt = tax_fmt | append: ".00" -%}{%- endif -%}
+
+{%- assign _c = processing_fee | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+{%- assign processing_fmt = _d | append: "" -%}
+{%- if processing_fmt contains "." -%}{%- assign _p = processing_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign processing_fmt = processing_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign processing_fmt = processing_fmt | append: ".00" -%}{%- endif -%}
+
+{%- assign _c = grand_total | times: 100 | round -%}{%- assign _d = _c | divided_by: 100.0 -%}
+{%- assign total_fmt = _d | append: "" -%}
+{%- if total_fmt contains "." -%}{%- assign _p = total_fmt | split: "." -%}{%- if _p[1].size == 1 -%}{%- assign total_fmt = total_fmt | append: "0" -%}{%- endif -%}{%- else -%}{%- assign total_fmt = total_fmt | append: ".00" -%}{%- endif -%}
 
 <div id="ticket-payment-summary-container" class="ticket-payment-summary-container">
     <h2 class="heading-2-xsmall">Order summary</h2>
     <div class="spacer x-large hide-for-small-only"></div>
     <div class="spacer show-for-small-only"></div>
-    <div id="payment-breakdown" class="payment-breakdown">
-        <span id="ticket-types"></span>
-        <span id="ticket-quantity"></span>
-        <span id="ticket-price-summary"></span>
-        <div class="spacer medium"></div>
-    </div>
+
+    {%- if breakdown == blank -%}
+        {%- comment -%} Step 1: empty containers populated live by ticket-purchase.js {%- endcomment -%}
+        <div id="payment-breakdown" class="payment-breakdown">
+            <span id="ticket-types"></span>
+            <span id="ticket-quantity"></span>
+            <span id="ticket-price-summary"></span>
+            <div class="spacer medium"></div>
+        </div>
+    {%- else -%}
+        <div id="payment-breakdown" class="payment-breakdown" style="display:flex">
+            {%- for venue in breakdown -%}
+                <div class="payment-break-downs">
+                    <p class="payment-breakdown-venue-name">{{ venue.venue_name }}</p>
+                    <div>
+                        {%- for item in venue.items -%}
+                            {%- assign _c = item.unit_price | times: 100 | round -%}
+                            {%- assign _d = _c | divided_by: 100.0 -%}
+                            {%- assign _fmt = _d | append: "" -%}
+                            {%- if _fmt contains "." -%}
+                                {%- assign _p = _fmt | split: "." -%}
+                                {%- if _p[1].size == 1 -%}{%- assign _fmt = _fmt | append: "0" -%}{%- endif -%}
+                            {%- else -%}
+                                {%- assign _fmt = _fmt | append: ".00" -%}
+                            {%- endif -%}
+                            <div class="payment-break-down-tier-container">
+                                <div class="payment-break-down-tier-name">{{ item.name }}</div>
+                                <div class="payment-break-down-tier-price"><p>{{ item.qty }} x </p> ${{ _fmt }}</div>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+            {%- endfor -%}
+        </div>
+    {%- endif -%}
 
     <div class="subtotal-container">
         <p class="subtotal-container-title">Subtotal</p>
-        <p id="subtotal-price">$0.00</p>
+        <p id="subtotal-price">${{ subtotal_fmt }}</p>
     </div>
     <div class="spacer x-small"></div>
 
-    {% comment %} ? DISCOUNT SUMMARY - HIDDEN ON DEFAULT {% endcomment %}
-    <div class="subtotal-container discount-summary is_not_visible">
-        <p class="subtotal-container-title">Discounts</p>
-        <p id="display-discount-value-summary">$0.00</p>
-    </div>
-    <div class="discount-summary-card is_not_visible">
-        <div class="spacer x-small"></div>
-        {% comment %} ? DISCOUNT DETAILS ON CARD {% endcomment %}
-        <ins-card steady>
-            <div class="discount-summary-details">
-                {% comment %} ? DISCOUNT DETAILS {% endcomment %}
-                <div>
-                    <div class="body-x-small-bold"> 
-                        <span id="display-discount-name" class="body-x-small-bold"></span>
-                    </div>
-                    <div class="body-x-small">
-                        <span id="display-discount-code" class="body-x-small"></span> - <span id="display-discount-value" class="body-x-small"> </span>
-                    </div>
-                </div>
-                {% comment %} ? REMOVE DISCOUNT BUTTON {% endcomment %}
-                <div>
-                    <button type="button" id="remove-discount" aria-label="Remove discount"><i class="icon-close-1" aria-hidden="true"></i></button>
-                </div>
-            </div>
-        </ins-card>
-        <div class="spacer x-small"></div>
-    </div>
-
     <div class="subtotal-container">
         <p class="subtotal-container-title">Tax</p>
-        <p id="tax-price">$0.00</p>
+        <p id="tax-price">${{ tax_fmt }}</p>
     </div>
     <div class="spacer x-small"></div>
 
     <div class="subtotal-container">
         <p class="subtotal-container-title">Processing fee (1.7%)</p>
-        <p id="proccessing-price">$0.00</p>
+        <p id="proccessing-price">${{ processing_fmt }}</p>
     </div>
 
     <div class="spacer medium"></div>
@@ -66,41 +114,35 @@ metadata: {
 
     <div class="total-container">
         <p class="total-container-title">Total</p>
-        <p id="total-price">$0.00</p>
+        <p id="total-price">${{ total_fmt }}</p>
     </div>
 
-    {% comment %} Responsive spacers {% endcomment %}
     {% include 'modules/events/layout/responsive_spacers', desktop: 'xxx-large', mobile: 'x-large' %}
 </div>
 
 
-
-
-
-{% comment %} Mobile view - View order summary button {% endcomment %}
+{% comment %} Mobile total bar {% endcomment %}
 {%- unless context.params.slug == 'confirmation' -%}
 <div id="mobile-order-summary" class="show-for-small-only">
     <div class="total">
         <p class="color-ui-05 body-x-small">Total</p>
-        <p id="mobile-total-price" class="order-total">$0.00</p>
+        <p id="mobile-total-price" class="order-total">${{ total_fmt }}</p>
     </div>
     <ins-button type="button" id="view-order-summary-btn" label="View order summary"></ins-button>
 </div>
 {%- endunless -%}
 
-{% comment %} Mobile view - Order summary drawer {% endcomment %}
-<ins-drawer 
-    custom-width="430px" 
-    position="right" 
+{% comment %} Mobile drawer {% endcomment %}
+<ins-drawer
+    custom-width="430px"
+    position="right"
     bordered=false
     id="order-summary-drawer"
     class="mobile-order-summary inline">
-
-    {% comment %} The content here is driven by the javascript below {% endcomment %}
     <div id="order-summary-drawer-content"></div>
 </ins-drawer>
 
-{% comment %} Copy data from Desktop view to Mobile view {% endcomment %}
+{% comment %} Copy desktop content to mobile drawer {% endcomment %}
 <script>
     let orderSummaryContainer = document.getElementById('ticket-payment-summary-container');
     let viewOrderSummaryBtn = document.getElementById('view-order-summary-btn');
@@ -109,10 +151,8 @@ metadata: {
 
     viewOrderSummaryBtn.addEventListener('insClick', async event => {
         let orderSummaryHtmlContent = orderSummaryContainer.innerHTML;
-        // Replace 'id' with 'data'
         let modifiedHTML = orderSummaryHtmlContent.replace(/\bid="([^"]+)"/g, 'data="$1"');
-
-        orderSummaryDrawer.setDrawerState(true); 
+        orderSummaryDrawer.setDrawerState(true);
         orderSummaryDrawerContent.innerHTML = modifiedHTML;
-    });    
+    });
 </script>

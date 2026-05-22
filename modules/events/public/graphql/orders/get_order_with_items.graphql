@@ -1,0 +1,41 @@
+query get_order_with_items (
+    $order_id: ID
+) {
+    items: records(
+        per_page: 1,
+        filter: {
+            id: { value: $order_id }
+            table: { value: "modules/insites_ecommerce/order" }
+            deleted_at: { exists: false }
+        }
+    ) {
+        results {
+            id
+            uuid: property(name: "uuid")
+            subtotal_amount: property_float(name: "subtotal_amount")
+            total_tax_amount: property_float(name: "total_tax_amount")
+            total_amount: property_float(name: "total_amount")
+            processing_fee: property_float(name: "processing_fee")
+            total_discount_amount: property_float(name: "total_discount_amount")
+
+            order_items: related_records(
+                table: "modules/insites_ecommerce/order_item"
+                join_on_property: "uuid"
+                foreign_property: "order_uuid"
+                filter: {
+                    deleted_at: { exists: false }
+                }
+            ) {
+                id
+                order_item_name: property(name: "order_item_name")
+                quantity: property_int(name: "quantity")
+                unit_price: property_float(name: "unit_price")
+                item_tax: property_float(name: "item_tax")
+                tax_amount: property_float(name: "tax_amount")
+                line_item_tax: property_float(name: "line_item_tax")
+                line_item_total: property_float(name: "line_item_total")
+                is_fixed_tax_amount: property_boolean(name: "is_fixed_tax_amount")
+            }
+        }
+    }
+}

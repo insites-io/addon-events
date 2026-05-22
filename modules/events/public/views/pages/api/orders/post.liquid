@@ -139,6 +139,11 @@ searchable: false
 
     {%- assign has_payment_error = false -%}
     {%- if add_order.id -%}
+        {%- include 'modules/events/orders/create_order_items',
+            raw_tickets: _raw_tickets,
+            order_uuid: add_order.uuid,
+            event_uuid: event_uuid -%}
+
         {%- include 'modules/events/orders/callback_init',
             payload: payload,
             order_data: add_order -%}

@@ -94,9 +94,15 @@ searchable: false
     {%- assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData -%}
 
     {%- function add_tickets = "events/event_tickets/create", event_uuid: ticketPayload.uuid, params: ticketPayload.data -%}
+    {% log add_tickets, type: "==test add_tickets" %}
 
-    {%- if add_tickets.errors -%}
+    {%- if add_tickets.failed_tickets_added_count > 0 -%}
         {%- assign errors = add_tickets -%}
+        {%- include 'modules/events/ticket/log_tickets_failed',
+            add_tickets: add_tickets,
+            event_uuid: event_uuid,
+            order_number: order_number,
+            user_uuid: user_uuid -%}
     {%- endif -%}
 {%- endif -%}
 

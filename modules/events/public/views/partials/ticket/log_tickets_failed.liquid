@@ -1,0 +1,65 @@
+---
+metadata: {
+    partial_name: 'Events | Ticket | Log Ticket Creation Failure Event Stream'
+}
+---
+
+{%- comment -%}
+  Writes a single event_stream entry summarising a ticket-creation failure via
+  the shared modules/portal/events/log_event helper. The events/event_tickets/create
+  controller returns counts only (no per-ticket detail), so this logs the totals
+  rather than one event per failed ticket.
+
+  Parameters:
+    add_tickets   — return value of events/event_tickets/create
+                    (total_tickets_added, successful_tickets_added_count, failed_tickets_added_count)
+    event_uuid    — event uuid the tickets were being created for
+    order_number  — order id (order_number on the ticket records)
+    user_uuid     — purchaser uuid
+{%- endcomment -%}
+
+{%- assign _first_name = context.current_user.first_name | default: context.session.contact_first_name -%}
+{%- assign _last_name  = context.current_user.last_name  | default: context.session.contact_last_name -%}
+{%- assign _email      = context.current_user.email      | default: context.session.contact_email -%}
+{%- assign _user_name  = _first_name | append: ' ' | append: _last_name -%}
+
+{%- assign _total      = add_tickets.total_tickets_added | plus: 0 -%}
+{%- assign _successful = add_tickets.successful_tickets_added_count | plus: 0 -%}
+{%- assign _failed     = add_tickets.failed_tickets_added_count | plus: 0 -%}
+
+{%- capture _description -%}
+Ticket creation failed for <a target="_blank" href="/admin/insites/#/crm/contacts/{{ user_uuid }}">{{ _user_name }}</a> — {{ _failed }} of {{ _total }} tickets failed (order #{{ order_number }}, event {{ event_uuid }})
+{%- endcapture -%}
+
+{%- capture _log_info_json -%}
+{
+    "action": "ticket_creation_failed",
+    "data": {
+        "items": {
+            "user": {
+                "uuid": "{{ user_uuid }}",
+                "email": "{{ _email }}",
+                "first_name": "{{ _first_name }}",
+                "last_name": "{{ _last_name }}"
+            },
+            "summary": {
+                "event_uuid": "{{ event_uuid }}",
+                "order_number": "{{ order_number }}",
+                "total_tickets_added": {{ _total }},
+                "successful_tickets_added_count": {{ _successful }},
+                "failed_tickets_added_count": {{ _failed }}
+            }
+        }
+    }
+}
+{%- endcapture -%}
+{%- assign _log = _log_info_json | parse_json -%}
+
+{%- assign info = '{}' | parse_json -%}
+{%- assign info = info | add_hash_key: "description", _description -%}
+{%- assign info = info | add_hash_key: "font_icon", "icon-alert-circle" -%}
+{%- assign info = info | add_hash_key: "font_icon_color", "#E54B4B" -%}
+{%- assign info = info | add_hash_key: "administrator_uuid", user_uuid -%}
+{%- assign info = info | add_hash_key: "log", _log -%}
+
+{% include 'modules/portal/events/log_event', info %}

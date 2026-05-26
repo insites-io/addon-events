@@ -7,24 +7,30 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
-{% assign errors = "" %}
-
+{%- assign errors = "" -%}
 
 {%- assign ticketData = payload.ticketData | parse_json -%}
 {%- assign event_uuid = payload.eventUUID -%}
 {%- assign ticket_uuid = payload.ticketUUID -%}
 
-{% assign ticketPayload = '{}' | parse_json %}
-{% assign data = '{}' | parse_json %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "event_uuid", event_uuid %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "ticket_uuid", ticket_uuid %}
-{% assign ticketPayload = ticketPayload | add_hash_key: "data", ticketData %}
+{%- comment -%}
+  assign_contact controller always writes purchased_by_uuid (nulls it if absent),
+  so re-send the current buyer's uuid to preserve ticket ownership.
+{%- endcomment -%}
+{%- if context.current_user -%}
+    {%- assign purchased_by_uuid = context.current_user.external_id -%}
+{%- else -%}
+    {%- assign purchased_by_uuid = context.session.event_guest_uuid -%}
+{%- endif -%}
+{%- assign ticketData = ticketData | add_hash_key: "purchased_by.uuid", purchased_by_uuid -%}
 
-{% function allocate_ticket = "events/event_tickets/update", uuid: ticketPayload.ticket_uuid, event_uuid: ticketPayload.event_uuid, params: ticketPayload.data %}
+{% function allocate_ticket = "events/event_tickets/assign_contact", uuid: ticket_uuid, event_uuid: event_uuid, params: ticketData %}
 
 {% if allocate_ticket.errors  %}
     {% assign errors = allocate_ticket %}
 {% endif %}     
+
+{%- assign data = '{}' | parse_json -%}
 
 {%- if errors != "" -%}
     {% assign data = data | add_hash_key: "has_error", true %}

@@ -239,10 +239,8 @@ const OrderProcessor = {
   },
 
   async createTickets() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const eventParam = urlParams.get("event");
     try {
-      const response = await ticketServices.createTickets(eventParam);
+      const response = await ticketServices.createTickets();
       if (response.data) return response;
     } catch (error) {
       console.error("Ticket creation error:", error);

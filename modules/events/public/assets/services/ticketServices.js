@@ -3,8 +3,8 @@ var ticketServices = (function () {
         checkTicketAvailability: function (uuid, payload) {
             return httpClient.processRequest('get', '/check-ticket-availability?eventuuid=' + uuid + '&ticketData=' + payload);
         },
-        createTickets: function (uuid) {
-            return httpClient.processRequest('post', '/create-tickets?eventuuid=' + uuid);
+        createTickets: function () {
+            return httpClient.processRequest('post', '/create-tickets');
         },
         allocateTicket: function (eventUuid, ticketUuid, payload) {
             return httpClient.processRequest('put', '/allocate-ticket?eventUUID=' + eventUuid + '&ticketUUID=' + ticketUuid + '&ticketData=' + payload);

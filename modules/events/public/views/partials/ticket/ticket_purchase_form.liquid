@@ -105,6 +105,10 @@ metadata: {
     {% comment %} ? HOLDER OF EVENT REGION {% endcomment %}
     <input type="hidden" id="event-region" name="{{ props.event_region.name }}" value="{{ event_custom_fields.event_region }}">
 
+    {% comment %} Restore previously selected tickets when returning to this page (e.g. Back from billing). The selection was saved to session by /api/check-ticket-availability. {% endcomment %}
+    {%- assign saved_ticket_selection = context.session.tickets_selected[event_uuid].ticketData | default: '[]' -%}
+    <input type="hidden" id="saved-ticket-selection" data-saved-selection='{{ saved_ticket_selection }}'>
+
     {% comment %} ? Settings of Button if Email Exists {% endcomment %}
     {% comment %} {% if is_company_email_exists.is_company_email_exists == true %}
         {% assign is_disabled = "disabled='false'" %}

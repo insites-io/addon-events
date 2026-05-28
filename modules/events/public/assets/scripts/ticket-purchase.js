@@ -506,6 +506,54 @@ const StepHandlers = {
 
 
 // ============================================================================
+// SELECTION RESTORER — repopulate steppers from a saved session selection
+// (e.g. when the user clicks Back from /ticket-billing)
+// ============================================================================
+
+const SelectionRestorer = {
+  restore() {
+    const el = document.getElementById("saved-ticket-selection");
+    if (!el || DOM.ticketSteppers.length === 0) return;
+
+    let saved;
+    try {
+      saved = JSON.parse(el.getAttribute("data-saved-selection") || "[]");
+    } catch (e) {
+      console.error("Invalid saved ticket selection:", e);
+      return;
+    }
+    if (!Array.isArray(saved) || saved.length === 0) return;
+
+    // Count saved tickets per tier + division + capacity_type.
+    const counts = {};
+    saved.forEach(ticket => {
+      const key = `${ticket["event_pricing_tier.uuid"]}|${ticket.event_pricing_division_uuid}|${ticket.capacity_type}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    // Apply counts to matching steppers; dispatching 'input' rebuilds
+    // ticketsData and re-renders the order summary via the existing listener.
+    DOM.ticketSteppers.forEach(stepper => {
+      const input = stepper.querySelector(".input-stepper");
+      if (!input) return;
+      let data;
+      try {
+        data = JSON.parse(input.getAttribute("data"));
+      } catch (e) {
+        return;
+      }
+      const key = `${data["event_pricing_tier.uuid"]}|${data.event_pricing_division_uuid}|${data.capacity_type}`;
+      const count = counts[key];
+      if (count > 0) {
+        input.value = String(count);
+        input.dispatchEvent(new Event("input"));
+      }
+    });
+  }
+};
+
+
+// ============================================================================
 // GLOBAL EXPORTS
 // ============================================================================
 
@@ -534,4 +582,5 @@ document.addEventListener("DOMContentLoaded", () => {
   TicketManager.setupSteppers();
   AccordionManager.setup();
   StepHandlers.handleStep1();
+  SelectionRestorer.restore();
 });

@@ -315,7 +315,7 @@ metadata: {
 
 
 {% comment %} Ticket Items {% endcomment %}
-{% include 'modules/events/emails/ticket_items', tickets: data.tickets %}
+{% include 'modules/events/emails/ticket_items', order_id: data.order_data.id %}
 
 
 {% comment %} Spacer {% endcomment %}

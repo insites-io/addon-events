@@ -151,13 +151,6 @@ insites-cli logs <env>        # tail instance logs
 
 > ⚠️ `.insites` contains instance tokens — treat as sensitive, do not share publicly, do not commit to forks.
 
-### Conventions
-- **Liquid Liquid Liquid** — page logic, guards, and pricing computation live in Liquid, not in client JS
-- **GraphQL filenames must match the operation name** inside them (e.g. `get_event.graphql` contains `query get_event`)
-- **Integer property filters** in GraphQL use `value_int` (not `value_integer`) with variable type `Int`
-- **`record_update` has no `errors` block** — valid return fields are `id`, `table`, `properties`, `created_at`, `updated_at`
-- **Do not edit `.min.js` / `.min.css`** — they are regenerated on save by the project's VSCode extension
-
 ---
 
 ## Features

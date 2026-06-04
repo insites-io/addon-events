@@ -6,9 +6,9 @@ max_deep_level: 2
 metadata: {
     "status": "published",
     "page_type": "content", 
-    "page_name": "Upcoming Events | Insites",
-    "page_title": "Upcoming Events | Insites",
-    "meta_title": "Upcoming Events | Insites" 
+    "page_name": "My Upcoming Events | Insites",
+    "page_title": "My Upcoming Events | Insites",
+    "meta_title": "My Upcoming Events | Insites" 
 }
 authorization_policies:
   - modules/portal/is_user_logged_in
@@ -16,7 +16,7 @@ authorization_policies:
 ---
 
 {% graphql user_event_uuids = "modules/events/event_tickets/get_user_purchased_tickets", 
-    purchased_by_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' %}
+    purchased_by_uuid: context.current_user.external_id | dig: 'items','results' | map: 'event_uuid' | array_uniq %}
 
 {% if context.params.slug2 %}
     {% comment %} Details view {% endcomment %}

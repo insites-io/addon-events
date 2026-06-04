@@ -1,6 +1,6 @@
 query get_user_purchased_tickets (
   $page: Int=1
-  $size: Int=50
+  $size: Int=500
   $purchased_by_uuid: String!
 ) {
   items: records(

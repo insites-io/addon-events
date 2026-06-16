@@ -45,7 +45,7 @@ metadata: {
     {
         "sk_key": "{{ stripe_settings.sk_key }}",
         "stripe_account_id": "{{ stripe_settings.account_id }}",
-        "sk_key_insites": "{{ stripe_settings.sk_key }}",
+        "sk_key_insites": "{{ stripe_settings.sk_key_insites }}",
         "idempotency_key": "{{ '' | uuid }}",
         "currency": "AUD",
         "amount": "{{ stripe_amount | advanced_format: '%.0f' }}",

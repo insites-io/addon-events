@@ -1,4 +1,4 @@
-query get_events (
+query get_events_total_entries (
   $page: Int=1
   $size: Int=20
   $uuids: [String!]
@@ -33,52 +33,19 @@ query get_events (
           properties: [
             { name: "venue_state", value: $venue_state, exists: true }
             { name: "event_type", value: $event_type }
-          ] 
+          ]
         }
         {
           ## venue_state can be null as long as the event_type is online_event
           properties: [
             { name: "venue_state", value: $venue_state, exists: false}
             { name: "event_type", contains: "online_event" }
-          ] 
+          ]
         }
       ]
-    } 
+    }
     sort: $sort_by
   ) {
-    results {
-      id
-      uuid: property(name: "uuid")
-      slug: property(name: "slug")
-      event_name: property(name: "event_name")
-      start_date_time: property(name: "start_date_time")
-      end_date_time: property(name: "end_date_time")
-      event_time_zone: property(name: "event_time_zone")
-      event_type: property(name: "event_type")
-      venue_name: property(name: "venue_name")
-      venue_state: property(name: "venue_state")
-      
-      event_image: property_upload(name: "event_image") {
-        url
-      }
-
-      custom_fields: related_records(
-        table: "modules/ins_events/event_custom_field"
-        foreign_property: "event_uuid"
-        join_on_property: "uuid"
-      ) {
-        image_thumbnail: property_upload(name: "image_thumbnail") {
-          url
-        }
-      }
-
-      category: related_record(
-        table: "modules/insites_events/event_system_field"
-        join_on_property: "category_uuid"
-        foreign_property: "uuid"
-      ){
-        value: property(name: "value")
-      }
-    }
+    total_entries
   }
 }

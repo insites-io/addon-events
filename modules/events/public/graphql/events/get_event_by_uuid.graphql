@@ -19,10 +19,6 @@ query get_event_by_uuid(
             }
         ]
     ) {
-        total_entries
-        total_pages
-        per_page
-        current_page
         results {
             id
 	        created_at

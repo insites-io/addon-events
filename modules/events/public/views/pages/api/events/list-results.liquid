@@ -65,6 +65,8 @@ searchable: false
     "sort_by": {{ sort_by }}
 }
 {% endparse_json %}
+{% comment %} Note: total_entries and results are fetched separately to optimize performance {% endcomment %}
+{% graphql events_total_entries = 'modules/events/events/get_events_total_entries', args: filters | dig: 'items' %}
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' %}
 
 {% capture cards_html %}
@@ -81,7 +83,7 @@ searchable: false
 
 {
     "html": {{ cards_html | json }},
-    "totalCount": {{ events.total_entries | default: 0 }},
+    "totalCount": {{ events_total_entries.total_entries | default: 0 }},
     "pageNumber": {{ page_num }},
     "pageSize": {{ per_page }}
 }

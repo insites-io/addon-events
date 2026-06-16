@@ -16,7 +16,7 @@ metadata: {
 {% endparse_json %} 
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' %}
 
-{% if events.total_entries > 0 %}
+{% if events.results.size > 0 %}
 
      {% assign main_event = events.results[0] %}
      <div class="bg-color-ui-02">

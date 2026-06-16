@@ -10,10 +10,6 @@ query generate_event_venue_areas(
             deleted_at: { exists: false }         
         }
     ) {
-        total_entries
-        total_pages
-        per_page
-        current_page
         results {
           table
           properties  

@@ -166,10 +166,12 @@ metadata: {
      "sort_by": {{ sort_by }}
 }
 {% endparse_json %} 
+{% comment %} Note: total_entries and results are fetched separately to optimize performance {% endcomment %}
+{% graphql events_total_entries = 'modules/events/events/get_events_total_entries', args: filters | dig: 'items' -%}
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' -%}
 
      {% comment %} Filters | Search {% endcomment %}
-     {% if is_filters_applied == false and events.total_entries == 0 %}
+     {% if is_filters_applied == false and events_total_entries.total_entries == 0 %}
           {% comment %} Dont show filters blocks when no events are found even if filters are not applied {% endcomment %}
      {% else %}
      <div class="wrapper width-1440">
@@ -212,7 +214,7 @@ metadata: {
      <div class="spacer xxx-large show-for-small-only"></div>
      {% endif %}
      
-{% if events.total_entries == 0 %}
+{% if events_total_entries.total_entries == 0 %}
 
      <div class="wrapper width-1440">
           <div class="text-center">
@@ -280,7 +282,7 @@ metadata: {
 
 <script id="pagination-data" type="application/json">
 {
-     "totalCount": {{ events.total_entries | default: 0 }},
+     "totalCount": {{ events_total_entries.total_entries | default: 0 }},
      "pageNumber": {{ page_num }},
      "pageSize": {{ per_page }},
      "pageSizeOptions": [12, 24, 30],

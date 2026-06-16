@@ -25,10 +25,6 @@ query get_tickets (
         },
         sort: [ $sort ]
     ) {
-        total_pages
-        total_entries
-        per_page
-        current_page
         results {
             id
             created_at

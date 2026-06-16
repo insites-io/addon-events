@@ -1,0 +1,28 @@
+{% comment %}
+  All events addon constants are provisioned here.
+  - events_addon: install flag read by host sites to detect the events addon.
+  - events_addon_google_map_id: map id for the event detail Google map,
+    namespaced under events_addon so it does not collide with other addons'
+    google_map_id (e.g. addon-locator). The actual value is set per-site.
+{% endcomment %}
+{% parse_json constants %}
+[
+  { "name": "events_addon", "value": "true" },
+  { "name": "events_addon_google_map_id", "value": "DEMO_MAP_ID" }
+]
+{% endparse_json %}
+
+{% for constant in constants %}
+  {% graphql create_constant, name: constant.name, value: constant.value %}
+    mutation constant_set(
+      $name: String
+      $value: String
+    ) {
+      constant_set(name: $name, value: $value) {
+        value
+        name
+      }
+    }
+  {% endgraphql %}
+  {% log create_constant, type: "Constants Created" %}
+{% endfor %}

@@ -92,7 +92,7 @@ metadata: {
           "lng": {{ event.venue_geojson.coordinates[0] | default: 0 }},
           "lat": {{ event.venue_geojson.coordinates[1] | default: 0 }},
           "location_name": "{{ event.venue_name }}",
-          "map_id": "{{ context.constants.google_map_id }}"
+          "map_id": "{{ context.constants.events_addon_google_map_id }}"
      }
      </script>
      {% if context.environment == "staging" %}

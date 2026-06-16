@@ -1,0 +1,17 @@
+{% comment %}
+  Provision the events_addon_google_map_id constant (empty default) so the events
+  Google map has its own map id and does not collide with other addons'
+  google_map_id (e.g. addon-locator). The actual value is set per-site.
+{% endcomment %}
+{% graphql create_constant, name: 'events_addon_google_map_id', value: '' %}
+  mutation constant_set(
+  $name: String
+  $value: String
+) {
+  constant_set(name: $name, value: $value) {
+    value
+    name
+  }
+}
+{% endgraphql %}
+{% log create_constant, type: "Constants Created: events_addon_google_map_id" %}

@@ -19,10 +19,22 @@ searchable: false
      {%- comment -%} Logged-in user {%- endcomment -%}
      {%- assign user_uuid = context.current_user.external_id -%}
 {%- else -%}
-     {%- comment -%} Guest user {%- endcomment -%}
-     {%- assign user_uuid = payload.user_uuid -%}
-     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%} 
+     {%- comment -%}
+          Guest user: derive the contact UUID from the session (set in contacts/post),
+          never from the request body — otherwise a guest could update any contact by UUID.
+     {%- endcomment -%}
+     {%- assign user_uuid = context.session.event_guest_uuid -%}
+     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
 {%- endif -%}
+
+{%- comment -%} No contact established for this session — refuse rather than update with a blank UUID {%- endcomment -%}
+{%- if user_uuid == blank -%}
+{
+    "has_error": true,
+    "message": "No contact found. Please start your purchase again."
+}
+{%- response_status status -%}
+{%- else -%}
 
 
 {% comment %} 
@@ -84,3 +96,5 @@ searchable: false
 
 {{ update_contact  }}
 {%- response_status status -%}
+
+{%- endif -%}

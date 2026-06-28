@@ -51,8 +51,7 @@ metadata: {
 {
     "is_guest": true,
     "form_type": "{{ form_type }}",
-    "is_guest_editable": {{ is_guest_editable | default: false }},
-    "uuid": "{{ user.uuid }}"
+    "is_guest_editable": {{ is_guest_editable | default: false }}
 }
 {%- endif -%}
 

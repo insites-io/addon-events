@@ -36,7 +36,9 @@ The entire module is Liquid + GraphQL + vanilla JS — no build step, no framewo
 5. Checkout actions are POSTed to JSON endpoints under `pages/api/**`, which revalidate availability server-side, compute totals from database pricing (not client input), create the order, and trigger the Stripe payment + post-payment callbacks.
 
 ### Why server-side pricing & guards
-Pricing is recomputed in `partials/purchase_ticket/compute_prices.liquid` on every step — the client never sets totals. Page-level access guards are written in Liquid (not JS) so an unauthenticated or out-of-order request is rejected before the page renders. Post-payment re-entry into earlier steps is blocked to prevent double-charges.
+Pricing is recomputed in `partials/ticket/compute_prices.liquid` (server-side, from DB pricing) when the order is created — the client never sets totals. Page-level access guards are written in Liquid (not JS) so an unauthenticated or out-of-order request is rejected before the page renders. Post-payment re-entry into earlier steps is blocked to prevent double-charges.
+
+API endpoints derive the acting identity (contact/order/ticket) from `current_user` or the server session — never from the request body — so a caller cannot act on another user's records. 
 
 ---
 
@@ -51,16 +53,15 @@ modules/events/public/
 ├── graphql/               Queries + mutations grouped by domain
 │   ├── account/  address/  attachments/  event_custom_fields/
 │   ├── event_tickets/  events/  migrations/  orders/
-│   ├── payment_method/  system/  venues/
+│   ├── payment_method/  system/
 ├── migrations/            Seed data + schema migrations (run in filename order)
 └── views/
     ├── pages/             File-based routes
     │   ├── api/           JSON endpoints (contacts / events / orders)
     │   ├── events/        upcoming-events, previous-events (list + detail)
-    │   ├── ticket/        purchase / billing / payment / confirmation / allocate
+    │   ├── ticket/        ticket-purchase / -billing / -payment / -confirmation / -allocate, account-created
     │   ├── portal/        itinerary-upcoming, itinerary-previous (members)
     │   ├── account/       Account-related event pages
-    │   └── admin/         Admin-only views
     └── partials/          Reusable Liquid fragments (events, ticket steps, orders, stripe, emails)
 ```
 
@@ -79,23 +80,49 @@ modules/events/public/
 ### Ticket purchase flow
 | Route | Step |
 |---|---|
-| `/purchase-ticket?event=<EVENT_UUID>` | Step 1 — ticket selection |
+| `/ticket-purchase?event=<EVENT_UUID>` | Step 1 — ticket selection |
 | `/ticket-billing` | Step 2 — billing details |
 | `/ticket-payment` | Step 3 — Stripe payment |
-| `/purchase-ticket-confirmation` | Step 4 — confirmation |
-| `/allocate-ticket` | Allocate purchased tickets to attendees |
+| `/ticket-confirmation` | Step 4 — confirmation |
+| `/ticket-allocate` | Allocate purchased tickets to attendees |
+| `/event-account-created` | Guest "account created" confirmation |
 
 ### Portal (member-only)
 | Route | Description |
 |---|---|
-| `/portal/itinerary-upcoming` | Logged-in member's upcoming events |
-| `/portal/itinerary-previous` | Logged-in member's past events |
+| `/itinerary-upcoming` | Logged-in member's upcoming events |
+| `/itinerary-previous` | Logged-in member's past events |
+
+### Admin (administrator-only)
+Gated by the `modules/events/is_administrator` authorization policy.
+| Route | Description |
+|---|---|
+| `/admin/event-thumbnail` | Bulk event-thumbnail sync tool |
 
 ### JSON API endpoints
-Defined under `pages/api/**`. Used by the checkout JS and async UI:
-- `POST /api/orders/create-order` — revalidates availability, computes totals, creates order, triggers Stripe + callbacks
-- `/api/events/tickets/*` — availability checks, ticket lookups
-- `/api/contacts/*` — guest/member contact create/update
+File-based under `pages/api/**`; each route is the page's `slug`. Used by the checkout JS and async UI. Identity (contact/order/ticket) is always derived server-side, never from the request body.
+
+**Orders**
+- `POST /api/create-order` — revalidates availability, computes totals from DB pricing, creates the order, triggers Stripe + callbacks
+- `POST /api/update-order` — retries payment on an existing order (order re-read from DB)
+- `POST /api/set-confirmation-timestamp` — opens the confirmation page for the session's pending order
+
+**Tickets & events**
+- `GET  /api/check-ticket-availability` — validates a ticket selection and stores it in session
+- `POST /api/create-tickets` — creates ticket records from the session selection (prices re-fetched from DB)
+- `PUT  /api/allocate-ticket` — assigns a purchased ticket to an attendee (ownership-checked)
+- `GET  /api/payment-methods` — the caller's own saved cards
+- `GET  /api/events/list-results` — paginated/filtered event cards (also backs the member itinerary)
+
+**Contacts**
+- `POST /api/create-contact-company` — create guest contact + company
+- `PUT  /api/update-contact` — update the caller's own contact
+- `POST /api/create-contact-address` — add an address to the caller's own contact
+- `POST /api/validate-email` — check whether an email already has an account (routes guest checkout)
+- `PUT  /api/add-password` — set a password to convert a guest into a registered account
+
+**Admin (administrator-only)**
+- `GET  /admin/api/events-needing-thumbnail`, `GET /admin/api/check-thumbnail`, `GET /admin/api/thumbnail-upload-url`, `POST /admin/api/save-thumbnail` — event-thumbnail sync tooling
 
 ---
 
@@ -130,7 +157,7 @@ See [CHANGELOG.md](CHANGELOG.md) for what each version added — e.g. v1.1.0 int
 
 ### 3. Configure Stripe
 The checkout reads Stripe settings from the portal:
-- **Stripe keys** — loaded via `modules/portal/stripe/get_stripe_settings` (consumed by `partials/purchase_ticket/payment_step/payment_step.liquid`)
+- **Stripe keys** — loaded via `modules/portal/stripe/get_stripe_settings` (consumed by `partials/ticket/payment_step/payment_step.liquid`)
 - **Gateway selection** — read via `modules/portal/pay_bills/get_settings` (consumed by `partials/orders/callback_init.liquid`)
 
 If Stripe isn't configured, the payment step renders:

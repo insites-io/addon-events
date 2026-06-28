@@ -3,6 +3,8 @@ slug: admin/api/check-thumbnail
 format: json
 method: get
 searchable: false
+authorization_policies:
+    - modules/events/is_administrator
 ---
 
 {% assign event_uuid = context.params.event_uuid %}

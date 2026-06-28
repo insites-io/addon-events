@@ -80,7 +80,6 @@ const OrderProcessor = {
         result = (await contactServices.updateContact(billingPayload)).data;
       } else if (validateEmail.is_guest === true && validateEmail.form_type === 'edit' &&
                  validateEmail.is_guest_editable === true) {
-        billingPayload.user_uuid = validateEmail.uuid;
         result = (await contactServices.updateContact(billingPayload)).data;
       } else if (validateEmail.is_guest === true && validateEmail.form_type === 'add') {
         result = (await contactServices.addContact(billingPayload)).data;

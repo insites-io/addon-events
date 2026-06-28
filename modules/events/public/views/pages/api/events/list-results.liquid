@@ -21,6 +21,25 @@ searchable: false
     endif
 -%}
 
+{%- if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' -%}
+    {%- assign is_itinerary = true -%}   
+{%- endif -%}
+
+{%- comment -%}
+  itinerary-* are the logged-in "my events" views. Without a current_user, return an empty
+  itinerary rather than querying tickets with a blank purchased_by_uuid — a null property
+  filter is ignored and would match every user's tickets.
+{%- endcomment -%}
+{%- if is_itinerary and context.current_user == blank -%}
+{
+    "html": "",
+    "totalCount": 0,
+    "pageNumber": {{ page_num }},
+    "pageSize": {{ per_page }}
+}
+{%- response_status 200 -%}
+{%- else -%}
+
 {% parse_json sort_by %}
 { "properties": [{ "name": "start_date_time", "order": "{{ order | default: 'ASC' }}" }] }
 {% endparse_json %}
@@ -87,3 +106,5 @@ searchable: false
     "pageNumber": {{ page_num }},
     "pageSize": {{ per_page }}
 }
+
+{%- endif -%}

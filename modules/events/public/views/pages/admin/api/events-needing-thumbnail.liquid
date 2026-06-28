@@ -3,6 +3,8 @@ slug: admin/api/events-needing-thumbnail
 format: json
 method: get
 searchable: false
+authorization_policies:
+    - modules/events/is_administrator
 ---
 
 {% assign page = context.params.page | plus: 0 | default: 1 %}

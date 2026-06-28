@@ -1,6 +1,8 @@
 ---
 slug: admin/event-thumbnail
 searchable: false
+authorization_policies:
+    - modules/events/is_administrator
 ---
 
 <!DOCTYPE html>
@@ -8,6 +10,7 @@ searchable: false
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ context.authenticity_token }}">
   <title>Sync Event Thumbnails</title>
   <style>
     body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
@@ -64,7 +67,10 @@ searchable: false
     async function postJson(url, body) {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content
+        },
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);

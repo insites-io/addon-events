@@ -49,8 +49,3 @@ metadata: {
     {%- include 'modules/events/ticket/billing_step/billing_form_address_card', addresses: addresses, selected_card: context.session.billing_address_id | default: "", type: 'billing' -%}
 
 </div>
-
-
-<script>
-    let contactUuid = '{{ context.current_user.external_id }}';
-</script>

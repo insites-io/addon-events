@@ -9,9 +9,11 @@ metadata: {
 {% endcomment %}
 
 {% comment %} Order Contact {% endcomment %}
-{% liquid 
+{% liquid
     session contact_first_name = null
     session contact_last_name = null
+    # Preserve the email for the guest account-creation step (add-password), which runs after this clear.
+    session temp_guest_contact_email = context.session.contact_email
     session contact_email = null
     session contact_company_name = null
     session contact_phone_country_code = null

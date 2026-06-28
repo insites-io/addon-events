@@ -3,6 +3,8 @@ slug: admin/api/thumbnail-upload-url
 format: json
 method: get
 searchable: false
+authorization_policies:
+    - modules/events/is_administrator
 ---
 
 {% graphql result %}

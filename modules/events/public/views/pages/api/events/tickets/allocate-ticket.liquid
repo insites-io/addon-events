@@ -22,13 +22,32 @@ searchable: false
 {%- else -%}
     {%- assign purchased_by_uuid = context.session.event_guest_uuid -%}
 {%- endif -%}
+
+{%- comment -%}
+  Ownership check: the ticket identified by ticket_uuid must have been purchased by the
+  caller. Without this, a caller could pass any ticketUUID and re-allocate it — and since
+  assign_contact rewrites purchased_by_uuid, even steal ownership of someone else's ticket.
+{%- endcomment -%}
+{%- graphql ticket_owner = 'modules/events/event_tickets/get_ticket_by_uuid', uuid: ticket_uuid | dig: 'items', 'results' | first -%}
+
+{%- if purchased_by_uuid == blank or ticket_owner == nil or ticket_owner.purchased_by_uuid != purchased_by_uuid -%}
+{
+    "has_error": true,
+    "message": "Ticket not found."
+}
+{%- response_status 403 -%}
+{%- else -%}
+
 {%- assign ticketData = ticketData | add_hash_key: "purchased_by.uuid", purchased_by_uuid -%}
+
+{%- comment -%} Use the ticket's own event from the DB, not the body-supplied eventUUID {%- endcomment -%}
+{%- assign event_uuid = ticket_owner.event_uuid -%}
 
 {% function allocate_ticket = "events/event_tickets/assign_contact", uuid: ticket_uuid, event_uuid: event_uuid, params: ticketData %}
 
 {% if allocate_ticket.errors  %}
     {% assign errors = allocate_ticket %}
-{% endif %}     
+{% endif %}
 
 {%- assign data = '{}' | parse_json -%}
 
@@ -45,3 +64,5 @@ searchable: false
 {{ data }}
 
 {%- response_status status -%}
+
+{%- endif -%}

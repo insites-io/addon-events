@@ -1,0 +1,110 @@
+---
+slug: api/events/list-results
+format: json
+method: get
+searchable: false
+---
+
+{%- liquid
+    assign page_num           = context.params.page      | default: 1  | plus: 0
+    assign per_page           = context.params.per_page  | default: 12 | plus: 0
+    assign keyword            = context.params.search    | default: ""
+    assign selected_category  = context.params.category  | default: ""
+    assign selected_location  = context.params.location  | default: ""
+    assign sort               = context.params.sort
+    assign page_type          = context.params.page_type
+
+    if sort == "Earliest to latest"
+        assign order = "ASC"
+    elsif sort == "Latest to earlier"
+        assign order = "DESC"
+    endif
+-%}
+
+{%- if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' -%}
+    {%- assign is_itinerary = true -%}   
+{%- endif -%}
+
+{%- comment -%}
+  itinerary-* are the logged-in "my events" views. Without a current_user, return an empty
+  itinerary rather than querying tickets with a blank purchased_by_uuid — a null property
+  filter is ignored and would match every user's tickets.
+{%- endcomment -%}
+{%- if is_itinerary and context.current_user == blank -%}
+{
+    "html": "",
+    "totalCount": 0,
+    "pageNumber": {{ page_num }},
+    "pageSize": {{ per_page }}
+}
+{%- response_status 200 -%}
+{%- else -%}
+
+{% parse_json sort_by %}
+{ "properties": [{ "name": "start_date_time", "order": "{{ order | default: 'ASC' }}" }] }
+{% endparse_json %}
+
+{% if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' %}
+    {% graphql user_tickets = "modules/events/event_tickets/get_user_purchased_tickets",
+        purchased_by_uuid: context.current_user.external_id %}
+    {% assign user_event_uuids = user_tickets.items.results | map: 'event_uuid' %}
+{% endif %}
+
+
+{% parse_json category_params %}
+{ "page": 1, "size": 50, "system_field": "event_category" }
+{% endparse_json %}
+{% function system_fields = "events/system_fields/list", params: category_params %}
+{% assign categories = system_fields.results %}
+{% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}
+
+{% parse_json filters %}
+{
+    "page": {{ page_num }},
+    "size": {{ per_page }},
+    {% if page_type == 'upcoming-events' or page_type == 'itinerary-upcoming' %}
+        "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+    {% elsif page_type == 'previous-events' or page_type == 'itinerary-previous' %}
+        "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}",
+    {% endif %}
+    {% if page_type == 'itinerary-upcoming' or page_type == 'itinerary-previous' %}
+        "uuids": {{ user_event_uuids | default: '[]' }},
+    {% endif %}
+    {% if selected_category_uuid and selected_category_uuid != '' %}
+        "category_uuid": "{{ selected_category_uuid }}",
+    {% endif %}
+    {% if selected_location == 'WEB' %}
+        "event_type": "online_event",
+    {% elsif selected_location != '' %}
+        "venue_state": "{{ selected_location }}",
+    {% endif %}
+    {% if keyword != '' %}
+        "event_name": "{{ keyword }}",
+    {% endif %}
+    "sort_by": {{ sort_by }}
+}
+{% endparse_json %}
+{% comment %} Note: total_entries and results are fetched separately to optimize performance {% endcomment %}
+{% graphql events_total_entries = 'modules/events/events/get_events_total_entries', args: filters | dig: 'items' %}
+{% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' %}
+
+{% capture cards_html %}
+<div class="grid-x grid-padding-x event-card-wrap">
+    {% for item in events.results %}
+        <div class="cell large-4 medium-6 small-12">
+            {% include 'modules/events/events/card', item: item, list: true, page: page_type %}
+            <div class="spacer xxx-large hide-for-small-only"></div>
+        </div>
+        <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
+    {% endfor %}
+</div>
+{% endcapture %}
+
+{
+    "html": {{ cards_html | json }},
+    "totalCount": {{ events_total_entries.total_entries | default: 0 }},
+    "pageNumber": {{ page_num }},
+    "pageSize": {{ per_page }}
+}
+
+{%- endif -%}

@@ -20,7 +20,6 @@ query get_filter_category_location (
       ]
     } 
   ) {
-    total_entries    
     results {
       id
       uuid: property(name: "uuid")

@@ -17,8 +17,7 @@ query get_event (
         { name: "uuid", value_in: $uuids, value: $uuid }    
       ]             
     } 
-  ) {
-    total_entries    
+  ) {  
     results {
       id
       uuid: property(name: "uuid")

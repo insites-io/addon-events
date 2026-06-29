@@ -1,4 +1,19 @@
 {% comment %} Import Events {% endcomment %}
+{%- graphql existing -%}
+  query {
+    items: records(
+      per_page: 1
+      filter: {
+        table: { value: "modules/insites_events/event" }
+        deleted_at: { exists: false }
+      }
+    ) {
+      total_entries
+    }
+  }
+{%- endgraphql -%}
+{%- assign existing_count = existing.items.total_entries | default: 0 -%}
+{%- if existing_count == 0 -%}
 {% parse_json import_events %}
 [
   {
@@ -554,3 +569,6 @@
   }
 {%- endgraphql -%}
 {% log results, type: "SEED DATA: Events" %}
+{%- else -%}
+{% log existing_count, type: "SEED DATA: Events skipped (records already exist)" %}
+{%- endif -%}

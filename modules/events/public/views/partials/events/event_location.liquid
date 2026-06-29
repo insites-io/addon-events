@@ -54,7 +54,7 @@ metadata: {
 
 {% if is_print == true %}
      <div class="grid-x">
-          <i class="icon-map-pin"></i>
+          <i class="icon-map-pin" aria-hidden="true"></i>
           <div class="wrap">
                {% if item.event_type == 'venue' %}
                     <div><span {% if is_bold_name == true %}class="body-bold"{% endif %}>{{ item.venue_name }}</span></div>

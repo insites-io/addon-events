@@ -1,28 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname.includes("/allocate-ticket")) {
-    const saved = localStorage.getItem("orderSummary");
-    if (saved) {
-      const data = JSON.parse(saved);
-
-      // Restore breakdown HTML
-      const breakdownEl = document.getElementById("payment-breakdown");
-      breakdownEl.innerHTML = data.breakdown;
-      breakdownEl.style.display = "block"; // force display
-
-      // Restore totals
-      document.getElementById("subtotal-price").textContent = data.subtotal;
-      document.getElementById("tax-price").textContent = data.tax;
-      document.getElementById("proccessing-price").textContent = data.processing;
-      document.getElementById("total-price").textContent = data.total;
-      document.getElementById("mobile-total-price").textContent = data.total;
-
-      // 🔒 Always hide discount section
-      document.querySelector(".discount-summary").classList.add("is_not_visible");
-      document.querySelector(".discount-summary-card").classList.add("is_not_visible");
-    }
-  }
-});
-
 let allocateTicket = document.getElementById("allocate-ticket");
 let allocateTicketUUID = document.getElementById("allocate-ticket-uuid")
 let allocateButton = document.getElementById("submit-btn");
@@ -98,6 +73,13 @@ function createAllocationPayload() {
 
 // Open modal
 allocationModalButton.forEach((btn) => {
+  // Keyboard support: role="button" divs don't fire click on Enter/Space natively
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      btn.click();
+    }
+  });
   btn.addEventListener("click", () => {
     let id = btn.getAttribute("data-ticket-id");
     allocateTicket.value = id;

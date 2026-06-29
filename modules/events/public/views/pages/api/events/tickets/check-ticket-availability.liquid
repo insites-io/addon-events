@@ -10,7 +10,7 @@ searchable: false
 
 
 {% comment %} Validate tickets availability; Export: errors {% endcomment %}
-{%- include 'modules/events/purchase_ticket/check_ticket_availability', payload: payload -%}
+{%- include 'modules/events/ticket/check_ticket_availability', payload: payload -%}
 {%- assign errors = context.exports.errors -%}
 
 

@@ -1,7 +1,7 @@
 ---
 slug: api/validate-email
 format: json
-method: get
+method: post
 searchable: false
 metadata: {
     "status": "published",
@@ -10,7 +10,8 @@ metadata: {
 }
 ---
 
-{%- assign email = context.params.email | downcase |default: null -%}
+{%- assign payload = context.params | parse_json -%}
+{%- assign email = payload.email | downcase | default: null -%}
 
 {%- if context.current_user -%}
     {% comment %} The user is logged in {% endcomment %}
@@ -50,8 +51,7 @@ metadata: {
 {
     "is_guest": true,
     "form_type": "{{ form_type }}",
-    "is_guest_editable": {{ is_guest_editable | default: false }},
-    "uuid": "{{ user.uuid }}"
+    "is_guest_editable": {{ is_guest_editable | default: false }}
 }
 {%- endif -%}
 

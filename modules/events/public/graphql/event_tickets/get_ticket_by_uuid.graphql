@@ -1,0 +1,21 @@
+query get_ticket_by_uuid (
+    $uuid: String!
+) {
+    items: records(
+        per_page: 1
+        filter: {
+            deleted_at: { exists: false }
+            table: { value: "modules/insites_events/event_ticket" }
+            properties: [
+                { name: "uuid", value: $uuid }
+            ]
+        }
+    ) {
+        results {
+            id
+            uuid: property(name: "uuid")
+            purchased_by_uuid: property(name: "purchased_by_uuid")
+            event_uuid: property(name: "event_uuid")
+        }
+    }
+}

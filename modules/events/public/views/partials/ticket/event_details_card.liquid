@@ -1,0 +1,53 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Event Details Card'
+}
+---
+
+
+<div id="event-details-card">
+    <div class="event-details-card-img">      
+        {% assign safe_event_name = event.event_name | replace: '"', '' | strip %}  
+        <img src="{{ event.event_image.url }}" alt="{{ safe_event_name }}">
+    </div>
+
+    <div class="event-details-card-details">
+        <h3 class="heading-3-small">{{ event.event_name }}</h3>
+        <div class="event-details-card-location-details">
+            {% if event.event_category.value %}
+                <div class="spacer xx-small"></div>
+                <span class="paragraph-body-title-case">
+                    <i class="icon-custom icon-bookmark-1" aria-hidden="true"></i>
+                    {{ event.event_category.value }}
+                </span>
+                <div class="spacer xx-small"></div>
+                {% include 'modules/events/events/event_date_time', item: event %}
+                <div class="spacer xx-small"></div>
+                       
+
+                {% comment %} Locataion {% endcomment %}
+                {% assign venue_details = event.venue_details %}
+                {% parse_json event_location %}
+                {
+                    "event_type": "{{ event.event_type }}",
+                    "venue_name": "{{ venue_details.venue_name }}",
+                    "venue_address_1": "{{ venue_details.address_1 }}",
+                    "venue_address_2": "{{ venue_details.address_2 }}",
+                    "venue_address_3": "{{ venue_details.address_3 }}",
+                    "venue_suburb": "{{ venue_details.suburb }}",
+                    "venue_state": "{{ venue_details.state }}",
+                    "venue_postcode": "{{ venue_details.postcode }}",
+                    "venue_country": "{{ venue_details.country }}"
+                }
+                {% endparse_json %}       
+                {% comment %} Print & Export location {% endcomment %}
+                {% include 'modules/events/events/event_location', item: event_location, show_address: true, is_print: true %} 
+                {% assign venue = context.exports.location %}  
+
+                <input type="hidden" id="event-location" name="{{ props.event_location.name }}" value="{{ venue }}">
+
+                <div class="spacer xx-small"></div>
+            {% endif %}
+        </div>
+    </div>
+</div>        

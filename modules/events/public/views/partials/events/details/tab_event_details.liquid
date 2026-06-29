@@ -19,7 +19,7 @@ metadata: {
 {% if event.event_type == 'online_event' %}
      <div class="event-card-wrap">
           <div class="grid-x">
-               <i class="icon-map-pin"></i>
+               <i class="icon-map-pin" aria-hidden="true"></i>
                <span>Online event</span>
           </div>
      </div>
@@ -30,7 +30,7 @@ metadata: {
           {% include 'modules/events/events/event_location', item: event, show_address: true, is_bold_name: true, is_print: true %}
      </div>
      <div class="spacer"></div>
-     <a href="https://www.google.com/maps?q={{ event.venue_name | url_encode }}&ll={{ event.venue_geojson.coordinates[1] }},{{ event.venue_geojson.coordinates[0] }}" target="_blank">
+     <a href="https://www.google.com/maps?q={{ event.venue_name | url_encode }}&ll={{ event.venue_geojson.coordinates[1] }},{{ event.venue_geojson.coordinates[0] }}" target="_blank" rel="noopener noreferrer" aria-label="Get directions (opens in new tab)">
           <ins-button label="Get directions" icon="icon-navigation" outlined></ins-button>
      </a>
 {% endif %}

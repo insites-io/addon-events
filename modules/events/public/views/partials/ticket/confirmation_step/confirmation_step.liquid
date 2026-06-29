@@ -1,0 +1,210 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Confirmation Step'
+}
+---
+
+
+{% comment %} Clear ticket purchase sessions {% endcomment %}
+{% include 'modules/events/ticket/clear_ticket_purchase_sessions' %} 
+
+
+<div id="ticket-confirmation-step">
+    <h2 class="heading-2-xsmall">Order details</h2>
+    <div class="spacer x-large"></div>
+    <div class="grid-x" id="order-details-container">
+        <div class="large-6 medium-6 small-12">
+            <div class="order-contact-conirmation">
+                <h3 class="heading-5-small">Order contact</h3>
+                <div class="spacer small"></div>
+                <p id="order-contact-name">
+                    {{ order_details.order_contact_first_name }} {{ order_details.order_contact_last_name }}
+                </p>
+                <p id="order-contact-email">{{ order_details.order_contact_email }}</p>
+                <p id="order-contact-mobile-number">
+                    {% if order_details.order_contact_phone_number %}
+                        ({{ order_details.order_contact_phone_country_code }}) {{ order_details.order_contact_phone_number }}
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="spacer x-large"></div>
+            <div class="billing-conirmation">
+                <h3 class="heading-5-small">Billing details</h3>
+                <div class="spacer small"></div>
+                <p id="billing-contact-name">{{- order_details.billing_contact_first_name }} {{ order_details.billing_contact_last_name -}}</p>
+                <p id="billing-contact-email">{{ order_details.billing_contact_email }}</p>
+                <p id="billing-contact-mobile-number">
+                  {%- if order_details.billing_contact_phone_number -%}
+                    ({{ order_details.billing_contact_phone_country_code }}) {{ order_details.billing_contact_phone_number }}
+                  {%- endif -%}
+                </p>
+                <p id="billing-contact-address">
+                  {% comment %} This guarantees no trailing spaces sneak in from any field regardless of position. {% endcomment %}
+                  {%- assign _a1 = order_details.billing_address_1 | strip -%}
+                  {%- assign _a2 = order_details.billing_address_2 | strip -%}
+                  {%- assign _a3 = order_details.billing_address_3 | strip -%}
+                  {%- assign _suburb = order_details.billing_suburb | strip -%}
+                  {%- assign _state = order_details.billing_state | strip -%}
+                  {%- assign _postcode = order_details.billing_postcode | strip -%}
+                  {%- assign _country = order_details.billing_country | strip -%}
+                  {%- assign addr = _a1 -%}
+                  {%- if _a2 != blank -%}{%- assign addr = addr | append: ', ' | append: _a2 -%}{%- endif -%}
+                  {%- if _a3 != blank -%}{%- assign addr = addr | append: ', ' | append: _a3 -%}{%- endif -%}
+                  {%- if _suburb != blank -%}{%- assign addr = addr | append: ', ' | append: _suburb -%}{%- endif -%}
+                  {%- if _state != blank -%}{%- assign addr = addr | append: ', ' | append: _state -%}{%- endif -%}
+                  {%- if _postcode != blank -%}{%- assign addr = addr | append: ' ' | append: _postcode -%}{%- endif -%}
+                  {%- if _country != blank -%}{%- assign addr = addr | append: ', ' | append: _country -%}{%- endif -%}
+                  {{ addr }}
+                </p>
+            </div>
+        </div>
+
+        <div class="large-6 medium-6 small-12 payment-details-confirmation">
+            <div class="wrap">
+                <h3 class="heading-5-small">Payment details</h3>                    
+                <div class="spacer small"></div>
+                <p class="font-cabin">
+                    {{ order_details.payment.card_brand | upcase }} **** **** **** {{ order_details.payment.card_last_four_digits }}
+                </p>
+                {%- assign month = order_details.payment.card_expiry_month -%}
+                {%- if order_details.payment.card_expiry_month.size < 2 -%}
+                    {%- assign month = "0" | append: order_details.payment.card_expiry_month -%}
+                {%- endif -%}
+                <p class="font-cabin" id="payment-month">{{ month }} / {{ order_details.payment.card_expiry_year }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if context.current_user == nil %}
+        <div class="spacer x-large"></div>
+        <h2 class="heading-2-xsmall">Create an account</h2>
+        <div class="spacer x-large"></div>
+        <div class="grid-x grid-padding-x grid-padding-y" id="create-account-confirmation">
+            <div class="large-6 medium-6 small-12 cell">
+                <ins-input   
+                    id="confirmation-email-input"
+                    class="label-input" 
+                    label="Email Address*"
+                    placeholder="Email Address" 
+                    field="text" 
+                    validate
+                    readonly
+                    value="{{ order_details.order_contact_email }}">
+                </ins-input>
+            </div>
+
+            <div class="large-6 medium-6 small-12 cell">
+                <ins-input   
+                    id="confirmation-email-password"
+                    class="label-input" 
+                    label="Password*"
+                    placeholder="Password" 
+                    required
+                    validate
+                    field="password">
+                </ins-input>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div id="purchase-ticket-button-step-5" class="grid-x grid-padding-x ">
+            <div class="cell large-6 medium-6 small-0"> 
+            </div>
+            <div class="cell large-6 medium-6 small-12 text-right">
+            <ins-button type="button" id="submit-create-account" class="submit-btn" label="Create account" solid ></ins-button>
+            </div> 
+        </div>
+    {% endif %}
+</div>
+<div class="spacer section"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
+{%- endif -%} 
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const emailInput = document.getElementById("confirmation-email-input");
+    const passwordInput = document.getElementById("confirmation-email-password");
+    const submitBtn = document.getElementById("submit-create-account");
+
+    function showError(input, message, addHasError = false) {
+        input.setAttribute("error-message", message);
+        input.setAttribute("invalid", true);
+
+        if (addHasError) {
+            input.setAttribute("has-error", true);
+        }
+    }
+
+    function clearError(input) {
+        input.removeAttribute("error-message");
+        input.removeAttribute("invalid");
+        input.removeAttribute("has-error");
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email.toLowerCase());
+    }
+
+    function validatePassword(password) {
+        return password && password.length >= 6;
+    }
+
+    submitBtn?.addEventListener("insClick", async function () {
+        const emailValue = emailInput?.value || "";
+        const passwordValue = passwordInput?.value || "";
+
+        let isValid = true;
+
+        // Email validation
+        if (!validateEmail(emailValue)) {
+            showError(emailInput, "Please enter a valid email address.");
+            isValid = false;
+        } else {
+            clearError(emailInput);
+        }
+
+        // Password validation
+        if (!validatePassword(passwordValue)) {
+            showError(passwordInput, "Password must be at least 6 characters.", true);
+            isValid = false;
+        } else {
+            clearError(passwordInput);
+        }
+
+        if (!isValid) return;
+
+        const encodedPassword = btoa(passwordValue);
+
+        let accountPayload = {
+            "email": emailValue,
+            "password": encodedPassword
+        }
+
+        submitBtn.loading = true 
+
+        const response = await contactServices.addPassword(accountPayload);
+
+        if(response.data.has_error) {
+            App.events.notyf("error", "Something went wrong. Please try again.");
+        }else {
+            window.location.href = "/event-account-created";
+        }
+
+        submitBtn.loading = false 
+
+    });
+});
+</script>

@@ -1,0 +1,125 @@
+---
+slug: ticket-billing
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Billing",
+    page_name: "Billing",
+    meta_title: "Billing",
+    page_title: "Billing",
+    sitemap_enabled: "false",
+    meta_description: "Billing details for ticket purchase",
+}
+---
+
+{% comment %} Detect pending allocation from a previous purchase — notify user before sending them to allocation {% endcomment %}
+{%- liquid
+  assign has_pending_allocation = false
+  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank
+    assign has_pending_allocation = true
+    assign pending_allocation_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
+  endif
+-%}
+
+{% comment %} Guard: ticket availability check must have passed for this event (set by /api/check-ticket-availability) {% endcomment %}
+{% if context.session.tickets_selected[context.params.event] == blank and has_pending_allocation == false %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
+
+{% comment %} Loading overlay {% endcomment %}
+<div id="loadingOverlay" class="loading-overlay hide">
+    <ins-loader
+        id="ticket-loader"
+        state-title=""
+        state-icon="processing"
+        state-message="Saving your details... Hang tight, and please do not leave this screen.">
+    </ins-loader>
+</div>
+
+{%- if has_pending_allocation -%}
+    {%- include 'modules/events/ticket/pending_allocation_notice', pending_allocation_url: pending_allocation_url -%}
+{%- else -%}
+<div id="purchase-ticket">
+
+    {% comment %} Stepper {% endcomment %}
+    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/ticket/stepper' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="purchase-ticket-form">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x">
+                    <div id="purchase-ticket-container">
+                        <div class="spacer xxxx-large"></div>
+                        <div id="ticket-purchase-header-container">
+                            <h1 id="ticket-purchase-header" class="heading-1-xsmall">Contact & billing</h1>
+                            <div class="spacer xxx-large hide-for-small-only"></div>
+                            <div class="spacer show-for-small-only"></div>
+                        </div>
+                        <div class="purchase-page">
+                            <div class="grid-x grid-padding-x invoice-details form-group" active>
+                                <div class="large-7 medium-12 small-12 cell">
+                                    {%- include 'modules/events/ticket/billing_step/billing_form_step' -%}
+                                </div>
+                                <div class="large-4 large-offset-1 medium-12 small-12 cell">
+                                    {% include 'modules/events/ticket/order_summary_pre_payment' %}
+                                </div>
+                            </div>
+
+                            {% comment %} Buttons {% endcomment %}
+                            <div id="purchase-ticket-button-step-2" class="grid-x grid-padding-x">
+                                <div class="large-7 medium-12 small-12 cell">
+                                    <div class="grid-x grid-padding-y">
+                                        <div class="cell large-6 medium-6 small-12">
+                                            <a href="/ticket-purchase?event={{ context.params.event }}">
+                                                <ins-button type="button" label="Back" icon="icon-arrow-left" class="ticket-buttons" outlined></ins-button>
+                                            </a>
+                                        </div>
+                                        <div class="cell large-6 medium-6 small-12 text-right">
+                                            <ins-button type="button" id="submit-billing-info" class="submit-btn ticket-buttons" label="Proceed to payment" icon-right="icon-arrow-forward" solid></ins-button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="large-4 large-offset-1 medium-12 small-12 cell"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spacer xxxx-large"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{% include 'modules/website/layout/googlemaps' %}
+{%- comment -%} Shared Google Places address lookup from app-portal (new AutocompleteSuggestion API). {%- endcomment -%}
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/address-lookup.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/checkout/checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-billing.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/services/contactServices.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/portal/scripts/address-lookup.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/checkout/checkout.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script src="{{ 'modules/events/scripts/ticket-billing.js' | asset_url }}"></script>
+{%- endif -%}
+{%- endif -%}

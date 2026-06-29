@@ -1,0 +1,19 @@
+mutation add_event_thumbnail (
+    $event_uuid: String!
+    $url: String!
+    $source: String!
+) {
+    items: record_create(
+        form_name: "modules/events/add_event_thumbnail"
+        record: {
+            table: "modules/ins_events/event_custom_field"
+            properties: [
+                { name: "event_uuid", value: $event_uuid }
+                { name: "image_thumbnail", value: $url }
+                { name: "image_thumbnail_source", value: $source }
+            ]
+        }
+    ) {
+        id
+    }
+}

@@ -25,10 +25,30 @@ metadata: {
           <div class="event-grid-x">
 
                {% for item in sponsors %}
-                    <div class="wrap" data-id="{{item.id}}">
+                    <div class="wrap" data-id="{{item.id}}"{% if item.content and item.content != '' %} role="button" tabindex="0" aria-label="View details for {{ item.company_name }}"{% endif %}>
                          <div class="img-wrap">
-                              {% if item.logo.url %}
-                                   <img src="{{ item.logo.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="180" height="170" alt="{{ item.company_name }}">
+                              {% comment %}
+                                   Use the sponsor's uploaded logo when present. Otherwise, for
+                                   seeded sponsors (logo empty in the table), fall back to a bundled
+                                   asset matching the company name. The allowlist guards against
+                                   pointing at a non-existent asset for non-seeded sponsors, since
+                                   asset_url returns a URL even when the file does not exist.
+                              {% endcomment %}
+                              {% liquid
+                                   assign sponsor_logo = ''
+                                   if item.logo.url
+                                        assign sponsor_logo = item.logo.url | replace: ' ', '%20' | escape
+                                   else
+                                        assign seeded_sponsor_slugs = ',galileo,layers,quotient,'
+                                        assign sponsor_slug = item.company_name | strip | downcase | replace: ' ', '-'
+                                        assign sponsor_slug_lookup = sponsor_slug | prepend: ',' | append: ','
+                                        if sponsor_slug != '' and seeded_sponsor_slugs contains sponsor_slug_lookup
+                                             assign sponsor_logo = sponsor_slug | prepend: 'modules/events/images/sponsors/' | append: '@2x.webp' | asset_url
+                                        endif
+                                   endif
+                              %}
+                              {% if sponsor_logo != '' %}
+                                   <img src="{{ sponsor_logo }}" loading="lazy" decoding="async" width="180" height="170" alt="{{ item.company_name }}">
                               {% else %}
                                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                               {% endif %}

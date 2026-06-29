@@ -1,0 +1,15 @@
+---
+name: is_administrator
+metadata: {
+    auth_policy_name: "Is Administrator"
+}
+---
+{%  liquid
+    graphql data = 'modules/events/account/get_current_user_administrator'
+
+    if data.current_user.administrator != blank
+        echo true
+    else
+        echo false
+    endif
+%}

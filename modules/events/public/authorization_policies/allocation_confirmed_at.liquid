@@ -1,0 +1,19 @@
+---
+name: allocation_confirmed_at
+redirect_to: /upcoming-events
+flash_alert: Order confirmation page has expired.
+---
+{% assign now = 'now' | to_time %}
+{% assign confirmed_at = context.session.allocation_confirmed_at | to_time %}
+{% assign diff = confirmed_at | time_diff: now, 'minutes' | plus: 0 %}
+
+{% comment %}
+    Ownership check: the order_id in the URL must match the order this session confirmed,
+    otherwise a buyer could view any other order by changing the order_id param (IDOR).
+{% endcomment %}
+{% assign param_order_id = context.params.order_id | plus: 0 %}
+{% assign session_order_id = context.session.confirmed_order_id | plus: 0 %}
+
+{%- if diff < 15 and session_order_id != 0 and param_order_id == session_order_id -%}
+    true
+{%- endif -%}

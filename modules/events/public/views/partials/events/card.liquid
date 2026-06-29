@@ -4,22 +4,35 @@ metadata: {
 }
 ---
 
-<div class="wrap" >
+<article class="{% if list %}wrap{% else %}event-card-featured{% endif %}" aria-labelledby="event-title-{{ item.slug }}">
+     {% assign cf = item.custom_fields | first %}
+     {% assign card_image = cf.image_thumbnail.url | default: item.event_image.url %}
+     {% if list %}
      <div class="img-wrap">
-          {% if item.event_image.url %}
-               <img src="{{ item.event_image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="920" height="585" alt="{{ item.event_name }}">
+          {% if card_image %}
+               <img src="{{ card_image | replace: ' ', '%20' | escape }}" {% if is_lcp %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" width="420" height="268" alt="">
           {% else %}
                {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
           {% endif %}
      </div>
-</div>
-<div class="wrap" >
+     <div class="wrap">
+     {% else %}
+     <div class="wrap">
+          <div class="img-wrap">
+               {% if card_image %}
+                    <img src="{{ card_image | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="420" height="268" alt="">
+               {% else %}
+                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
+               {% endif %}
+          </div>
+     </div>
+     <div class="wrap">
+          <div class="spacer show-for-small-only"></div>
+     {% endif %}
 
      {% comment %} Spacer {% endcomment %}
      {% if list == true %}                         
           <div class="spacer"></div>
-     {% else %}
-          <div class="spacer show-for-small-only"></div>
      {% endif %}
 
      {% comment %} State | Category {% endcomment %}
@@ -31,7 +44,7 @@ metadata: {
           {% endif %}
           <p class="venue-state">{{ venue_state }}</p>
           <div class="flex-child-auto text-right">
-               <i class="icon-bookmark-1"></i>
+               <i class="icon-bookmark-1" aria-hidden="true"></i>
                <span>{{ item.category.value }}</span>
           </div>
      </div>
@@ -40,14 +53,14 @@ metadata: {
 
      {% comment %} Event Name | Button {% endcomment %}
      <div class="event-heading-wrap">
-          {% if list == true %}                         
-               <h5 class="flex-child-auto">{{ item.event_name }}</h5>
+          {% if list == true %}
+               <h2 id="event-title-{{ item.slug }}" class="heading-5 flex-child-auto">{{ item.event_name | strip }}</h2>
           {% else %}
-               <h4 class="flex-child-auto">{{ item.event_name }}</h4>
+               <h2 id="event-title-{{ item.slug }}" class="heading-4 flex-child-auto">{{ item.event_name | strip }}</h2>
           {% endif %}                         
           <div class="event-button-wrap">
-               <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}">
-                    <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label=""></ins-button>
+               <a href="/{{page | default: 'upcoming-events'}}/{{ item.slug }}" aria-label="View details for {{ item.event_name | strip | replace: '"', "" }}">
+                    <ins-button size="large" icon="icon-arrow-up-right" class="event-card-btn" label="" inert></ins-button>
                </a>
           </div>                         
      </div>
@@ -60,6 +73,7 @@ metadata: {
      <div class="spacer xx-small"></div>
 
      {% comment %} Locataion {% endcomment %}
-     {% include 'modules/events/events/event_location', item: item, type: type, is_print: true %} 
+     {% include 'modules/events/events/event_location', item: item, type: type, is_print: true %}
 
 </div>
+</article>

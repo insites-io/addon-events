@@ -21,10 +21,6 @@ query get_divisions (
             }
         ]
     ) {
-        total_pages
-        total_entries
-        per_page
-        current_page
         results {
             id
             created_at

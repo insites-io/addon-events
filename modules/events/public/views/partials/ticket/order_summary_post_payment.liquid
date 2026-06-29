@@ -1,0 +1,76 @@
+---
+metadata: {
+    partial_name: 'Events | Ticket | Order Summary (Post-payment, locked pricing)'
+}
+---
+
+{%- comment -%}
+  Post-payment wrapper for the order summary. Used on /ticket-allocate and
+  /ticket-confirmation. Reads the order + its order_items (created alongside the
+  order in api/orders/post via partials/orders/create_order_items) so the summary
+  remains valid even if /api/create-tickets later fails. Totals come straight
+  from the order record (matching what was charged). Delegates rendering to
+  order_summary.
+
+  order_item_name is encoded as "<Type> - <Tier> | <Venue>"; we split on " | "
+  to recover the venue header for .payment-breakdown-venue-name and group items
+  underneath.
+
+  Parameters: order_id
+{%- endcomment -%}
+
+{%- graphql order_result = 'modules/events/orders/get_order_with_items', order_id: order_id -%}
+{%- assign order = order_result | dig: "items", "results" | first -%}
+{%- assign db_items = order.order_items -%}
+
+{%- assign breakdown = '' | split: ',' -%}
+{%- assign seen_venue_keys = "" -%}
+
+{%- for item in db_items -%}
+    {%- assign parts = item.order_item_name | split: " | " -%}
+    {%- if parts.size > 1 -%}
+        {%- assign venue = parts[1] -%}
+    {%- else -%}
+        {%- assign venue = "" -%}
+    {%- endif -%}
+    {%- assign vkey = "|" | append: venue | append: "|" -%}
+    {%- unless seen_venue_keys contains vkey -%}
+        {%- assign seen_venue_keys = seen_venue_keys | append: vkey -%}
+
+        {%- assign venue_items = '' | split: ',' -%}
+        {%- for vi in db_items -%}
+            {%- assign vi_parts = vi.order_item_name | split: " | " -%}
+            {%- if vi_parts.size > 1 -%}
+                {%- assign vi_venue = vi_parts[1] -%}
+                {%- assign vi_label = vi_parts[0] -%}
+            {%- else -%}
+                {%- assign vi_venue = "" -%}
+                {%- assign vi_label = vi_parts[0] -%}
+            {%- endif -%}
+            {%- if vi_venue == venue -%}
+                {%- assign _item = '{}' | parse_json -%}
+                {%- assign _item = _item | add_hash_key: "name", vi_label -%}
+                {%- assign _item = _item | add_hash_key: "qty", vi.quantity -%}
+                {%- assign _item = _item | add_hash_key: "unit_price", vi.unit_price -%}
+                {%- assign venue_items = venue_items | array_add: _item -%}
+            {%- endif -%}
+        {%- endfor -%}
+
+        {%- assign venue_entry = '{}' | parse_json -%}
+        {%- assign venue_entry = venue_entry | add_hash_key: "venue_name", venue -%}
+        {%- assign venue_entry = venue_entry | add_hash_key: "items", venue_items -%}
+        {%- assign breakdown = breakdown | array_add: venue_entry -%}
+    {%- endunless -%}
+{%- endfor -%}
+
+{%- assign subtotal = order.subtotal_amount | plus: 0 -%}
+{%- assign total_tax = order.total_tax_amount | plus: 0 -%}
+{%- assign processing_fee = order.processing_fee | plus: 0 -%}
+{%- assign grand_total = order.total_amount | plus: 0 -%}
+
+{% include 'modules/events/ticket/order_summary',
+    breakdown: breakdown,
+    subtotal: subtotal,
+    total_tax: total_tax,
+    processing_fee: processing_fee,
+    grand_total: grand_total %}

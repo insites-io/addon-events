@@ -8,6 +8,13 @@ if (sponsorsDataEl) {
      const { sponsors } = mapData;
 
      sponsorItems.forEach(sponsorItem => {
+          // Keyboard support: role="button" divs don't fire click on Enter/Space natively
+          sponsorItem.addEventListener('keydown', (e) => {
+               if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    sponsorItem.click();
+               }
+          });
           sponsorItem.addEventListener('click', () => {
                const sponsor = sponsors.find(item => item.id === sponsorItem.dataset.id);
                if (!sponsor) return;
@@ -20,8 +27,8 @@ if (sponsorsDataEl) {
                if (oldSubHeading) oldSubHeading.remove();
 
                // link
-               const link = sponsor.link 
-                    ? `<a href="${sponsor.link}" target="_blank">${sponsor.link}</a>` 
+               const link = sponsor.link
+                    ? `<a href="${sponsor.link}" target="_blank" rel="noopener noreferrer" aria-label="${sponsor.link} (opens in new tab)">${sponsor.link}</a>`
                     : '';
 
                const subHeadingHtml = `
@@ -29,7 +36,7 @@ if (sponsorsDataEl) {
                     <div class="spacer x-small"></div>
                     <div class="event-card-wrap">
                          <div class="grid-x">
-                         <i class="icon-globals"></i>
+                         <i class="icon-globals" aria-hidden="true"></i>
                          <span id="sponsor-link">${link}</span>
                          </div>
                     </div>

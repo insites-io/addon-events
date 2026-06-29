@@ -19,10 +19,22 @@ searchable: false
      {%- comment -%} Logged-in user {%- endcomment -%}
      {%- assign user_uuid = context.current_user.external_id -%}
 {%- else -%}
-     {%- comment -%} Guest user {%- endcomment -%}
-     {%- assign user_uuid = payload.user_uuid -%}
-     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%} 
+     {%- comment -%}
+          Guest user: derive the contact UUID from the session (set in contacts/post),
+          never from the request body — otherwise a guest could update any contact by UUID.
+     {%- endcomment -%}
+     {%- assign user_uuid = context.session.event_guest_uuid -%}
+     {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
 {%- endif -%}
+
+{%- comment -%} No contact established for this session — refuse rather than update with a blank UUID {%- endcomment -%}
+{%- if user_uuid == blank -%}
+{
+    "has_error": true,
+    "message": "No contact found. Please start your purchase again."
+}
+{%- response_status status -%}
+{%- else -%}
 
 
 {% comment %} 
@@ -66,23 +78,8 @@ searchable: false
 {%- endif -%}     
 
 
-{% comment %} Check if profile portal exists {% endcomment %}
-{%- graphql user = 'modules/events/account/check_user_email', email: email | dig: 'items', 'results' | first  -%}
-{%- assign portal_profile = user| dig: 'portal' | first -%}
-
-{%- if portal_profile.id == null or portal_profile.id == '' or portal_profile.id == nil -%}
-     {%- comment -%} Generate temporary token {%- endcomment -%}
-     {%- graphql temporary_token = 'modules/portal/account/generate_user_temporary_token', 
-          email: email | dig: 'items','results' | first -%}
-
-     {% comment %} Create user profile: 'modules/portal/portal' {% endcomment %}
-     {%- graphql create_user_profile = 'modules/portal/account/create_user_profile', 
-          id: update_contact.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true -%}
-{%- endif -%}
-
-
 {% comment %} Update sessions {% endcomment %}
-{% include 'modules/events/purchase_ticket/ticket_purchase_sessions', payload: payload %} 
+{% include 'modules/events/ticket/ticket_purchase_sessions', payload: payload %} 
 
 
 {%- comment -%} Set Status {%- endcomment -%}
@@ -99,3 +96,5 @@ searchable: false
 
 {{ update_contact  }}
 {%- response_status status -%}
+
+{%- endif -%}

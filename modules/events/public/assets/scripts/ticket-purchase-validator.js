@@ -83,7 +83,6 @@ let TicketScript = (function () {
                 //Get id and element to identify the kind of form submitted
                 let formId = event.target.id;
                 let formElem = document.getElementById(formId).closest('form'); 
-                let form = event.srcElement;
                 // Check what form is being validated...
                 //Validation for other forms
 

@@ -5,7 +5,7 @@ method: post
 searchable: false
 ---
 
-{%- comment -%} 
+{%- comment -%}
   This is where account creation is handled for guest users during ticket purchase.
   Save event_guest_uuid to session for later use.
   event_guest_uuid is equal to context.current_user.external_id or user uuid once their account is created.
@@ -14,123 +14,144 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
+{%- assign is_duplicate = false -%}
 
-   
+
 {%- if context.current_user -%}
 
   {%- comment -%} Do nothing {%- endcomment -%}
-  
+
 {%- else -%}
 
-  {%- comment -%} Create contact {%- endcomment -%}
-  {%- function add_contact = "crm/controller/contacts/create", params: payload -%}
-
-
-  {%- comment -%} Create company {%- endcomment -%}
-  {%- parse_json company_details -%}
-  {
-    "company_name": "{{ payload.company_name }}"
-  }
-  {%- endparse_json -%}   
-  {%- function add_company = "crm/controller/companies/create", params: company_details -%}
-
-
-  {%- comment -%} Save to session for later use {%- endcomment -%}
-  {%- session contact_email = add_contact.email -%}
-  {%- session event_guest_id = add_contact.id -%}
-  {%- session event_guest_uuid = add_contact.uuid -%}
-  {%- session event_guest_company_uuid = add_company.uuid -%}
-
-
-  {% comment %} Create Address {% endcomment %}
-  {%- parse_json add_address_data -%}
-  {
-      "contact.uuid" : "{{ add_contact.uuid }}",
-      "address_label" : "Billing",
-      "address_1" : "{{ payload.billing_address_1 }}",
-      "address_2" : "{{ payload.billing_address_2 }}",
-      "state" : "{{ payload.billing_state }}",
-      "suburb" : "{{ payload.billing_suburb }}",
-      "country" : "{{ payload.billing_country }}",
-      "postcode" : "{{ payload.billing_postcode }}"
-  }
-  {%- endparse_json -%}
-  {%- function add_address = "crm/controller/addresses/create", type: "contact", params: add_address_data -%}
-  {%- session default_address_uuid = add_address.uuid -%}
-
-  
   {%- comment -%}
-      Save event_guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
+    Guard: refuse to create a duplicate contact.
+    The client routes to updateContact / lockout via /validate-email.json,
+    but we re-check server-side in case of routing bugs or race conditions.
   {%- endcomment -%}
-  {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}  
+  {%- assign email_lower = payload.email | downcase -%}
+  {%- graphql existing_user = 'modules/events/account/check_user_email', email: email_lower | dig: 'items', 'results' | first -%}
 
-  {%- comment -%} 
-    - Associate contact with company    
-    - Set default address
-    - Update notes with event_guest_temp_uuid
-  {%- endcomment -%}
-  {%- parse_json update_contact_data -%}
+  {%- if existing_user.email != blank -%}
+    {%- assign is_duplicate = true -%}
+  {%- else -%}
+
+    {%- comment -%} Create contact {%- endcomment -%}
+    {%- function add_contact = "crm/controller/contacts/create", params: payload -%}
+
+
+    {%- comment -%} Create company {%- endcomment -%}
+    {%- parse_json company_details -%}
+    {
+      "company_name": "{{ payload.company_name }}"
+    }
+    {%- endparse_json -%}
+    {%- function add_company = "crm/controller/companies/create", params: company_details -%}
+
+
+    {%- comment -%} Save to session for later use {%- endcomment -%}
+    {%- session contact_email = add_contact.email -%}
+    {%- session event_guest_id = add_contact.id -%}
+    {%- session event_guest_uuid = add_contact.uuid -%}
+    {%- session event_guest_company_uuid = add_company.uuid -%}
+
+
+    {% comment %} Create Address {% endcomment %}
+    {%- parse_json add_address_data -%}
+    {
+        "contact.uuid" : "{{ add_contact.uuid }}",
+        "address_label" : "Billing",
+        "address_1" : "{{ payload.billing_address_1 }}",
+        "address_2" : "{{ payload.billing_address_2 }}",
+        "state" : "{{ payload.billing_state }}",
+        "suburb" : "{{ payload.billing_suburb }}",
+        "country" : "{{ payload.billing_country }}",
+        "postcode" : "{{ payload.billing_postcode }}"
+    }
+    {%- endparse_json -%}
+    {%- function add_address = "crm/controller/addresses/create", type: "contact", params: add_address_data -%}
+    {%- session default_address_uuid = add_address.uuid -%}
+
+
+    {%- comment -%}
+        Save event_guest_temp_uuid in crm_contact.notes to verify if the guest editing the user linked to the email is the same guest who created it.
+    {%- endcomment -%}
+    {%- function event_guest_temp_uuid = 'modules/events/users/get_user_uuid' -%}
+
+    {%- comment -%}
+      - Associate contact with company
+      - Set default address
+      - Update notes with event_guest_temp_uuid
+    {%- endcomment -%}
+    {%- parse_json update_contact_data -%}
+    {
+        "uuid": "{{ add_contact.uuid }}",
+        "email": "{{ add_contact.email }}",
+        "company.uuid": "{{ add_company.uuid }}",
+        "default_address_uuid": "{{ add_address.uuid }}",
+        "notes": "{{ event_guest_temp_uuid }}"
+    }
+    {%- endparse_json -%}
+    {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}
+
+
+    {% comment %} Update sessions {% endcomment %}
+    {% include 'modules/events/ticket/ticket_purchase_sessions', payload: payload %}
+
+  {%- endif -%}
+
+{%- endif -%}
+
+
+{%- if is_duplicate -%}
+
+  {%- parse_json duplicate_response -%}
   {
-      "uuid": "{{ add_contact.uuid }}",
-      "email": "{{ add_contact.email }}",
-      "company.uuid": "{{ add_company.uuid }}",
-      "default_address_uuid": "{{ add_address.uuid }}",
-      "notes": "{{ event_guest_temp_uuid }}"
+    "has_error": true,
+    "error_code": "email_already_exists",
+    "message": "An account with this email already exists. Please sign in to continue."
   }
   {%- endparse_json -%}
-  {%- function update_contact = "crm/controller/contacts/update", uuid: update_contact_data.uuid, params: update_contact_data -%}    
+  {{ duplicate_response }}
+  {%- response_status 409 -%}
 
+{%- else -%}
 
-  {%- comment -%} Generate temporary token {%- endcomment -%}
-  {%- graphql temporary_token = 'modules/portal/account/generate_user_temporary_token', 
-        email: payload.email | dig: 'items','results' | first -%}
-
-  {%- comment -%} Create user profile: 'modules/portal/portal' {%- endcomment -%}
-  {%- graphql create_user_profile = 'modules/portal/account/create_user_profile', 
-        id: add_contact.id, token: temporary_token.temporary_token, is_enabled: true, primary_account_holder: true -%}
-
-
-  {% comment %} Update sessions {% endcomment %}
-  {% include 'modules/events/purchase_ticket/ticket_purchase_sessions', payload: payload %} 
-
-
-{%- endif -%}
-
-
-{%- comment -%} Add event {%- endcomment -%}
-{%- parse_json event_data -%}
-{
-  "font_icon_color": "#048801",
-  "log": {
-    "data": {
-      "created_at": "{{ add_contact.created_at }}",
-      "id": "{{ add_contact.id }}",
-      "updated_at": "{{ add_contact.updated_at }}",
-      "properties": {{ add_contact |  default: '[]'}}
+  {%- comment -%} Add event {%- endcomment -%}
+  {%- parse_json event_data -%}
+  {
+    "font_icon_color": "#048801",
+    "log": {
+      "data": {
+        "created_at": "{{ add_contact.created_at }}",
+        "id": "{{ add_contact.id }}",
+        "updated_at": "{{ add_contact.updated_at }}",
+        "properties": {{ add_contact |  default: '[]'}}
+      },
+      "action": "add_contact",
+      "contact_uuid": "{{ add_contact.uuid }}"
     },
-    "action": "add_contact",
-    "contact_uuid": "{{ add_contact.uuid }}"
-  },
-  "datetime": "{{ 'now' | date: '%s' }}",
-  "font_icon": "icon-check-2",
-  "module_feature": "crm_contact",
-  "module_source": "insites_core",
-  "administrator_uuid": "",
-  "uuid": "{{ '' | uuid }}",
-  "details": "",
-  "description": "New user <a target='_blank' href='/admin/insites/#/crm/contacts/{{add_contact.id}}'>{{add_contact.first_name}} {{add_contact.last_name}}</a> from <a target='_blank' href='/admin/insites#/crm/companies/{{ add_company.uuid }}'>{{ add_company.company_name  }}</a> has been added via ticket purchase."
-}
-{%- endparse_json -%}
-{%- function add_event = "crm/controller/event-streams/create", params: event_data -%}
+    "datetime": "{{ 'now' | date: '%s' }}",
+    "font_icon": "icon-check-2",
+    "module_feature": "crm_contact",
+    "module_source": "insites_core",
+    "administrator_uuid": "",
+    "uuid": "{{ '' | uuid }}",
+    "details": "",
+    "description": "New user <a target='_blank' href='/admin/insites/#/crm/contacts/{{add_contact.id}}'>{{add_contact.first_name}} {{add_contact.last_name}}</a> from <a target='_blank' href='/admin/insites#/crm/companies/{{ add_company.uuid }}'>{{ add_company.company_name  }}</a> has been added via ticket purchase."
+  }
+  {%- endparse_json -%}
+  {%- function add_event = "crm/controller/event-streams/create", params: event_data -%}
 
 
-{%- comment -%} Set Status {%- endcomment -%}
-{%- if add_contact.id -%}
-    {%- assign status = 200 -%}
+  {%- comment -%} Set Status {%- endcomment -%}
+  {%- if add_contact.id -%}
+      {%- assign status = 200 -%}
+  {%- endif -%}
+
+
+  {% assign update_contact = update_contact | add_hash_key: 'is_guest', 'true' %}
+
+  {{ update_contact  }}
+  {%- response_status status -%}
+
 {%- endif -%}
-
-
-{% assign update_contact = update_contact | add_hash_key: 'is_guest', 'true' %}
-
-{{ update_contact  }}
-{%- response_status status -%}

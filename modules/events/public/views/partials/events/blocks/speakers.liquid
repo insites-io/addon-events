@@ -26,20 +26,41 @@ metadata: {
                {% for item in speakers %}
 
                     {% comment %} Add no-content class when empty to unset the cursor pointer {% endcomment %}
+                    {% assign no_content = '' %}
                     {% if item.content == blank or item.content == '' %}
                          {% assign no_content = 'no-content' %}
                     {% endif %}
 
-                    <div class="cell large-3 medium-6 small-12 {{ no_content }}" data-id="{{item.id}}">
+                    <div class="cell large-3 medium-6 small-12 {{ no_content }}" data-id="{{item.id}}"{% unless no_content == 'no-content' %} role="button" tabindex="0" aria-label="View bio for {{ item.first_name }} {{ item.last_name }}"{% endunless %}>
                          <div class="img-wrap">
-                              {% if item.image.url %}
-                                   <img src="{{ item.image.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="270" height="280" alt="{{ item.first_name }}">
+                              {% comment %}
+                                   Use the speaker's uploaded image when present. Otherwise, for
+                                   seeded speakers (image empty in the table), fall back to a bundled
+                                   asset matching first-name-last-name. The allowlist guards against
+                                   pointing at a non-existent asset for non-seeded speakers, since
+                                   asset_url returns a URL even when the file does not exist.
+                              {% endcomment %}
+                              {% liquid
+                                   assign speaker_image = ''
+                                   if item.image.url
+                                        assign speaker_image = item.image.url | replace: ' ', '%20' | escape
+                                   else
+                                        assign seeded_speaker_slugs = ',anya-sharma,ben-carter,eleanor-vance,julian-cross,mateo-rossi,oliver-cromwell,sarah-jenkins,sofia-rodriguez,'
+                                        assign speaker_slug = item.first_name | append: ' ' | append: item.last_name | strip | downcase | replace: ' ', '-'
+                                        assign speaker_slug_lookup = speaker_slug | prepend: ',' | append: ','
+                                        if speaker_slug != '' and seeded_speaker_slugs contains speaker_slug_lookup
+                                             assign speaker_image = speaker_slug | prepend: 'modules/events/images/speaker/' | append: '@2x.webp' | asset_url
+                                        endif
+                                   endif
+                              %}
+                              {% if speaker_image != '' %}
+                                   <img src="{{ speaker_image }}" loading="lazy" decoding="async" width="270" height="280" alt="{{ item.first_name }} {{ item.last_name }}">
                               {% else %}
                                    {% include 'modules/website/layout/placeholder_image', size: 'medium' %}
                               {% endif %}
                          </div>
                          <div class="spacer"></div>
-                         <h5 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h5>
+                         <h3 class="heading-5">{{ item.first_name}} {{ item.last_name}}</h3>
                          <div class="spacer x-small"></div>                         
 
                          {% comment %} Job Title {% endcomment %}
@@ -68,7 +89,7 @@ metadata: {
 
           </div>
      </section>
-     <div class="spacer xxx-large"></div>
+     <div class="spacer xxxx-large"></div>
 
      <ins-modal
           id="speaker-modal"

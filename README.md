@@ -1,81 +1,95 @@
-# Events Addon
+# addon-events
 
-Latest: `v1.1.0` (see `CHANGELOG.md`)
+Insites events addon — event creation, ticketing, registration, Stripe payment, and Google Maps integration. Adds public event listing and detail pages, a multi-step ticket purchase flow (guest and member), ticket allocation, and supporting API endpoints and migrations. Active at `v1.1.0` (see `CHANGELOG.md`).
 
-## Overview
-The Events Addon is an Insites module that adds event listing + event detail pages, a multi-step ticket purchase flow (guest + member), ticket allocation, and supporting API endpoints and migrations.
+## Stack
 
+- **Platform**: Insites (PlatformOS-based)
+- **Templating**: Liquid
+- **Data**: GraphQL queries and mutations
+- **Payments**: Stripe
+- **Maps**: Google Maps
+- **Frontend assets**: JS and CSS bundled under `modules/events/public/assets/`
 
 ## Prerequisites
-- **Website & Portal**: `>= v1.3.0` (see `CHANGELOG.md`)
-- **Payment gateway**: Stripe (configured in the IIA)
 
-## Dependencies
-### Application dependency (Marketplace)
-- **Website & Portal** (install first)
+- **Website & Portal**: `>= v1.3.0`
+- **Payment gateway**: Stripe, configured in the Insites instance
+- **Module dependencies**: API, CMS, CRM, Ecommerce, Events
+- **Application dependency**: Website & Portal (install first)
 
-### Module dependencies
-- **API**
-- **CMS**
-- **CRM**
-- **Ecommerce**
-- **Events**
+## Installation
+
+### 1. Install the addon
+
+Will be available via the Insites Console marketplace, or install directly from this repository.
+
+Ensure the dependency modules (Website & Portal, Ecommerce, CRM, Events, CMS, API) are installed and enabled before activating the addon.
+
+### 2. Run migrations and seed data
+
+Migrations and seed data live under `modules/events/public/migrations/**` and cover events, venues, speakers, sponsors, FAQs, pricing tiers, and pricing divisions.
+
+If upgrading, review `CHANGELOG.md` for migration notes (for example, pricing divisions introduced in `v1.1.0`).
+
+## Configuration
+
+### Stripe payments
+
+The ticket purchase flow requires Stripe settings to be present in the portal template:
+
+- **Stripe settings** are loaded via `modules/portal/stripe/get_stripe_settings` and used in `modules/events/public/views/partials/purchase_ticket/payment_step/payment_step.liquid`.
+- **Gateway selection** is read from `modules/portal/pay_bills/get_settings` and used in `modules/events/public/views/partials/orders/callback_init.liquid`.
+
+If Stripe is not configured, the UI shows: "Payment settings not configured, please contact website administrator."
+
+### Local development
+
+Insites instance settings are typically stored in `.insites`. Treat this file as sensitive (it contains tokens and keys) and never commit it to a public repository.
 
 ## What gets installed
+
 Most of the addon lives under `modules/events/public/`:
+
 - **Pages (routes)**: `modules/events/public/views/pages/**`
 - **Partials**: `modules/events/public/views/partials/**`
 - **GraphQL**: `modules/events/public/graphql/**`
 - **Migrations / seed data**: `modules/events/public/migrations/**`
-- **Assets**: `modules/events/public/assets/**` (JS/CSS)
+- **Assets**: `modules/events/public/assets/**`
 
 ## Key routes
+
 ### Public event pages
-- **Upcoming events (list + detail)**: `/upcoming-events`  
-  - Detail view: `/upcoming-events/<event-slug>` (uses `slug2`)
-- **Previous events (list + detail)**: `/previous-events`  
-  - Detail view: `/previous-events/<event-slug>`
+
+- **Upcoming events**: `/upcoming-events` (detail at `/upcoming-events/<event-slug>`)
+- **Previous events**: `/previous-events` (detail at `/previous-events/<event-slug>`)
 
 ### Ticket purchase flow
-- **Purchase ticket (multi-step UI)**: `/purchase-ticket?event=<EVENT_UUID>`
-- **Allocate ticket**: `/allocate-ticket` (used after purchase / for allocation flows)
+
+- **Purchase ticket**: `/purchase-ticket?event=<EVENT_UUID>`
+- **Allocate ticket**: `/allocate-ticket`
 - **Purchase confirmation**: `/purchase-ticket-confirmation`
 
-### JSON API endpoints (used by the JS checkout flow)
-Routes are defined under `modules/events/public/views/pages/api/**`. Common ones:
-- **Create order**: `POST /api/create-order` (revalidates availability, computes totals, creates order, triggers payment + callbacks)
-- **Ticket endpoints**: `/api/events/tickets/*` (availability checks, allocation, etc.)
-- **Contact endpoints**: `/api/contacts/*` (guest/member contact operations)
+### JSON API endpoints
 
-## Setup / installation
-### 1) Add the module to your Portal Template
-- Install Events Add-on via Insites Marketplace (https://console.insites.io/console#/marketplace)
-- Ensure the dependency modules (Portal/Website/Ecommerce/CRM/Events) are installed and enabled.
+Routes live under `modules/events/public/views/pages/api/**`:
 
-### 2) Run migrations / seed data
-This addon includes migrations/seeds under `modules/events/public/migrations/**` (events, venues, speakers, sponsors, FAQs, pricing tiers, pricing divisions).
-
-Notes:
-- If you’re upgrading, review `CHANGELOG.md` for migration notes (e.g. pricing divisions introduced in `v1.1.0`).
-
-### 3) Configure payments (Stripe)
-The ticket purchase flow requires Stripe settings to be present in the portal template:
-- **Stripe settings** are loaded via `modules/portal/stripe/get_stripe_settings` (used in `modules/events/public/views/partials/purchase_ticket/payment_step/payment_step.liquid`).
-- **Gateway selection** is read from `modules/portal/pay_bills/get_settings` (used in `modules/events/public/views/partials/orders/callback_init.liquid`).
-
-If Stripe is not configured, the UI will show:
-> “Payment settings not configured, please contact website administrator.”
-
-## Development notes
-- **Local/dev instance configuration**: Insites instance settings are typically stored in `.insites`. Treat it as **sensitive** (contains tokens/keys) and avoid sharing publicly.
-- **Assets**: JS/CSS are included from `modules/events/public/assets/**` and referenced by pages like `purchase-ticket.liquid`.
+- `POST /api/create-order` — revalidates availability, computes totals, creates the order, triggers payment and callbacks
+- `/api/events/tickets/*` — availability checks, allocation
+- `/api/contacts/*` — guest and member contact operations
 
 ## Features
-- **Upcoming events**: list + details
-- **Previous events**: list + details
-- **Ticket purchase**: multi-step checkout (member + guest)
-- **Ticket allocation**
-- **My events / itinerary pages**: under `modules/events/public/views/pages/portal/**`
 
-## Documentation
-- Internal doc: [Click Here](https://docs.google.com/document/d/1z5RFTcwAnloFi3mjJ2pcdj4HzQix6TUUFqmLoop7JUM/edit?tab=t.0)
+- Upcoming events list and detail pages
+- Previous events list and detail pages
+- Multi-step ticket purchase (member and guest)
+- Ticket allocation
+- My events and itinerary pages under `modules/events/public/views/pages/portal/**`
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Contributions are accepted under the Developer Certificate of Origin (DCO); commits must be signed off with `git commit -s`.
+
+## Licence
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

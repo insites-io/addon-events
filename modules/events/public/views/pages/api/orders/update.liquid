@@ -1,0 +1,67 @@
+---
+slug: api/update-order
+format: json
+method: post
+searchable: false
+---
+
+{%- assign payload = context.params | parse_json -%}
+{%- assign status = 400 -%}
+{%- assign order_uuid = context.session.event_order_uuid -%}
+
+{%- if order_uuid == blank -%}
+{
+    "has_error": true,
+    "message": "No order found. Please start your purchase again."
+}
+{%- response_status status -%}
+{%- else -%}
+
+{%- graphql existing_order = 'modules/events/orders/get_order_via_uuid', uuid: order_uuid | dig: 'items', 'results' | first -%}
+
+{%- if existing_order == nil -%}
+{
+    "has_error": true,
+    "message": "Order not found. Please contact support."
+}
+{%- response_status status -%}
+{%- else -%}
+
+{%- comment -%}
+  Rebuild payload for callback_init: use the existing order's fields so all
+  financial and contact data is consistent, then overlay the new card token
+  and event_uuid (needed for email notification and payment creation).
+{%- endcomment -%}
+{%- liquid
+    assign order_payload = existing_order
+    assign order_payload = order_payload | add_hash_key: "stripe_credit_card", payload.stripe_credit_card
+    assign order_payload = order_payload | add_hash_key: "event_uuid",          context.session.pending_allocation_event_uuid
+    assign order_payload = order_payload | add_hash_key: "order_total",         existing_order.total_amount
+-%}
+
+{%- include 'modules/events/orders/callback_init',
+    payload: order_payload,
+    order_data: existing_order -%}
+{%- assign errors = context.session.paybill_error -%}
+
+{%- if errors != nil -%}
+{
+    "has_error": true,
+    "has_payment_error": true,
+    "message": {{ errors }}
+}
+{%- else -%}
+{
+    "has_error": false,
+    "message": "Payment updated successfully",
+    "data": {{ existing_order }}
+}
+{%- session pending_payment_retry_order_id = nil -%}
+{%- session pending_allocation_order_id = existing_order.id -%}
+{%- assign status = 200 -%}
+{%- endif -%}
+
+{%- endif -%}
+{%- endif -%}
+
+{%- response_status status -%}

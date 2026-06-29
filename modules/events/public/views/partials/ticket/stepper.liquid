@@ -1,0 +1,36 @@
+---
+metadata: {
+    partial_name: 'Events | Ticket | Stepper'
+}
+---
+
+{%- liquid
+    if context.params.slug == 'ticket-billing'
+        assign step1Status = 'complete'
+        assign step2Status = 'active'
+    elsif context.params.slug == 'ticket-payment'
+        assign step1Status = 'complete'
+        assign step2Status = 'complete'
+        assign step3Status = 'active'
+    elsif context.params.slug == 'ticket-allocate'
+        assign step1Status = 'complete'
+        assign step2Status = 'complete'
+        assign step3Status = 'complete'
+        assign step4Status = 'active'
+    elsif context.params.slug == 'ticket-confirmation'
+        assign step1Status = 'complete'
+        assign step2Status = 'complete'
+        assign step3Status = 'complete'
+        assign step4Status = 'complete'
+    endif
+-%}
+
+<div class="form-groups-tab step-scrollbar stepper-wrapper">
+    <ins-steps id="ticket-purchase-stepper">
+        <ins-step {{ step1Status }} description="Purchase"></ins-step>
+        <ins-step {{ step2Status }} description="Billing"></ins-step>
+        <ins-step {{ step3Status }} description="Payment"></ins-step>
+        <ins-step {{ step4Status }} description="Allocate"></ins-step>
+        <ins-step description="Confirmation"></ins-step>
+    </ins-steps>
+</div>

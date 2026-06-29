@@ -4,85 +4,77 @@ metadata: {
 }
 ---
 
-{% comment %} 
+{% comment %}
      Required from parent:
-     - tickets
+     - order_id
+
+     Reads order_items from the order (created in partials/orders/create_order_items)
+     and groups them by venue. order_item_name is encoded as
+     "<Type> - <Tier> | <Venue>" (see create_order_items.liquid) — we split on " | "
+     to recover the venue header and render items underneath.
+
+     Matches the grouping/format used by ticket/order_summary_post_payment so the
+     email mirrors the on-screen post-payment summary.
 {% endcomment %}
 
-{% comment %} Get ticket_venue_name first {% endcomment %}
-{% assign venues = tickets | map: 'ticket_venue_name' | array_uniq | sort %}
+{%- graphql db_items = 'modules/events/orders/get_order_with_items', order_id: order_id 
+        | dig: 'items', 'results' | first | dig: 'order_items' -%}
 
 
-{% comment %} Get tickets by ticket_venue_name {% endcomment %}
-{% for venue in venues %}
-    {% if venue and venue != '' %}
+{%- assign seen_venue_keys = '' -%}
+{%- for item in db_items -%}
+    {%- assign parts = item.order_item_name | split: ' | ' -%}
+    {%- if parts.size > 1 -%}
+        {%- assign venue = parts[1] -%}
+    {%- else -%}
+        {%- assign venue = '' -%}
+    {%- endif -%}
+    {%- assign vkey = '|' | append: venue | append: '|' -%}
+    {%- unless seen_venue_keys contains vkey -%}
+        {%- assign seen_venue_keys = seen_venue_keys | append: vkey -%}
 
-          {% comment %} Spacer {% endcomment %}
-          {% if forloop.first == false %}
-               {% include 'modules/events/emails/spacer_table_body', spaceSize: 8 %}
-          {% endif %}
+        {% comment %} Spacer between venue groups {% endcomment %}
+        {% unless forloop.first %}
+            {% include 'modules/events/emails/spacer_table_body', spaceSize: 8 %}
+        {% endunless %}
 
-          {% comment %} Venue Name {% endcomment %}
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-               <tr>
+        {% comment %} Venue / Division name {% endcomment %}
+        {% if venue != '' %}
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
                     <td style="padding:0px 40px 0px 40px; line-height:22px;">
-                         <p style="font-weight:600; font-size:14px; color:#525252; margin:0;">
-                              {{ venue }}
-                         </p>
+                        <p style="font-weight:600; font-size:14px; color:#525252; margin:0;">
+                            {{ venue }}
+                        </p>
                     </td>
-               </tr>
-          </table>
+                </tr>
+            </table>
 
-          {% comment %} Spacer {% endcomment %}
-          {% include 'modules/events/emails/spacer_table_body', spaceSize: 4 %}
+            {% include 'modules/events/emails/spacer_table_body', spaceSize: 4 %}
+        {% endif %}
 
+        {% comment %} Render every order_item under this venue {% endcomment %}
+        {%- for vi in db_items -%}
+            {%- assign vi_parts = vi.order_item_name | split: ' | ' -%}
+            {%- if vi_parts.size > 1 -%}
+                {%- assign vi_venue = vi_parts[1] -%}
+                {%- assign vi_label = vi_parts[0] -%}
+            {%- else -%}
+                {%- assign vi_venue = '' -%}
+                {%- assign vi_label = vi_parts[0] -%}
+            {%- endif -%}
+            {%- if vi_venue == venue -%}
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td style="padding:0px 40px 0px 40px; line-height:22px;">
+                            <p style="font-size:14px; color:#525252; margin:0;">
+                                {{ vi.quantity }} x {{ vi_label }} {{ vi.unit_price | pricify: 'USD', no_cents_if_whole: false }} AUD
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            {%- endif -%}
+        {%- endfor -%}
 
-          {% comment %} Gather all tier_ids under this venue {% endcomment %}
-          {% liquid  
-               assign tiers = '' | split: ','
-               for ticket in tickets
-                    if ticket.ticket_venue_name == venue                         
-                         assign tiers = tiers | array_add: ticket.tier_id
-                    endif
-               endfor 
-               assign tiers = tiers | array_uniq 
-          %}
-
-          {% comment %} Separate individual and group tiers {% endcomment %}
-          {% liquid
-               assign individual_tiers = '' | split: ','
-               assign group_tiers = '' | split: ','
-
-               for tier in tiers
-                    if tier and tier != ''
-                         assign sample = nil
-                         for ticket in tickets
-                              if ticket.tier_id == tier and ticket.ticket_venue_name == venue
-                              assign sample = ticket
-                              break
-                              endif
-                         endfor
-
-                         if sample.capacity_type == 'individual'
-                              assign individual_tiers = individual_tiers | array_add: tier
-                         else
-                              assign group_tiers = group_tiers | array_add: tier
-                         endif
-                    endif
-               endfor
-          %}
-
-          {% comment %} Render individual tiers first {% endcomment %}
-          {% for tier in individual_tiers %}
-               {% include 'modules/events/emails/ticket_tier', tickets: tickets, venue: venue, tier: tier %}      
-          {% endfor %}
-
-          {% comment %} Render group tiers after {% endcomment %}
-          {% for tier in group_tiers %}
-               {% include 'modules/events/emails/ticket_tier', tickets: tickets, venue: venue, tier: tier %}
-          {% endfor %}
-     
-    {% endif %}
-  
-{% endfor %}
-
+    {%- endunless -%}
+{%- endfor -%}

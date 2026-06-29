@@ -7,15 +7,36 @@ searchable: false
 
 {%- assign payload = context.params | parse_json -%}
 {%- assign status = 400 -%}
-   
-{% function add_contact_address = "crm/controller/addresses/create", type: "contact", params: payload %}       
+
+{%- comment -%}
+     Bind the address to the caller's own contact, derived server-side — never trust the
+     related_uuid sent in the body, or a caller could attach an address to any contact.
+{%- endcomment -%}
+{%- if context.current_user -%}
+     {%- assign contact_uuid = context.current_user.external_id -%}
+{%- else -%}
+     {%- assign contact_uuid = context.session.event_guest_uuid -%}
+{%- endif -%}
+{%- assign payload = payload | add_hash_key: "related_uuid", contact_uuid -%}
+
+{%- if contact_uuid == blank -%}
+{
+     "has_error": true,
+     "message": "No contact found. Please start your purchase again."
+}
+{%- response_status status -%}
+{%- else -%}
+
+{% function add_contact_address = "crm/controller/addresses/create", type: "contact", params: payload %}
 
 {% comment %} Set Status {% endcomment %}
 {%- liquid
-     if add_contact_address.id 
+     if add_contact_address.id
           assign status = 200
      endif
 -%}
 
 {{ add_contact_address  }}
 {%- response_status status -%}
+
+{%- endif -%}

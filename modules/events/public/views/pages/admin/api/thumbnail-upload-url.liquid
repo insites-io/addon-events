@@ -1,0 +1,22 @@
+---
+slug: admin/api/thumbnail-upload-url
+format: json
+method: get
+searchable: false
+authorization_policies:
+    - modules/events/is_administrator
+---
+
+{% graphql result %}
+    mutation {
+        s3_upload: property_upload_presigned_url(
+            table: "modules/ins_events/event_custom_field"
+            property_name: "image_thumbnail"
+        ) {
+            upload_url
+            upload_url_payload
+        }
+    }
+{% endgraphql %}
+
+{{ result.s3_upload | json }}

@@ -5,7 +5,7 @@ query get_tickets (
   	$purchased_by_uuid: String!,
   	$event_pricing_division_uuid:String,
   	$event_pricing_tier_uuid:String,
-    $order_id: String,
+    $order_id: Int,
     $expires_in_seconds: Int,
     $sort: RecordsSortInput = { created_at: { order: ASC }}
 ) {
@@ -20,15 +20,11 @@ query get_tickets (
               	{ name: "purchased_by_uuid", value: $purchased_by_uuid },
                 { name: "event_pricing_division", value: $event_pricing_division_uuid },
                 { name: "event_pricing_tier_uuid", value: $event_pricing_tier_uuid },
-                { name: "order_number", value: $order_id },
+                { name: "order_number", value_int: $order_id },
             ]
         },
         sort: [ $sort ]
     ) {
-        total_pages
-        total_entries
-        per_page
-        current_page
         results {
             id
             created_at

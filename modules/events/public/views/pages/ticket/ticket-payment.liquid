@@ -1,0 +1,115 @@
+---
+slug: ticket-payment
+layout: modules/website/website_default
+max_deep_level: 1
+authorization_policies:
+metadata: {
+    status: "published",
+    heading: "Payment",
+    page_name: "Payment",
+    meta_title: "Payment",
+    page_title: "Payment",
+    sitemap_enabled: "false",
+    meta_description: "Payment for ticket purchase",
+}
+---
+
+{% comment %} Detect pending allocation — only when order is paid AND tickets are already created (otherwise it's ticket retry mode and we let the user retry here) {% endcomment %}
+{%- liquid
+  assign has_pending_allocation = false
+  if context.session.pending_allocation_order_id != blank and context.session.pending_allocation_event_uuid != blank and context.session.pending_tickets_data == blank
+    assign has_pending_allocation = true
+    assign pending_allocation_url = '/ticket-allocate?event=' | append: context.session.pending_allocation_event_uuid | append: '&order_id=' | append: context.session.pending_allocation_order_id
+  endif
+-%}
+
+{% comment %} Guard: billing must be completed (contact save sets this session var) {% endcomment %}
+{% if context.session.billing_contact_email == blank and has_pending_allocation == false %}
+  {% redirect_to '/upcoming-events' %}
+{% endif %}
+
+{% comment %} Loading overlay {% endcomment %}
+<div id="loadingOverlay" class="loading-overlay hide">
+    <ins-loader
+        id="ticket-loader"
+        state-title=""
+        state-icon="processing"
+        state-message="Processing your payment... Hang tight, and please do not leave this screen.">
+    </ins-loader>
+</div>
+
+{%- if has_pending_allocation -%}
+    {%- include 'modules/events/ticket/pending_allocation_notice', pending_allocation_url: pending_allocation_url -%}
+{%- else -%}
+<div id="purchase-ticket">
+
+    {% comment %} Stepper {% endcomment %}
+    <div class="purchase-ticket-wrapper" id="purchase-ticket-stepper-wrapper">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x ticket-stepper-container">
+                    {%- include 'modules/events/ticket/stepper' -%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="purchase-ticket-form">
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="grid-x">
+                    <div id="purchase-ticket-container">
+                        <div class="spacer xxxx-large"></div>
+                        <div id="ticket-purchase-header-container">
+                            <h1 id="ticket-purchase-header" class="heading-1-xsmall">Payment</h1>
+                            <div class="spacer xxx-large hide-for-small-only"></div>
+                            <div class="spacer show-for-small-only"></div>
+                        </div>
+                        <div class="purchase-page">
+                            <div class="grid-x grid-padding-x invoice-details form-group" active>
+                                <div class="large-7 medium-12 small-12 cell">
+                                    {%- include 'modules/events/ticket/payment_step/payment_step' -%}
+                                </div>
+                                <div class="large-4 large-offset-1 medium-12 small-12 cell">
+                                    {% include 'modules/events/ticket/order_summary_pre_payment' %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spacer xxxx-large"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Hidden fields required by payment validator {% endcomment %}
+<input type="hidden" id="bill-total-amount">
+<input type="hidden" id="bill-order-value">
+<input hidden id="event_uuid_hidden" type="hidden" value="{{ context.params.event }}">
+
+{% comment %} Ticket retry mode: order was paid but ticket creation failed on the previous attempt {% endcomment %}
+{%- if context.session.pending_payment_retry_order_id != blank -%}
+<input type="hidden" id="payment_retry_mode" value="true">
+{%- elsif context.session.pending_allocation_order_id != blank and context.session.pending_tickets_data != blank -%}
+<input type="hidden" id="ticket_retry_mode" value="true">
+<input type="hidden" id="pending_order_id" value="{{ context.session.pending_allocation_order_id }}">
+{%- endif -%}
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+    <script defer src="{{ 'modules/events/services/httpClient.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/apiServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/orderServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/ticketServices.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-purchase-validator.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+{%- else -%}
+    <script defer src="{{ 'modules/events/services/httpClient.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/apiServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/orderServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/services/ticketServices.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-purchase-validator.min.js' | asset_url }}"></script>
+    <script defer src="{{ 'modules/events/scripts/ticket-payment.js' | asset_url }}"></script>
+{%- endif -%}
+{%- endif -%}

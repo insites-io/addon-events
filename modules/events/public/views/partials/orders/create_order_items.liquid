@@ -1,0 +1,80 @@
+---
+metadata: {
+    partial_name: 'Events | Orders | Create Order Items'
+}
+---
+
+{%- comment -%}
+  Build order_items grouped by (tier, division, ticket_type) and bulk-insert them.
+  These mirror the cart at order-creation time and remain even if /api/create-tickets
+  later fails, giving the order summary a reliable source instead of relying on
+  event_ticket rows.
+
+  Parameters:
+    raw_tickets — parsed ticketData array from session
+    order_uuid  — uuid of the just-created order
+    event_uuid  — uuid of the event (used to resolve division → venue_area_name)
+{%- endcomment -%}
+
+{%- assign _tier_uuids = raw_tickets | map: 'event_pricing_tier.uuid' | array_uniq | array_compact -%}
+{%- graphql _tier_records = 'modules/events/events/pricing/get_ticket_prices', uuid: _tier_uuids | dig: 'items', 'results' -%}
+{%- graphql _division_records = 'modules/events/events/get_divisions', event_uuid: event_uuid | dig: 'items', 'results' -%}
+
+{%- assign _order_items = '' | split: ',' -%}
+{%- assign _seen_keys = "" -%}
+{%- for _it in raw_tickets -%}
+    {%- assign _it_tier_uuid     = _it['event_pricing_tier.uuid'] -%}
+    {%- assign _it_division_uuid = _it.event_pricing_division_uuid -%}
+    {%- assign _it_type          = _it.capacity_type -%}
+    {%- assign _it_key = '|' | append: _it_tier_uuid | append: '|' | append: _it_division_uuid | append: '|' | append: _it_type | append: '|' -%}
+    {%- unless _seen_keys contains _it_key -%}
+        {%- assign _seen_keys = _seen_keys | append: _it_key -%}
+        {%- assign _it_qty = 0 -%}
+        {%- for _it2 in raw_tickets -%}
+            {%- assign _it2_key = '|' | append: _it2['event_pricing_tier.uuid'] | append: '|' | append: _it2.event_pricing_division_uuid | append: '|' | append: _it2.capacity_type | append: '|' -%}
+            {%- if _it2_key == _it_key -%}{%- assign _it_qty = _it_qty | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- assign _it_tier = _tier_records | where: 'uuid', _it_tier_uuid | first -%}
+        {%- assign _it_division = _division_records | where: 'uuid', _it_division_uuid | first -%}
+        {%- if _it_tier -%}
+            {%- assign _it_unit_price = _it_tier.price | plus: 0 -%}
+            {%- if _it_tier.tax_type == 'percentage' -%}
+                {%- assign _it_tax_per_unit = _it_unit_price | times: _it_tier.tax | divided_by: 100.0 -%}
+                {%- assign _it_is_fixed = false -%}
+            {%- else -%}
+                {%- assign _it_tax_per_unit = _it_tier.tax | plus: 0 -%}
+                {%- assign _it_is_fixed = true -%}
+            {%- endif -%}
+            {%- assign _it_line_total = _it_unit_price | times: _it_qty -%}
+            {%- assign _it_line_tax   = _it_tax_per_unit | times: _it_qty -%}
+            {%- comment -%}
+              Format: "<Type> - <Tier> | <Venue>". The " | " separator marks the
+              boundary between item label and venue so order_summary_post_payment
+              can split them back out for the .payment-breakdown-venue-name header.
+            {%- endcomment -%}
+            {%- assign _it_name = _it_type | capitalize | append: ' - ' | append: _it_tier.name -%}
+            {%- if _it_division.name != blank -%}
+                {%- assign _it_name = _it_name | append: ' | ' | append: _it_division.name -%}
+            {%- endif -%}
+
+            {%- assign _it_uuid = '' | uuid -%}
+            {%- assign _item = '{}' | parse_json -%}
+            {%- assign _item = _item | add_hash_key: "uuid",                _it_uuid -%}
+            {%- assign _item = _item | add_hash_key: "order_uuid",          order_uuid -%}
+            {%- assign _item = _item | add_hash_key: "order_item_name",     _it_name -%}
+            {%- assign _item = _item | add_hash_key: "quantity",            _it_qty -%}
+            {%- assign _item = _item | add_hash_key: "unit_price",          _it_unit_price -%}
+            {%- assign _item = _item | add_hash_key: "item_price",          _it_unit_price -%}
+            {%- assign _item = _item | add_hash_key: "item_tax",            _it_tier.tax -%}
+            {%- assign _item = _item | add_hash_key: "tax_amount",          _it_tax_per_unit -%}
+            {%- assign _item = _item | add_hash_key: "line_item_tax",       _it_line_tax -%}
+            {%- assign _item = _item | add_hash_key: "line_item_total",     _it_line_total -%}
+            {%- assign _item = _item | add_hash_key: "is_fixed_tax_amount", _it_is_fixed -%}
+            {%- assign _order_items = _order_items | array_add: _item -%}
+        {%- endif -%}
+    {%- endunless -%}
+{%- endfor -%}
+
+{%- if _order_items.size > 0 -%}
+    {%- function _ = "ecommerce/controller/order_items/add_bulk", params: _order_items -%}
+{%- endif -%}

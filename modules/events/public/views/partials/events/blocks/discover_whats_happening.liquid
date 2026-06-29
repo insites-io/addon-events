@@ -16,31 +16,33 @@ metadata: {
 {% endparse_json %} 
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' %}
 
-{% if events.total_entries > 0 %}
+{% if events.results.size > 0 %}
 
      {% assign main_event = events.results[0] %}
      <div class="bg-color-ui-02">
 
           {% comment %} Main Event {% endcomment %}
-          <section class="wrapper width-1440">          
-               <div class="spacer xxxx-large"></div>
+          <div class="wrapper width-1440">          
+               <div class="spacer xxxx-large hide-for-small-only"></div>
+               <div class="spacer large show-for-small-only"></div>
                <div class="text-center">
                     <h2>Discover what's happening</h2>
                     <div class="spacer small"></div>
                     <p class="body-large">Event updates - stay informed about upcoming and current events!</p>
                </div>
-               <div class="spacer section"></div>
+               <div class="spacer xxxx-large hide-for-small-only"></div>
+               <div class="spacer xxx-large show-for-small-only"></div>
 
                <div id="main-event" class="event-card-wrap">
                     {% include 'modules/events/events/card', item: main_event %}
                </div>               
-          </section> 
+          </div> 
           
           <div class="spacer xxxx-large hide-for-small-only"></div>
           <div class="spacer xx-large show-for-small-only"></div>
 
           {% comment %} Event List {% endcomment %}
-          <section class="wrapper width-1440">
+          <div class="wrapper width-1440">
                <div class="grid-x grid-padding-x grid-padding-y event-card-wrap">
                     {% for item in events.results offset:1 %}
                          <div class="cell large-4 medium-6 small-12">
@@ -49,11 +51,11 @@ metadata: {
                          <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
                     {% endfor %}
                </div>               
-          </section> 
+          </div> 
 
           <div class="spacer xxx-large hide-for-small-only"></div>
           <div class="text-center">
-               <a href="/upcoming-events">
+               <a href="/upcoming-events" aria-label="Explore upcoming events">
                     <ins-button label="Explore upcoming events" solid icon-right="icon-arrow-forward"></ins-button>
                </a>
           </div>

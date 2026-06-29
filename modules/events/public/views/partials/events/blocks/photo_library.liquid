@@ -48,27 +48,27 @@ metadata: {
                {% assign item_number = 1 %}
                {% for item in galleries limit:per_page %}
                     {% if item.file.url %}
-                         <div class="cell large-3 medium-4 small-12 pagination-item" data-item="{{ item_number }}">
+                         <div class="cell large-3 medium-4 small-12 pagination-item" data-item="{{ item_number }}" role="button" tabindex="0" aria-label="View photo {{ item_number }}">
                               <div class="img-wrap">
-                                   <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="288" height="200" alt="gallery_{{ item_number }}">
+                                   <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="288" height="200" alt="">
                               </div>
                          </div>
                          {% assign item_number = item_number | plus: 1 %}
                     {% endif %}
                {% endfor %}
 
-               {% comment %} 
-                    Get the remaining gallery items, but keep them hidden for now. 
+               {% comment %}
+                    Get the remaining gallery items, but keep them hidden for now.
                     The js function showPaginatedItems will show/hide gallery items depending on the selected page and per_page
-               {% endcomment %}                
+               {% endcomment %}
                {% for page in (start_page..total_pages) %}
-                    {% assign offset = page | minus: 1 | times: per_page %}                    
+                    {% assign offset = page | minus: 1 | times: per_page %}
                     {% if galleries.size > offset %}
                          {% for item in galleries limit: per_page offset: offset %}
                               {% if item.file.url %}
-                                   <div class="cell large-3 medium-4 small-12 pagination-item hide" data-item="{{ item_number }}">
+                                   <div class="cell large-3 medium-4 small-12 pagination-item hide" data-item="{{ item_number }}" role="button" tabindex="0" aria-label="View photo {{ item_number }}">
                                         <div class="img-wrap">
-                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="288" height="200" alt="gallery_{{ item_number }}">
+                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" loading="lazy" decoding="async" width="288" height="200" alt="">
                                         </div>
                                    </div>
                                    {% assign item_number = item_number | plus: 1 %}
@@ -95,12 +95,12 @@ metadata: {
           Modal Carousel - Gallery Slider 
           - This does not use the actual <ins-modal> component; it only mimics some of its element classes.
      {% endcomment %}
-     <div id="galleries-modal" class="ins-modal-wrap no-button full-height show-modal">
+     <div id="galleries-modal" class="ins-modal-wrap no-button full-height show-modal" role="dialog" aria-modal="true" aria-label="Photo gallery">
           <div class="ins-backdrop-wrap hide"></div>
           <div class="ins-card-wrap steady no-padding">
                <div class="ins-modal-content">
                     <div class="ins-modal-head no-heading">
-                        <span class="icon-close-1"></span>
+                        <span class="icon-close-1" role="button" tabindex="0" aria-label="Close photo gallery"></span>
                     </div>
                </div>
           </div>
@@ -114,7 +114,7 @@ metadata: {
                               {% for item in galleries %}
                                    {% if item.file.url %}
                                         <div class="img-wrap">
-                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" decoding="async" alt="img-{{ item.id}}" >
+                                             <img src="{{ item.file.url | replace: ' ', '%20' | escape }}" decoding="async" alt="">
                                         </div>
                                    {% endif %}
                               {% endfor %}  

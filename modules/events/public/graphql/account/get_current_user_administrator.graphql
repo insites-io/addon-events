@@ -1,0 +1,13 @@
+query get_current_user_administrator {
+    current_user {
+        id
+        email
+        external_id
+        administrator: profiles(
+            profile_type: "modules/insites_core/administrator"
+        ) {
+            id
+            profile_type
+        }
+    }
+}

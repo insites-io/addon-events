@@ -88,7 +88,6 @@ let Checkout = (function () {
                 if(isValid){
                     let url = '/create-contact-address.json' ;
                     let payload = {
-                            "related_uuid": contactUuid, //REQUIRED
                             "address_label": modalAddress1El.value, //REQUIRED
                             "default_address": false,
                             "address_1": modalAddress1El.value,

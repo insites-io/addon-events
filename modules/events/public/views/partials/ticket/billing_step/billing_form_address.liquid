@@ -1,0 +1,51 @@
+---
+metadata: {
+    partial_name: 'Events | Purchase Ticket | Billing Step | Billing Form Address'
+}
+---
+
+
+{% comment %} Get user's and company's addresses {% endcomment %}
+{% assign related_uuid = '' |  split: ',' %}
+{% assign related_uuid = related_uuid | array_add: context.current_user.external_id %}
+{% if company_uuid %}
+    {% assign related_uuid = related_uuid | array_add: company_uuid %}
+{% endif %}
+{%- graphql addresses = 'modules/events/address/get_address', 
+    related_uuid: related_uuid | dig: 'items','results' -%}
+
+<div class="hide-for-small-only spacer xxx-large"></div>
+<div class="show-for-small-only spacer x-large"></div>
+
+<div id="billing-address-fields" class="wrap">
+    <div class="grid-x">        
+        <h3 class="heading-2-xsmall">Billing address</h3>
+        <div class="cell show-for-small-only spacer small"></div>
+        {% comment %} Add new address {% endcomment %}
+        <div id="billing-address-fields" class="text-right flex-child-grow" id="address-toggle">
+            <ins-button 
+            type="button" 
+            id="add-address-btn"
+            name="billing-address-fields" 
+            icon="icon-plus" 
+            label="Add new address">
+            </ins-button>
+        </div>         
+    </div>
+    <div class="hide-for-small-only spacer x-large"></div>
+    <div class="show-for-small-only spacer"></div>
+
+   
+    {% comment %} Selected address {% endcomment %}
+    <ins-input validate required
+        id="billing-address-uuid" 
+        class="hidden-input"
+        value="{{ context.session.billing_address_uuid }}"
+        name="billing_address_uuid"
+        error-message="Billing address is required. Please select from the list below or add new address.">
+    </ins-input> 
+            
+    {%- comment -%} Address cards {%- endcomment -%}
+    {%- include 'modules/events/ticket/billing_step/billing_form_address_card', addresses: addresses, selected_card: context.session.billing_address_id | default: "", type: 'billing' -%}
+
+</div>

@@ -8,17 +8,14 @@ metadata: {
     "page_type": "content", 
     "page_name": "Upcoming Events | Insites",
     "page_title": "Upcoming Events | Insites",
-    "meta_title": "Upcoming Events | Insites" 
+    "meta_title": "Upcoming Events | Insites",
+    "meta_description": "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!"
 }
 dynamic_cache:
   layout: true
   key: |-
     {%- parse_json models -%}
     [
-      "modules/insites_cms/global",
-      "modules/insites_core/localisation",
-      "modules/website/menu",
-      "modules/website/features",
       "modules/insites_events/event",
       "modules/insites_events/venue",      
       "modules/insites_events/event_speaker",
@@ -41,7 +38,7 @@ dynamic_cache:
 
     {% comment %} Hero title and description {% endcomment %}
     {% assign description = "What's happening soon? Discover all our exciting upcoming events and mark your calendars so you don't miss out on the fun!" %}
-    {% include 'modules/website/content/hero_title', title: 'Upcoming events', description: description %} 
+    {% include 'modules/events/events/hero_title', header: 'Upcoming events', description: description %}
 
     {% include 'modules/events/events/list/list', page: 'upcoming-events' %}
 

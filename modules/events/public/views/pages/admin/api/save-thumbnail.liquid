@@ -1,0 +1,40 @@
+---
+slug: admin/api/save-thumbnail
+format: json
+method: post
+searchable: false
+authorization_policies:
+    - modules/events/is_administrator
+---
+
+{% assign event_uuid    = context.params.event_uuid %}
+{% assign thumbnail_url = context.params.thumbnail_url %}
+{% assign source_url    = context.params.source_url %}
+
+
+{% graphql custom_field = 'modules/events/event_custom_fields/get_by_event_uuid',
+    event_uuid: event_uuid
+%}
+{% assign cf = custom_field.results.results | first %}
+
+{% if cf.id != blank %}
+
+    {% graphql result = 'modules/events/event_custom_fields/update_event_thumbnail',
+        id: cf.id,
+        url: thumbnail_url,
+        source: source_url
+    %}    
+
+    { "status": "ok", "id": "{{ cf.id }}" }
+
+{% else %}
+
+    {% graphql result = 'modules/events/event_custom_fields/add_event_thumbnail',
+        event_uuid: event_uuid,
+        url: thumbnail_url,
+        source: source_url
+    %}
+
+    { "status": "ok", "id": "{{ result.items.id }}" }
+
+{% endif %}

@@ -85,22 +85,26 @@ metadata: {
      %}
 
 {% else %}
-     {% parse_json params %}
+     {% parse_json filters_category %}
      {
-          "page" : 1,
-          "size" : 50,
-          "system_field" : "event_category"
+          {% if page == 'upcoming-events' %}
+               "gt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}"
+          {% elsif page == 'previous-events' %}
+               "lt_date_now": "{{ 'now' | date: "%Y-%m-%d %H:%M" }}"
+          {% endif %}
      }
      {% endparse_json %}
-     {% function system_fields = "events/system_fields/list", uuid: event.uuid, params: params  %}     
-     {% assign categories = system_fields.results %}   
-
-     {% assign selected_category_uuid = categories | array_detect: value: selected_category | dig: 'uuid' %}     
-     {% assign categories_name = categories | map: 'value' | array_uniq | sort %}     
-
-     {% capture category_options %}  
-          {{ categories_name | array_prepend: 'All' }}
-     {% endcapture %}
+     {% graphql category_location_public = 'modules/events/events/get_filter_category_location_public', args: filters_category | dig: 'items','results' -%}
+     {% liquid
+          assign category_options = 'All' | split: ','
+          for category in category_location_public
+               assign category_options = category_options | array_add: category.category.value
+               if category.category.value == selected_category
+                    assign selected_category_uuid = category.category_uuid
+               endif
+          endfor
+          assign category_options = category_options | array_uniq | array_compact | sort
+     %}
 {% endif %}
 
      
@@ -115,10 +119,14 @@ metadata: {
           assign location_options = location_options | array_prepend: 'All'
      %}
 {% else %}
-     {% graphql locations = 'modules/events/venues/get_venue_states' | dig: 'items','results' -%}
-     {% capture location_options %}  
-          {{ locations | map: 'state' | array_uniq | array_prepend: 'WEB' | array_prepend: 'All'  }}
-     {% endcapture %}
+     {% liquid
+          assign location_options = category_location_public | map: 'venue_state' | array_uniq | array_compact | sort
+          assign has_online_event = category_location_public | map: 'event_type' | array_uniq | array_any: 'online_event'
+          if has_online_event
+               assign location_options = location_options | array_prepend: 'WEB'
+          endif
+          assign location_options = location_options | array_prepend: 'All'
+     %}
 {% endif %}
 
 
@@ -158,10 +166,12 @@ metadata: {
      "sort_by": {{ sort_by }}
 }
 {% endparse_json %} 
+{% comment %} Note: total_entries and results are fetched separately to optimize performance {% endcomment %}
+{% graphql events_total_entries = 'modules/events/events/get_events_total_entries', args: filters | dig: 'items' -%}
 {% graphql events = 'modules/events/events/get_events', args: filters | dig: 'items' -%}
 
      {% comment %} Filters | Search {% endcomment %}
-     {% if is_filters_applied == false and events.total_entries == 0 %}
+     {% if is_filters_applied == false and events_total_entries.total_entries == 0 %}
           {% comment %} Dont show filters blocks when no events are found even if filters are not applied {% endcomment %}
      {% else %}
      <div class="wrapper width-1440">
@@ -187,10 +197,9 @@ metadata: {
                     </ins-filter>
                 </div>
                 <div class="large-4 medium-12 small-12 cell search-container-cell small-order-2">
-                    <div class="">
-                        <ins-input                 
+                    <div role="search">
+                        <ins-input
                             id="search-event"
-                            class="search-bars"
                             placeholder="Search by event name"
                             icon-event
                             icon="icon-search-1"
@@ -201,11 +210,11 @@ metadata: {
             </div>
         </div>
      </div>
-     <div class="spacer large hide-for-small-only"></div>
+     <div class="spacer xxx-large hide-for-small-only"></div>
      <div class="spacer xxx-large show-for-small-only"></div>
      {% endif %}
      
-{% if events.total_entries == 0 %}
+{% if events_total_entries.total_entries == 0 %}
 
      <div class="wrapper width-1440">
           <div class="text-center">
@@ -238,24 +247,32 @@ metadata: {
      <div class="wrapper width-1440">     
           
           {% comment %} List {% endcomment %}
+          <div id="events-card-grid">
           <div class="grid-x grid-padding-x event-card-wrap">
                {% for item in events.results %}
                     <div class="cell large-4 medium-6 small-12">
-                         {% include 'modules/events/events/card', item: item, list: true, page: page %}
+                         {% assign is_lcp = false %}
+                         {% if forloop.index <= 3 %}
+                              {% assign is_lcp = true %}
+                         {% endif %}
+                         {% include 'modules/events/events/card', item: item, list: true, page: page, is_lcp: is_lcp %}
                          <div class="spacer xxx-large hide-for-small-only"></div>
-                    </div>                    
+                    </div>
                     <div class="cell large-0 medium-0 small-12 spacer x-large show-for-small-only"></div>
-               {% endfor %}	
+               {% endfor %}
+          </div>
           </div>
 
           {% comment %} Pagination {% endcomment %}
           <div class="spacer small show-for-small-only"></div>
-          <ins-table no-wrap
-               static-table
-               id="paginationTable"
-               class="event-pagination-table"
-               without-search>    
-          </ins-table>
+          <section aria-label="Pagination">
+               <ins-table no-wrap
+                    static-table
+                    id="paginationTable"
+                    class="event-pagination-table"
+                    without-search>
+               </ins-table>
+          </section>
      </div>
      <div class="spacer section hide-for-small-only"></div>
      <div class="spacer xxx-large show-for-small-only"></div>  
@@ -265,11 +282,12 @@ metadata: {
 
 <script id="pagination-data" type="application/json">
 {
-     "totalCount": {{ events.total_entries | default: 0 }},
+     "totalCount": {{ events_total_entries.total_entries | default: 0 }},
      "pageNumber": {{ page_num }},
      "pageSize": {{ per_page }},
      "pageSizeOptions": [12, 24, 30],
-     "paginationText": "Items per page"
+     "paginationText": "Items per page",
+     "pageType": "{{ page }}"
 }
 </script>
 

@@ -14,5 +14,13 @@ searchable: false
      {%- assign user_uuid = context.session.event_guest_uuid -%}
 {%- endif -%}
 
+{%- comment -%}
+  Never query with a blank contact_uuid — a null property filter is ignored, which would
+  return every user's saved cards (including the chargeable payment_method_token).
+{%- endcomment -%}
+{%- if user_uuid == blank -%}
+[]
+{%- else -%}
 {%- graphql cards = "modules/events/payment_method/get_payment_method", contact_uuid: user_uuid, size: 50 | dig: 'items', 'results' -%}
 {{ cards }}
+{%- endif -%}

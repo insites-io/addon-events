@@ -1,0 +1,25 @@
+---
+slug: api/set-confirmation-timestamp
+format: json
+method: post
+searchable: false
+---
+
+{%- comment -%}
+  Only open the confirmation gate for a caller who actually has a pending order in their
+  session — otherwise anyone could POST here to flip the flag and then load
+  /ticket-confirmation?order_id=<any> directly.
+{%- endcomment -%}
+{%- if context.session.pending_allocation_order_id == blank -%}
+{
+    "has_error": true,
+    "message": "No pending order to confirm."
+}
+{%- response_status 400 -%}
+{%- else -%}
+{%- session allocation_confirmed_at = 'now' | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+{%- comment -%} Record which order this session is allowed to view on the confirmation page {%- endcomment -%}
+{%- session confirmed_order_id = context.session.pending_allocation_order_id -%}
+{ "status": "ok" }
+{%- response_status 200 -%}
+{%- endif -%}

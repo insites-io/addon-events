@@ -1,6 +1,6 @@
 /**
  * Ticket Step 2 — Billing
- * Restores ticket selection from sessionStorage, handles billing form,
+ * Restores ticket selection from the server-side session, handles billing form,
  * saves contact via API, then redirects to /ticket-payment.
  */
 

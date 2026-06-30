@@ -491,12 +491,9 @@ const StepHandlers = {
           setTimeout(() => {
             Utils.hideLoading();
             firstStep.hasError = false;
-
-            // Save selection to sessionStorage and proceed to billing
             const urlParams = new URLSearchParams(window.location.search);
             const eventParam = urlParams.get("event");
-
-              window.location.href = `/ticket-billing?event=${eventParam}`;
+            window.location.href = `/ticket-billing?event=${eventParam}`;
           }, 500);
         }
       }, 1000);
